@@ -155,10 +155,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="cpp-gb.cpp" />
+    <ClCompile Include="CPU.cpp" />
+    <ClCompile Include="gameboy.cpp" />
     <ClCompile Include="PPU.cpp" />
+    <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="CPU.h" />
+    <ClInclude Include="gameboy.h" />
     <ClInclude Include="PPU.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
