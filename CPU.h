@@ -2,8 +2,9 @@
 #ifndef CPU_H_GUARD
 #define CPU_H_GUARD
 
-#include <cstdint>
 #include <iostream>
+#include "type.h"
+#include <vector>
 
 class CPU {
 public:
@@ -12,34 +13,27 @@ public:
 private:
 
 	//REGISTER
-	typedef union {
-		struct {
-			uint8_t low;
-			uint8_t high;
-		};
-		uint16_t ganz;
-	}Register;
-
 	Register AF; // Accumulator & Flags
 	Register BC; // BC
 	Register DE; // DE
 	Register HL; // HL
 
-	uint16_t sp; // stack pointer
-	uint16_t pc; // program counter/pointer
+	Register sp; // stack pointer
+	Register pc; // program counter/pointer
 
 public:
-	uint16_t getAF();
-	uint16_t getBC();
-	uint16_t getDE();
-	uint16_t getHL();
-	uint8_t getA();
-	uint8_t getF();
-	uint8_t getC();
-	uint8_t getD();
-	uint8_t getE();
-	uint8_t getH();
-	uint8_t getL();
+	u16 getAF() const;
+	u16 getBC() const;
+	u16 getDE() const;
+	u16 getHL() const;
+
+	u8 getA() const;
+	u8 getF() const;
+	u8 getC() const;
+	u8 getD() const;
+	u8 getE() const;
+	u8 getH() const;
+	u8 getL() const;
 
 	//FLAGS
 public:
@@ -55,7 +49,29 @@ public:
 	void toggleFlag(const flag);	//toggled die flag
 	bool checkFlag(const flag);		//gibt flag status wieder
 
+private:
+	struct instruction {
+		const char* mnemonic;
+		u8 bytes;
+		u8 cycles;
+	};
+
+
+	//OPCODES
+	//TODO: OPJumpliste füllen mit pointern für jeden opcode
+	//LD und ADD und andere häufig benutze ops einzelnen funktionen zuteielen
+	//die opcode funktionen führen diese dann mit anderen parametern aus
 public:
 	void OPCODEONE();
+
+	std::vector<instruction> instructions{
+		{"NOP",2,2},
+		{"NOP",2,2},
+		{"NOP",2,2},
+	};
+	void parseOPCode(u8&);
+
+
+
 };
 #endif // !CPU_H_GUARD
