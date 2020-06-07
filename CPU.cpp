@@ -38,19 +38,20 @@ CPU::CPU() {
 		{"SET 4 B", &CPU::prefixedopcode0xE0, 2, 2},{"SET 4 C", &CPU::prefixedopcode0xE1, 2, 2},{"SET 4 D", &CPU::prefixedopcode0xE2, 2, 2},{"SET 4 E", &CPU::prefixedopcode0xE3, 2, 2},{"SET 4 H", &CPU::prefixedopcode0xE4, 2, 2},{"SET 4 L", &CPU::prefixedopcode0xE5, 2, 2},{"SET 4 HL", &CPU::prefixedopcode0xE6, 2, 4},{"SET 4 A", &CPU::prefixedopcode0xE7, 2, 2},{"SET 5 B", &CPU::prefixedopcode0xE8, 2, 2},{"SET 5 C", &CPU::prefixedopcode0xE9, 2, 2},{"SET 5 D", &CPU::prefixedopcode0xEA, 2, 2},{"SET 5 E", &CPU::prefixedopcode0xEB, 2, 2},{"SET 5 H", &CPU::prefixedopcode0xEC, 2, 2},{"SET 5 L", &CPU::prefixedopcode0xED, 2, 2},{"SET 5 HL", &CPU::prefixedopcode0xEE, 2, 4},{"SET 5 A", &CPU::prefixedopcode0xEF, 2, 2},
 		{"SET 6 B", &CPU::prefixedopcode0xF0, 2, 2},{"SET 6 C", &CPU::prefixedopcode0xF1, 2, 2},{"SET 6 D", &CPU::prefixedopcode0xF2, 2, 2},{"SET 6 E", &CPU::prefixedopcode0xF3, 2, 2},{"SET 6 H", &CPU::prefixedopcode0xF4, 2, 2},{"SET 6 L", &CPU::prefixedopcode0xF5, 2, 2},{"SET 6 HL", &CPU::prefixedopcode0xF6, 2, 4},{"SET 6 A", &CPU::prefixedopcode0xF7, 2, 2},{"SET 7 B", &CPU::prefixedopcode0xF8, 2, 2},{"SET 7 C", &CPU::prefixedopcode0xF9, 2, 2},{"SET 7 D", &CPU::prefixedopcode0xFA, 2, 2},{"SET 7 E", &CPU::prefixedopcode0xFB, 2, 2},{"SET 7 H", &CPU::prefixedopcode0xFC, 2, 2},{"SET 7 L", &CPU::prefixedopcode0xFD, 2, 2},{"SET 7 HL", &CPU::prefixedopcode0xFE, 2, 4},{"SET 7 A", &CPU::prefixedopcode0xFF, 2, 2}
 	};
+
 }
 
-void CPU::setFlag(const Flag F) {
-	AF.low |= (1 << F);
+void CPU::setFlag(const Flag& F) {
+	setBit(AF.low, static_cast<u8>(F));
 }
-void CPU::clearFlag(const Flag F) {
-	AF.low &= ~(1 << F);
+void CPU::clearFlag(const Flag& F) {
+	clearBit(AF.low, static_cast<u8>(F));
 }
-bool CPU::checkFlag(const Flag F) {
-	return (AF.low >> F) & 1;
+bool CPU::checkFlag(const Flag& F) {
+	return checkBit(AF.low, static_cast<u8>(F));
 }
-void CPU::toggleFlag(const Flag F) {
-	AF.low ^= (1 << F);
+void CPU::toggleFlag(const Flag& F) {
+	toggleBit(AF.low, static_cast<u8>(F));
 }
 
 void CPU::setBit(u8& value, const u8 bit) {
@@ -74,10 +75,10 @@ void CPU::toggleBit(u16& value, const u16 bit) {
 	value ^= (1 << bit);
 }
 
-bool CPU::checkBit(u8& value, const u8 bit) {
+bool CPU::checkBit(const u8& value, const u8 bit) {
 	return (value >> bit) & 1;
 }
-bool CPU::checkBit(u16& value, const u16 bit) {
+bool CPU::checkBit(const u16& value, const u16 bit) {
 	return (value >> bit) & 1;
 }
 
@@ -85,7 +86,9 @@ bool CPU::checkBit(u16& value, const u16 bit) {
 
 
 void CPU::parseOPCode(u8& opcode) {
+
 	u8 function = (this->*instructions[opcode].function)();
 	function = (this->*prefixedinstructions[opcode].function)();
 }
+
 

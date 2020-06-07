@@ -23,18 +23,13 @@ private:
 
 	//FLAGS
 private:
-	enum Flag {
-		z_flag = 7, // Zero Flag
-		n_flag = 6, // Add/Sub-Flag 
-		h_flag = 5, // Half Carry Flag
-		c_flag = 4, // Carry Flag
-	};
+
 
 public:
-	void setFlag(const Flag);		//setze flag auf true egal was
-	void clearFlag(const Flag);		//setze flag auf false egal was
-	void toggleFlag(const Flag);	//toggled die flag
-	bool checkFlag(const Flag);		//gibt flag status wieder
+	void setFlag(const Flag&);		//setze flag auf true egal was
+	void clearFlag(const Flag&);		//setze flag auf false egal was
+	void toggleFlag(const Flag&);	//toggled die flag
+	bool checkFlag(const Flag&);		//gibt flag status wieder
 
 	void setBit(u8&, const u8);
 	void setBit(u16&, const u16);
@@ -42,8 +37,8 @@ public:
 	void clearBit(u16&, const u16);
 	void toggleBit(u8&, const u8);
 	void toggleBit(u16&, const u16);
-	bool checkBit(u8&, const u8);
-	bool checkBit(u16&, const u16);
+	bool checkBit(const u8&, const u8);
+	bool checkBit(const u16&, const u16);
 
 	//OPCODES
 private:

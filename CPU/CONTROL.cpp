@@ -1,11 +1,15 @@
 #include "../CPU.h"
 
 u8 CPU::opcode0x00() {	// NOP
-	setBit(AF.low, h_flag);
+	setBit(AF.low, static_cast<u8>(Flag::c));
 	std::cout << "0x00 nicht implementiert" << std::endl;
 	return 0;
 }
 u8 CPU::opcode0x10() {	// STOP
+	toggleFlag(Flag::z);
+	std::cout << "Z Flag: " << checkFlag(Flag::z) << std::endl;
+	toggleFlag(Flag::z);
+	std::cout << "Z Flag: " << checkFlag(Flag::z) << std::endl;
 	std::cout << "0x10 nicht implementiert" << std::endl;
 	return 0;
 }

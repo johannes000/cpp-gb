@@ -10,6 +10,12 @@ typedef unsigned short u16;
 typedef signed char i8;
 typedef signed short i16;
 
+enum class Flag {
+	z = 7, // Zero Flag
+	n = 6, // Add/Sub-Flag 
+	h = 5, // Half Carry Flag
+	c = 4, // Carry Flag
+};
 
 typedef union {
 	struct {
@@ -18,8 +24,6 @@ typedef union {
 	};
 	u16 ganz;
 }Register;
-
-
 
 #endif // !TYPE_H_GUARD
 
