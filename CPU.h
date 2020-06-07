@@ -20,10 +20,9 @@ private:
 	Register sp; // stack pointer
 	Register pc; // program counter/pointer
 
-public:
 
 	//FLAGS
-public:
+private:
 	enum Flag {
 		z_flag = 7, // Zero Flag
 		n_flag = 6, // Add/Sub-Flag 
@@ -31,10 +30,20 @@ public:
 		c_flag = 4, // Carry Flag
 	};
 
+public:
 	void setFlag(const Flag);		//setze flag auf true egal was
 	void clearFlag(const Flag);		//setze flag auf false egal was
 	void toggleFlag(const Flag);	//toggled die flag
 	bool checkFlag(const Flag);		//gibt flag status wieder
+
+	void setBit(u8&, const u8);
+	void setBit(u16&, const u16);
+	void clearBit(u8&, const u8);
+	void clearBit(u16&, const u16);
+	void toggleBit(u8&, const u8);
+	void toggleBit(u16&, const u16);
+	bool checkBit(u8&, const u8);
+	bool checkBit(u16&, const u16);
 
 	//OPCODES
 private:

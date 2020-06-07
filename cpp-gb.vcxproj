@@ -156,6 +156,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="CPU.cpp" />
+    <ClCompile Include="CPU\LD.cpp" />
+    <ClCompile Include="CPU\ARITHMETIC.cpp" />
+    <ClCompile Include="CPU\JUMPS.cpp" />
+    <ClCompile Include="CPU\CONTROL.cpp" />
+    <ClCompile Include="CPU\SHIFT.cpp" />
     <ClCompile Include="gameboy.cpp" />
     <ClCompile Include="PPU.cpp" />
     <ClCompile Include="main.cpp" />

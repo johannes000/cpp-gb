@@ -27,7 +27,10 @@ with open('Opcodes.json') as json_file:
         if(op2 != ""):
             string += " " + op2
         print(string)
+        print('std::cout << ' + '"' + strHex +
+              ' nicht implementiert" << std::endl;')
         print("     return 0; }")
+
     print("")
     print("")
     print("")
@@ -56,6 +59,8 @@ with open('Opcodes.json') as json_file:
         if(op2 != ""):
             string += " " + op2
         print(string)
+        print('std::cout << ' + '"prefixed ' + strHex +
+              ' nicht implementiert" << std::endl;')
         print("     return 0; }")
     print("")
     print("")
