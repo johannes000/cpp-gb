@@ -155,6 +155,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="CARDRIDGE.cpp" />
     <ClCompile Include="CPU.cpp" />
     <ClCompile Include="CPU\LD.cpp" />
     <ClCompile Include="CPU\ARITHMETIC.cpp" />
@@ -162,12 +163,15 @@
     <ClCompile Include="CPU\CONTROL.cpp" />
     <ClCompile Include="CPU\SHIFT.cpp" />
     <ClCompile Include="gameboy.cpp" />
+    <ClCompile Include="MEMORY.cpp" />
     <ClCompile Include="PPU.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="CARDRIDGE.h" />
     <ClInclude Include="CPU.h" />
     <ClInclude Include="gameboy.h" />
+    <ClInclude Include="MEMORY.h" />
     <ClInclude Include="type.h" />
     <ClInclude Include="PPU.h" />
   </ItemGroup>

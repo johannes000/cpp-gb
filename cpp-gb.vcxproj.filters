@@ -42,6 +42,12 @@
     <ClCompile Include="CPU\CONTROL.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
+    <ClCompile Include="MEMORY.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="CARDRIDGE.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="PPU.h">
@@ -54,6 +60,12 @@
       <Filter>Headerdateien</Filter>
     </ClInclude>
     <ClInclude Include="type.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="MEMORY.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="CARDRIDGE.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
   </ItemGroup>

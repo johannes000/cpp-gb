@@ -7,6 +7,7 @@ u8 CPU::opcode0x00() {	// NOP
 }
 u8 CPU::opcode0x10() {	// STOP
 	toggleFlag(Flag::z);
+
 	std::cout << "Z Flag: " << checkFlag(Flag::z) << std::endl;
 	toggleFlag(Flag::z);
 	std::cout << "Z Flag: " << checkFlag(Flag::z) << std::endl;

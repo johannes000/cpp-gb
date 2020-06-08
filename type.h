@@ -10,7 +10,7 @@ typedef unsigned short u16;
 typedef signed char i8;
 typedef signed short i16;
 
-enum class Flag {
+const enum class Flag {
 	z = 7, // Zero Flag
 	n = 6, // Add/Sub-Flag 
 	h = 5, // Half Carry Flag

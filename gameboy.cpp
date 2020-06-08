@@ -2,7 +2,9 @@
 
 
 gameboy::gameboy() {
+}
 
+gameboy::~gameboy() {
 }
 
 void gameboy::startemu() {
@@ -16,5 +18,10 @@ void gameboy::startemu() {
 	cpu.parseOPCode(c);
 	cpu.setFlag(Flag::n);
 
+	mem.write(0x1234, 0x33);
+	std::cout << std::hex << "mem: " << mem.read(0x01) << std::endl;
+
+
+	rom.loadROM("C:\/Users\/knaub\/source\/repos\/cpp-gb\/testroms\/cpu_instrs\/cpu_instrs.gb");
 }
 
