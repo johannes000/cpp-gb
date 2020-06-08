@@ -16,13 +16,16 @@ bool CARDRIDGE::loadROM(const char* romFile) {
 	}
 	std::vector<u8> data(std::istreambuf_iterator<char>(is), {});
 	rom = data;
+
+	getRomInfo();
+
 	romintomem();
 	return true;
 }
 
 void CARDRIDGE::romintomem() {
 	auto b = (rom.begin() + 0x0100);
-	auto e = (rom.begin() + 0x3FFF);
+	auto e = (rom.begin() + 0x7FFF);
 	u16 i = 0x0100;
 	while (b != e) {
 		mem->write(i++, *(b++));
@@ -32,7 +35,15 @@ void CARDRIDGE::romintomem() {
 void CARDRIDGE::getRomInfo() {
 	if (rom.size() == 0)
 		return;
-
+	if (calcCheckSum() != rom[0x14D]) {
+		std::cout << "Checkrum FAIL!" << std::endl;
+		return;
+	}
+	std::memcpy(title, &rom[0x134], 15);
+	cgb = (CGBFlag)rom[0x143];
+	ctype = (CType)rom[0x147];
+	romsize = (ROMSize)rom[0x148];
+	ramsize = (RAMSize)rom[0x149];
 }
 
 void CARDRIDGE::printRom() {
@@ -47,4 +58,14 @@ void CARDRIDGE::printRom() {
 
 u8 CARDRIDGE::readAddr(u16 addr) {
 	return rom[addr];
+}
+
+u8 CARDRIDGE::calcCheckSum() {
+	if (checkSum == 0) {
+		int i = 0x0134;
+		while (i <= 0x014C)
+			checkSum = checkSum - rom[i++] - 1;
+
+	}
+	return checkSum;
 }

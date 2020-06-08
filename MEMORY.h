@@ -18,6 +18,7 @@ public:
 	u8 read(u16 addr);
 	void write(u16 addr, u8 data);
 
+
 private:
 	std::vector<u8> memory;
 	const u8 boot[256] = {

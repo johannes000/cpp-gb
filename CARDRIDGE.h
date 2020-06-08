@@ -27,9 +27,11 @@ public:
 private:
 	std::vector<u8> rom;
 	void romintomem();
+	u8 checkSum = 0;
+	u8 calcCheckSum();
 
 public:
-	const char* title = "";
+	char title[15] = "";
 	bool SGBFlag = false;
 	CGBFlag cgb = CGBFlag::ON;
 	CType ctype = CType::MBC1;
