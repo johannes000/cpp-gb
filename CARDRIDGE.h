@@ -27,6 +27,7 @@ public:
 private:
 	std::vector<u8> rom;
 	void romintomem();
+	void romintomem(u16 romBeg, u16 romEnd, u16 dest);
 	u8 checkSum = 0;
 	u8 calcCheckSum();
 

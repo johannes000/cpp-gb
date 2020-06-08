@@ -21,8 +21,9 @@ const enum class Flag {
 
 typedef union {
 	struct {
-		u8 low;
-		u8 high;
+		//AF
+		u8 low;	// F
+		u8 high; // A
 	};
 	u16 ganz;
 }Register;

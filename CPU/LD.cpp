@@ -67,8 +67,8 @@ u8 CPU::opcode0x2E() {	// LD L d8
 }
 
 u8 CPU::opcode0x31() {  // LD SP d16
-	std::cout << "0x31 nicht implementiert" << std::endl;
-	return u8();
+	SP.ganz = merge_u8(mem->read(nextOPCode + 1), mem->read(nextOPCode + 2));
+	return 0;
 }
 
 

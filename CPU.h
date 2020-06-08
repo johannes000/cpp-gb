@@ -37,8 +37,20 @@ private:
 
 public:
 	void setFlag(const Flag&);		//setze flag auf true egal was
+	void setFlags(const Flag&, const Flag&);		//setze flag auf true egal was
+	void setFlags(const Flag&, const Flag&, const Flag&);		//setze flag auf true egal was
+	void setAllFlags();
+
 	void clearFlag(const Flag&);		//setze flag auf false egal was
+	void clearFlags(const Flag& F1, const Flag& F2);
+	void clearFlags(const Flag& F1, const Flag& F2, const Flag& F3);
+	void clearAllFlags();
+
 	void toggleFlag(const Flag&);	//toggled die flag
+	void toggleFlags(const Flag& F1, const Flag& F2);
+	void toggleFlags(const Flag& F1, const Flag& F2, const Flag& F3);
+	void toggleAllFlags();
+
 	bool checkFlag(const Flag&);		//gibt flag status wieder
 
 	void setBit(u8&, const u8);
@@ -63,6 +75,15 @@ private:
 	std::vector<instruction> prefixedinstructions;
 	instruction nextInst;
 	u8 nextOPCode;
+
+	//oft benutzte anweisugen
+	u16 merge_u8(const u8& data_lb, const u8& data_hb);
+
+	void ld_16_16(u16& destination, const u8& datalb, const  u8& datahb);
+	void ld_16_8(u16& destination, const u8& data);
+
+	u8 xor_8(u8& data1, const u8& data2);
+
 
 	u8 opcode0x00();	// NOP
 	u8 opcode0x01();	// LD BC d16

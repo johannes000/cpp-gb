@@ -161,6 +161,7 @@
     <ClCompile Include="CPU\ARITHMETIC.cpp" />
     <ClCompile Include="CPU\JUMPS.cpp" />
     <ClCompile Include="CPU\CONTROL.cpp" />
+    <ClCompile Include="CPU\helper.cpp" />
     <ClCompile Include="CPU\SHIFT.cpp" />
     <ClCompile Include="gameboy.cpp" />
     <ClCompile Include="MEMORY.cpp" />

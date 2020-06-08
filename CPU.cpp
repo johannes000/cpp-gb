@@ -43,24 +43,56 @@ CPU::CPU(MEMORY* m) {
 	};
 
 	mem = m;
-
-
 }
 
 void CPU::setFlag(const Flag& F) {
-
 	setBit(AF.low, static_cast<u8>(F));
+}
+void CPU::setFlags(const Flag& F1, const Flag& F2) {
+	setFlag(F1);
+	setFlag(F2);
+}
+void CPU::setFlags(const Flag& F1, const Flag& F2, const Flag& F3) {
+	setFlag(F1);
+	setFlag(F2);
+	setFlag(F3);
+}
+void CPU::setAllFlags() {
+	AF.low = 0xFF;
 }
 void CPU::clearFlag(const Flag& F) {
 	clearBit(AF.low, static_cast<u8>(F));
+}
+void CPU::clearFlags(const Flag& F1, const Flag& F2) {
+	clearFlag(F1);
+	clearFlag(F2);
+}
+void CPU::clearFlags(const Flag& F1, const Flag& F2, const Flag& F3) {
+	clearFlag(F1);
+	clearFlag(F2);
+	clearFlag(F3);
+}
+void CPU::clearAllFlags() {
+	AF.low = 0x00;
 }
 bool CPU::checkFlag(const Flag& F) {
 	return checkBit(AF.low, static_cast<u8>(F));
 }
 void CPU::toggleFlag(const Flag& F) {
 	toggleBit(AF.low, static_cast<u8>(F));
-
 }
+void CPU::toggleFlags(const Flag& F1, const Flag& F2) {
+	toggleFlag(F1);
+	toggleFlag(F2);
+}
+void CPU::toggleFlags(const Flag& F1, const Flag& F2, const Flag& F3) {
+	toggleFlag(F1);
+	toggleFlag(F2);
+	toggleFlag(F3);
+}
+void CPU::toggleAllFlags() {
+}
+
 
 void CPU::setBit(u8& value, const u8 bit) {
 	value |= (1 << bit);
@@ -92,7 +124,6 @@ bool CPU::checkBit(const u16& value, const u16 bit) {
 
 void CPU::parseOPCode(u8& opcode) {
 	u8 function = (this->*instructions[opcode].function)();
-	function = (this->*prefixedinstructions[opcode].function)();
 }
 
 void CPU::update() {

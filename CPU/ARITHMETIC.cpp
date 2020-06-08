@@ -311,31 +311,31 @@ u8 CPU::opcode0xDE() {	// SBC A d8
 }
 
 u8 CPU::opcode0xEE() {	// XOR d8
-	std::cout << "0xEE nicht implementiert" << std::endl;
+	AF.high = xor_8(AF.high, mem->read(PC.ganz + 1));
 	return 0;
 }
 u8 CPU::opcode0xA8() {	// XOR B
-	std::cout << "0xA8 nicht implementiert" << std::endl;
+	AF.high = xor_8(AF.high, BC.low);
 	return 0;
 }
 u8 CPU::opcode0xA9() {	// XOR C
-	std::cout << "0xA9 nicht implementiert" << std::endl;
+	AF.high = xor_8(AF.high, BC.high);
 	return 0;
 }
 u8 CPU::opcode0xAA() {	// XOR D
-	std::cout << "0xAA nicht implementiert" << std::endl;
+	AF.high = xor_8(AF.high, DE.low);
 	return 0;
 }
 u8 CPU::opcode0xAB() {	// XOR E
-	std::cout << "0xAB nicht implementiert" << std::endl;
+	AF.high = xor_8(AF.high, DE.high);
 	return 0;
 }
 u8 CPU::opcode0xAC() {	// XOR H
-	std::cout << "0xAC nicht implementiert" << std::endl;
+	AF.high = xor_8(AF.high, HL.high);
 	return 0;
 }
 u8 CPU::opcode0xAD() {	// XOR L
-	std::cout << "0xAD nicht implementiert" << std::endl;
+	AF.high = xor_8(AF.high, HL.low);
 	return 0;
 }
 u8 CPU::opcode0xAE() {	// XOR HL
@@ -343,7 +343,7 @@ u8 CPU::opcode0xAE() {	// XOR HL
 	return 0;
 }
 u8 CPU::opcode0xAF() {	// XOR A
-	std::cout << "0xAF nicht implementiert" << std::endl;
+	AF.high = xor_8(AF.high, AF.high);
 	return 0;
 }
 u8 CPU::opcode0xB8() {	// CP B

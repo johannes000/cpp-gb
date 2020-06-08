@@ -18,15 +18,19 @@ bool CARDRIDGE::loadROM(const char* romFile) {
 	rom = data;
 
 	getRomInfo();
-
 	romintomem();
+
 	return true;
 }
 
 void CARDRIDGE::romintomem() {
-	auto b = (rom.begin() + 0x0100);
-	auto e = (rom.begin() + 0x7FFF);
-	u16 i = 0x0100;
+	romintomem(0x0100, 0x7FFF, 0x0100);
+}
+
+void CARDRIDGE::romintomem(u16 romBeg, u16 romEnd, u16 dest) {
+	auto b = (rom.begin() + romBeg);
+	auto e = (rom.begin() + romEnd);
+	u16 i = dest;
 	while (b != e) {
 		mem->write(i++, *(b++));
 	}
