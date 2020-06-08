@@ -8,7 +8,6 @@ MEMORY::MEMORY() {
 }
 
 MEMORY::~MEMORY() {
-	delete[] boot;
 }
 
 u8 MEMORY::read(const u16 addr) {
@@ -21,3 +20,5 @@ void MEMORY::write(const u16 addr, u8 data) {
 	if (addr >= 0x00 && addr <= 0xFFFF)
 		memory[addr] = data;
 }
+
+

@@ -3,12 +3,23 @@
 #define CPU_H_GUARD
 
 #include <iostream>
-#include "type.h"
 #include <vector>
+
+#include "type.h"
+#include "MEMORY.h"
+class MEMORY;
 
 class CPU {
 public:
 	CPU();
+	CPU(MEMORY*);
+
+	MEMORY* mem = nullptr;
+
+	void parseOPCode(u8&);
+	void update();
+	void incPC();
+	u8 getNextOPCode();
 
 private:
 	//REGISTER
@@ -17,9 +28,8 @@ private:
 	Register DE; // DE
 	Register HL; // HL
 
-	Register sp; // stack pointer
-	Register pc; // program counter/pointer
-
+	Register PC; // program counter/pointer
+	Register SP; // stack pointer
 
 	//FLAGS
 private:
@@ -40,17 +50,19 @@ public:
 	bool checkBit(const u8&, const u8);
 	bool checkBit(const u16&, const u16);
 
+
 	//OPCODES
 private:
 	struct instruction {
-		const char* mnemonic;
+		const char* mnemonic = "";
 		u8(CPU::* function)(void) = nullptr;
-		u8 bytes;
-		u8 cycles;
+		u8 bytes = 0;
+		u8 cycles = 0;
 	};
 	std::vector<instruction> instructions;
 	std::vector<instruction> prefixedinstructions;
-
+	instruction nextInst;
+	u8 nextOPCode;
 
 	u8 opcode0x00();	// NOP
 	u8 opcode0x01();	// LD BC d16
@@ -566,9 +578,6 @@ private:
 	u8 prefixedopcode0xFD();	// SET 7 L
 	u8 prefixedopcode0xFE();	// SET 7 HL
 	u8 prefixedopcode0xFF();	// SET 7 A
-
-public:
-	void parseOPCode(u8&);
 
 };
 #endif // !CPU_H_GUARD

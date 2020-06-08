@@ -2,10 +2,14 @@
 #ifndef MEMORY_H_GUARD
 #define MEMORY_H_GUARD
 
-#include "type.h"
 #include <algorithm>
 #include <iostream>
 #include <vector>
+#include <iterator>
+
+#include "type.h"
+#include "CPU.h"
+
 
 class MEMORY {
 public:
@@ -13,7 +17,6 @@ public:
 	~MEMORY();
 	u8 read(u16 addr);
 	void write(u16 addr, u8 data);
-
 
 private:
 	std::vector<u8> memory;

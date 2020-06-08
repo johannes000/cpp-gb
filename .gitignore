@@ -409,3 +409,4 @@ MigrationBackup/
 
 #testroms for the emulator
 .testroms/
+.gb
