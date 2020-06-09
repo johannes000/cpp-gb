@@ -141,6 +141,10 @@ u8 CPU::opcode0xFF() {	// RST 38H
 	R.PC = 0x0000 + 0x0038;
 	return 1;
 }
+u8 CPU::opcode0xC9() {	// RET
+	ret();
+	return 1;
+}
 u8 CPU::opcode0xD9() {	// RETI
 	ret();
 	std::cout << "0xD9 ENABLE INTERUPT IMPLEMENTIEREN" << std::endl;

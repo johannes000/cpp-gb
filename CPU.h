@@ -67,6 +67,7 @@ private:
 	std::vector<instruction> prefixedinstructions;
 	instruction instruction_info;
 	u8 OPCode;
+	bool prefix = false;
 
 	//oft benutzte Anweisugen
 	u8 read_u8_at_pc();
@@ -88,6 +89,8 @@ private:
 	void pop_r16_reg(u16* reg);
 	void ret();
 	void call();
+	// BITS
+	void test_n_bit_set_z(const u8 bit, const u8* reg);
 
 
 	u8 opcode0x00();	// NOP

@@ -45,12 +45,8 @@ u8 CPU::opcode0x76() {	// HALT
 	std::cout << "0x76 nicht implementiert" << std::endl;
 	return 0;
 }
-u8 CPU::opcode0xC9() {	// RET
-	std::cout << "0xC9 nicht implementiert" << std::endl;
-	return 0;
-}
 u8 CPU::opcode0xCB() {	// PREFIX
-	std::cout << "0xCB nicht implementiert" << std::endl;
+	prefix = true;
 	return 0;
 }
 

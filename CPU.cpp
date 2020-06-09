@@ -52,16 +52,25 @@ void CPU::initRegister() {
 	R.DE = 0x00D8;
 	R.HL = 0x014D;
 	R.SP = 0xFFFE;
-	R.PC = 0x0100;
+	R.PC = 0x0000;
 }
 
 void CPU::parseOPCode(u8& opcode) {
-	u8 function = (this->*instructions[opcode].function)();
+	if (prefix) {
+		prefix = false;
+		instruction_info = prefixedinstructions[OPCode];
+		std::cout << instruction_info.mnemonic << std::endl;
+		u8 function = (this->*prefixedinstructions[opcode].function)();
+	}
+	else {
+		instruction_info = instructions[OPCode];
+		std::cout << instruction_info.mnemonic << std::endl;
+		u8 function = (this->*instructions[opcode].function)();
+	}
 }
 
 void CPU::update() {
 	OPCode = getNextOPCode();
-	instruction_info = instructions[OPCode];
 	parseOPCode(OPCode);
 	incPC();
 }
