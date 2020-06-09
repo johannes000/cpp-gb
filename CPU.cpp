@@ -41,100 +41,18 @@ CPU::CPU(MEMORY* m) {
 		{"SET 4 B", &CPU::prefixedopcode0xE0, 2, 2},{"SET 4 C", &CPU::prefixedopcode0xE1, 2, 2},{"SET 4 D", &CPU::prefixedopcode0xE2, 2, 2},{"SET 4 E", &CPU::prefixedopcode0xE3, 2, 2},{"SET 4 H", &CPU::prefixedopcode0xE4, 2, 2},{"SET 4 L", &CPU::prefixedopcode0xE5, 2, 2},{"SET 4 HL", &CPU::prefixedopcode0xE6, 2, 4},{"SET 4 A", &CPU::prefixedopcode0xE7, 2, 2},{"SET 5 B", &CPU::prefixedopcode0xE8, 2, 2},{"SET 5 C", &CPU::prefixedopcode0xE9, 2, 2},{"SET 5 D", &CPU::prefixedopcode0xEA, 2, 2},{"SET 5 E", &CPU::prefixedopcode0xEB, 2, 2},{"SET 5 H", &CPU::prefixedopcode0xEC, 2, 2},{"SET 5 L", &CPU::prefixedopcode0xED, 2, 2},{"SET 5 HL", &CPU::prefixedopcode0xEE, 2, 4},{"SET 5 A", &CPU::prefixedopcode0xEF, 2, 2},
 		{"SET 6 B", &CPU::prefixedopcode0xF0, 2, 2},{"SET 6 C", &CPU::prefixedopcode0xF1, 2, 2},{"SET 6 D", &CPU::prefixedopcode0xF2, 2, 2},{"SET 6 E", &CPU::prefixedopcode0xF3, 2, 2},{"SET 6 H", &CPU::prefixedopcode0xF4, 2, 2},{"SET 6 L", &CPU::prefixedopcode0xF5, 2, 2},{"SET 6 HL", &CPU::prefixedopcode0xF6, 2, 4},{"SET 6 A", &CPU::prefixedopcode0xF7, 2, 2},{"SET 7 B", &CPU::prefixedopcode0xF8, 2, 2},{"SET 7 C", &CPU::prefixedopcode0xF9, 2, 2},{"SET 7 D", &CPU::prefixedopcode0xFA, 2, 2},{"SET 7 E", &CPU::prefixedopcode0xFB, 2, 2},{"SET 7 H", &CPU::prefixedopcode0xFC, 2, 2},{"SET 7 L", &CPU::prefixedopcode0xFD, 2, 2},{"SET 7 HL", &CPU::prefixedopcode0xFE, 2, 4},{"SET 7 A", &CPU::prefixedopcode0xFF, 2, 2}
 	};
-
+	initRegister();
 	mem = m;
 
-	R.AF = 0x01B0;
-	R.SP = 0x1234;
 }
 
 void CPU::initRegister() {
-
-}
-
-void CPU::setFlag(const Flag& F) {
-	setBit(R.F, static_cast<u8>(F));
-
-}
-void CPU::setFlags(const Flag& F1, const Flag& F2) {
-	setFlag(F1);
-	setFlag(F2);
-}
-void CPU::setFlags(const Flag& F1, const Flag& F2, const Flag& F3) {
-	setFlag(F1);
-	setFlag(F2);
-	setFlag(F3);
-}
-void CPU::setAllFlags() {
-	R.F = 0xFF;
-}
-
-void CPU::clearFlag(const Flag& F) {
-	clearBit(R.F, static_cast<u8>(F));
-}
-void CPU::clearFlags(const Flag& F1, const Flag& F2) {
-	clearFlag(F1);
-	clearFlag(F2);
-}
-void CPU::clearFlags(const Flag& F1, const Flag& F2, const Flag& F3) {
-	clearFlag(F1);
-	clearFlag(F2);
-	clearFlag(F3);
-}
-void CPU::clearAllFlags() {
-	R.F = 0x00;
-}
-
-bool CPU::checkFlag(const Flag& F) {
-	return checkBit(R.F, static_cast<u8>(F));
-}
-void CPU::toggleFlag(const Flag& F) {
-	toggleBit(R.F, static_cast<u8>(F));
-}
-
-void CPU::toggleFlags(const Flag& F1, const Flag& F2) {
-	toggleFlag(F1);
-	toggleFlag(F2);
-}
-void CPU::toggleFlags(const Flag& F1, const Flag& F2, const Flag& F3) {
-	toggleFlag(F1);
-	toggleFlag(F2);
-	toggleFlag(F3);
-}
-void CPU::toggleAllFlags() {
-	toggleFlag(Flag::c);
-	toggleFlag(Flag::z);
-	toggleFlag(Flag::n);
-	toggleFlag(Flag::h);
-}
-
-
-void CPU::setBit(u8& value, const u8 bit) {
-	value |= (1 << bit);
-}
-void CPU::setBit(u16& value, const u16 bit) {
-	value |= (1 << bit);
-}
-
-void CPU::clearBit(u8& value, const u8 bit) {
-	value &= ~(1 << bit);
-}
-void CPU::clearBit(u16& value, const u16 bit) {
-	value &= ~(1 << bit);
-}
-
-void CPU::toggleBit(u8& value, const u8 bit) {
-	value ^= (1 << bit);
-}
-void CPU::toggleBit(u16& value, const u16 bit) {
-	value ^= (1 << bit);
-}
-
-bool CPU::checkBit(const u8& value, const u8 bit) {
-	return (value >> bit) & 1;
-}
-bool CPU::checkBit(const u16& value, const u16 bit) {
-	return (value >> bit) & 1;
+	R.AF = 0x01B0;
+	R.BC = 0x0013;
+	R.DE = 0x00D8;
+	R.HL = 0x014D;
+	R.SP = 0xFFFE;
+	R.PC = 0x0100;
 }
 
 void CPU::parseOPCode(u8& opcode) {
@@ -142,16 +60,18 @@ void CPU::parseOPCode(u8& opcode) {
 }
 
 void CPU::update() {
-	nextOPCode = getNextOPCode();
-	nextInst = instructions[nextOPCode];
-	parseOPCode(nextOPCode);
+	OPCode = getNextOPCode();
+	instruction_info = instructions[OPCode];
+	parseOPCode(OPCode);
 	incPC();
 }
 
 void CPU::incPC() {
-	R.PC += nextInst.bytes;
+	R.PC += instruction_info.bytes;
 }
 
 u8 CPU::getNextOPCode() {
 	return mem->read(R.PC);
 }
+
+

@@ -1,129 +1,141 @@
 #include "../CPU.h"
 
+void CPU::inc_u8_reg(u8* reg) {
+	*reg = *reg + 1;
+
+	clearFlag(Flag::n);
+
+	if (*reg & 0xFF)
+		clearFlag(Flag::h);
+	else
+		setFlag(Flag::h);
+
+	if (*reg == 0)
+		setFlag(Flag::z);
+	else
+		clearFlag(Flag::z);
+}
+
+void CPU::dec_u8_reg(u8* reg) {
+	*reg = *reg - 1;
+
+	setFlag(Flag::n);
+
+	if (*reg == 0)
+		setFlag(Flag::z);
+	else
+		clearFlag(Flag::z);
+
+	if ((*reg & 0x0F) == 0x0F)
+		setFlag(Flag::h);
+	else
+		clearFlag(Flag::h);
+
+}
+
+void CPU::add_a_r8(u8* reg) {
+}
+
+
 u8 CPU::opcode0x3C() {	// INC A
-	std::cout << "0x3C nicht implementiert" << std::endl;
+	inc_u8_reg(&R.A);
 	return 0;
 }
-u8 CPU::opcode0x03() {	// INC BC
-	std::cout << "0x03 nicht implementiert" << std::endl;
-	return 0;
-}
+
 u8 CPU::opcode0x04() {	// INC B
-	std::cout << "0x04 nicht implementiert" << std::endl;
+	inc_u8_reg(&R.B);
 	return 0;
 }
 u8 CPU::opcode0x0C() {	// INC C
-	std::cout << "0x0C nicht implementiert" << std::endl;
-	return 0;
-}
-u8 CPU::opcode0x13() {	// INC DE
-	std::cout << "0x13 nicht implementiert" << std::endl;
+	inc_u8_reg(&R.C);
 	return 0;
 }
 u8 CPU::opcode0x14() {	// INC D
-	std::cout << "0x14 nicht implementiert" << std::endl;
+	inc_u8_reg(&R.D);
 	return 0;
 }
 u8 CPU::opcode0x1C() {	// INC E
-	std::cout << "0x1C nicht implementiert" << std::endl;
-	return 0;
-}
-u8 CPU::opcode0x23() {	// INC HL
-	std::cout << "0x23 nicht implementiert" << std::endl;
+	inc_u8_reg(&R.E);
 	return 0;
 }
 u8 CPU::opcode0x24() {	// INC H
-	std::cout << "0x24 nicht implementiert" << std::endl;
+	inc_u8_reg(&R.H);
 	return 0;
 }
 u8 CPU::opcode0x2C() {	// INC L
-	std::cout << "0x2C nicht implementiert" << std::endl;
+	inc_u8_reg(&R.L);
+	return 0;
+}
+u8 CPU::opcode0x34() {	// INC (HL)
+	inc_u8_reg(mem->read_ptr(R.HL));
+	return 0;
+}
+u8 CPU::opcode0x13() {	// INC DE
+	R.DE++;
+	return 0;
+}
+u8 CPU::opcode0x03() {	// INC BC
+	R.BC++;
+	return 0;
+}
+u8 CPU::opcode0x23() {	// INC HL
+	R.HL++;
 	return 0;
 }
 u8 CPU::opcode0x33() {	// INC SP
-	std::cout << "0x33 nicht implementiert" << std::endl;
-	return 0;
-}
-u8 CPU::opcode0x34() {	// INC HL
-	std::cout << "0x34 nicht implementiert" << std::endl;
+	R.SP++;
 	return 0;
 }
 u8 CPU::opcode0x05() {	// DEC B
-	std::cout << "0x05 nicht implementiert" << std::endl;
-	return 0;
-}
-u8 CPU::opcode0x0B() {	// DEC BC
-	std::cout << "0x0B nicht implementiert" << std::endl;
+	dec_u8_reg(&R.B);
 	return 0;
 }
 u8 CPU::opcode0x0D() {	// DEC C
-	std::cout << "0x0D nicht implementiert" << std::endl;
+	dec_u8_reg(&R.C);
 	return 0;
 }
 u8 CPU::opcode0x15() {	// DEC D
-	std::cout << "0x15 nicht implementiert" << std::endl;
+	dec_u8_reg(&R.C);
 	return 0;
 }
-u8 CPU::opcode0x1B() {	// DEC DE
-	std::cout << "0x1B nicht implementiert" << std::endl;
-	return 0;
-}
-
 u8 CPU::opcode0x1D() {	// DEC E
-	std::cout << "0x1D nicht implementiert" << std::endl;
+	dec_u8_reg(&R.E);
 	return 0;
 }
 u8 CPU::opcode0x25() {	// DEC H
-	std::cout << "0x25 nicht implementiert" << std::endl;
+	dec_u8_reg(&R.H);
+	return 0;
+}
+u8 CPU::opcode0x3D() {	// DEC A
+	dec_u8_reg(&R.A);
+	return 0;
+}
+u8 CPU::opcode0x2D() {	// DEC L
+	dec_u8_reg(&R.L);
+	return 0;
+}
+u8 CPU::opcode0x35() {	// DEC (HL)
+	dec_u8_reg(mem->read_ptr(R.HL));
+	return 0;
+}
+u8 CPU::opcode0x0B() {	// DEC BC
+	R.BC--;
+	return 0;
+}
+u8 CPU::opcode0x1B() {	// DEC DE
+	R.DE--;
 	return 0;
 }
 u8 CPU::opcode0x2B() {	// DEC HL
-	std::cout << "0x2B nicht implementiert" << std::endl;
-	return 0;
-}
-
-u8 CPU::opcode0x2D() {	// DEC L
-	std::cout << "0x2D nicht implementiert" << std::endl;
-	return 0;
-}
-u8 CPU::opcode0x35() {	// DEC HL
-	std::cout << "0x35 nicht implementiert" << std::endl;
+	R.HL--;
 	return 0;
 }
 u8 CPU::opcode0x3B() {	// DEC SP
-	std::cout << "0x3B nicht implementiert" << std::endl;
+	R.SP--;
 	return 0;
 }
 
-u8 CPU::opcode0x3D() {	// DEC A
-	std::cout << "0x3D nicht implementiert" << std::endl;
-	return 0;
-}
-u8 CPU::opcode0x27() {	// DAA
-	std::cout << "0x27 nicht implementiert" << std::endl;
-	return 0;
-}
-u8 CPU::opcode0x37() {	// SCF
-	std::cout << "0x37 nicht implementiert" << std::endl;
-	return 0;
-}
 
-u8 CPU::opcode0x09() {	// ADD HL BC
-	std::cout << "0x09 nicht implementiert" << std::endl;
-	return 0;
-}
-u8 CPU::opcode0x19() {	// ADD HL DE
-	std::cout << "0x19 nicht implementiert" << std::endl;
-	return 0;
-}
-u8 CPU::opcode0x29() {	// ADD HL HL
-	std::cout << "0x29 nicht implementiert" << std::endl;
-	return 0;
-}
-u8 CPU::opcode0x39() {	// ADD HL SP
-	std::cout << "0x39 nicht implementiert" << std::endl;
-	return 0;
-}
 u8 CPU::opcode0x80() {	// ADD A B
 	std::cout << "0x80 nicht implementiert" << std::endl;
 	return 0;
@@ -156,6 +168,23 @@ u8 CPU::opcode0x87() {	// ADD A A
 	std::cout << "0x87 nicht implementiert" << std::endl;
 	return 0;
 }
+u8 CPU::opcode0x09() {	// ADD HL BC
+	std::cout << "0x09 nicht implementiert" << std::endl;
+	return 0;
+}
+u8 CPU::opcode0x19() {	// ADD HL DE
+	std::cout << "0x19 nicht implementiert" << std::endl;
+	return 0;
+}
+u8 CPU::opcode0x29() {	// ADD HL HL
+	std::cout << "0x29 nicht implementiert" << std::endl;
+	return 0;
+}
+u8 CPU::opcode0x39() {	// ADD HL SP
+	std::cout << "0x39 nicht implementiert" << std::endl;
+	return 0;
+}
+
 u8 CPU::opcode0xC6() {	// ADD A d8
 	std::cout << "0xC6 nicht implementiert" << std::endl;
 	return 0;

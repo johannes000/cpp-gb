@@ -30,19 +30,19 @@ u8 CPU::opcode0x2E() {	// LD L d8
 }
 
 u8 CPU::opcode0x01() {	// LD BC d16
-	R.BC = u16_data_at_opcode();
+	R.BC = read_u16_at_pc();
 	return 0;
 }
 u8 CPU::opcode0x11() {	// LD DE d16
-	R.DE = u16_data_at_opcode();
+	R.DE = read_u16_at_pc();
 	return 0;
 }
 u8 CPU::opcode0x21() {	// LD HL d16
-	R.HL = u16_data_at_opcode();
+	R.HL = read_u16_at_pc();
 	return 0;
 }
 u8 CPU::opcode0x31() {  // LD SP d16
-	R.SP = u16_data_at_opcode();
+	R.SP = read_u16_at_pc();
 	return 0;
 }
 u8 CPU::opcode0x02() {	// LD [BC] A
@@ -50,19 +50,19 @@ u8 CPU::opcode0x02() {	// LD [BC] A
 	return 0;
 }
 u8 CPU::opcode0x08() {	// LD (a16) SP
-	mem->write_u16(u16_data_at_opcode(), R.SP);
+	mem->write_u16(read_u16_at_pc(), R.SP);
 	return 0;
 }
 u8 CPU::opcode0xFA() {	// LD A (a16)
-	R.A = mem->read(u16_data_at_opcode());
+	R.A = mem->read(read_u16_at_pc());
 	return 0;
 }
 u8 CPU::opcode0xEA() {	// LD (a16) A
-	mem->write(u16_data_at_opcode(), R.A);
+	mem->write(read_u16_at_pc(), R.A);
 	return 0;
 }
 u8 CPU::opcode0x0A() {	// LD A (BC)
-	R.A = mem->read(u16_data_at_opcode());
+	R.A = mem->read(read_u16_at_pc());
 	return 0;
 }
 
@@ -359,13 +359,13 @@ u8 CPU::opcode0xF8() {	// LD HL SP + r8
 	i8 r8 = read_i8_at_pc();
 	u16 result = R.SP + r8;
 	u16 check = R.SP ^ r8 ^ ((result) & 0xFFFF);
-
-	R.HL = result;
-
 	if (checkBit(check, 7))
 		setFlag(Flag::c);
 	if (checkBit(check, 3))
 		setFlag(Flag::h);
+
+	R.HL = result;
+
 	clearFlags(Flag::z, Flag::n);
 	return 0;
 }

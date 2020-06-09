@@ -14,12 +14,23 @@ u8 CPU::opcode0x10() {	// STOP
 	std::cout << "0x10 nicht implementiert" << std::endl;
 	return 0;
 }
+u8 CPU::opcode0x27() {	// DAA
+	std::cout << "0x27 nicht implementiert" << std::endl;
+	return 0;
+}
 u8 CPU::opcode0x3F() {	// CCF
-	std::cout << "0x3F nicht implementiert" << std::endl;
+	toggleFlag(Flag::c);
+	clearFlags(Flag::n, Flag::h);
+	return 0;
+}
+u8 CPU::opcode0x37() {	// SCF
+	setFlag(Flag::c);
+	clearFlags(Flag::n, Flag::h);
 	return 0;
 }
 u8 CPU::opcode0x2F() {	// CPL
-	std::cout << "0x2F nicht implementiert" << std::endl;
+	R.A = ~R.A;
+	setFlags(Flag::n, Flag::h);
 	return 0;
 }
 u8 CPU::opcode0xF3() {	// DI

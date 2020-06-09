@@ -65,23 +65,29 @@ private:
 	};
 	std::vector<instruction> instructions;
 	std::vector<instruction> prefixedinstructions;
-	instruction nextInst;
-	u8 nextOPCode;
+	instruction instruction_info;
+	u8 OPCode;
 
 	//oft benutzte Anweisugen
 	u8 read_u8_at_pc();
-	u16 u16_data_at_opcode();
+	u16 read_u16_at_pc();
+	u16 read_u16_sp();
 
 	i8 read_i8_at_pc();
 
 	u16 u8_to_u16(const u8& data_lb, const u8& data_hb);
 
-	void ld_8_8(u8& destination, u8& data);
-
-	void ld_16_16(u16& destination, const u8& datalb, const  u8& datahb);
-	void ld_16_8(u16& destination, const u8& data);
-
 	u8 xor_8(u8& data1, const u8& data2);
+
+	void inc_u8_reg(u8* reg);
+	void dec_u8_reg(u8* reg);
+
+	void add_a_r8(u8* reg);
+	// JUMPS
+	void push_r16_reg(u16* reg);
+	void pop_r16_reg(u16* reg);
+	void ret();
+	void call();
 
 
 	u8 opcode0x00();	// NOP
@@ -143,7 +149,8 @@ private:
 	u8 opcode0x38();	// JR C r8
 	u8 opcode0x39();	// ADD HL SP
 	u8 opcode0x3A();	// LD A HL
-	u8 opcode0x3B();	// DEC SP
+	u8 opcode0x3B();
+	// DEC SP
 	u8 opcode0x3C();	// INC A
 	u8 opcode0x3D();	// DEC A
 	u8 opcode0x3E();	// LD A d8
