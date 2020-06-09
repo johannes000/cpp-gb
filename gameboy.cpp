@@ -13,6 +13,9 @@ void gameboy::startemu() {
 	//ppu.renderScreen();
 	rom.loadROM("./testroms/cpu_instrs/cpu_instrs.gb");
 
+	u8 a = 0xF8;
+	cpu.parseOPCode(a);
+
 	cpu.update();
 	cpu.update();
 	cpu.update();

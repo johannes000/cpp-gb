@@ -24,6 +24,7 @@ public:
 private:
 	//REGISTER
 	Register R;
+	void initRegister();
 
 	//FLAGS
 public:
@@ -67,8 +68,13 @@ private:
 	instruction nextInst;
 	u8 nextOPCode;
 
-	//oft benutzte anweisugen
-	u16 merge_u8(const u8& data_lb, const u8& data_hb);
+	//oft benutzte Anweisugen
+	u8 read_u8_at_pc();
+	u16 u16_data_at_opcode();
+
+	i8 read_i8_at_pc();
+
+	u16 u8_to_u16(const u8& data_lb, const u8& data_hb);
 
 	void ld_8_8(u8& destination, u8& data);
 

@@ -32,13 +32,14 @@ private:
 	u8 calcCheckSum();
 
 public:
-	char title[15] = "";
-	bool SGBFlag = false;
-	CGBFlag cgb = CGBFlag::ON;
-	CType ctype = CType::MBC1;
-	ROMSize romsize = ROMSize::S128KByte;
-	RAMSize ramsize = RAMSize::None;
-
+	struct Rom_Info {
+		char title[15] = "";
+		bool SGBFlag = false;
+		CGBFlag cgb = CGBFlag::ON;
+		CType ctype = CType::MBC1;
+		ROMSize romsize = ROMSize::S128KByte;
+		RAMSize ramsize = RAMSize::None;
+	}rom_info;
 };
 
 

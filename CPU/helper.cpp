@@ -2,8 +2,21 @@
 
 
 
-u16 CPU::merge_u8(const u8& data_lb, const u8& data_hb) {
+u16 CPU::u8_to_u16(const u8& data_lb, const u8& data_hb) {
 	return (data_lb << 8) | (data_hb & 0xff);
+}
+
+// Merged die Werte auf die PC + 1 und PC + 2 zeigt in ein u16
+u16 CPU::u16_data_at_opcode() {
+	return u8_to_u16(mem->read(R.PC + 1), mem->read(R.PC + 2));
+}
+
+i8 CPU::read_i8_at_pc() {
+	return (i8)(read_u8_at_pc());
+}
+
+u8 CPU::read_u8_at_pc() {
+	return mem->read(R.PC + 1);
 }
 
 void CPU::ld_8_8(u8& destination, u8& data) {

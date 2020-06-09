@@ -17,6 +17,7 @@ bool CARDRIDGE::loadROM(const char* romFile) {
 	std::vector<u8> data(std::istreambuf_iterator<char>(is), {});
 	rom = data;
 
+
 	getRomInfo();
 	romintomem();
 
@@ -43,11 +44,11 @@ void CARDRIDGE::getRomInfo() {
 		std::cout << "Checkrum FAIL!" << std::endl;
 		return;
 	}
-	std::memcpy(title, &rom[0x134], 15);
-	cgb = (CGBFlag)rom[0x143];
-	ctype = (CType)rom[0x147];
-	romsize = (ROMSize)rom[0x148];
-	ramsize = (RAMSize)rom[0x149];
+	std::memcpy(rom_info.title, &rom[0x134], 15);
+	rom_info.cgb = (CGBFlag)rom[0x143];
+	rom_info.ctype = (CType)rom[0x147];
+	rom_info.romsize = (ROMSize)rom[0x148];
+	rom_info.ramsize = (RAMSize)rom[0x149];
 }
 
 void CARDRIDGE::printRom() {

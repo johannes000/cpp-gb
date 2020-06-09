@@ -315,7 +315,7 @@ u8 CPU::opcode0xEE() {	// XOR d8
 	return 0;
 }
 u8 CPU::opcode0xA8() {	// XOR B
-	R.A = xor_8(R.A, BC.low);
+	R.A = xor_8(R.A, R.B);
 	return 0;
 }
 u8 CPU::opcode0xA9() {	// XOR C
@@ -323,19 +323,19 @@ u8 CPU::opcode0xA9() {	// XOR C
 	return 0;
 }
 u8 CPU::opcode0xAA() {	// XOR D
-	R.A = xor_8(R.A, DE.low);
+	R.A = xor_8(R.A, R.D);
 	return 0;
 }
 u8 CPU::opcode0xAB() {	// XOR E
-	R.A = xor_8(R.A, DE.high);
+	R.A = xor_8(R.A, R.E);
 	return 0;
 }
 u8 CPU::opcode0xAC() {	// XOR H
-	R.A = xor_8(R.A, HL.high);
+	R.A = xor_8(R.A, R.H);
 	return 0;
 }
 u8 CPU::opcode0xAD() {	// XOR L
-	R.A = xor_8(R.A, HL.low);
+	R.A = xor_8(R.A, R.L);
 	return 0;
 }
 u8 CPU::opcode0xAE() {	// XOR HL

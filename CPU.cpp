@@ -43,6 +43,13 @@ CPU::CPU(MEMORY* m) {
 	};
 
 	mem = m;
+
+	R.AF = 0x01B0;
+	R.SP = 0x1234;
+}
+
+void CPU::initRegister() {
+
 }
 
 void CPU::setFlag(const Flag& F) {
