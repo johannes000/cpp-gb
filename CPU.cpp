@@ -46,7 +46,8 @@ CPU::CPU(MEMORY* m) {
 }
 
 void CPU::setFlag(const Flag& F) {
-	setBit(AF.low, static_cast<u8>(F));
+	setBit(R.F, static_cast<u8>(F));
+
 }
 void CPU::setFlags(const Flag& F1, const Flag& F2) {
 	setFlag(F1);
@@ -58,10 +59,11 @@ void CPU::setFlags(const Flag& F1, const Flag& F2, const Flag& F3) {
 	setFlag(F3);
 }
 void CPU::setAllFlags() {
-	AF.low = 0xFF;
+	R.F = 0xFF;
 }
+
 void CPU::clearFlag(const Flag& F) {
-	clearBit(AF.low, static_cast<u8>(F));
+	clearBit(R.F, static_cast<u8>(F));
 }
 void CPU::clearFlags(const Flag& F1, const Flag& F2) {
 	clearFlag(F1);
@@ -73,14 +75,16 @@ void CPU::clearFlags(const Flag& F1, const Flag& F2, const Flag& F3) {
 	clearFlag(F3);
 }
 void CPU::clearAllFlags() {
-	AF.low = 0x00;
+	R.F = 0x00;
 }
+
 bool CPU::checkFlag(const Flag& F) {
-	return checkBit(AF.low, static_cast<u8>(F));
+	return checkBit(R.F, static_cast<u8>(F));
 }
 void CPU::toggleFlag(const Flag& F) {
-	toggleBit(AF.low, static_cast<u8>(F));
+	toggleBit(R.F, static_cast<u8>(F));
 }
+
 void CPU::toggleFlags(const Flag& F1, const Flag& F2) {
 	toggleFlag(F1);
 	toggleFlag(F2);
@@ -91,6 +95,10 @@ void CPU::toggleFlags(const Flag& F1, const Flag& F2, const Flag& F3) {
 	toggleFlag(F3);
 }
 void CPU::toggleAllFlags() {
+	toggleFlag(Flag::c);
+	toggleFlag(Flag::z);
+	toggleFlag(Flag::n);
+	toggleFlag(Flag::h);
 }
 
 
@@ -134,9 +142,9 @@ void CPU::update() {
 }
 
 void CPU::incPC() {
-	PC.ganz += nextInst.bytes;
+	R.PC += nextInst.bytes;
 }
 
 u8 CPU::getNextOPCode() {
-	return mem->read(PC.ganz);
+	return mem->read(R.PC);
 }

@@ -311,31 +311,31 @@ u8 CPU::opcode0xDE() {	// SBC A d8
 }
 
 u8 CPU::opcode0xEE() {	// XOR d8
-	AF.high = xor_8(AF.high, mem->read(PC.ganz + 1));
+	R.A = xor_8(R.A, mem->read(R.PC + 1));
 	return 0;
 }
 u8 CPU::opcode0xA8() {	// XOR B
-	AF.high = xor_8(AF.high, BC.low);
+	R.A = xor_8(R.A, BC.low);
 	return 0;
 }
 u8 CPU::opcode0xA9() {	// XOR C
-	AF.high = xor_8(AF.high, BC.high);
+	R.A = xor_8(R.A, R.B);
 	return 0;
 }
 u8 CPU::opcode0xAA() {	// XOR D
-	AF.high = xor_8(AF.high, DE.low);
+	R.A = xor_8(R.A, DE.low);
 	return 0;
 }
 u8 CPU::opcode0xAB() {	// XOR E
-	AF.high = xor_8(AF.high, DE.high);
+	R.A = xor_8(R.A, DE.high);
 	return 0;
 }
 u8 CPU::opcode0xAC() {	// XOR H
-	AF.high = xor_8(AF.high, HL.high);
+	R.A = xor_8(R.A, HL.high);
 	return 0;
 }
 u8 CPU::opcode0xAD() {	// XOR L
-	AF.high = xor_8(AF.high, HL.low);
+	R.A = xor_8(R.A, HL.low);
 	return 0;
 }
 u8 CPU::opcode0xAE() {	// XOR HL
@@ -343,7 +343,7 @@ u8 CPU::opcode0xAE() {	// XOR HL
 	return 0;
 }
 u8 CPU::opcode0xAF() {	// XOR A
-	AF.high = xor_8(AF.high, AF.high);
+	R.A = xor_8(R.A, R.A);
 	return 0;
 }
 u8 CPU::opcode0xB8() {	// CP B

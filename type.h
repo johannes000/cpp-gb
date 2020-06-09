@@ -17,16 +17,50 @@ const enum class Flag {
 	c = 4, // Carry Flag
 };
 
-
-
-typedef union {
+struct Register {
 	struct {
-		//AF
-		u8 low;	// F
-		u8 high; // A
+		union {
+			struct {
+				u8 F;
+				u8 A;
+			};
+			u16 AF;
+		};
 	};
-	u16 ganz;
-}Register;
+
+	struct {
+		union {
+			struct {
+				u8 C;
+				u8 B;
+			};
+			u16 BC;
+		};
+	};
+
+	struct {
+		union {
+			struct {
+				u8 E;
+				u8 D;
+			};
+			u16 DE;
+		};
+	};
+
+	struct {
+		union {
+			struct {
+				u8 L;
+				u8 H;
+			};
+			u16 HL;
+		};
+	};
+
+	u16 SP;
+	u16 PC;
+};
 
 //ROM INFO
 const enum class CGBFlag {

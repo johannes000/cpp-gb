@@ -1,7 +1,7 @@
 #include "../CPU.h"
 
 u8 CPU::opcode0x00() {	// NOP
-	setBit(AF.low, static_cast<u8>(Flag::c));
+	setBit(R.F, static_cast<u8>(Flag::c));
 	std::cout << "0x00 nicht implementiert" << std::endl;
 	return 0;
 }

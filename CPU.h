@@ -23,18 +23,9 @@ public:
 
 private:
 	//REGISTER
-	Register AF; // Accumulator & Flags
-	Register BC; // BC
-	Register DE; // DE
-	Register HL; // HL
-
-	Register PC; // program counter/pointer
-	Register SP; // stack pointer
+	Register R;
 
 	//FLAGS
-private:
-
-
 public:
 	void setFlag(const Flag&);		//setze flag auf true egal was
 	void setFlags(const Flag&, const Flag&);		//setze flag auf true egal was
@@ -78,6 +69,8 @@ private:
 
 	//oft benutzte anweisugen
 	u16 merge_u8(const u8& data_lb, const u8& data_hb);
+
+	void ld_8_8(u8& destination, u8& data);
 
 	void ld_16_16(u16& destination, const u8& datalb, const  u8& datahb);
 	void ld_16_8(u16& destination, const u8& data);

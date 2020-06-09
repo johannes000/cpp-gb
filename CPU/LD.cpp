@@ -1,11 +1,36 @@
 #include "../CPU.h"
 
-u8 CPU::opcode0x02() {	// LD BC A
-	std::cout << "0x02 nicht implementiert" << std::endl;
+u8 CPU::opcode0x3E() {	// LD A d8
+	R.A = mem->read(R.PC + 1);
 	return 0;
 }
 u8 CPU::opcode0x06() {	// LD B d8
-	std::cout << "0x06 nicht implementiert" << std::endl;
+	R.B = mem->read(R.PC + 1);
+	return 0;
+}
+u8 CPU::opcode0x0E() {	// LD C d8
+	R.C = mem->read(R.PC + 1);
+	return 0;
+}
+u8 CPU::opcode0x16() {	// LD D d8
+	R.D = mem->read(R.PC + 1);
+	return 0;
+}
+u8 CPU::opcode0x1E() {	// LD E d8
+	R.E = mem->read(R.PC + 1);
+	return 0;
+}
+u8 CPU::opcode0x26() {	// LD H d8
+	R.H = mem->read(R.PC + 1);
+	return 0;
+}
+u8 CPU::opcode0x2E() {	// LD L d8
+	R.L = mem->read(R.PC + 1);
+	return 0;
+}
+
+u8 CPU::opcode0x02() {	// LD BC A
+	std::cout << "0x02 nicht implementiert" << std::endl;
 	return 0;
 }
 u8 CPU::opcode0x01() {	// LD BC d16
@@ -20,10 +45,6 @@ u8 CPU::opcode0x0A() {	// LD A BC
 	std::cout << "0x0A nicht implementiert" << std::endl;
 	return 0;
 }
-u8 CPU::opcode0x0E() {	// LD C d8
-	std::cout << "0x0E nicht implementiert" << std::endl;
-	return 0;
-}
 
 u8 CPU::opcode0x11() {	// LD DE d16
 	std::cout << "0x11 nicht implementiert" << std::endl;
@@ -33,16 +54,8 @@ u8 CPU::opcode0x12() {	// LD DE A
 	std::cout << "0x12 nicht implementiert" << std::endl;
 	return 0;
 }
-u8 CPU::opcode0x16() {	// LD D d8
-	std::cout << "0x16 nicht implementiert" << std::endl;
-	return 0;
-}
 u8 CPU::opcode0x1A() {	// LD A DE
 	std::cout << "0x1A nicht implementiert" << std::endl;
-	return 0;
-}
-u8 CPU::opcode0x1E() {	// LD E d8
-	std::cout << "0x1E nicht implementiert" << std::endl;
 	return 0;
 }
 u8 CPU::opcode0x21() {	// LD HL d16
@@ -53,21 +66,13 @@ u8 CPU::opcode0x22() {	// LD HL A
 	std::cout << "0x22 nicht implementiert" << std::endl;
 	return 0;
 }
-u8 CPU::opcode0x26() {	// LD H d8
-	std::cout << "0x26 nicht implementiert" << std::endl;
-	return 0;
-}
 u8 CPU::opcode0x2A() {	// LD A HL
 	std::cout << "0x2A nicht implementiert" << std::endl;
 	return 0;
 }
-u8 CPU::opcode0x2E() {	// LD L d8
-	std::cout << "0x2E nicht implementiert" << std::endl;
-	return 0;
-}
 
 u8 CPU::opcode0x31() {  // LD SP d16
-	SP.ganz = merge_u8(mem->read(nextOPCode + 1), mem->read(nextOPCode + 2));
+	R.SP = merge_u8(mem->read(nextOPCode + 1), mem->read(nextOPCode + 2));
 	return 0;
 }
 
@@ -82,10 +87,6 @@ u8 CPU::opcode0x36() {	// LD HL d8
 }
 u8 CPU::opcode0x3A() {	// LD A HL
 	std::cout << "0x3A nicht implementiert" << std::endl;
-	return 0;
-}
-u8 CPU::opcode0x3E() {	// LD A d8
-	std::cout << "0x3E nicht implementiert" << std::endl;
 	return 0;
 }
 u8 CPU::opcode0x40() {	// LD B B
