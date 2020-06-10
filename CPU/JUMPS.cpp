@@ -16,7 +16,6 @@ void CPU::pop_r16_reg(u16* reg) {
 void CPU::ret() {
 	//  Pop two bytes from stack & jump to that address.
 	R.PC = read_u16_sp();
-	R.SP += 2;
 }
 
 void CPU::call() {
@@ -55,6 +54,7 @@ u8 CPU::opcode0xC0() {	// RET NZ
 	return 1;
 }
 u8 CPU::opcode0xC8() {	// RET Z
+	u8 a = 2, b = 3;
 	if (check_flag(Flag::z))
 		ret();
 	return 1;

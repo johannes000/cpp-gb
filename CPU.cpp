@@ -52,7 +52,7 @@ void CPU::initRegister() {
 	R.DE = 0x00D8;
 	R.HL = 0x014D;
 	R.SP = 0xFFFE;
-	R.PC = 0x0000;
+	R.PC = 0x0100;
 }
 
 void CPU::parseOPCode(u8& opcode) {
@@ -61,6 +61,7 @@ void CPU::parseOPCode(u8& opcode) {
 	if (prefix) {
 		prefix = false;
 		instruction_info = prefixedinstructions[OPCode];
+		std::cout << "0x" << std::hex << std::uppercase << (int)(R.PC) << " " << instruction_info.mnemonic;
 		std::cout << instruction_info.mnemonic << std::endl;
 		u8 function = (this->*prefixedinstructions[opcode].function)();
 	}
