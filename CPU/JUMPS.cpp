@@ -1,15 +1,20 @@
 #include "../CPU.h"
 
 void CPU::push_r16_reg(u16* reg) {
+	// Push register pair nn onto stack.
+	// Decrement Stack Pointer(SP) twice
 	R.SP -= 2;
 	mem->write_u16(R.SP, *reg);
 }
 
 void CPU::pop_r16_reg(u16* reg) {
+	// Pop two bytes off stack into register pair nn.
+	// Increment Stack Pointer(SP) twice
 	*reg = read_u16_sp();
 	R.SP -= 2;
 }
 void CPU::ret() {
+	//  Pop two bytes from stack & jump to that address.
 	R.PC = read_u16_sp();
 	R.SP += 2;
 }

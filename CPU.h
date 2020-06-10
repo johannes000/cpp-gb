@@ -3,7 +3,8 @@
 #define CPU_H_GUARD
 
 #include <iostream>
-#include <vector>
+#include <vector>    
+
 
 #include "type.h"
 #include "MEMORY.h"
@@ -28,31 +29,34 @@ private:
 
 	//FLAGS
 public:
-	void setFlag(const Flag&);		//setze flag auf true egal was
-	void setFlags(const Flag&, const Flag&);		//setze flag auf true egal was
-	void setFlags(const Flag&, const Flag&, const Flag&);		//setze flag auf true egal was
+	void set_Flag_if(const Flag&, bool condition);
+	void setFlag(const Flag&);								//setze flag auf true egal was
+	void setFlags(const Flag&, const Flag&);				//setze flag auf true egal was
+	void setFlags(const Flag&, const Flag&, const Flag&);	//setze flag auf true egal was
 	void setAllFlags();
 
-	void clearFlag(const Flag&);		//setze flag auf false egal was
+	void clearFlag(const Flag&);							//setze flag auf false egal was
 	void clearFlags(const Flag& F1, const Flag& F2);
 	void clearFlags(const Flag& F1, const Flag& F2, const Flag& F3);
 	void clearAllFlags();
 
-	void toggleFlag(const Flag&);	//toggled die flag
+	void toggleFlag(const Flag&);							//toggled die flag
 	void toggleFlags(const Flag& F1, const Flag& F2);
 	void toggleFlags(const Flag& F1, const Flag& F2, const Flag& F3);
 	void toggleAllFlags();
 
-	bool checkFlag(const Flag&);		//gibt flag status wieder
+	bool checkFlag(const Flag&);							//gibt flag status wieder
 
-	void setBit(u8&, const u8);
-	void setBit(u16&, const u16);
-	void clearBit(u8&, const u8);
-	void clearBit(u16&, const u16);
-	void toggleBit(u8&, const u8);
-	void toggleBit(u16&, const u16);
-	bool checkBit(const u8&, const u8);
-	bool checkBit(const u16&, const u16);
+	void set_Bit_if(u8& value, const u8 bit, bool condition);
+	void set_Bit_if(u16& value, const u16 bit, bool condition);
+	void setBit(u8& value, const u8 bit);
+	void setBit(u16& value, const u16 bit);
+	void clearBit(u8& value, const u8 bit);
+	void clearBit(u16& value, const u16 bit);
+	void toggleBit(u8& value, const u8 bit);
+	void toggleBit(u16& value, const u16 bit);
+	bool checkBit(const u8& value, const u8 bit);
+	bool checkBit(const u16& value, const u16 bit);
 
 
 	//OPCODES
@@ -78,19 +82,43 @@ private:
 
 	u16 u8_to_u16(const u8& data_lb, const u8& data_hb);
 
-	u8 xor_8(u8& data1, const u8& data2);
+
+	// ARITHMETIC
+	void xor_r8_r8(u8* data1, const u8* data2);
+	void and_r8_r8(u8* reg1, const u8* reg2);
+
+	void cp_r8_r8(const u8* data1, const u8* data2);
 
 	void inc_u8_reg(u8* reg);
 	void dec_u8_reg(u8* reg);
 
-	void add_a_r8(u8* reg);
+	void add_r8_r8(u8* reg, u8* value);
+	void adc_r8_r8(u8* reg, u8* value);
+
+	void add_r16_r16(u16* reg, u16* value);
+
+	void sub_r8_r8(u8* reg, u8* value);
+	void sbc_r8_r8(u8* reg, u8* value);
+
 	// JUMPS
 	void push_r16_reg(u16* reg);
 	void pop_r16_reg(u16* reg);
 	void ret();
 	void call();
+
 	// BITS
 	void test_n_bit_set_z(const u8 bit, const u8* reg);
+
+	// SHIFTS
+	void rot_right_c_r8(u8* reg);
+	void rot_left_c_r8(u8* reg);
+	void rot_left_r8(u8* reg);
+	void rot_right_r8(u8* reg);
+	void shift_left_a_r8(u8* reg);
+	void shift_right_a_r8(u8* reg);
+	void shift_right_l_r8(u8* reg);
+	void swap_r8(u8* reg);
+
 
 
 	u8 opcode0x00();	// NOP

@@ -1,26 +1,118 @@
 #include "../CPU.h"
 
 void CPU::test_n_bit_set_z(const u8 bit, const u8* reg) {
-	if (!checkBit(*reg, bit))
-		setFlag(Flag::z);
-	else
-		clearFlag(Flag::z);
+	// wenn bit gesetzt setze Zero Flag
+	set_Flag_if(Flag::z, checkBit(*reg, bit));
 	setFlag(Flag::h);
 	clearFlag(Flag::n);
 }
 
-u8 CPU::opcode0x07() {	// RLCA
-	if (checkBit(R.A, 7))
-		setFlag(Flag::c);
-	else
-		clearFlag(Flag::c);
-	R.A <<= 1;
-	if (R.A == 0x00)
-		setFlag(Flag::z);
-	else
-		clearFlag(Flag::z);
+void CPU::rot_right_c_r8(u8* reg) {
+	// Rotate register r8 right.
+	// [0] ->[7 -> 0]->C
+	u8 b0 = *reg & 1;
+	*reg >>= 1;
+
+
+	set_Flag_if(Flag::c, b0 == 1);
+	set_Bit_if(*reg, 7, b0 == 1);
+	set_Flag_if(Flag::z, *reg == 0);
 
 	setFlags(Flag::n, Flag::h);
+}
+
+void CPU::rot_left_c_r8(u8* reg) {
+	// Rotate register r8 left.
+	// C < -[7 < -0] < -[7]
+	u8 b7 = *reg & 0x80;
+	*reg <<= 1;
+
+	set_Flag_if(Flag::c, b7 == 1);
+	set_Bit_if(*reg, 0, b7 == 0x80);
+	set_Flag_if(Flag::z, *reg == 0);
+
+	setFlags(Flag::n, Flag::h);
+}
+
+void CPU::rot_left_r8(u8* reg) {
+	// Rotate bits in register r8 left through carry.
+	// C <-[7 < -0] <-C
+	u8 b7 = *reg & 0x80;
+	*reg <<= 1;
+
+	set_Bit_if(*reg, 0, checkFlag(Flag::c));
+	set_Flag_if(Flag::c, b7 == 0x80);
+	set_Flag_if(Flag::z, *reg == 0);
+	clearFlags(Flag::n, Flag::h);
+}
+void CPU::rot_right_r8(u8* reg) {
+	// Rotate register r8 right through carry.
+	// C ->[7 -> 0]->C
+	u8 b7 = *reg & 1;
+	*reg >>= 1;
+	set_Bit_if(*reg, 7, checkFlag(Flag::c));
+
+	set_Flag_if(Flag::c, b7 == 1);
+	set_Flag_if(Flag::z, *reg == 0);
+
+	clearFlags(Flag::n, Flag::h);
+}
+
+void CPU::shift_left_a_r8(u8* reg) {
+	// Shift Left Arithmetic register r8.
+	// C < -[7 < -0] < -0
+	u8 b7 = *reg & 0x80;
+	*reg >>= 1;
+	set_Flag_if(Flag::c, b7 == 0x80);
+	set_Flag_if(Flag::z, *reg == 0);
+
+	clearFlags(Flag::n, Flag::h);
+}
+
+void CPU::shift_right_a_r8(u8* reg) {
+	// hift Right Arithmetic register r8.
+	// [7] ->[7 -> 0]->C
+	u8 b7 = *reg & 0x80;
+	u8 b0 = *reg & 1;
+	*reg >>= 1;
+
+	set_Bit_if(*reg, 7, b7 == 0x80);
+	set_Flag_if(Flag::c, b0 == 1);
+	set_Flag_if(Flag::z, *reg == 0);
+
+	clearFlags(Flag::n, Flag::h);
+}
+
+void CPU::shift_right_l_r8(u8* reg) {
+	// Shift Right Logic register r8.
+	// 0 ->[7 -> 0]->C
+	u8 b0 = *reg & 1;
+	*reg >>= 1;
+
+	set_Flag_if(Flag::c, b0 == 1);
+	set_Flag_if(Flag::z, *reg == 0);
+
+	clearFlags(Flag::n, Flag::h);
+
+}
+
+void CPU::swap_r8(u8* reg) {
+	// Swap upper 4 bits in register r8 and the lower 4 ones.
+	u8 l_bits = *reg & 0xF0;
+	u8 h_bits = *reg & 0x0F;
+
+	l_bits >>= 4;
+	h_bits <<= 4;
+
+	*reg = l_bits | h_bits;
+}
+
+
+// OPCODES
+
+u8 CPU::opcode0x07() {	// RLCA
+	rot_right_c_r8(&R.A);
+	clearFlag(Flag::z);
 	return 0;
 }
 u8 CPU::opcode0x17() {	// RLA
@@ -28,268 +120,269 @@ u8 CPU::opcode0x17() {	// RLA
 	return 0;
 }
 u8 CPU::opcode0x0F() {	// RRCA
-	std::cout << "0x0F nicht implementiert" << std::endl;
+	rot_right_c_r8(&R.A);
 	return 0;
 }
 u8 CPU::opcode0x1F() {	// RRA
-	std::cout << "0x1F nicht implementiert" << std::endl;
+	rot_right_r8(&R.A);
+	clearFlag(Flag::z);
 	return 0;
 }
 
 u8 CPU::prefixedopcode0x00() {	// RLC B
-	std::cout << "prefixed 0x00 nicht implementiert" << std::endl;
+	rot_left_c_r8(&R.B);
 	return 0;
 }
 u8 CPU::prefixedopcode0x01() {	// RLC C
-	std::cout << "prefixed 0x01 nicht implementiert" << std::endl;
+	rot_left_c_r8(&R.C);
 	return 0;
 }
 u8 CPU::prefixedopcode0x02() {	// RLC D
-	std::cout << "prefixed 0x02 nicht implementiert" << std::endl;
+	rot_left_c_r8(&R.D);
 	return 0;
 }
 u8 CPU::prefixedopcode0x03() {	// RLC E
-	std::cout << "prefixed 0x03 nicht implementiert" << std::endl;
+	rot_left_c_r8(&R.E);
 	return 0;
 }
 u8 CPU::prefixedopcode0x04() {	// RLC H
-	std::cout << "prefixed 0x04 nicht implementiert" << std::endl;
+	rot_left_c_r8(&R.H);
 	return 0;
 }
 u8 CPU::prefixedopcode0x05() {	// RLC L
-	std::cout << "prefixed 0x05 nicht implementiert" << std::endl;
+	rot_left_c_r8(&R.L);
 	return 0;
 }
 u8 CPU::prefixedopcode0x06() {	// RLC HL
-	std::cout << "prefixed 0x06 nicht implementiert" << std::endl;
+	rot_left_c_r8(mem->read_ptr(R.HL));
 	return 0;
 }
 u8 CPU::prefixedopcode0x07() {	// RLC A
-	std::cout << "prefixed 0x07 nicht implementiert" << std::endl;
+	rot_left_c_r8(&R.A);
 	return 0;
 }
 u8 CPU::prefixedopcode0x08() {	// RRC B
-	std::cout << "prefixed 0x08 nicht implementiert" << std::endl;
+	rot_right_c_r8(&R.B);
 	return 0;
 }
 u8 CPU::prefixedopcode0x09() {	// RRC C
-	std::cout << "prefixed 0x09 nicht implementiert" << std::endl;
+	rot_right_c_r8(&R.C);
 	return 0;
 }
 u8 CPU::prefixedopcode0x0A() {	// RRC D
-	std::cout << "prefixed 0x0A nicht implementiert" << std::endl;
+	rot_right_c_r8(&R.D);
 	return 0;
 }
 u8 CPU::prefixedopcode0x0B() {	// RRC E
-	std::cout << "prefixed 0x0B nicht implementiert" << std::endl;
+	rot_right_c_r8(&R.E);
 	return 0;
 }
 u8 CPU::prefixedopcode0x0C() {	// RRC H
-	std::cout << "prefixed 0x0C nicht implementiert" << std::endl;
+	rot_right_c_r8(&R.H);
 	return 0;
 }
 u8 CPU::prefixedopcode0x0D() {	// RRC L
-	std::cout << "prefixed 0x0D nicht implementiert" << std::endl;
+	rot_right_c_r8(&R.L);
 	return 0;
 }
 u8 CPU::prefixedopcode0x0E() {	// RRC HL
-	std::cout << "prefixed 0x0E nicht implementiert" << std::endl;
+	rot_right_c_r8(mem->read_ptr(R.HL));
 	return 0;
 }
 u8 CPU::prefixedopcode0x0F() {	// RRC A
-	std::cout << "prefixed 0x0F nicht implementiert" << std::endl;
+	rot_right_c_r8(&R.A);
 	return 0;
 }
 u8 CPU::prefixedopcode0x10() {	// RL B
-	std::cout << "prefixed 0x10 nicht implementiert" << std::endl;
+	rot_left_r8(&R.B);
 	return 0;
 }
 u8 CPU::prefixedopcode0x11() {	// RL C
-	std::cout << "prefixed 0x11 nicht implementiert" << std::endl;
+	rot_left_r8(&R.C);
 	return 0;
 }
 u8 CPU::prefixedopcode0x12() {	// RL D
-	std::cout << "prefixed 0x12 nicht implementiert" << std::endl;
+	rot_left_r8(&R.D);
 	return 0;
 }
 u8 CPU::prefixedopcode0x13() {	// RL E
-	std::cout << "prefixed 0x13 nicht implementiert" << std::endl;
+	rot_left_r8(&R.E);
 	return 0;
 }
 u8 CPU::prefixedopcode0x14() {	// RL H
-	std::cout << "prefixed 0x14 nicht implementiert" << std::endl;
+	rot_left_r8(&R.H);
 	return 0;
 }
 u8 CPU::prefixedopcode0x15() {	// RL L
-	std::cout << "prefixed 0x15 nicht implementiert" << std::endl;
+	rot_left_r8(&R.L);
 	return 0;
 }
 u8 CPU::prefixedopcode0x16() {	// RL HL
-	std::cout << "prefixed 0x16 nicht implementiert" << std::endl;
+	rot_left_r8(mem->read_ptr(R.HL));
 	return 0;
 }
 u8 CPU::prefixedopcode0x17() {	// RL A
-	std::cout << "prefixed 0x17 nicht implementiert" << std::endl;
+	rot_left_r8(&R.A);
 	return 0;
 }
 u8 CPU::prefixedopcode0x18() {	// RR B
-	std::cout << "prefixed 0x18 nicht implementiert" << std::endl;
+	rot_right_r8(&R.B);
 	return 0;
 }
 u8 CPU::prefixedopcode0x19() {	// RR C
-	std::cout << "prefixed 0x19 nicht implementiert" << std::endl;
+	rot_right_r8(&R.C);
 	return 0;
 }
 u8 CPU::prefixedopcode0x1A() {	// RR D
-	std::cout << "prefixed 0x1A nicht implementiert" << std::endl;
+	rot_right_r8(&R.D);
 	return 0;
 }
 u8 CPU::prefixedopcode0x1B() {	// RR E
-	std::cout << "prefixed 0x1B nicht implementiert" << std::endl;
+	rot_right_r8(&R.E);
 	return 0;
 }
 u8 CPU::prefixedopcode0x1C() {	// RR H
-	std::cout << "prefixed 0x1C nicht implementiert" << std::endl;
+	rot_right_r8(&R.H);
 	return 0;
 }
 u8 CPU::prefixedopcode0x1D() {	// RR L
-	std::cout << "prefixed 0x1D nicht implementiert" << std::endl;
+	rot_right_r8(&R.L);
 	return 0;
 }
 u8 CPU::prefixedopcode0x1E() {	// RR HL
-	std::cout << "prefixed 0x1E nicht implementiert" << std::endl;
+	rot_right_r8(mem->read_ptr(R.HL));
 	return 0;
 }
 u8 CPU::prefixedopcode0x1F() {	// RR A
-	std::cout << "prefixed 0x1F nicht implementiert" << std::endl;
+	rot_right_r8(&R.A);
 	return 0;
 }
 u8 CPU::prefixedopcode0x20() {	// SLA B
-	std::cout << "prefixed 0x20 nicht implementiert" << std::endl;
+	shift_left_a_r8(&R.B);
 	return 0;
 }
 u8 CPU::prefixedopcode0x21() {	// SLA C
-	std::cout << "prefixed 0x21 nicht implementiert" << std::endl;
+	shift_left_a_r8(&R.C);
 	return 0;
 }
 u8 CPU::prefixedopcode0x22() {	// SLA D
-	std::cout << "prefixed 0x22 nicht implementiert" << std::endl;
+	shift_left_a_r8(&R.D);
 	return 0;
 }
 u8 CPU::prefixedopcode0x23() {	// SLA E
-	std::cout << "prefixed 0x23 nicht implementiert" << std::endl;
+	shift_left_a_r8(&R.E);
 	return 0;
 }
 u8 CPU::prefixedopcode0x24() {	// SLA H
-	std::cout << "prefixed 0x24 nicht implementiert" << std::endl;
+	shift_left_a_r8(&R.H);
 	return 0;
 }
 u8 CPU::prefixedopcode0x25() {	// SLA L
-	std::cout << "prefixed 0x25 nicht implementiert" << std::endl;
+	shift_left_a_r8(&R.L);
 	return 0;
 }
 u8 CPU::prefixedopcode0x26() {	// SLA HL
-	std::cout << "prefixed 0x26 nicht implementiert" << std::endl;
+	shift_left_a_r8(mem->read_ptr(R.HL));
 	return 0;
 }
 u8 CPU::prefixedopcode0x27() {	// SLA A
-	std::cout << "prefixed 0x27 nicht implementiert" << std::endl;
+	shift_left_a_r8(&R.A);
 	return 0;
 }
 u8 CPU::prefixedopcode0x28() {	// SRA B
-	std::cout << "prefixed 0x28 nicht implementiert" << std::endl;
+	shift_right_a_r8(&R.B);
 	return 0;
 }
 u8 CPU::prefixedopcode0x29() {	// SRA C
-	std::cout << "prefixed 0x29 nicht implementiert" << std::endl;
+	shift_right_a_r8(&R.C);
 	return 0;
 }
 u8 CPU::prefixedopcode0x2A() {	// SRA D
-	std::cout << "prefixed 0x2A nicht implementiert" << std::endl;
+	shift_right_a_r8(&R.D);
 	return 0;
 }
 u8 CPU::prefixedopcode0x2B() {	// SRA E
-	std::cout << "prefixed 0x2B nicht implementiert" << std::endl;
+	shift_right_a_r8(&R.E);
 	return 0;
 }
 u8 CPU::prefixedopcode0x2C() {	// SRA H
-	std::cout << "prefixed 0x2C nicht implementiert" << std::endl;
+	shift_right_a_r8(&R.H);
 	return 0;
 }
 u8 CPU::prefixedopcode0x2D() {	// SRA L
-	std::cout << "prefixed 0x2D nicht implementiert" << std::endl;
+	shift_right_a_r8(&R.L);
 	return 0;
 }
 u8 CPU::prefixedopcode0x2E() {	// SRA HL
-	std::cout << "prefixed 0x2E nicht implementiert" << std::endl;
+	shift_right_a_r8(mem->read_ptr(R.HL));
 	return 0;
 }
 u8 CPU::prefixedopcode0x2F() {	// SRA A
-	std::cout << "prefixed 0x2F nicht implementiert" << std::endl;
+	shift_right_a_r8(&R.A);
 	return 0;
 }
 u8 CPU::prefixedopcode0x30() {	// SWAP B
-	std::cout << "prefixed 0x30 nicht implementiert" << std::endl;
+	swap_r8(&R.B);
 	return 0;
 }
 u8 CPU::prefixedopcode0x31() {	// SWAP C
-	std::cout << "prefixed 0x31 nicht implementiert" << std::endl;
+	swap_r8(&R.C);
 	return 0;
 }
 u8 CPU::prefixedopcode0x32() {	// SWAP D
-	std::cout << "prefixed 0x32 nicht implementiert" << std::endl;
+	swap_r8(&R.D);
 	return 0;
 }
 u8 CPU::prefixedopcode0x33() {	// SWAP E
-	std::cout << "prefixed 0x33 nicht implementiert" << std::endl;
+	swap_r8(&R.E);
 	return 0;
 }
 u8 CPU::prefixedopcode0x34() {	// SWAP H
-	std::cout << "prefixed 0x34 nicht implementiert" << std::endl;
+	swap_r8(&R.H);
 	return 0;
 }
 u8 CPU::prefixedopcode0x35() {	// SWAP L
-	std::cout << "prefixed 0x35 nicht implementiert" << std::endl;
+	swap_r8(&R.L);
 	return 0;
 }
 u8 CPU::prefixedopcode0x36() {	// SWAP HL
-	std::cout << "prefixed 0x36 nicht implementiert" << std::endl;
+	swap_r8(mem->read_ptr(R.HL));
 	return 0;
 }
 u8 CPU::prefixedopcode0x37() {	// SWAP A
-	std::cout << "prefixed 0x37 nicht implementiert" << std::endl;
+	swap_r8(&R.A);
 	return 0;
 }
 u8 CPU::prefixedopcode0x38() {	// SRL B
-	std::cout << "prefixed 0x38 nicht implementiert" << std::endl;
+	shift_right_l_r8(&R.B);
 	return 0;
 }
 u8 CPU::prefixedopcode0x39() {	// SRL C
-	std::cout << "prefixed 0x39 nicht implementiert" << std::endl;
+	shift_right_l_r8(&R.C);
 	return 0;
 }
 u8 CPU::prefixedopcode0x3A() {	// SRL D
-	std::cout << "prefixed 0x3A nicht implementiert" << std::endl;
+	shift_right_l_r8(&R.D);
 	return 0;
 }
 u8 CPU::prefixedopcode0x3B() {	// SRL E
-	std::cout << "prefixed 0x3B nicht implementiert" << std::endl;
+	shift_right_l_r8(&R.E);
 	return 0;
 }
 u8 CPU::prefixedopcode0x3C() {	// SRL H
-	std::cout << "prefixed 0x3C nicht implementiert" << std::endl;
+	shift_right_l_r8(&R.H);
 	return 0;
 }
 u8 CPU::prefixedopcode0x3D() {	// SRL L
-	std::cout << "prefixed 0x3D nicht implementiert" << std::endl;
+	shift_right_l_r8(&R.L);
 	return 0;
 }
 u8 CPU::prefixedopcode0x3E() {	// SRL HL
-	std::cout << "prefixed 0x3E nicht implementiert" << std::endl;
+	shift_right_l_r8(mem->read_ptr(R.HL));
 	return 0;
 }
 u8 CPU::prefixedopcode0x3F() {	// SRL A
-	std::cout << "prefixed 0x3F nicht implementiert" << std::endl;
+	shift_right_l_r8(&R.A);
 	return 0;
 }
 u8 CPU::prefixedopcode0x40() {	// BIT 0 B

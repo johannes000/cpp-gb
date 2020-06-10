@@ -3,7 +3,7 @@
 
 CPU::CPU() {}
 
-CPU::CPU(MEMORY* m) {
+CPU::CPU(MEMORY* memory) {
 	instructions = {
 	   {"NOP", &CPU::opcode0x00, 1, 1},{"LD BC d16", &CPU::opcode0x01, 3, 3},{"LD BC A", &CPU::opcode0x02, 1, 2},{"INC BC", &CPU::opcode0x03, 1, 2},{"INC B", &CPU::opcode0x04, 1, 1},{"DEC B", &CPU::opcode0x05, 1, 1},{"LD B d8", &CPU::opcode0x06, 2, 2},{"RLCA", &CPU::opcode0x07, 1, 1},{"LD a16 SP", &CPU::opcode0x08, 3, 5},{"ADD HL BC", &CPU::opcode0x09, 1, 2},{"LD A BC", &CPU::opcode0x0A, 1, 2},{"DEC BC", &CPU::opcode0x0B, 1, 2},{"INC C", &CPU::opcode0x0C, 1, 1},{"DEC C", &CPU::opcode0x0D, 1, 1},{"LD C d8", &CPU::opcode0x0E, 2, 2},{"RRCA", &CPU::opcode0x0F, 1, 1},
 	   {"STOP", &CPU::opcode0x10, 1, 1},{"LD DE d16", &CPU::opcode0x11, 3, 3},{"LD DE A", &CPU::opcode0x12, 1, 2},{"INC DE", &CPU::opcode0x13, 1, 2},{"INC D", &CPU::opcode0x14, 1, 1},{"DEC D", &CPU::opcode0x15, 1, 1},{"LD D d8", &CPU::opcode0x16, 2, 2},{"RLA", &CPU::opcode0x17, 1, 1},{"JR r8", &CPU::opcode0x18, 2, 3},{"ADD HL DE", &CPU::opcode0x19, 1, 2},{"LD A DE", &CPU::opcode0x1A, 1, 2},{"DEC DE", &CPU::opcode0x1B, 1, 2},{"INC E", &CPU::opcode0x1C, 1, 1},{"DEC E", &CPU::opcode0x1D, 1, 1},{"LD E d8", &CPU::opcode0x1E, 2, 2},{"RRA", &CPU::opcode0x1F, 1, 1},
@@ -42,7 +42,7 @@ CPU::CPU(MEMORY* m) {
 		{"SET 6 B", &CPU::prefixedopcode0xF0, 2, 2},{"SET 6 C", &CPU::prefixedopcode0xF1, 2, 2},{"SET 6 D", &CPU::prefixedopcode0xF2, 2, 2},{"SET 6 E", &CPU::prefixedopcode0xF3, 2, 2},{"SET 6 H", &CPU::prefixedopcode0xF4, 2, 2},{"SET 6 L", &CPU::prefixedopcode0xF5, 2, 2},{"SET 6 HL", &CPU::prefixedopcode0xF6, 2, 4},{"SET 6 A", &CPU::prefixedopcode0xF7, 2, 2},{"SET 7 B", &CPU::prefixedopcode0xF8, 2, 2},{"SET 7 C", &CPU::prefixedopcode0xF9, 2, 2},{"SET 7 D", &CPU::prefixedopcode0xFA, 2, 2},{"SET 7 E", &CPU::prefixedopcode0xFB, 2, 2},{"SET 7 H", &CPU::prefixedopcode0xFC, 2, 2},{"SET 7 L", &CPU::prefixedopcode0xFD, 2, 2},{"SET 7 HL", &CPU::prefixedopcode0xFE, 2, 4},{"SET 7 A", &CPU::prefixedopcode0xFF, 2, 2}
 	};
 	initRegister();
-	mem = m;
+	mem = memory;
 
 }
 
@@ -56,6 +56,8 @@ void CPU::initRegister() {
 }
 
 void CPU::parseOPCode(u8& opcode) {
+	if (R.PC == 0x0100)
+		std::cout << "100" << std::endl;
 	if (prefix) {
 		prefix = false;
 		instruction_info = prefixedinstructions[OPCode];
@@ -64,7 +66,13 @@ void CPU::parseOPCode(u8& opcode) {
 	}
 	else {
 		instruction_info = instructions[OPCode];
-		std::cout << instruction_info.mnemonic << std::endl;
+
+		std::cout << "0x" << std::hex << std::uppercase << (int)(R.PC) << " " << instruction_info.mnemonic;
+		if (instruction_info.cycles == 3)
+			std::cout << " " << (int)(read_u16_at_pc());
+		if (instruction_info.cycles == 2)
+			std::cout << " 0x" << (int)(read_u8_at_pc());
+		std::cout << std::endl;
 		u8 function = (this->*instructions[opcode].function)();
 	}
 }

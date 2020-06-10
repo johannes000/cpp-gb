@@ -1,41 +1,89 @@
 #include "../CPU.h"
 
+void CPU::xor_r8_r8(u8* data1, const u8* data2) {
+	*data1 ^= *data2;
+	set_Flag_if(Flag::z, *data1 == 0);
+	setFlags(Flag::n, Flag::h, Flag::c);
+}
+
+void CPU::and_r8_r8(u8* reg1, const u8* reg2) {
+}
+
+void CPU::cp_r8_r8(const u8* data1, const u8* data2) {
+	u8 result = *data1 - *data2;
+
+	setFlag(Flag::n);
+	set_Flag_if(Flag::h, ((*data1 & 0xf) - (*data2 & 0xf)) < 0);
+	set_Flag_if(Flag::c, *data1 < *data2);
+	set_Flag_if(Flag::z, result == 0);
+}
+
 void CPU::inc_u8_reg(u8* reg) {
+	//  Increment register.
+
 	*reg = *reg + 1;
 
 	clearFlag(Flag::n);
 
-	if (*reg & 0xFF)
-		clearFlag(Flag::h);
-	else
-		setFlag(Flag::h);
-
-	if (*reg == 0)
-		setFlag(Flag::z);
-	else
-		clearFlag(Flag::z);
+	set_Flag_if(Flag::h, !(*reg & 0xFF));
+	set_Flag_if(Flag::z, *reg == 0);
 }
 
 void CPU::dec_u8_reg(u8* reg) {
+	// Decrement register.
+
 	*reg = *reg - 1;
 
 	setFlag(Flag::n);
 
-	if (*reg == 0)
-		setFlag(Flag::z);
-	else
-		clearFlag(Flag::z);
-
-	if ((*reg & 0x0F) == 0x0F)
-		setFlag(Flag::h);
-	else
-		clearFlag(Flag::h);
+	set_Flag_if(Flag::h, (*reg & 0x0F) == 0x0F);
+	set_Flag_if(Flag::z, *reg == 0);
 
 }
 
-void CPU::add_a_r8(u8* reg) {
+void CPU::add_r8_r8(u8* reg, u8* value) {
+	u8 result = *reg + *value;
+	clearFlag(Flag::n);
+	set_Flag_if(Flag::h, (*reg & 0xf) + (*value & 0xf) > 0xf);
+	set_Flag_if(Flag::c, (result & 0x100) != 0);
+	*reg = result;
+	set_Flag_if(Flag::z, *reg == 0);
 }
 
+void CPU::adc_r8_r8(u8* reg, u8* value) {
+	// Add n + Carry flag to A
+	u8 c;
+	checkFlag(Flag::c) ? c = 1 : c = 0;
+	*value += c;
+	add_r8_r8(reg, value);
+}
+
+void CPU::add_r16_r16(u16* reg, u16* value) {
+	u16 result = *reg + *value;
+	clearFlag(Flag::n);
+	set_Flag_if(Flag::h, (*reg & 0xfff) + (*value & 0xfff) > 0xfff);
+	set_Flag_if(Flag::c, (result & 0x10000) != 0);
+	*reg = result;
+}
+
+void CPU::sub_r8_r8(u8* reg, u8* value) {
+	u8 result = *reg - *value;
+
+	setFlag(Flag::n);
+	set_Flag_if(Flag::h, ((*reg & 0xf) - (*value & 0xf)) < 0);
+	set_Flag_if(Flag::c, *reg < *value);
+
+	*reg = result;
+	set_Flag_if(Flag::z, *reg == 0);
+}
+
+void CPU::sbc_r8_r8(u8* reg, u8* value) {
+	u8 c;
+	checkFlag(Flag::c) ? c = 1 : c = 0;
+	*value += c;
+
+	sub_r8_r8(reg, value);
+}
 
 u8 CPU::opcode0x3C() {	// INC A
 	inc_u8_reg(&R.A);
@@ -137,96 +185,100 @@ u8 CPU::opcode0x3B() {	// DEC SP
 
 
 u8 CPU::opcode0x80() {	// ADD A B
-	std::cout << "0x80 nicht implementiert" << std::endl;
+	add_r8_r8(&R.A, &R.B);
 	return 0;
 }
 u8 CPU::opcode0x81() {	// ADD A C
-	std::cout << "0x81 nicht implementiert" << std::endl;
+	add_r8_r8(&R.A, &R.C);
 	return 0;
 }
 u8 CPU::opcode0x82() {	// ADD A D
-	std::cout << "0x82 nicht implementiert" << std::endl;
+	add_r8_r8(&R.A, &R.D);
 	return 0;
 }
 u8 CPU::opcode0x83() {	// ADD A E
-	std::cout << "0x83 nicht implementiert" << std::endl;
+	add_r8_r8(&R.A, &R.E);
 	return 0;
 }
 u8 CPU::opcode0x84() {	// ADD A H
-	std::cout << "0x84 nicht implementiert" << std::endl;
+	add_r8_r8(&R.A, &R.H);
 	return 0;
 }
 u8 CPU::opcode0x85() {	// ADD A L
-	std::cout << "0x85 nicht implementiert" << std::endl;
+	add_r8_r8(&R.A, &R.L);
 	return 0;
 }
 u8 CPU::opcode0x86() {	// ADD A HL
-	std::cout << "0x86 nicht implementiert" << std::endl;
+	add_r8_r8(&R.A, mem->read_ptr(R.HL));
 	return 0;
 }
 u8 CPU::opcode0x87() {	// ADD A A
-	std::cout << "0x87 nicht implementiert" << std::endl;
+	add_r8_r8(&R.A, &R.A);
 	return 0;
 }
 u8 CPU::opcode0x09() {	// ADD HL BC
-	std::cout << "0x09 nicht implementiert" << std::endl;
+	add_r16_r16(&R.HL, &R.BC);
 	return 0;
 }
 u8 CPU::opcode0x19() {	// ADD HL DE
-	std::cout << "0x19 nicht implementiert" << std::endl;
+	add_r16_r16(&R.HL, &R.DE);
 	return 0;
 }
 u8 CPU::opcode0x29() {	// ADD HL HL
-	std::cout << "0x29 nicht implementiert" << std::endl;
+	add_r16_r16(&R.HL, &R.HL);
 	return 0;
 }
 u8 CPU::opcode0x39() {	// ADD HL SP
-	std::cout << "0x39 nicht implementiert" << std::endl;
+	add_r16_r16(&R.HL, &R.SP);
 	return 0;
 }
 
 u8 CPU::opcode0xC6() {	// ADD A d8
-	std::cout << "0xC6 nicht implementiert" << std::endl;
+	u8 data = read_u8_at_pc();
+	add_r8_r8(&R.A, &data);
 	return 0;
 }
 u8 CPU::opcode0xE8() {	// ADD SP r8
-	std::cout << "0xE8 nicht implementiert" << std::endl;
+	u16 data = read_u8_at_pc() + 0xFF00;
+
+	add_r16_r16(&R.SP, &data);
 	return 0;
 }
 u8 CPU::opcode0x90() {	// SUB B
-	std::cout << "0x90 nicht implementiert" << std::endl;
+	sub_r8_r8(&R.A, &R.B);
 	return 0;
 }
 u8 CPU::opcode0x91() {	// SUB C
-	std::cout << "0x91 nicht implementiert" << std::endl;
+	sub_r8_r8(&R.A, &R.C);
 	return 0;
 }
 u8 CPU::opcode0x92() {	// SUB D
-	std::cout << "0x92 nicht implementiert" << std::endl;
+	sub_r8_r8(&R.A, &R.D);
 	return 0;
 }
 u8 CPU::opcode0x93() {	// SUB E
-	std::cout << "0x93 nicht implementiert" << std::endl;
+	sub_r8_r8(&R.A, &R.E);
 	return 0;
 }
 u8 CPU::opcode0x94() {	// SUB H
-	std::cout << "0x94 nicht implementiert" << std::endl;
+	sub_r8_r8(&R.A, &R.H);
 	return 0;
 }
 u8 CPU::opcode0x95() {	// SUB L
-	std::cout << "0x95 nicht implementiert" << std::endl;
+	sub_r8_r8(&R.A, &R.L);
 	return 0;
 }
 u8 CPU::opcode0x96() {	// SUB HL
-	std::cout << "0x96 nicht implementiert" << std::endl;
+	sub_r8_r8(&R.A, mem->read_ptr(R.HL));
 	return 0;
 }
 u8 CPU::opcode0x97() {	// SUB A
-	std::cout << "0x97 nicht implementiert" << std::endl;
+	sub_r8_r8(&R.A, &R.A);
 	return 0;
 }
 u8 CPU::opcode0xD6() {	// SUB d8
-	std::cout << "0xD6 nicht implementiert" << std::endl;
+	u8 data = read_u8_at_pc();
+	sub_r8_r8(&R.A, &data);
 	return 0;
 }
 u8 CPU::opcode0xE6() {	// AND d8
@@ -303,147 +355,151 @@ u8 CPU::opcode0xF6() {	// OR d8
 }
 
 u8 CPU::opcode0x98() {	// SBC A B
-	std::cout << "0x98 nicht implementiert" << std::endl;
+	sbc_r8_r8(&R.A, &R.B);
 	return 0;
 }
 u8 CPU::opcode0x99() {	// SBC A C
-	std::cout << "0x99 nicht implementiert" << std::endl;
+	sbc_r8_r8(&R.A, &R.C);
 	return 0;
 }
 u8 CPU::opcode0x9A() {	// SBC A D
-	std::cout << "0x9A nicht implementiert" << std::endl;
+	sbc_r8_r8(&R.A, &R.D);
 	return 0;
 }
 u8 CPU::opcode0x9B() {	// SBC A E
-	std::cout << "0x9B nicht implementiert" << std::endl;
+	sbc_r8_r8(&R.A, &R.E);
 	return 0;
 }
 u8 CPU::opcode0x9C() {	// SBC A H
-	std::cout << "0x9C nicht implementiert" << std::endl;
+	sbc_r8_r8(&R.A, &R.H);
 	return 0;
 }
 u8 CPU::opcode0x9D() {	// SBC A L
-	std::cout << "0x9D nicht implementiert" << std::endl;
+	sbc_r8_r8(&R.A, &R.L);
 	return 0;
 }
 u8 CPU::opcode0x9E() {	// SBC A HL
-	std::cout << "0x9E nicht implementiert" << std::endl;
+	sbc_r8_r8(&R.A, mem->read_ptr(R.HL));
 	return 0;
 }
 u8 CPU::opcode0x9F() {	// SBC A A
-	std::cout << "0x9F nicht implementiert" << std::endl;
+	sbc_r8_r8(&R.A, &R.A);
 	return 0;
 }
 u8 CPU::opcode0xDE() {	// SBC A d8
-	std::cout << "0xDE nicht implementiert" << std::endl;
+	u8 data = read_u8_at_pc();
+	sbc_r8_r8(&R.A, &data);
 	return 0;
 }
 
 u8 CPU::opcode0xEE() {	// XOR d8
-	R.A = xor_8(R.A, mem->read(R.PC + 1));
+	u8 data = read_u8_at_pc();
+	xor_r8_r8(&R.A, &data);
 	return 0;
 }
 u8 CPU::opcode0xA8() {	// XOR B
-	R.A = xor_8(R.A, R.B);
+	xor_r8_r8(&R.A, &R.B);
 	return 0;
 }
 u8 CPU::opcode0xA9() {	// XOR C
-	R.A = xor_8(R.A, R.B);
+	xor_r8_r8(&R.A, &R.C);
 	return 0;
 }
 u8 CPU::opcode0xAA() {	// XOR D
-	R.A = xor_8(R.A, R.D);
+	xor_r8_r8(&R.A, &R.D);
 	return 0;
 }
 u8 CPU::opcode0xAB() {	// XOR E
-	R.A = xor_8(R.A, R.E);
+	xor_r8_r8(&R.A, &R.E);
 	return 0;
 }
 u8 CPU::opcode0xAC() {	// XOR H
-	R.A = xor_8(R.A, R.H);
+	xor_r8_r8(&R.A, &R.H);
 	return 0;
 }
 u8 CPU::opcode0xAD() {	// XOR L
-	R.A = xor_8(R.A, R.L);
+	xor_r8_r8(&R.A, &R.L);
 	return 0;
 }
 u8 CPU::opcode0xAE() {	// XOR HL
-	std::cout << "0xAE nicht implementiert" << std::endl;
+	xor_r8_r8(&R.A, mem->read_ptr(R.HL));
 	return 0;
 }
 u8 CPU::opcode0xAF() {	// XOR A
-	R.A = xor_8(R.A, R.A);
+	xor_r8_r8(&R.A, &R.A);
 	return 0;
 }
 u8 CPU::opcode0xB8() {	// CP B
-	std::cout << "0xB8 nicht implementiert" << std::endl;
+	cp_r8_r8(&R.A, &R.B);
 	return 0;
 }
 u8 CPU::opcode0xB9() {	// CP C
-	std::cout << "0xB9 nicht implementiert" << std::endl;
+	cp_r8_r8(&R.A, &R.C);
 	return 0;
 }
 u8 CPU::opcode0xBA() {	// CP D
-	std::cout << "0xBA nicht implementiert" << std::endl;
+	cp_r8_r8(&R.A, &R.D);
 	return 0;
 }
 u8 CPU::opcode0xBB() {	// CP E
-	std::cout << "0xBB nicht implementiert" << std::endl;
+	cp_r8_r8(&R.A, &R.E);
 	return 0;
 }
 u8 CPU::opcode0xBC() {	// CP H
-	std::cout << "0xBC nicht implementiert" << std::endl;
+	cp_r8_r8(&R.A, &R.H);
 	return 0;
 }
 u8 CPU::opcode0xBD() {	// CP L
-	std::cout << "0xBD nicht implementiert" << std::endl;
+	cp_r8_r8(&R.A, &R.L);
 	return 0;
 }
 u8 CPU::opcode0xBE() {	// CP HL
-	std::cout << "0xBE nicht implementiert" << std::endl;
+	cp_r8_r8(&R.A, mem->read_ptr(R.HL));
 	return 0;
 }
 u8 CPU::opcode0xBF() {	// CP A
-	std::cout << "0xBF nicht implementiert" << std::endl;
+	cp_r8_r8(&R.A, &R.A);
 	return 0;
 }
 u8 CPU::opcode0xFE() {	// CP d8
-	std::cout << "0xFE nicht implementiert" << std::endl;
+	u8 data = read_u8_at_pc();
+	cp_r8_r8(&R.A, &data);
 	return 0;
 }
 u8 CPU::opcode0x88() {	// ADC A B
-	std::cout << "0x88 nicht implementiert" << std::endl;
+	adc_r8_r8(&R.A, &R.B);
 	return 0;
 }
 u8 CPU::opcode0x89() {	// ADC A C
-	std::cout << "0x89 nicht implementiert" << std::endl;
+	adc_r8_r8(&R.A, &R.C);
 	return 0;
 }
 u8 CPU::opcode0x8A() {	// ADC A D
-	std::cout << "0x8A nicht implementiert" << std::endl;
+	adc_r8_r8(&R.A, &R.D);
 	return 0;
 }
 u8 CPU::opcode0x8B() {	// ADC A E
-	std::cout << "0x8B nicht implementiert" << std::endl;
+	adc_r8_r8(&R.A, &R.E);
 	return 0;
 }
 u8 CPU::opcode0x8C() {	// ADC A H
-	std::cout << "0x8C nicht implementiert" << std::endl;
+	adc_r8_r8(&R.A, &R.H);
 	return 0;
 }
 u8 CPU::opcode0x8D() {	// ADC A L
-	std::cout << "0x8D nicht implementiert" << std::endl;
+	adc_r8_r8(&R.A, &R.L);
 	return 0;
 }
 u8 CPU::opcode0x8E() {	// ADC A HL
-	std::cout << "0x8E nicht implementiert" << std::endl;
+	adc_r8_r8(&R.A, mem->read_ptr(R.HL));
 	return 0;
 }
 u8 CPU::opcode0x8F() {	// ADC A A
-	std::cout << "0x8F nicht implementiert" << std::endl;
+	adc_r8_r8(&R.A, &R.A);
 	return 0;
 }
-u8 CPU::opcode0xCE() {	// ADC A d8
-	std::cout << "0xCE nicht implementiert" << std::endl;
+u8 CPU::opcode0xCE() {	// ADC A d8	
+	u8 data = read_u8_at_pc();
+	adc_r8_r8(&R.A, &data);
 	return 0;
 }

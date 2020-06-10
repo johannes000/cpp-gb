@@ -8,25 +8,21 @@ u16 CPU::u8_to_u16(const u8& data_lb, const u8& data_hb) {
 
 // Merged die Werte auf die PC + 1 und PC + 2 zeigt in ein u16
 u16 CPU::read_u16_at_pc() {
-	return u8_to_u16(mem->read(R.PC + 1), mem->read(R.PC + 2));
+	return u8_to_u16(mem->read(R.PC + 2), mem->read(R.PC + 1));
 }
 u16 CPU::read_u16_sp() {
-	return u8_to_u16(mem->read(R.SP), mem->read(R.SP + 1));
+	return u8_to_u16(mem->read(R.SP + 1), mem->read(R.SP));
 }
 i8 CPU::read_i8_at_pc() {
 	return (i8)(read_u8_at_pc());
 }
-
 u8 CPU::read_u8_at_pc() {
 	return mem->read(R.PC + 1);
 }
 
-u8 CPU::xor_8(u8& data1, const u8& data2) {
-	u8 xordata = data1 ^ data2;
-	if (xordata == 0)
-		setFlag(Flag::z);
-	setFlags(Flag::n, Flag::h, Flag::c);
-	return xordata;
+
+void CPU::set_Flag_if(const Flag& F, bool condition) {
+	condition ? setFlag(F) : clearFlag(F);
 }
 
 void CPU::setFlag(const Flag& F) {
@@ -65,6 +61,7 @@ void CPU::clearAllFlags() {
 bool CPU::checkFlag(const Flag& F) {
 	return checkBit(R.F, static_cast<u8>(F));
 }
+
 void CPU::toggleFlag(const Flag& F) {
 	toggleBit(R.F, static_cast<u8>(F));
 }
@@ -85,6 +82,14 @@ void CPU::toggleAllFlags() {
 	toggleFlag(Flag::h);
 }
 
+
+void CPU::set_Bit_if(u8& value, const u8 bit, bool condition) {
+	condition ? setBit(value, 0) : clearBit(value, 0);
+}
+
+void CPU::set_Bit_if(u16& value, const u16 bit, bool condition) {
+	condition ? setBit(value, 0) : clearBit(value, 0);
+}
 
 void CPU::setBit(u8& value, const u8 bit) {
 	value |= (1 << bit);
