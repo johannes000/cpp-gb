@@ -11,7 +11,7 @@ void CPU::pop_r16_reg(u16* reg) {
 	// Pop two bytes off stack into register pair nn.
 	// Increment Stack Pointer(SP) twice
 	*reg = read_u16_sp();
-	R.SP -= 2;
+	R.SP += 2;
 }
 void CPU::ret() {
 	//  Pop two bytes from stack & jump to that address.

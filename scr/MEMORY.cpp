@@ -1,10 +1,8 @@
 #include "MEMORY.h"
 
 MEMORY::MEMORY() {
-	memory = std::vector<u8>(0xFFFF + 1);
-
 	// bootrom in memory
-	std::copy(boot, (boot + 0xFF), memory.begin());
+	std::copy(boot.begin(), (boot.begin() + 0xFF), memory.begin());
 }
 
 MEMORY::~MEMORY() {
