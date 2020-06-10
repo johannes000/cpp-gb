@@ -29,34 +29,34 @@ private:
 
 	//FLAGS
 public:
-	void set_Flag_if(const Flag&, bool condition);
-	void setFlag(const Flag&);								//setze flag auf true egal was
-	void setFlags(const Flag&, const Flag&);				//setze flag auf true egal was
-	void setFlags(const Flag&, const Flag&, const Flag&);	//setze flag auf true egal was
-	void setAllFlags();
+	void set_flag_if(const Flag&, bool condition);
+	void set_flag(const Flag&);								//setze flag auf true egal was
+	void set_flags(const Flag&, const Flag&);				//setze flag auf true egal was
+	void set_flags(const Flag&, const Flag&, const Flag&);	//setze flag auf true egal was
+	void set_all_flags();
 
-	void clearFlag(const Flag&);							//setze flag auf false egal was
-	void clearFlags(const Flag& F1, const Flag& F2);
-	void clearFlags(const Flag& F1, const Flag& F2, const Flag& F3);
-	void clearAllFlags();
+	void reset_flag(const Flag&);							//setze flag auf false egal was
+	void reset_flags(const Flag& F1, const Flag& F2);
+	void reset_flags(const Flag& F1, const Flag& F2, const Flag& F3);
+	void reset_all_flags();
 
-	void toggleFlag(const Flag&);							//toggled die flag
-	void toggleFlags(const Flag& F1, const Flag& F2);
-	void toggleFlags(const Flag& F1, const Flag& F2, const Flag& F3);
-	void toggleAllFlags();
+	void toggle_flag(const Flag&);							//toggled die flag
+	void toggle_flags(const Flag& F1, const Flag& F2);
+	void toggle_flags(const Flag& F1, const Flag& F2, const Flag& F3);
+	void toggle_all_flags();
 
-	bool checkFlag(const Flag&);							//gibt flag status wieder
+	bool check_flag(const Flag&);							//gibt flag status wieder
 
-	void set_Bit_if(u8& value, const u8 bit, bool condition);
-	void set_Bit_if(u16& value, const u16 bit, bool condition);
-	void setBit(u8& value, const u8 bit);
-	void setBit(u16& value, const u16 bit);
-	void clearBit(u8& value, const u8 bit);
-	void clearBit(u16& value, const u16 bit);
-	void toggleBit(u8& value, const u8 bit);
-	void toggleBit(u16& value, const u16 bit);
-	bool checkBit(const u8& value, const u8 bit);
-	bool checkBit(const u16& value, const u16 bit);
+	void set_bit_if(u8& value, const u8 bit, bool condition);
+	void set_bit_if(u16& value, const u16 bit, bool condition);
+	void set_bit(u8& value, const u8 bit);
+	void set_bit(u16& value, const u16 bit);
+	void reset_bit(u8& value, const u8 bit);
+	void reset_bit(u16& value, const u16 bit);
+	void toggle_bit(u8& value, const u8 bit);
+	void toggle_bit(u16& value, const u16 bit);
+	bool check_bit(const u8& value, const u8 bit);
+	bool check_bit(const u16& value, const u16 bit);
 
 
 	//OPCODES
@@ -86,6 +86,7 @@ private:
 	// ARITHMETIC
 	void xor_r8_r8(u8* data1, const u8* data2);
 	void and_r8_r8(u8* reg1, const u8* reg2);
+	void or_r8_r8(u8* reg1, const u8* reg2);
 
 	void cp_r8_r8(const u8* data1, const u8* data2);
 

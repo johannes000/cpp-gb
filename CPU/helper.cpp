@@ -21,100 +21,100 @@ u8 CPU::read_u8_at_pc() {
 }
 
 
-void CPU::set_Flag_if(const Flag& F, bool condition) {
-	condition ? setFlag(F) : clearFlag(F);
+void CPU::set_flag_if(const Flag& F, bool condition) {
+	condition ? set_flag(F) : reset_flag(F);
 }
 
-void CPU::setFlag(const Flag& F) {
-	setBit(R.F, static_cast<u8>(F));
+void CPU::set_flag(const Flag& F) {
+	set_bit(R.F, static_cast<u8>(F));
 
 }
-void CPU::setFlags(const Flag& F1, const Flag& F2) {
-	setFlag(F1);
-	setFlag(F2);
+void CPU::set_flags(const Flag& F1, const Flag& F2) {
+	set_flag(F1);
+	set_flag(F2);
 }
-void CPU::setFlags(const Flag& F1, const Flag& F2, const Flag& F3) {
-	setFlag(F1);
-	setFlag(F2);
-	setFlag(F3);
+void CPU::set_flags(const Flag& F1, const Flag& F2, const Flag& F3) {
+	set_flag(F1);
+	set_flag(F2);
+	set_flag(F3);
 }
-void CPU::setAllFlags() {
+void CPU::set_all_flags() {
 	R.F = 0xFF;
 }
 
-void CPU::clearFlag(const Flag& F) {
-	clearBit(R.F, static_cast<u8>(F));
+void CPU::reset_flag(const Flag& F) {
+	reset_bit(R.F, static_cast<u8>(F));
 }
-void CPU::clearFlags(const Flag& F1, const Flag& F2) {
-	clearFlag(F1);
-	clearFlag(F2);
+void CPU::reset_flags(const Flag& F1, const Flag& F2) {
+	reset_flag(F1);
+	reset_flag(F2);
 }
-void CPU::clearFlags(const Flag& F1, const Flag& F2, const Flag& F3) {
-	clearFlag(F1);
-	clearFlag(F2);
-	clearFlag(F3);
+void CPU::reset_flags(const Flag& F1, const Flag& F2, const Flag& F3) {
+	reset_flag(F1);
+	reset_flag(F2);
+	reset_flag(F3);
 }
-void CPU::clearAllFlags() {
+void CPU::reset_all_flags() {
 	R.F = 0x00;
 }
 
-bool CPU::checkFlag(const Flag& F) {
-	return checkBit(R.F, static_cast<u8>(F));
+bool CPU::check_flag(const Flag& F) {
+	return check_bit(R.F, static_cast<u8>(F));
 }
 
-void CPU::toggleFlag(const Flag& F) {
-	toggleBit(R.F, static_cast<u8>(F));
+void CPU::toggle_flag(const Flag& F) {
+	toggle_bit(R.F, static_cast<u8>(F));
 }
 
-void CPU::toggleFlags(const Flag& F1, const Flag& F2) {
-	toggleFlag(F1);
-	toggleFlag(F2);
+void CPU::toggle_flags(const Flag& F1, const Flag& F2) {
+	toggle_flag(F1);
+	toggle_flag(F2);
 }
-void CPU::toggleFlags(const Flag& F1, const Flag& F2, const Flag& F3) {
-	toggleFlag(F1);
-	toggleFlag(F2);
-	toggleFlag(F3);
+void CPU::toggle_flags(const Flag& F1, const Flag& F2, const Flag& F3) {
+	toggle_flag(F1);
+	toggle_flag(F2);
+	toggle_flag(F3);
 }
-void CPU::toggleAllFlags() {
-	toggleFlag(Flag::c);
-	toggleFlag(Flag::z);
-	toggleFlag(Flag::n);
-	toggleFlag(Flag::h);
-}
-
-
-void CPU::set_Bit_if(u8& value, const u8 bit, bool condition) {
-	condition ? setBit(value, 0) : clearBit(value, 0);
+void CPU::toggle_all_flags() {
+	toggle_flag(Flag::c);
+	toggle_flag(Flag::z);
+	toggle_flag(Flag::n);
+	toggle_flag(Flag::h);
 }
 
-void CPU::set_Bit_if(u16& value, const u16 bit, bool condition) {
-	condition ? setBit(value, 0) : clearBit(value, 0);
+
+void CPU::set_bit_if(u8& value, const u8 bit, bool condition) {
+	condition ? set_bit(value, 0) : reset_bit(value, 0);
 }
 
-void CPU::setBit(u8& value, const u8 bit) {
+void CPU::set_bit_if(u16& value, const u16 bit, bool condition) {
+	condition ? set_bit(value, 0) : reset_bit(value, 0);
+}
+
+void CPU::set_bit(u8& value, const u8 bit) {
 	value |= (1 << bit);
 }
-void CPU::setBit(u16& value, const u16 bit) {
+void CPU::set_bit(u16& value, const u16 bit) {
 	value |= (1 << bit);
 }
 
-void CPU::clearBit(u8& value, const u8 bit) {
+void CPU::reset_bit(u8& value, const u8 bit) {
 	value &= ~(1 << bit);
 }
-void CPU::clearBit(u16& value, const u16 bit) {
+void CPU::reset_bit(u16& value, const u16 bit) {
 	value &= ~(1 << bit);
 }
 
-void CPU::toggleBit(u8& value, const u8 bit) {
+void CPU::toggle_bit(u8& value, const u8 bit) {
 	value ^= (1 << bit);
 }
-void CPU::toggleBit(u16& value, const u16 bit) {
+void CPU::toggle_bit(u16& value, const u16 bit) {
 	value ^= (1 << bit);
 }
 
-bool CPU::checkBit(const u8& value, const u8 bit) {
+bool CPU::check_bit(const u8& value, const u8 bit) {
 	return (value >> bit) & 1;
 }
-bool CPU::checkBit(const u16& value, const u16 bit) {
+bool CPU::check_bit(const u16& value, const u16 bit) {
 	return (value >> bit) & 1;
 }

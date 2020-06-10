@@ -1,21 +1,35 @@
 #include "../CPU.h"
 
 void CPU::xor_r8_r8(u8* data1, const u8* data2) {
+	// XOR data 1 und data 2 und speicher das ergebnis in data 1
 	*data1 ^= *data2;
-	set_Flag_if(Flag::z, *data1 == 0);
-	setFlags(Flag::n, Flag::h, Flag::c);
+	set_flag_if(Flag::z, *data1 == 0);
+	set_flags(Flag::n, Flag::h, Flag::c);
 }
 
 void CPU::and_r8_r8(u8* reg1, const u8* reg2) {
+	// AND reg 1 und reg 2 und speicher das ergebnis in data 1
+	*reg1 &= *reg2;
+	set_flag_if(Flag::z, *reg1 == 0);
+	reset_flags(Flag::n, Flag::c);
+	set_flag(Flag::h);
+
+}
+
+void CPU::or_r8_r8(u8* reg1, const u8* reg2) {
+	// OR reg 1 und reg 2 und speicher das ergebnis in data 1
+	reset_all_flags();
+	*reg1 |= *reg2;
+	set_flag_if(Flag::z, *reg1 == 0);
 }
 
 void CPU::cp_r8_r8(const u8* data1, const u8* data2) {
 	u8 result = *data1 - *data2;
 
-	setFlag(Flag::n);
-	set_Flag_if(Flag::h, ((*data1 & 0xf) - (*data2 & 0xf)) < 0);
-	set_Flag_if(Flag::c, *data1 < *data2);
-	set_Flag_if(Flag::z, result == 0);
+	set_flag(Flag::n);
+	set_flag_if(Flag::h, ((*data1 & 0xf) - (*data2 & 0xf)) < 0);
+	set_flag_if(Flag::c, *data1 < *data2);
+	set_flag_if(Flag::z, result == 0);
 }
 
 void CPU::inc_u8_reg(u8* reg) {
@@ -23,10 +37,10 @@ void CPU::inc_u8_reg(u8* reg) {
 
 	*reg = *reg + 1;
 
-	clearFlag(Flag::n);
+	reset_flag(Flag::n);
 
-	set_Flag_if(Flag::h, !(*reg & 0xFF));
-	set_Flag_if(Flag::z, *reg == 0);
+	set_flag_if(Flag::h, !(*reg & 0xFF));
+	set_flag_if(Flag::z, *reg == 0);
 }
 
 void CPU::dec_u8_reg(u8* reg) {
@@ -34,52 +48,52 @@ void CPU::dec_u8_reg(u8* reg) {
 
 	*reg = *reg - 1;
 
-	setFlag(Flag::n);
+	set_flag(Flag::n);
 
-	set_Flag_if(Flag::h, (*reg & 0x0F) == 0x0F);
-	set_Flag_if(Flag::z, *reg == 0);
+	set_flag_if(Flag::h, (*reg & 0x0F) == 0x0F);
+	set_flag_if(Flag::z, *reg == 0);
 
 }
 
 void CPU::add_r8_r8(u8* reg, u8* value) {
 	u8 result = *reg + *value;
-	clearFlag(Flag::n);
-	set_Flag_if(Flag::h, (*reg & 0xf) + (*value & 0xf) > 0xf);
-	set_Flag_if(Flag::c, (result & 0x100) != 0);
+	reset_flag(Flag::n);
+	set_flag_if(Flag::h, (*reg & 0xf) + (*value & 0xf) > 0xf);
+	set_flag_if(Flag::c, (result & 0x100) != 0);
 	*reg = result;
-	set_Flag_if(Flag::z, *reg == 0);
+	set_flag_if(Flag::z, *reg == 0);
 }
 
 void CPU::adc_r8_r8(u8* reg, u8* value) {
 	// Add n + Carry flag to A
 	u8 c;
-	checkFlag(Flag::c) ? c = 1 : c = 0;
+	check_flag(Flag::c) ? c = 1 : c = 0;
 	*value += c;
 	add_r8_r8(reg, value);
 }
 
 void CPU::add_r16_r16(u16* reg, u16* value) {
 	u16 result = *reg + *value;
-	clearFlag(Flag::n);
-	set_Flag_if(Flag::h, (*reg & 0xfff) + (*value & 0xfff) > 0xfff);
-	set_Flag_if(Flag::c, (result & 0x10000) != 0);
+	reset_flag(Flag::n);
+	set_flag_if(Flag::h, (*reg & 0xfff) + (*value & 0xfff) > 0xfff);
+	set_flag_if(Flag::c, (result & 0x10000) != 0);
 	*reg = result;
 }
 
 void CPU::sub_r8_r8(u8* reg, u8* value) {
 	u8 result = *reg - *value;
 
-	setFlag(Flag::n);
-	set_Flag_if(Flag::h, ((*reg & 0xf) - (*value & 0xf)) < 0);
-	set_Flag_if(Flag::c, *reg < *value);
+	set_flag(Flag::n);
+	set_flag_if(Flag::h, ((*reg & 0xf) - (*value & 0xf)) < 0);
+	set_flag_if(Flag::c, *reg < *value);
 
 	*reg = result;
-	set_Flag_if(Flag::z, *reg == 0);
+	set_flag_if(Flag::z, *reg == 0);
 }
 
 void CPU::sbc_r8_r8(u8* reg, u8* value) {
 	u8 c;
-	checkFlag(Flag::c) ? c = 1 : c = 0;
+	check_flag(Flag::c) ? c = 1 : c = 0;
 	*value += c;
 
 	sub_r8_r8(reg, value);
@@ -234,13 +248,11 @@ u8 CPU::opcode0x39() {	// ADD HL SP
 }
 
 u8 CPU::opcode0xC6() {	// ADD A d8
-	u8 data = read_u8_at_pc();
-	add_r8_r8(&R.A, &data);
+	add_r8_r8(&R.A, mem->read_ptr(R.PC + 1));
 	return 0;
 }
 u8 CPU::opcode0xE8() {	// ADD SP r8
 	u16 data = read_u8_at_pc() + 0xFF00;
-
 	add_r16_r16(&R.SP, &data);
 	return 0;
 }
@@ -277,80 +289,79 @@ u8 CPU::opcode0x97() {	// SUB A
 	return 0;
 }
 u8 CPU::opcode0xD6() {	// SUB d8
-	u8 data = read_u8_at_pc();
-	sub_r8_r8(&R.A, &data);
+	sub_r8_r8(&R.A, mem->read_ptr(R.PC + 1));
 	return 0;
 }
 u8 CPU::opcode0xE6() {	// AND d8
-	std::cout << "0xE6 nicht implementiert" << std::endl;
+	and_r8_r8(&R.A, mem->read_ptr(R.PC + 1));
 	return 0;
 }
 u8 CPU::opcode0xA0() {	// AND B
-	std::cout << "0xA0 nicht implementiert" << std::endl;
+	and_r8_r8(&R.A, &R.B);
 	return 0;
 }
 u8 CPU::opcode0xA1() {	// AND C
-	std::cout << "0xA1 nicht implementiert" << std::endl;
+	and_r8_r8(&R.A, &R.C);
 	return 0;
 }
 u8 CPU::opcode0xA2() {	// AND D
-	std::cout << "0xA2 nicht implementiert" << std::endl;
+	and_r8_r8(&R.A, &R.D);
 	return 0;
 }
 u8 CPU::opcode0xA3() {	// AND E
-	std::cout << "0xA3 nicht implementiert" << std::endl;
+	and_r8_r8(&R.A, &R.E);
 	return 0;
 }
 u8 CPU::opcode0xA4() {	// AND H
-	std::cout << "0xA4 nicht implementiert" << std::endl;
+	and_r8_r8(&R.A, &R.H);
 	return 0;
 }
 u8 CPU::opcode0xA5() {	// AND L
-	std::cout << "0xA5 nicht implementiert" << std::endl;
+	and_r8_r8(&R.A, &R.L);
 	return 0;
 }
 u8 CPU::opcode0xA6() {	// AND HL
-	std::cout << "0xA6 nicht implementiert" << std::endl;
+	and_r8_r8(&R.A, mem->read_ptr(R.HL));
 	return 0;
 }
 u8 CPU::opcode0xA7() {	// AND A
-	std::cout << "0xA7 nicht implementiert" << std::endl;
+	and_r8_r8(&R.A, &R.A);
 	return 0;
 }
 u8 CPU::opcode0xB0() {	// OR B
-	std::cout << "0xB0 nicht implementiert" << std::endl;
+	or_r8_r8(&R.A, &R.B);
 	return 0;
 }
 u8 CPU::opcode0xB1() {	// OR C
-	std::cout << "0xB1 nicht implementiert" << std::endl;
+	or_r8_r8(&R.A, &R.C);
 	return 0;
 }
 u8 CPU::opcode0xB2() {	// OR D
-	std::cout << "0xB2 nicht implementiert" << std::endl;
+	or_r8_r8(&R.A, &R.D);
 	return 0;
 }
 u8 CPU::opcode0xB3() {	// OR E
-	std::cout << "0xB3 nicht implementiert" << std::endl;
+	or_r8_r8(&R.A, &R.E);
 	return 0;
 }
 u8 CPU::opcode0xB4() {	// OR H
-	std::cout << "0xB4 nicht implementiert" << std::endl;
+	or_r8_r8(&R.A, &R.H);
 	return 0;
 }
 u8 CPU::opcode0xB5() {	// OR L
-	std::cout << "0xB5 nicht implementiert" << std::endl;
+	or_r8_r8(&R.A, &R.L);
 	return 0;
 }
 u8 CPU::opcode0xB6() {	// OR HL
-	std::cout << "0xB6 nicht implementiert" << std::endl;
+	or_r8_r8(&R.A, mem->read_ptr(R.HL));
 	return 0;
 }
 u8 CPU::opcode0xB7() {	// OR A
-	std::cout << "0xB7 nicht implementiert" << std::endl;
+	or_r8_r8(&R.A, mem->read_ptr(R.HL));
 	return 0;
 }
 u8 CPU::opcode0xF6() {	// OR d8
-	std::cout << "0xF6 nicht implementiert" << std::endl;
+	or_r8_r8(&R.A, mem->read_ptr(R.PC + 1));
 	return 0;
 }
 
@@ -387,14 +398,12 @@ u8 CPU::opcode0x9F() {	// SBC A A
 	return 0;
 }
 u8 CPU::opcode0xDE() {	// SBC A d8
-	u8 data = read_u8_at_pc();
-	sbc_r8_r8(&R.A, &data);
+	sbc_r8_r8(&R.A, mem->read_ptr(R.PC + 1));
 	return 0;
 }
 
 u8 CPU::opcode0xEE() {	// XOR d8
-	u8 data = read_u8_at_pc();
-	xor_r8_r8(&R.A, &data);
+	xor_r8_r8(&R.A, mem->read_ptr(R.PC + 1));
 	return 0;
 }
 u8 CPU::opcode0xA8() {	// XOR B
@@ -462,8 +471,7 @@ u8 CPU::opcode0xBF() {	// CP A
 	return 0;
 }
 u8 CPU::opcode0xFE() {	// CP d8
-	u8 data = read_u8_at_pc();
-	cp_r8_r8(&R.A, &data);
+	cp_r8_r8(&R.A, mem->read_ptr(R.PC + 1));
 	return 0;
 }
 u8 CPU::opcode0x88() {	// ADC A B
@@ -499,7 +507,6 @@ u8 CPU::opcode0x8F() {	// ADC A A
 	return 0;
 }
 u8 CPU::opcode0xCE() {	// ADC A d8	
-	u8 data = read_u8_at_pc();
-	adc_r8_r8(&R.A, &data);
+	adc_r8_r8(&R.A, mem->read_ptr(R.PC + 1));
 	return 0;
 }

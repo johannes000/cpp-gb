@@ -2,9 +2,9 @@
 
 void CPU::test_n_bit_set_z(const u8 bit, const u8* reg) {
 	// wenn bit gesetzt setze Zero Flag
-	set_Flag_if(Flag::z, checkBit(*reg, bit));
-	setFlag(Flag::h);
-	clearFlag(Flag::n);
+	set_flag_if(Flag::z, check_bit(*reg, bit));
+	set_flag(Flag::h);
+	reset_flag(Flag::n);
 }
 
 void CPU::rot_right_c_r8(u8* reg) {
@@ -14,11 +14,11 @@ void CPU::rot_right_c_r8(u8* reg) {
 	*reg >>= 1;
 
 
-	set_Flag_if(Flag::c, b0 == 1);
-	set_Bit_if(*reg, 7, b0 == 1);
-	set_Flag_if(Flag::z, *reg == 0);
+	set_flag_if(Flag::c, b0 == 1);
+	set_bit_if(*reg, 7, b0 == 1);
+	set_flag_if(Flag::z, *reg == 0);
 
-	setFlags(Flag::n, Flag::h);
+	set_flags(Flag::n, Flag::h);
 }
 
 void CPU::rot_left_c_r8(u8* reg) {
@@ -27,11 +27,11 @@ void CPU::rot_left_c_r8(u8* reg) {
 	u8 b7 = *reg & 0x80;
 	*reg <<= 1;
 
-	set_Flag_if(Flag::c, b7 == 1);
-	set_Bit_if(*reg, 0, b7 == 0x80);
-	set_Flag_if(Flag::z, *reg == 0);
+	set_flag_if(Flag::c, b7 == 1);
+	set_bit_if(*reg, 0, b7 == 0x80);
+	set_flag_if(Flag::z, *reg == 0);
 
-	setFlags(Flag::n, Flag::h);
+	set_flags(Flag::n, Flag::h);
 }
 
 void CPU::rot_left_r8(u8* reg) {
@@ -40,22 +40,22 @@ void CPU::rot_left_r8(u8* reg) {
 	u8 b7 = *reg & 0x80;
 	*reg <<= 1;
 
-	set_Bit_if(*reg, 0, checkFlag(Flag::c));
-	set_Flag_if(Flag::c, b7 == 0x80);
-	set_Flag_if(Flag::z, *reg == 0);
-	clearFlags(Flag::n, Flag::h);
+	set_bit_if(*reg, 0, check_flag(Flag::c));
+	set_flag_if(Flag::c, b7 == 0x80);
+	set_flag_if(Flag::z, *reg == 0);
+	reset_flags(Flag::n, Flag::h);
 }
 void CPU::rot_right_r8(u8* reg) {
 	// Rotate register r8 right through carry.
 	// C ->[7 -> 0]->C
 	u8 b7 = *reg & 1;
 	*reg >>= 1;
-	set_Bit_if(*reg, 7, checkFlag(Flag::c));
+	set_bit_if(*reg, 7, check_flag(Flag::c));
 
-	set_Flag_if(Flag::c, b7 == 1);
-	set_Flag_if(Flag::z, *reg == 0);
+	set_flag_if(Flag::c, b7 == 1);
+	set_flag_if(Flag::z, *reg == 0);
 
-	clearFlags(Flag::n, Flag::h);
+	reset_flags(Flag::n, Flag::h);
 }
 
 void CPU::shift_left_a_r8(u8* reg) {
@@ -63,10 +63,10 @@ void CPU::shift_left_a_r8(u8* reg) {
 	// C < -[7 < -0] < -0
 	u8 b7 = *reg & 0x80;
 	*reg >>= 1;
-	set_Flag_if(Flag::c, b7 == 0x80);
-	set_Flag_if(Flag::z, *reg == 0);
+	set_flag_if(Flag::c, b7 == 0x80);
+	set_flag_if(Flag::z, *reg == 0);
 
-	clearFlags(Flag::n, Flag::h);
+	reset_flags(Flag::n, Flag::h);
 }
 
 void CPU::shift_right_a_r8(u8* reg) {
@@ -76,11 +76,11 @@ void CPU::shift_right_a_r8(u8* reg) {
 	u8 b0 = *reg & 1;
 	*reg >>= 1;
 
-	set_Bit_if(*reg, 7, b7 == 0x80);
-	set_Flag_if(Flag::c, b0 == 1);
-	set_Flag_if(Flag::z, *reg == 0);
+	set_bit_if(*reg, 7, b7 == 0x80);
+	set_flag_if(Flag::c, b0 == 1);
+	set_flag_if(Flag::z, *reg == 0);
 
-	clearFlags(Flag::n, Flag::h);
+	reset_flags(Flag::n, Flag::h);
 }
 
 void CPU::shift_right_l_r8(u8* reg) {
@@ -89,10 +89,10 @@ void CPU::shift_right_l_r8(u8* reg) {
 	u8 b0 = *reg & 1;
 	*reg >>= 1;
 
-	set_Flag_if(Flag::c, b0 == 1);
-	set_Flag_if(Flag::z, *reg == 0);
+	set_flag_if(Flag::c, b0 == 1);
+	set_flag_if(Flag::z, *reg == 0);
 
-	clearFlags(Flag::n, Flag::h);
+	reset_flags(Flag::n, Flag::h);
 
 }
 
@@ -112,7 +112,7 @@ void CPU::swap_r8(u8* reg) {
 
 u8 CPU::opcode0x07() {	// RLCA
 	rot_right_c_r8(&R.A);
-	clearFlag(Flag::z);
+	reset_flag(Flag::z);
 	return 0;
 }
 u8 CPU::opcode0x17() {	// RLA
@@ -125,7 +125,7 @@ u8 CPU::opcode0x0F() {	// RRCA
 }
 u8 CPU::opcode0x1F() {	// RRA
 	rot_right_r8(&R.A);
-	clearFlag(Flag::z);
+	reset_flag(Flag::z);
 	return 0;
 }
 
@@ -642,531 +642,531 @@ u8 CPU::prefixedopcode0x7F() {	// BIT 7 A
 	return 0;
 }
 u8 CPU::prefixedopcode0x80() {	// RES 0 B
-	clearBit(R.B, 0);
+	reset_bit(R.B, 0);
 	return 0;
 }
 u8 CPU::prefixedopcode0x81() {	// RES 0 C
-	clearBit(R.C, 0);
+	reset_bit(R.C, 0);
 	return 0;
 }
 u8 CPU::prefixedopcode0x82() {	// RES 0 D
-	clearBit(R.D, 0);
+	reset_bit(R.D, 0);
 	return 0;
 }
 u8 CPU::prefixedopcode0x83() {	// RES 0 E
-	clearBit(R.E, 0);
+	reset_bit(R.E, 0);
 	return 0;
 }
 u8 CPU::prefixedopcode0x84() {	// RES 0 H
-	clearBit(R.H, 0);
+	reset_bit(R.H, 0);
 	return 0;
 }
 u8 CPU::prefixedopcode0x85() {	// RES 0 L
-	clearBit(R.L, 0);
+	reset_bit(R.L, 0);
 	return 0;
 }
 u8 CPU::prefixedopcode0x86() {	// RES 0 HL
 	u8 data = mem->read(R.HL);
-	clearBit(data, 0);
+	reset_bit(data, 0);
 	return 0;
 }
 u8 CPU::prefixedopcode0x87() {	// RES 0 A
-	clearBit(R.A, 0);
+	reset_bit(R.A, 0);
 	return 0;
 }
 u8 CPU::prefixedopcode0x88() {	// RES 1 B
-	clearBit(R.B, 1);
+	reset_bit(R.B, 1);
 	return 0;
 }
 u8 CPU::prefixedopcode0x89() {	// RES 1 C
-	clearBit(R.C, 1);
+	reset_bit(R.C, 1);
 	return 0;
 }
 u8 CPU::prefixedopcode0x8A() {	// RES 1 D
-	clearBit(R.D, 1);
+	reset_bit(R.D, 1);
 	return 0;
 }
 u8 CPU::prefixedopcode0x8B() {	// RES 1 E
-	clearBit(R.E, 1);
+	reset_bit(R.E, 1);
 	return 0;
 }
 u8 CPU::prefixedopcode0x8C() {	// RES 1 H
-	clearBit(R.H, 1);
+	reset_bit(R.H, 1);
 	return 0;
 }
 u8 CPU::prefixedopcode0x8D() {	// RES 1 L
-	clearBit(R.L, 1);
+	reset_bit(R.L, 1);
 	return 0;
 }
 u8 CPU::prefixedopcode0x8E() {	// RES 1 HL
 	u8 data = mem->read(R.HL);
-	clearBit(data, 1);
+	reset_bit(data, 1);
 	return 0;
 }
 u8 CPU::prefixedopcode0x8F() {	// RES 1 A
-	clearBit(R.A, 1);
+	reset_bit(R.A, 1);
 	return 0;
 }
 u8 CPU::prefixedopcode0x90() {	// RES 2 B
-	clearBit(R.B, 2);
+	reset_bit(R.B, 2);
 	return 0;
 }
 u8 CPU::prefixedopcode0x91() {	// RES 2 C
-	clearBit(R.C, 2);
+	reset_bit(R.C, 2);
 	return 0;
 }
 u8 CPU::prefixedopcode0x92() {	// RES 2 D
-	clearBit(R.D, 2);
+	reset_bit(R.D, 2);
 	return 0;
 }
 u8 CPU::prefixedopcode0x93() {	// RES 2 E
-	clearBit(R.E, 2);
+	reset_bit(R.E, 2);
 	return 0;
 }
 u8 CPU::prefixedopcode0x94() {	// RES 2 H
-	clearBit(R.H, 2);
+	reset_bit(R.H, 2);
 	return 0;
 }
 u8 CPU::prefixedopcode0x95() {	// RES 2 L
-	clearBit(R.L, 2);
+	reset_bit(R.L, 2);
 	return 0;
 }
 u8 CPU::prefixedopcode0x96() {	// RES 2 HL
 	u8 data = mem->read(R.HL);
-	clearBit(data, 2);
+	reset_bit(data, 2);
 	return 0;
 }
 u8 CPU::prefixedopcode0x97() {	// RES 2 A
-	clearBit(R.A, 2);
+	reset_bit(R.A, 2);
 	return 0;
 }
 u8 CPU::prefixedopcode0x98() {	// RES 3 B
-	clearBit(R.B, 3);
+	reset_bit(R.B, 3);
 	return 0;
 }
 u8 CPU::prefixedopcode0x99() {	// RES 3 C
-	clearBit(R.C, 3);
+	reset_bit(R.C, 3);
 	return 0;
 }
 u8 CPU::prefixedopcode0x9A() {	// RES 3 D
-	clearBit(R.D, 3);
+	reset_bit(R.D, 3);
 	return 0;
 }
 u8 CPU::prefixedopcode0x9B() {	// RES 3 E
-	clearBit(R.E, 3);
+	reset_bit(R.E, 3);
 	return 0;
 }
 u8 CPU::prefixedopcode0x9C() {	// RES 3 H
-	clearBit(R.H, 3);
+	reset_bit(R.H, 3);
 	return 0;
 }
 u8 CPU::prefixedopcode0x9D() {	// RES 3 L
-	clearBit(R.L, 3);
+	reset_bit(R.L, 3);
 	return 0;
 }
 u8 CPU::prefixedopcode0x9E() {	// RES 3 HL
 	u8 data = mem->read(R.HL);
-	clearBit(data, 3);
+	reset_bit(data, 3);
 	return 0;
 }
 u8 CPU::prefixedopcode0x9F() {	// RES 3 A
-	clearBit(R.A, 3);
+	reset_bit(R.A, 3);
 	return 0;
 }
 u8 CPU::prefixedopcode0xA0() {	// RES 4 B
-	clearBit(R.B, 4);
+	reset_bit(R.B, 4);
 	return 0;
 }
 u8 CPU::prefixedopcode0xA1() {	// RES 4 C
-	clearBit(R.C, 4);
+	reset_bit(R.C, 4);
 	return 0;
 }
 u8 CPU::prefixedopcode0xA2() {	// RES 4 D
-	clearBit(R.D, 4);
+	reset_bit(R.D, 4);
 	return 0;
 }
 u8 CPU::prefixedopcode0xA3() {	// RES 4 E
-	clearBit(R.E, 4);
+	reset_bit(R.E, 4);
 	return 0;
 }
 u8 CPU::prefixedopcode0xA4() {	// RES 4 H
-	clearBit(R.H, 4);
+	reset_bit(R.H, 4);
 	return 0;
 }
 u8 CPU::prefixedopcode0xA5() {	// RES 4 L
-	clearBit(R.L, 4);
+	reset_bit(R.L, 4);
 	return 0;
 }
 u8 CPU::prefixedopcode0xA6() {	// RES 4 HL
 	u8 data = mem->read(R.HL);
-	clearBit(data, 4);
+	reset_bit(data, 4);
 	return 0;
 }
 u8 CPU::prefixedopcode0xA7() {	// RES 4 A
-	clearBit(R.A, 4);
+	reset_bit(R.A, 4);
 	return 0;
 }
 u8 CPU::prefixedopcode0xA8() {	// RES 5 B
-	clearBit(R.B, 5);
+	reset_bit(R.B, 5);
 	return 0;
 }
 u8 CPU::prefixedopcode0xA9() {	// RES 5 C
-	clearBit(R.C, 5);
+	reset_bit(R.C, 5);
 	return 0;
 }
 u8 CPU::prefixedopcode0xAA() {	// RES 5 D
-	clearBit(R.D, 5);
+	reset_bit(R.D, 5);
 	return 0;
 }
 u8 CPU::prefixedopcode0xAB() {	// RES 5 E
-	clearBit(R.E, 5);
+	reset_bit(R.E, 5);
 	return 0;
 }
 u8 CPU::prefixedopcode0xAC() {	// RES 5 H
-	clearBit(R.H, 5);
+	reset_bit(R.H, 5);
 	return 0;
 }
 u8 CPU::prefixedopcode0xAD() {	// RES 5 L
-	clearBit(R.L, 5);
+	reset_bit(R.L, 5);
 	return 0;
 }
 u8 CPU::prefixedopcode0xAE() {	// RES 5 HL
 	u8 data = mem->read(R.HL);
-	clearBit(data, 5);
+	reset_bit(data, 5);
 	return 0;
 }
 u8 CPU::prefixedopcode0xAF() {	// RES 5 A
-	clearBit(R.A, 5);
+	reset_bit(R.A, 5);
 	return 0;
 }
 u8 CPU::prefixedopcode0xB0() {	// RES 6 B
-	clearBit(R.B, 6);
+	reset_bit(R.B, 6);
 	return 0;
 }
 u8 CPU::prefixedopcode0xB1() {	// RES 6 C
-	clearBit(R.C, 6);
+	reset_bit(R.C, 6);
 	return 0;
 }
 u8 CPU::prefixedopcode0xB2() {	// RES 6 D
-	clearBit(R.D, 6);
+	reset_bit(R.D, 6);
 	return 0;
 }
 u8 CPU::prefixedopcode0xB3() {	// RES 6 E
-	clearBit(R.E, 6);
+	reset_bit(R.E, 6);
 	return 0;
 }
 u8 CPU::prefixedopcode0xB4() {	// RES 6 H
-	clearBit(R.H, 6);
+	reset_bit(R.H, 6);
 	return 0;
 }
 u8 CPU::prefixedopcode0xB5() {	// RES 6 L
-	clearBit(R.L, 6);
+	reset_bit(R.L, 6);
 	return 0;
 }
 u8 CPU::prefixedopcode0xB6() {	// RES 6 HL
 	u8 data = mem->read(R.HL);
-	clearBit(data, 6);
+	reset_bit(data, 6);
 	return 0;
 }
 u8 CPU::prefixedopcode0xB7() {	// RES 6 A
-	clearBit(R.A, 6);
+	reset_bit(R.A, 6);
 	return 0;
 }
 u8 CPU::prefixedopcode0xB8() {	// RES 7 B
-	clearBit(R.B, 7);
+	reset_bit(R.B, 7);
 	return 0;
 }
 u8 CPU::prefixedopcode0xB9() {	// RES 7 C
-	clearBit(R.C, 7);
+	reset_bit(R.C, 7);
 	return 0;
 }
 u8 CPU::prefixedopcode0xBA() {	// RES 7 D
-	clearBit(R.D, 7);
+	reset_bit(R.D, 7);
 	return 0;
 }
 u8 CPU::prefixedopcode0xBB() {	// RES 7 E
-	clearBit(R.E, 7);
+	reset_bit(R.E, 7);
 	return 0;
 }
 u8 CPU::prefixedopcode0xBC() {	// RES 7 H
-	clearBit(R.H, 7);
+	reset_bit(R.H, 7);
 	return 0;
 }
 u8 CPU::prefixedopcode0xBD() {	// RES 7 L
-	clearBit(R.L, 7);
+	reset_bit(R.L, 7);
 	return 0;
 }
 u8 CPU::prefixedopcode0xBE() {	// RES 7 HL
 	u8 data = mem->read(R.HL);
-	clearBit(data, 7);
+	reset_bit(data, 7);
 	return 0;
 }
 u8 CPU::prefixedopcode0xBF() {	// RES 7 A
-	clearBit(R.A, 7);
+	reset_bit(R.A, 7);
 	return 0;
 }
 u8 CPU::prefixedopcode0xC0() {	// SET 0 B
-	setBit(R.B, 0);
+	set_bit(R.B, 0);
 	return 0;
 }
 u8 CPU::prefixedopcode0xC1() {	// SET 0 C
-	setBit(R.C, 0);
+	set_bit(R.C, 0);
 	return 0;
 }
 u8 CPU::prefixedopcode0xC2() {	// SET 0 D
-	setBit(R.D, 0);
+	set_bit(R.D, 0);
 	return 0;
 }
 u8 CPU::prefixedopcode0xC3() {	// SET 0 E
-	setBit(R.E, 0);
+	set_bit(R.E, 0);
 	return 0;
 }
 u8 CPU::prefixedopcode0xC4() {	// SET 0 H
-	setBit(R.H, 0);
+	set_bit(R.H, 0);
 	return 0;
 }
 u8 CPU::prefixedopcode0xC5() {	// SET 0 L
-	setBit(R.L, 0);
+	set_bit(R.L, 0);
 	return 0;
 }
 u8 CPU::prefixedopcode0xC6() {	// SET 0 HL
 	u8 data = mem->read(R.HL);
-	setBit(data, 0);
+	set_bit(data, 0);
 	return 0;
 }
 u8 CPU::prefixedopcode0xC7() {	// SET 0 A
-	setBit(R.A, 0);
+	set_bit(R.A, 0);
 	return 0;
 }
 u8 CPU::prefixedopcode0xC8() {	// SET 1 B
-	setBit(R.B, 1);
+	set_bit(R.B, 1);
 	return 0;
 }
 u8 CPU::prefixedopcode0xC9() {	// SET 1 C
-	setBit(R.C, 1);
+	set_bit(R.C, 1);
 	return 0;
 }
 u8 CPU::prefixedopcode0xCA() {	// SET 1 D
-	setBit(R.D, 1);
+	set_bit(R.D, 1);
 	return 0;
 }
 u8 CPU::prefixedopcode0xCB() {	// SET 1 E
-	setBit(R.E, 1);
+	set_bit(R.E, 1);
 	return 0;
 }
 u8 CPU::prefixedopcode0xCC() {	// SET 1 H
-	setBit(R.H, 1);
+	set_bit(R.H, 1);
 	return 0;
 }
 u8 CPU::prefixedopcode0xCD() {	// SET 1 L
-	setBit(R.L, 1);
+	set_bit(R.L, 1);
 	return 0;
 }
 u8 CPU::prefixedopcode0xCE() {	// SET 1 HL
 	u8 data = mem->read(R.HL);
-	setBit(data, 1);
+	set_bit(data, 1);
 	return 0;
 }
 u8 CPU::prefixedopcode0xCF() {	// SET 1 A
-	setBit(R.A, 1);
+	set_bit(R.A, 1);
 	return 0;
 }
 u8 CPU::prefixedopcode0xD0() {	// SET 2 B
-	setBit(R.B, 2);
+	set_bit(R.B, 2);
 	return 0;
 }
 u8 CPU::prefixedopcode0xD1() {	// SET 2 C
-	setBit(R.C, 2);
+	set_bit(R.C, 2);
 	return 0;
 }
 u8 CPU::prefixedopcode0xD2() {	// SET 2 D
-	setBit(R.D, 2);
+	set_bit(R.D, 2);
 	return 0;
 }
 u8 CPU::prefixedopcode0xD3() {	// SET 2 E
-	setBit(R.E, 2);
+	set_bit(R.E, 2);
 	return 0;
 }
 u8 CPU::prefixedopcode0xD4() {	// SET 2 H
-	setBit(R.H, 2);
+	set_bit(R.H, 2);
 	return 0;
 }
 u8 CPU::prefixedopcode0xD5() {	// SET 2 L
-	setBit(R.L, 2);
+	set_bit(R.L, 2);
 	return 0;
 }
 u8 CPU::prefixedopcode0xD6() {	// SET 2 HL
 	u8 data = mem->read(R.HL);
-	setBit(data, 2);
+	set_bit(data, 2);
 	return 0;
 }
 u8 CPU::prefixedopcode0xD7() {	// SET 2 A
-	setBit(R.A, 2);
+	set_bit(R.A, 2);
 	return 0;
 }
 u8 CPU::prefixedopcode0xD8() {	// SET 3 B
-	setBit(R.B, 3);
+	set_bit(R.B, 3);
 	return 0;
 }
 u8 CPU::prefixedopcode0xD9() {	// SET 3 C
-	setBit(R.C, 3);
+	set_bit(R.C, 3);
 	return 0;
 }
 u8 CPU::prefixedopcode0xDA() {	// SET 3 D
-	setBit(R.D, 3);
+	set_bit(R.D, 3);
 	return 0;
 }
 u8 CPU::prefixedopcode0xDB() {	// SET 3 E
-	setBit(R.E, 3);
+	set_bit(R.E, 3);
 	return 0;
 }
 u8 CPU::prefixedopcode0xDC() {	// SET 3 H
-	setBit(R.H, 3);
+	set_bit(R.H, 3);
 	return 0;
 }
 u8 CPU::prefixedopcode0xDD() {	// SET 3 L
-	setBit(R.L, 3);
+	set_bit(R.L, 3);
 
 	return 0;
 }
 u8 CPU::prefixedopcode0xDE() {	// SET 3 HL
 	u8 data = mem->read(R.HL);
-	setBit(data, 3);
+	set_bit(data, 3);
 	return 0;
 }
 u8 CPU::prefixedopcode0xDF() {	// SET 3 A
-	setBit(R.A, 3);
+	set_bit(R.A, 3);
 	return 0;
 }
 u8 CPU::prefixedopcode0xE0() {	// SET 4 B
-	setBit(R.B, 4);
+	set_bit(R.B, 4);
 	return 0;
 }
 u8 CPU::prefixedopcode0xE1() {	// SET 4 C
-	setBit(R.C, 4);
+	set_bit(R.C, 4);
 	return 0;
 }
 u8 CPU::prefixedopcode0xE2() {	// SET 4 D
-	setBit(R.D, 4);
+	set_bit(R.D, 4);
 	return 0;
 }
 u8 CPU::prefixedopcode0xE3() {	// SET 4 E
-	setBit(R.E, 4);
+	set_bit(R.E, 4);
 	return 0;
 }
 u8 CPU::prefixedopcode0xE4() {	// SET 4 H
-	setBit(R.H, 4);
+	set_bit(R.H, 4);
 	return 0;
 }
 u8 CPU::prefixedopcode0xE5() {	// SET 4 L
-	setBit(R.L, 4);
+	set_bit(R.L, 4);
 	return 0;
 }
 u8 CPU::prefixedopcode0xE6() {	// SET 4 HL
 	u8 data = mem->read(R.HL);
-	setBit(data, 4);
+	set_bit(data, 4);
 	return 0;
 }
 u8 CPU::prefixedopcode0xE7() {	// SET 4 A
-	setBit(R.A, 4);
+	set_bit(R.A, 4);
 	return 0;
 }
 u8 CPU::prefixedopcode0xE8() {	// SET 5 B
-	setBit(R.B, 5);
+	set_bit(R.B, 5);
 	return 0;
 }
 u8 CPU::prefixedopcode0xE9() {	// SET 5 C
-	setBit(R.C, 5);
+	set_bit(R.C, 5);
 	return 0;
 }
 u8 CPU::prefixedopcode0xEA() {	// SET 5 D
-	setBit(R.D, 5);
+	set_bit(R.D, 5);
 	return 0;
 }
 u8 CPU::prefixedopcode0xEB() {	// SET 5 E
-	setBit(R.E, 5);
+	set_bit(R.E, 5);
 	return 0;
 }
 u8 CPU::prefixedopcode0xEC() {	// SET 5 H
-	setBit(R.H, 5);
+	set_bit(R.H, 5);
 	return 0;
 }
 u8 CPU::prefixedopcode0xED() {	// SET 5 L
-	setBit(R.L, 5);
+	set_bit(R.L, 5);
 	return 0;
 }
 u8 CPU::prefixedopcode0xEE() {	// SET 5 HL
 	u8 data = mem->read(R.HL);
-	setBit(data, 5);
+	set_bit(data, 5);
 	return 0;
 }
 u8 CPU::prefixedopcode0xEF() {	// SET 5 A
-	setBit(R.A, 5);
+	set_bit(R.A, 5);
 	return 0;
 }
 u8 CPU::prefixedopcode0xF0() {	// SET 6 B
-	setBit(R.B, 6);
+	set_bit(R.B, 6);
 	return 0;
 }
 u8 CPU::prefixedopcode0xF1() {	// SET 6 C
-	setBit(R.C, 6);
+	set_bit(R.C, 6);
 	return 0;
 }
 u8 CPU::prefixedopcode0xF2() {	// SET 6 D
-	setBit(R.D, 6);
+	set_bit(R.D, 6);
 	return 0;
 }
 u8 CPU::prefixedopcode0xF3() {	// SET 6 E
-	setBit(R.E, 6);
+	set_bit(R.E, 6);
 	return 0;
 }
 u8 CPU::prefixedopcode0xF4() {	// SET 6 H
-	setBit(R.H, 6);
+	set_bit(R.H, 6);
 	return 0;
 }
 u8 CPU::prefixedopcode0xF5() {	// SET 6 L
-	setBit(R.L, 6);
+	set_bit(R.L, 6);
 	return 0;
 }
 u8 CPU::prefixedopcode0xF6() {	// SET 6 HL
 	u8 data = mem->read(R.HL);
-	setBit(data, 6);
+	set_bit(data, 6);
 	return 0;
 }
 u8 CPU::prefixedopcode0xF7() {	// SET 6 A
-	setBit(R.A, 6);
+	set_bit(R.A, 6);
 	return 0;
 }
 u8 CPU::prefixedopcode0xF8() {	// SET 7 B
-	setBit(R.B, 7);
+	set_bit(R.B, 7);
 	return 0;
 }
 u8 CPU::prefixedopcode0xF9() {	// SET 7 C
-	setBit(R.C, 7);
+	set_bit(R.C, 7);
 	return 0;
 }
 u8 CPU::prefixedopcode0xFA() {	// SET 7 D
-	setBit(R.D, 7);
+	set_bit(R.D, 7);
 	return 0;
 }
 u8 CPU::prefixedopcode0xFB() {	// SET 7 E
-	setBit(R.E, 7);
+	set_bit(R.E, 7);
 	return 0;
 }
 u8 CPU::prefixedopcode0xFC() {	// SET 7 H
-	setBit(R.H, 7);
+	set_bit(R.H, 7);
 	return 0;
 }
 u8 CPU::prefixedopcode0xFD() {	// SET 7 L
-	setBit(R.L, 7);
+	set_bit(R.L, 7);
 	return 0;
 }
 u8 CPU::prefixedopcode0xFE() {	// SET 7 HL
 	u8 data = mem->read(R.HL);
-	setBit(data, 7);
+	set_bit(data, 7);
 	return 0;
 }
 u8 CPU::prefixedopcode0xFF() {	// SET 7 A
-	setBit(R.A, 7);
+	set_bit(R.A, 7);
 	return 0;
 }

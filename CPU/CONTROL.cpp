@@ -12,18 +12,18 @@ u8 CPU::opcode0x27() {	// DAA
 	return 0;
 }
 u8 CPU::opcode0x3F() {	// CCF
-	toggleFlag(Flag::c);
-	clearFlags(Flag::n, Flag::h);
+	toggle_flag(Flag::c);
+	reset_flags(Flag::n, Flag::h);
 	return 0;
 }
 u8 CPU::opcode0x37() {	// SCF
-	setFlag(Flag::c);
-	clearFlags(Flag::n, Flag::h);
+	set_flag(Flag::c);
+	reset_flags(Flag::n, Flag::h);
 	return 0;
 }
 u8 CPU::opcode0x2F() {	// CPL
 	R.A = ~R.A;
-	setFlags(Flag::n, Flag::h);
+	set_flags(Flag::n, Flag::h);
 	return 0;
 }
 u8 CPU::opcode0xF3() {	// DI

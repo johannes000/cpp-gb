@@ -30,47 +30,47 @@ u8 CPU::opcode0x18() {	// JR r8
 	return 1;
 }
 u8 CPU::opcode0x20() {	// JR NZ r8
-	if (!checkFlag(Flag::z))
+	if (!check_flag(Flag::z))
 		R.PC += read_u8_at_pc();
 	return 1;
 }
 u8 CPU::opcode0x28() {	// JR Z r8
-	if (checkFlag(Flag::z))
+	if (check_flag(Flag::z))
 		R.PC += read_u8_at_pc();;
 	return 1;
 }
 u8 CPU::opcode0x30() {	// JR NC r8
-	if (!checkFlag(Flag::c))
+	if (!check_flag(Flag::c))
 		R.PC += read_u8_at_pc();
 	return 1;
 }
 u8 CPU::opcode0x38() {	// JR C r8
-	if (checkFlag(Flag::c))
+	if (check_flag(Flag::c))
 		R.PC += read_u8_at_pc();
 	return 1;
 }
 u8 CPU::opcode0xC0() {	// RET NZ
-	if (!checkFlag(Flag::z))
+	if (!check_flag(Flag::z))
 		ret();
 	return 1;
 }
 u8 CPU::opcode0xC8() {	// RET Z
-	if (checkFlag(Flag::z))
+	if (check_flag(Flag::z))
 		ret();
 	return 1;
 }
 u8 CPU::opcode0xD0() {	// RET NC
-	if (!checkFlag(Flag::c))
+	if (!check_flag(Flag::c))
 		ret();
 	return 1;
 }
 u8 CPU::opcode0xD8() {	// RET C
-	if (checkFlag(Flag::z))
+	if (check_flag(Flag::z))
 		ret();
 	return 1;
 }
 u8 CPU::opcode0xC2() {	// JP NZ a16
-	if (!checkFlag(Flag::z))
+	if (!check_flag(Flag::z))
 		R.PC = read_u16_at_pc();
 	return 1;
 }
@@ -79,17 +79,17 @@ u8 CPU::opcode0xC3() {	// JP a16
 	return 1;
 }
 u8 CPU::opcode0xCA() {	// JP Z a16
-	if (checkFlag(Flag::z))
+	if (check_flag(Flag::z))
 		R.PC = read_u16_at_pc();
 	return 1;
 }
 u8 CPU::opcode0xD2() {	// JP NC a16
-	if (!checkFlag(Flag::c))
+	if (!check_flag(Flag::c))
 		R.PC = read_u16_at_pc();
 	return 1;
 }
 u8 CPU::opcode0xDA() {	// JP C a16
-	if (checkFlag(Flag::c))
+	if (check_flag(Flag::c))
 		R.PC = read_u16_at_pc();
 	return 1;
 }
@@ -98,12 +98,12 @@ u8 CPU::opcode0xE9() {	// JP HL
 	return 1;
 }
 u8 CPU::opcode0xC4() {	// CALL NZ a16
-	if (!checkFlag(Flag::z))
+	if (!check_flag(Flag::z))
 		call();
 	return 1;
 }
 u8 CPU::opcode0xCC() {	// CALL Z a16
-	if (checkFlag(Flag::z))
+	if (check_flag(Flag::z))
 		call();
 	return 1;
 }
@@ -112,12 +112,12 @@ u8 CPU::opcode0xCD() {	// CALL a16
 	return 1;
 }
 u8 CPU::opcode0xD4() {	// CALL NC a16
-	if (!checkFlag(Flag::c))
+	if (!check_flag(Flag::c))
 		call();
 	return 1;
 }
 u8 CPU::opcode0xDC() {	// CALL C a16
-	if (checkFlag(Flag::c))
+	if (check_flag(Flag::c))
 		call();
 	return 1;
 }

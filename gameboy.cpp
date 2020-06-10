@@ -17,7 +17,7 @@ void gameboy::startemu() {
 	}
 
 
-	cpu.setFlag(Flag::n);
+	cpu.set_flag(Flag::n);
 	mem.write(0x1234, 0x33);
 }
 
