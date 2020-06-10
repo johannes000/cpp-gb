@@ -61,21 +61,19 @@ void CPU::parseOPCode(u8& opcode) {
 	if (prefix) {
 		prefix = false;
 		instruction_info = prefixedinstructions[OPCode];
-		std::cout << "0x" << std::hex << std::uppercase << (int)(R.PC) << " " << instruction_info.mnemonic;
-		std::cout << instruction_info.mnemonic << std::endl;
 		u8 function = (this->*prefixedinstructions[opcode].function)();
 	}
 	else {
 		instruction_info = instructions[OPCode];
 
-		std::cout << "0x" << std::hex << std::uppercase << (int)(R.PC) << " " << instruction_info.mnemonic;
-		if (instruction_info.cycles == 3)
-			std::cout << " " << (int)(read_u16_at_pc());
-		if (instruction_info.cycles == 2)
-			std::cout << " 0x" << (int)(read_u8_at_pc());
-		std::cout << std::endl;
 		u8 function = (this->*instructions[opcode].function)();
 	}
+	std::cout << "0x" << std::hex << std::uppercase << (int)(R.PC) << " " << instruction_info.mnemonic;
+	if (instruction_info.cycles == 3)
+		std::cout << " " << (int)(read_u16_at_pc());
+	if (instruction_info.cycles == 2)
+		std::cout << " 0x" << (int)(read_u8_at_pc());
+	std::cout << std::endl;
 }
 
 void CPU::update() {

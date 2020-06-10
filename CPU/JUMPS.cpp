@@ -16,6 +16,7 @@ void CPU::pop_r16_reg(u16* reg) {
 void CPU::ret() {
 	//  Pop two bytes from stack & jump to that address.
 	R.PC = read_u16_sp();
+	R.SP -= 2;
 }
 
 void CPU::call() {

@@ -116,7 +116,7 @@ u8 CPU::opcode0x07() {	// RLCA
 	return 0;
 }
 u8 CPU::opcode0x17() {	// RLA
-	(R.A << 1) | (R.A >> (sizeof(u8) * CHAR_BIT - 1));
+	R.A = (R.A << 1) | (R.A >> (sizeof(u8) * CHAR_BIT - 1));
 	return 0;
 }
 u8 CPU::opcode0x0F() {	// RRCA
