@@ -74,21 +74,29 @@
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>C:\Users\knaub\source\SDL2-2.0.12\include;$(IncludePath)</IncludePath>
     <LibraryPath>C:\Users\knaub\source\SDL2-2.0.12\lib\x86;$(LibraryPath)</LibraryPath>
+    <OutDir>C:\Users\knaub\source\repos\VSBuilds\Builds\$(MSBuildProjectName)\$(Platform)\$(Configuration)</OutDir>
+    <IntDir>C:\Users\knaub\source\repos\VSBuilds\Buffer\$(MSBuildProjectName)\$(Platform)\$(Configuration)</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>C:\Users\knaub\source\SDL2-2.0.12\include;$(IncludePath)</IncludePath>
     <LibraryPath>C:\Users\knaub\source\SDL2-2.0.12\lib\x86;$(LibraryPath)</LibraryPath>
+    <OutDir>C:\Users\knaub\source\repos\VSBuilds\Builds\$(MSBuildProjectName)\$(Platform)\$(Configuration)</OutDir>
+    <IntDir>C:\Users\knaub\source\repos\VSBuilds\Buffer\$(MSBuildProjectName)\$(Platform)\$(Configuration)</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>C:\Users\knaub\source\SDL2-2.0.12\include;$(IncludePath)</IncludePath>
     <LibraryPath>C:\Users\knaub\source\SDL2-2.0.12\lib\x64;$(LibraryPath)</LibraryPath>
+    <OutDir>C:\Users\knaub\source\repos\VSBuilds\Builds\$(MSBuildProjectName)\$(Platform)\$(Configuration)</OutDir>
+    <IntDir>C:\Users\knaub\source\repos\VSBuilds\Buffer\$(MSBuildProjectName)\$(Platform)\$(Configuration)</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>C:\Users\knaub\source\SDL2-2.0.12\include;$(IncludePath)</IncludePath>
     <LibraryPath>C:\Users\knaub\source\SDL2-2.0.12\lib\x64;$(LibraryPath)</LibraryPath>
+    <OutDir>C:\Users\knaub\source\repos\VSBuilds\Builds\$(MSBuildProjectName)\$(Platform)\$(Configuration)</OutDir>
+    <IntDir>C:\Users\knaub\source\repos\VSBuilds\Buffer\$(MSBuildProjectName)\$(Platform)\$(Configuration)</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -155,29 +163,29 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="CARDRIDGE.cpp" />
-    <ClCompile Include="CPU.cpp" />
-    <ClCompile Include="CPU\LD.cpp" />
-    <ClCompile Include="CPU\ARITHMETIC.cpp" />
-    <ClCompile Include="CPU\JUMPS.cpp" />
-    <ClCompile Include="CPU\CONTROL.cpp" />
-    <ClCompile Include="CPU\helper.cpp" />
-    <ClCompile Include="CPU\SHIFT.cpp" />
-    <ClCompile Include="gameboy.cpp" />
-    <ClCompile Include="MEMORY.cpp" />
-    <ClCompile Include="PPU.cpp" />
-    <ClCompile Include="main.cpp" />
+    <ClCompile Include="scr\CARDRIDGE.cpp" />
+    <ClCompile Include="scr\CPU.cpp" />
+    <ClCompile Include="scr\CPU\LD.cpp" />
+    <ClCompile Include="scr\CPU\ARITHMETIC.cpp" />
+    <ClCompile Include="scr\CPU\JUMPS.cpp" />
+    <ClCompile Include="scr\CPU\CONTROL.cpp" />
+    <ClCompile Include="scr\CPU\helper.cpp" />
+    <ClCompile Include="scr\CPU\SHIFT.cpp" />
+    <ClCompile Include="scr\gameboy.cpp" />
+    <ClCompile Include="scr\MEMORY.cpp" />
+    <ClCompile Include="scr\PPU.cpp" />
+    <ClCompile Include="scr\main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="CARDRIDGE.h" />
-    <ClInclude Include="CPU.h" />
-    <ClInclude Include="gameboy.h" />
-    <ClInclude Include="MEMORY.h" />
-    <ClInclude Include="type.h" />
-    <ClInclude Include="PPU.h" />
+    <ClInclude Include="scr\CARDRIDGE.h" />
+    <ClInclude Include="scr\CPU.h" />
+    <ClInclude Include="scr\gameboy.h" />
+    <ClInclude Include="scr\MEMORY.h" />
+    <ClInclude Include="scr\type.h" />
+    <ClInclude Include="scr\PPU.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="opcodes\instructions" />
+    <None Include="scr\opcodes\instructions" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -15,64 +15,64 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="PPU.cpp">
+    <ClCompile Include="scr\CARDRIDGE.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
-    <ClCompile Include="CPU.cpp">
+    <ClCompile Include="scr\CPU.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
-    <ClCompile Include="main.cpp">
+    <ClCompile Include="scr\gameboy.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
-    <ClCompile Include="gameboy.cpp">
+    <ClCompile Include="scr\main.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
-    <ClCompile Include="CPU\LD.cpp">
+    <ClCompile Include="scr\MEMORY.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
-    <ClCompile Include="CPU\ARITHMETIC.cpp">
+    <ClCompile Include="scr\PPU.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
-    <ClCompile Include="CPU\JUMPS.cpp">
+    <ClCompile Include="scr\CPU\ARITHMETIC.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
-    <ClCompile Include="CPU\SHIFT.cpp">
+    <ClCompile Include="scr\CPU\CONTROL.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
-    <ClCompile Include="CPU\CONTROL.cpp">
+    <ClCompile Include="scr\CPU\helper.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
-    <ClCompile Include="MEMORY.cpp">
+    <ClCompile Include="scr\CPU\JUMPS.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
-    <ClCompile Include="CARDRIDGE.cpp">
+    <ClCompile Include="scr\CPU\LD.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
-    <ClCompile Include="CPU\helper.cpp">
+    <ClCompile Include="scr\CPU\SHIFT.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="PPU.h">
+    <ClInclude Include="scr\type.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="CPU.h">
+    <ClInclude Include="scr\CARDRIDGE.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="gameboy.h">
+    <ClInclude Include="scr\CPU.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="type.h">
+    <ClInclude Include="scr\gameboy.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="MEMORY.h">
+    <ClInclude Include="scr\MEMORY.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="CARDRIDGE.h">
+    <ClInclude Include="scr\PPU.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="opcodes\instructions" />
+    <None Include="scr\opcodes\instructions" />
   </ItemGroup>
 </Project>
