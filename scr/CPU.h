@@ -17,7 +17,7 @@ public:
 
 	MEMORY* mem = nullptr;
 
-	void parseOPCode(u8&);
+	u8 parseOPCode(u8&);
 	void update();
 	void incPC();
 	u8 getNextOPCode();
