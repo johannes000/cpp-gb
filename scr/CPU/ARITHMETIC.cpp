@@ -252,7 +252,7 @@ u8 CPU::opcode0xC6() {	// ADD A d8
 	return 0;
 }
 u8 CPU::opcode0xE8() {	// ADD SP r8
-	u16 data = read_u8_at_pc() + 0xFF00;
+	u16 data = read_i8_at_pc() + 0xFF00;
 	add_r16_r16(&R.SP, &data);
 	return 0;
 }

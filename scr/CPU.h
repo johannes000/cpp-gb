@@ -11,7 +11,6 @@
 #include "MEMORY.h"
 
 
-
 class MEMORY;
 
 class CPU {
@@ -32,16 +31,19 @@ private:
 	//REGISTER
 	Register R;
 	void initRegister();
+	u16 oldPC;
 
 	//INTERRUPTS
 
 	// Interrupt Master Enable Flag
-	// 0 = Disable jump to interrupt vectors.
-	// 1 = Enable jump to interrupt vectors.
+	// 0 - Disable all Interrupts
+	// 1 - Enable all Interrupts that are enabled in IE Register(FFFF)
 	bool IME = false;
 	bool IME_scheduled = false;
 	bool DI_scheduled = false;
 
+	// FFFF - IE - Interrupt Enable (R/W)
+	u8* IR = nullptr;
 	const u8 JIR = 4;		// Bit 4 – Joypad Interrupt Requested(1 = Requested);
 	const u8 SIR = 3;		// Bit 3 – Serial Interrupt Requested(1 = Requested)
 	const u8 TIR = 2;		// Bit 2 – Timer Interrupt Requested(1 = Requested)
@@ -54,6 +56,8 @@ private:
 	bool LIR_state() { return check_bit(LIR, A_interrupt_flags); };
 	bool VIR_state() { return check_bit(VIR, A_interrupt_flags); };
 
+	// FF0F - IF - Interrupt Flag (R/W)
+	u8* IE = nullptr;
 	const u8 JIE = 4;	// Bit 4 – Joypad Interrupt Enable(1 = Enable, 0 = Disable)
 	const u8 SIE = 3;	// Bit 3 – Serial Interrupt Enable(1 = Enable, 0 = Disable)
 	const u8 TIE = 2;	// Bit 2 – Timer Interrupt Enable(1 = Enable, 0 = Disable)

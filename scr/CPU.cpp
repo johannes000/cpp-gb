@@ -7,6 +7,8 @@ CPU::CPU(MEMORY* memory) {
 	initRegister();
 	mem = memory;
 
+	IR = mem->read_ptr(A_interrupt_enable);
+	IE = mem->read_ptr(A_interrupt_flags);
 }
 
 void CPU::initRegister() {
@@ -34,6 +36,7 @@ u8 CPU::parseOPCode(u8& opcode) {
 }
 
 void CPU::update() {
+	oldPC = R.PC;
 	if (interrupts())
 		std::cout << "INTERRUPT" << std::endl;
 	if (IME_scheduled)
@@ -42,7 +45,7 @@ void CPU::update() {
 	OPCode = getNextOPCode();
 	u8 jp = parseOPCode(OPCode);
 
-	//print_last_opcode();
+	print_last_opcode();
 	if (jp == 0) incPC();
 }
 
@@ -60,13 +63,17 @@ void CPU::handle_interrupt() {
 
 
 bool CPU::interrupts() {
-	if (!IME)
-		return false;
+	if (!IME) {
+		if ((*IE & *IR & 0x1F) == 0)
+			return false;
+		else
+			return true;
+	}
 	return (JIR_state() & JIE_state()) || (SIR_state() & SIE_state()) || (TIR_state() & TIE_state()) || (LIR_state() & LIE_state()) || (VIR_state() & VIE_state());
 }
 
 void CPU::print_last_opcode() {
-	std::cout << "0x" << std::hex << std::uppercase << (int)(OPCode) << " " << instruction_info.mnemonic;
+	std::cout << "0x" << std::hex << std::uppercase << (int)(oldPC) << " " << instruction_info.mnemonic;
 	if (instruction_info.bytes == 3)
 		std::cout << " " << (int)(read_u16_at_pc());
 	if (instruction_info.bytes == 2)
@@ -77,7 +84,7 @@ void CPU::print_last_opcode() {
 void CPU::printallops() {
 	u16 mypc = 0x00;
 	instruction myinstruction_info;
-	for (size_t i = 0; i < 255; i++) {
+	for (size_t i = 0; i < 0x4FFF; i++) {
 		u8 myopcode = mem->read(mypc);
 		if (myopcode == 0xCB) {
 			myopcode = mem->read(++mypc);

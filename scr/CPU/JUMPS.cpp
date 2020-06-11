@@ -26,32 +26,32 @@ void CPU::call() {
 }
 
 u8 CPU::opcode0x18() {	// JR r8
-	R.PC += read_u8_at_pc();
+	R.PC += read_i8_at_pc();
 	return 1;
 }
 u8 CPU::opcode0x20() {	// JR NZ r8
 	if (!check_flag(Flag::z)) {
-		R.PC += read_u8_at_pc();
+		R.PC += read_i8_at_pc();
 		return 1;
 	}
 	return 0;
 }
 u8 CPU::opcode0x28() {	// JR Z r8	
 	if (check_flag(Flag::z)) {
-		R.PC += read_u8_at_pc();
+		R.PC += read_i8_at_pc();
 		return 1;
 	}
 }
 u8 CPU::opcode0x30() {	// JR NC r8
 	if (!check_flag(Flag::c)) {
-		R.PC += read_u8_at_pc();
+		R.PC += read_i8_at_pc();
 		return 1;
 	}
 	return 0;
 }
 u8 CPU::opcode0x38() {	// JR C r8
 	if (check_flag(Flag::c)) {
-		R.PC += read_u8_at_pc();
+		R.PC += read_i8_at_pc();
 		return 1;
 	}
 	return 0;

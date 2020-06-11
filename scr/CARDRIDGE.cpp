@@ -25,7 +25,7 @@ bool CARDRIDGE::loadROM(const char* romFile) {
 }
 
 void CARDRIDGE::romintomem() {
-	romintomem(0x0100, 0x7FFF, 0x0100);
+	romintomem(0x0000, 0x7FFF, 0x0100);
 }
 
 void CARDRIDGE::romintomem(u16 romBeg, u16 romEnd, u16 dest) {

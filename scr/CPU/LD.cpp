@@ -359,13 +359,9 @@ u8 CPU::opcode0xF8() {	// LD HL SP + r8
 	i8 r8 = read_i8_at_pc();
 	u16 result = R.SP + r8;
 	u16 check = R.SP ^ r8 ^ ((result) & 0xFFFF);
-	if (check_bit(check, 7))
-		set_flag(Flag::c);
-	if (check_bit(check, 3))
-		set_flag(Flag::h);
-
+	set_flag_if(Flag::c, check_bit(check, 7));
+	set_flag_if(Flag::h, check_bit(check, 3));
 	R.HL = result;
-
 	reset_flags(Flag::z, Flag::n);
 	return 0;
 }

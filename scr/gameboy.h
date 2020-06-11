@@ -15,8 +15,9 @@ public:
 
 	PPU ppu;
 	MEMORY mem;
-	CARDRIDGE rom = (&mem);
 	CPU cpu = (&mem);
+
+	CARDRIDGE rom = (&mem);
 
 	void startemu();
 private:
