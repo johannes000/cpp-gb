@@ -2,7 +2,6 @@
 // die Ausführung des Programms.
 //
 
-#include <SDL.h>
 #include <iostream>
 #include "gameboy.h"
 

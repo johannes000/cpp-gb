@@ -9,15 +9,14 @@ gameboy::~gameboy() {
 
 
 void gameboy::startemu() {
-	//ppu.createWindow();
-	//ppu.renderScreen();
+	ppu.createWindow();
+	ppu.renderScreen();
 	rom.loadROM("./testroms/cpu_instrs/cpu_instrs.gb");
-	for (size_t i = 0; i < 50; i++) {
+	for (size_t i = 0; i < 100; i++) {
 		cpu.update();
+		//ppu.waitforinput();
+		//SDL_Delay(200);
 	}
-
-
-	cpu.set_flag(Flag::n);
-	mem.write(0x1234, 0x33);
+	ppu.closeWindow();
 }
 

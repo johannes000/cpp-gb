@@ -37,7 +37,7 @@ public:
 		bool SGBFlag = false;
 		CGBFlag cgb = CGBFlag::ON;
 		CType ctype = CType::MBC1;
-		ROMSize romsize = ROMSize::S128KByte;
+		ROMSize romsize = ROMSize::KB32;
 		RAMSize ramsize = RAMSize::None;
 	}rom_info;
 };

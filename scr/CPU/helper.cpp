@@ -27,7 +27,6 @@ void CPU::set_flag_if(const Flag& F, bool condition) {
 
 void CPU::set_flag(const Flag& F) {
 	set_bit(R.F, static_cast<u8>(F));
-
 }
 void CPU::set_flags(const Flag& F1, const Flag& F2) {
 	set_flag(F1);
@@ -112,9 +111,9 @@ void CPU::toggle_bit(u16& value, const u16 bit) {
 	value ^= (1 << bit);
 }
 
-bool CPU::check_bit(const u8& value, const u8 bit) {
+bool CPU::check_bit(const u8& value, const u8& bit) {
 	return (value >> bit) & 1;
 }
-bool CPU::check_bit(const u16& value, const u16 bit) {
+bool CPU::check_bit(const u16& value, const u16& bit) {
 	return (value >> bit) & 1;
 }

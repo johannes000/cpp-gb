@@ -27,11 +27,11 @@ u8 CPU::opcode0x2F() {	// CPL
 	return 0;
 }
 u8 CPU::opcode0xF3() {	// DI
-	std::cout << "0xF3 nicht implementiert" << std::endl;
+	DI_scheduled = true;
 	return 0;
 }
 u8 CPU::opcode0xFB() {	// EI
-	std::cout << "0xFB nicht implementiert" << std::endl;
+	IME_scheduled = true;
 	return 0;
 }
 u8 CPU::opcode0x76() {	// HALT

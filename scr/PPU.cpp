@@ -12,6 +12,25 @@ void PPU::renderScreen() {
 	// Wait two seconds
 	SDL_Delay(20);
 
+}
+
+void PPU::waitforinput() {
+	bool quit = false;
+	while (!quit) {
+		if (SDL_PollEvent(&event)) {
+			/* We are only worried about SDL_KEYDOWN and SDL_KEYUP events */
+			switch (event.type) {
+			case SDL_KEYDOWN:
+				quit = true;
+				break;
+			default:
+				break;
+			}
+		}
+	}
+}
+
+void PPU::closeWindow() {
 	// Destroy window
 	SDL_DestroyWindow(window);
 

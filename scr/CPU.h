@@ -9,6 +9,9 @@
 
 #include "type.h"
 #include "MEMORY.h"
+
+
+
 class MEMORY;
 
 class CPU {
@@ -28,8 +31,45 @@ private:
 	Register R;
 	void initRegister();
 
+	//INTERRUPTS
+
+	// Interrupt Master Enable Flag
+	// 0 = Disable jump to interrupt vectors.
+	// 1 = Enable jump to interrupt vectors.
+	bool IME = false;
+	bool IME_scheduled = false;
+	bool DI_scheduled = false;
+
+	const u8 JIR = 4;		// Bit 4 – Joypad Interrupt Requested(1 = Requested);
+	const u8 SIR = 3;		// Bit 3 – Serial Interrupt Requested(1 = Requested)
+	const u8 TIR = 2;		// Bit 2 – Timer Interrupt Requested(1 = Requested)
+	const u8 LIR = 1;		// Bit 1 – LCD STAT Interrupt Requested(1 = Requested)
+	const u8 VIR = 0;		// Bit 0 – Vertical Blank Interrupt Requested(1 = Requested)
+
+	bool JIR_state() { return check_bit(JIR, A_interrupt_flags); };
+	bool SIR_state() { return check_bit(SIR, A_interrupt_flags); };
+	bool TIR_state() { return check_bit(TIR, A_interrupt_flags); };
+	bool LIR_state() { return check_bit(LIR, A_interrupt_flags); };
+	bool VIR_state() { return check_bit(VIR, A_interrupt_flags); };
+
+	const u8 JIE = 4;	// Bit 4 – Joypad Interrupt Enable(1 = Enable, 0 = Disable)
+	const u8 SIE = 3;	// Bit 3 – Serial Interrupt Enable(1 = Enable, 0 = Disable)
+	const u8 TIE = 2;	// Bit 2 – Timer Interrupt Enable(1 = Enable, 0 = Disable)
+	const u8 LIE = 1;	// Bit 1 – LCD STAT Interrupt Enable(1 = Enable, 0 = Disable)
+	const u8 VIE = 0;	// Bit 0 – Vertical Blank Interrupt Enable(1 = Enable, 0 = Disable)
+
+	bool JIE_state() { return check_bit(JIE, A_interrupt_enable); };
+	bool SIE_state() { return check_bit(SIE, A_interrupt_enable); };
+	bool TIE_state() { return check_bit(TIE, A_interrupt_enable); };
+	bool LIE_state() { return check_bit(LIE, A_interrupt_enable); };
+	bool VIE_state() { return check_bit(VIE, A_interrupt_enable); };
+
+	void handle_interrupt();
+	bool interrupts();
 	//FLAGS
-public:
+private:
+	void print_flags();
+
 	void set_flag_if(const Flag&, bool condition);
 	void set_flag(const Flag&);								//setze flag auf true egal was
 	void set_flags(const Flag&, const Flag&);				//setze flag auf true egal was
@@ -56,13 +96,12 @@ public:
 	void reset_bit(u16& value, const u16 bit);
 	void toggle_bit(u8& value, const u8 bit);
 	void toggle_bit(u16& value, const u16 bit);
-	bool check_bit(const u8& value, const u8 bit);
-	bool check_bit(const u16& value, const u16 bit);
+	bool check_bit(const u8& value, const u8& bit);
+	bool check_bit(const u16& value, const u16& bit);
 
 
 	//OPCODES
 private:
-
 	struct instruction {
 		const char* mnemonic = "";
 		u8(CPU::* function)(void) = nullptr;
@@ -103,6 +142,7 @@ private:
 
 	// JUMPS
 	void push_r16_reg(u16* reg);
+	void push_r16_reg(u16& reg);
 	void pop_r16_reg(u16* reg);
 	void ret();
 	void call();
@@ -157,6 +197,8 @@ private:
 		{"SET 4 B", &CPU::prefixedopcode0xE0, 2, 2},{"SET 4 C", &CPU::prefixedopcode0xE1, 2, 2},{"SET 4 D", &CPU::prefixedopcode0xE2, 2, 2},{"SET 4 E", &CPU::prefixedopcode0xE3, 2, 2},{"SET 4 H", &CPU::prefixedopcode0xE4, 2, 2},{"SET 4 L", &CPU::prefixedopcode0xE5, 2, 2},{"SET 4 HL", &CPU::prefixedopcode0xE6, 2, 4},{"SET 4 A", &CPU::prefixedopcode0xE7, 2, 2},{"SET 5 B", &CPU::prefixedopcode0xE8, 2, 2},{"SET 5 C", &CPU::prefixedopcode0xE9, 2, 2},{"SET 5 D", &CPU::prefixedopcode0xEA, 2, 2},{"SET 5 E", &CPU::prefixedopcode0xEB, 2, 2},{"SET 5 H", &CPU::prefixedopcode0xEC, 2, 2},{"SET 5 L", &CPU::prefixedopcode0xED, 2, 2},{"SET 5 HL", &CPU::prefixedopcode0xEE, 2, 4},{"SET 5 A", &CPU::prefixedopcode0xEF, 2, 2},
 		{"SET 6 B", &CPU::prefixedopcode0xF0, 2, 2},{"SET 6 C", &CPU::prefixedopcode0xF1, 2, 2},{"SET 6 D", &CPU::prefixedopcode0xF2, 2, 2},{"SET 6 E", &CPU::prefixedopcode0xF3, 2, 2},{"SET 6 H", &CPU::prefixedopcode0xF4, 2, 2},{"SET 6 L", &CPU::prefixedopcode0xF5, 2, 2},{"SET 6 HL", &CPU::prefixedopcode0xF6, 2, 4},{"SET 6 A", &CPU::prefixedopcode0xF7, 2, 2},{"SET 7 B", &CPU::prefixedopcode0xF8, 2, 2},{"SET 7 C", &CPU::prefixedopcode0xF9, 2, 2},{"SET 7 D", &CPU::prefixedopcode0xFA, 2, 2},{"SET 7 E", &CPU::prefixedopcode0xFB, 2, 2},{"SET 7 H", &CPU::prefixedopcode0xFC, 2, 2},{"SET 7 L", &CPU::prefixedopcode0xFD, 2, 2},{"SET 7 HL", &CPU::prefixedopcode0xFE, 2, 4},{"SET 7 A", &CPU::prefixedopcode0xFF, 2, 2}
 	};
+
+	void print_last_opcode();
 
 	u8 opcode0x00();	// NOP
 	u8 opcode0x01();	// LD BC d16

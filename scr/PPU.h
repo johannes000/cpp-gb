@@ -2,8 +2,6 @@
 #ifndef PPU_H_GUARD
 #define PPU_H_GUARD
 
-
-
 #include <SDL.h>
 #include <stdio.h>
 
@@ -11,8 +9,11 @@ class PPU {
 public:
 	bool createWindow();
 	void renderScreen();
+	void waitforinput();
+	void closeWindow();
 
 private:
+	SDL_Event event;
 	// Screen dimension constants
 	const int SCREEN_WIDTH = 640;
 	const int SCREEN_HEIGHT = 480;
