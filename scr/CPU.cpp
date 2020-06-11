@@ -42,7 +42,7 @@ void CPU::update() {
 	OPCode = getNextOPCode();
 	u8 jp = parseOPCode(OPCode);
 
-	print_last_opcode();
+	//print_last_opcode();
 	if (jp == 0) incPC();
 }
 
@@ -53,6 +53,7 @@ void CPU::incPC() {
 u8 CPU::getNextOPCode() {
 	return mem->read(R.PC);
 }
+
 
 void CPU::handle_interrupt() {
 }
@@ -70,11 +71,27 @@ void CPU::print_last_opcode() {
 		std::cout << " " << (int)(read_u16_at_pc());
 	if (instruction_info.bytes == 2)
 		std::cout << " 0x" << (int)(read_u8_at_pc());
-	print_flags();
 	std::cout << std::endl;
 }
 
-
-void CPU::print_flags() {
-	std::cout << " Z: " << check_flag(Flag::z);
+void CPU::printallops() {
+	u16 mypc = 0x00;
+	instruction myinstruction_info;
+	for (size_t i = 0; i < 255; i++) {
+		u8 myopcode = mem->read(mypc);
+		if (myopcode == 0xCB) {
+			myopcode = mem->read(++mypc);
+			myinstruction_info = prefixedinstructions[myopcode];
+		}
+		else {
+			myinstruction_info = instructions[myopcode];
+		}
+		std::cout << "0x" << std::hex << std::uppercase << (int)(myopcode) << " " << myinstruction_info.mnemonic;
+		if (myinstruction_info.bytes == 3)
+			std::cout << " " << (int)(read_u16_at_pc());
+		if (myinstruction_info.bytes == 2)
+			std::cout << " 0x" << (int)(read_u8_at_pc());
+		std::cout << std::endl;
+		mypc += myinstruction_info.bytes;
+	}
 }

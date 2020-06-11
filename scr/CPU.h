@@ -25,6 +25,8 @@ public:
 	void update();
 	void incPC();
 	u8 getNextOPCode();
+	void printallops();
+
 
 private:
 	//REGISTER
@@ -142,7 +144,6 @@ private:
 
 	// JUMPS
 	void push_r16_reg(u16* reg);
-	void push_r16_reg(u16& reg);
 	void pop_r16_reg(u16* reg);
 	void ret();
 	void call();
