@@ -1,7 +1,7 @@
 #include "gameboy.h"
 
 
-gameboy::gameboy() {
+gameboy::gameboy() :cpu(&mem), mem(&cpu, &card, &ppu), ppu() {
 
 }
 
@@ -10,7 +10,6 @@ gameboy::~gameboy() {
 
 
 void gameboy::startemu() {
-	mem.connect(&cpu, &card, &ppu);
 	ppu.createWindow();
 	ppu.renderScreen();
 	card.loadROM("./testroms/cpu_instrs/cpu_instrs.gb");

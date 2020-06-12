@@ -32,10 +32,13 @@ public:
 	struct Rom_Info {
 		char title[15] = "";
 		bool SGBFlag = false;
+
 		CGBFlag cgb = CGBFlag::ON;
 		CType ctype = CType::MBC1;
+
 		ROMSize romsize = ROMSize::KB32;
 		RAMSize ramsize = RAMSize::None;
+
 		int rom_banks;
 		int ram_banks;
 	}rom_info;

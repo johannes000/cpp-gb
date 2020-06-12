@@ -15,10 +15,8 @@ class MEMORY;
 
 class CPU {
 public:
-	CPU();
 	CPU(MEMORY*);
-
-	MEMORY* mem = nullptr;
+	~CPU();
 
 	u8 parseOPCode(u8&);
 	void update();
@@ -28,6 +26,7 @@ public:
 	bool in_boot_r();
 
 private:
+	MEMORY* mem = nullptr;
 	bool in_boot = true;
 
 	u8 read(const u16& addr);

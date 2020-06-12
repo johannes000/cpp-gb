@@ -16,8 +16,7 @@ public:
 	PPU ppu;
 	CARDRIDGE card;
 	MEMORY mem;
-	CPU cpu = (&mem);
-
+	CPU cpu;
 
 	void startemu();
 private:

@@ -1,12 +1,11 @@
 #include "CPU.h"
 
 
-CPU::CPU() {}
-
-CPU::CPU(MEMORY* memory) {
+CPU::CPU(MEMORY* memory) : mem(memory) {
 	initRegister();
-	mem = memory;
 }
+
+CPU::~CPU() {}
 
 void CPU::initRegister() {
 	R.AF = 0x01B0;
@@ -112,14 +111,14 @@ void CPU::write_u16(const u16& addr, const u16& data) {
 
 
 // INTERRUPT FLAGS
-bool CPU::JIR_state() { return check_bit(JIR, read(A_interrupt_flags)); };
-bool CPU::SIR_state() { return check_bit(SIR, read(A_interrupt_flags)); };
-bool CPU::TIR_state() { return check_bit(TIR, read(A_interrupt_flags)); };
-bool CPU::LIR_state() { return check_bit(LIR, read(A_interrupt_flags)); };
-bool CPU::VIR_state() { return check_bit(VIR, read(A_interrupt_flags)); };
+bool CPU::JIR_state() { return check_bit(JIR, read(INTERRUPT_FLAGS)); };
+bool CPU::SIR_state() { return check_bit(SIR, read(INTERRUPT_FLAGS)); };
+bool CPU::TIR_state() { return check_bit(TIR, read(INTERRUPT_FLAGS)); };
+bool CPU::LIR_state() { return check_bit(LIR, read(INTERRUPT_FLAGS)); };
+bool CPU::VIR_state() { return check_bit(VIR, read(INTERRUPT_FLAGS)); };
 
-bool CPU::JIE_state() { return check_bit(JIE, read(A_interrupt_enable)); };
-bool CPU::SIE_state() { return check_bit(SIE, read(A_interrupt_enable)); };
-bool CPU::TIE_state() { return check_bit(TIE, read(A_interrupt_enable)); };
-bool CPU::LIE_state() { return check_bit(LIE, read(A_interrupt_enable)); };
-bool CPU::VIE_state() { return check_bit(VIE, read(A_interrupt_enable)); };
+bool CPU::JIE_state() { return check_bit(JIE, read(INTERRUPT_ENABLE)); };
+bool CPU::SIE_state() { return check_bit(SIE, read(INTERRUPT_ENABLE)); };
+bool CPU::TIE_state() { return check_bit(TIE, read(INTERRUPT_ENABLE)); };
+bool CPU::LIE_state() { return check_bit(LIE, read(INTERRUPT_ENABLE)); };
+bool CPU::VIE_state() { return check_bit(VIE, read(INTERRUPT_ENABLE)); };

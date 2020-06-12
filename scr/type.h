@@ -12,8 +12,32 @@ typedef signed char i8;
 typedef signed short i16;
 
 //ADDRESSES
-constexpr u16 A_interrupt_flags = 0xFF0F;
-constexpr u16 A_interrupt_enable = 0xFFFF;
+constexpr u16 INTERRUPT_FLAGS = 0xFF0F;
+constexpr u16 INTERRUPT_ENABLE = 0xFFFF;
+
+constexpr u16 CARD_ROM_0 = 0x0000;
+constexpr u16 CARD_ROM_0_END = 0x3FFF;
+constexpr u16 CARD_ROM_END = 0x7000;
+constexpr u16 BIOS = 0x0000;
+constexpr u16 BIOS_END = 0x00FF;
+constexpr u16 CARD_HEADER = 0x0100;
+constexpr u16 CARD_BANKS = 0x4000;
+constexpr u16 CARD_BANKS_END = 0x7FFF;
+constexpr u16 GRAPHICS_RAM = 0x8000;
+constexpr u16 GRAPHICS_RAM_END = 0x9FFF;
+constexpr u16 CARD_EXTERNAL_RAM = 0xA000;
+constexpr u16 CARD_EXTERNAL_RAM_END = 0xBFFF;
+constexpr u16 WORKING_RAM = 0xC000;
+constexpr u16 WORKING_RAM_END = 0xDFFF;
+constexpr u16 WORKING_RAM_SHADOW = 0xE000;
+constexpr u16 WORKING_RAM_SHADOW_END = 0xFDFF;
+constexpr u16 SPRITE_INFORMATION = 0xFE00;
+constexpr u16 SPRITE_INFORMATION_END = 0xFE9F;
+constexpr u16 MEMORY_MAPPED_IO = 0xFF00;
+constexpr u16 MEMORY_MAPPED_IO_END = 0xFF7F;
+constexpr u16 ZERO_PAGE_RAM = 0xFF80;
+constexpr u16 ZERO_PAGE_RAM_END = 0xFFFF;
+
 
 typedef const u8 IF; // Interrupt Flags
 

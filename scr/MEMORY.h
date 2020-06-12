@@ -17,20 +17,20 @@ class CARDRIDGE;
 
 class MEMORY {
 public:
-	MEMORY();
+	MEMORY(CPU* c, CARDRIDGE* card, PPU* p);
 	~MEMORY();
-	void connect(CPU* c, CARDRIDGE* card, PPU* p);
 
-	u8 read(const u16& addr);
 	void write(const u16& addr, const u8& data);
 	void write_u16(const u16& addr, const u16& data);
-
+private:
 	bool address_in_range(const u16& addr, const u16& b_range, const u16& e_range);
 
 private:
 	CARDRIDGE* cardridge;
 	PPU* ppu;
 	CPU* cpu;
+	int active_rom_bank = 0;
+	int active_ram_bank = 0;
 	std::vector<u8> memory;
 
 	std::vector<u8> boot = {
@@ -51,8 +51,9 @@ private:
 		0x21, 0x04, 0x01, 0x11, 0xA8, 0x00, 0x1A, 0x13, 0xBE, 0x00, 0x00, 0x23, 0x7D, 0xFE, 0x34, 0x20,
 		0xF5, 0x06, 0x19, 0x78, 0x86, 0x23, 0x05, 0x20, 0xFB, 0x86, 0x00, 0x00, 0x3E, 0x01, 0xE0, 0x50
 	};
+public:
+	u8 read(const u16& addr);
 };
-
 
 
 #endif // !MEMORY_H_GUARD

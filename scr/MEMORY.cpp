@@ -1,9 +1,8 @@
 #include "MEMORY.h"
 
-MEMORY::MEMORY() {
+MEMORY::MEMORY(CPU* c, CARDRIDGE* card, PPU* p) :cpu(c), cardridge(card), ppu(p) {
 
 	memory = std::vector<u8>(0x10000, 0);
-
 
 	memory[0xFF05] = 0x00; // TIMA
 	memory[0xFF06] = 0x00; // TMA
@@ -41,21 +40,29 @@ MEMORY::MEMORY() {
 MEMORY::~MEMORY() {
 }
 
-void MEMORY::connect(CPU* c, CARDRIDGE* card, PPU* p) {
-	cardridge = card;
-	ppu = p;
-	cpu = c;
-}
-
-
-
 u8 MEMORY::read(const u16& addr) {
-
 	if (addr >= 0x00 && addr <= 0x7FFF) {
-		if (address_in_range(addr, 0x0000, 0x0FF) && cpu->in_boot_r()) {
+		if (cpu->in_boot_r() && address_in_range(addr, 0x0000, 0x0FF)) {
 			return boot.at(addr);
 		}
 		return cardridge->read(addr);
+
+		switch (cardridge->rom_info.ctype) {
+		case CType::ROM_ONLY:
+			break;
+		case CType::MBC1:
+			break;
+		case CType::MBC2:
+			break;
+		case CType::MBC3:
+			break;
+		case CType::MBC5:
+			break;
+		case CType::MBC6:
+			break;
+		default:
+			break;
+		}
 	}
 	else if (addr >= 0x8000 && addr <= 0xFFFF) {
 		return memory.at(addr);
@@ -93,7 +100,6 @@ void MEMORY::write_u16(const u16& addr, const u16& data) {
 		write(addr, data_hb);
 		write(addr + 1, data_lb);
 	}
-
 }
 
 bool MEMORY::address_in_range(const u16& addr, const u16& b_range, const u16& e_range) {
