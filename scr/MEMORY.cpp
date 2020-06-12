@@ -42,25 +42,17 @@ MEMORY::~MEMORY() {
 
 u8 MEMORY::read(const u16& addr) {
 	if (addr >= 0x00 && addr <= 0x7FFF) {
-		if (cpu->in_boot_r() && address_in_range(addr, 0x0000, 0x0FF)) {
-			return boot.at(addr);
-		}
-		return cardridge->read(addr);
-
 		switch (cardridge->rom_info.ctype) {
-		case CType::ROM_ONLY:
-			break;
 		case CType::MBC1:
-			break;
 		case CType::MBC2:
-			break;
 		case CType::MBC3:
-			break;
 		case CType::MBC5:
-			break;
 		case CType::MBC6:
-			break;
 		default:
+			if (cpu->in_boot_r() && address_in_range(addr, 0x0000, 0x0FF)) {
+				return boot.at(addr);
+			}
+			return cardridge->read(addr);
 			break;
 		}
 	}

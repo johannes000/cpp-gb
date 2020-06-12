@@ -9,12 +9,13 @@ class PPU {
 public:
 	PPU();
 	~PPU();
-	bool createWindow();
-	void renderScreen();
 	void waitforinput();
-	void closeWindow();
 
 private:
+	bool createWindow();
+	void renderScreen();
+	void closeWindow();
+
 	SDL_Event event = event;
 	// Screen dimension constants
 	const int SCREEN_WIDTH = 640;
