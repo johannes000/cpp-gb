@@ -1,12 +1,9 @@
 #include "MEMORY.h"
 
-MEMORY::MEMORY(CARDRIDGE* card) {
-	memory.fill(0);
+MEMORY::MEMORY() {
 
-	cardridge = card;
+	memory = std::vector<u8>(0x10000, 0);
 
-	// bootrom in memory
-	std::copy(boot.begin(), (boot.begin() + 0xFF), memory.begin());
 
 	memory[0xFF05] = 0x00; // TIMA
 	memory[0xFF06] = 0x00; // TMA
@@ -44,8 +41,20 @@ MEMORY::MEMORY(CARDRIDGE* card) {
 MEMORY::~MEMORY() {
 }
 
+void MEMORY::connect(CPU* c, CARDRIDGE* card, PPU* p) {
+	cardridge = card;
+	ppu = p;
+	cpu = c;
+}
+
+
+
 u8 MEMORY::read(const u16& addr) {
+
 	if (addr >= 0x00 && addr <= 0x7FFF) {
+		if (address_in_range(addr, 0x0000, 0x0FF) && cpu->in_boot_r()) {
+			return boot.at(addr);
+		}
 		return cardridge->read(addr);
 	}
 	else if (addr >= 0x8000 && addr <= 0xFFFF) {
@@ -56,14 +65,10 @@ u8 MEMORY::read(const u16& addr) {
 	}
 	return 0x00;
 }
-u8* MEMORY::read_ptr(const u16& addr) {
-	if (addr >= 0x00 && addr <= 0xFFFF)
-		return &memory.at(addr);
-	return 0x00;
-}
-void MEMORY::write(const u16& addr, const u8& data) {
-	if (addr >= 0x8000 && addr <= 0x9FFF) {
 
+void MEMORY::write(const u16& addr, const u8& data) {
+
+	if (addr >= 0x8000 && addr <= 0x9FFF) {
 		memory.at(addr) = data;
 	}
 	else if (addr >= 0xA000 && addr <= 0xDFFF) {
@@ -90,6 +95,12 @@ void MEMORY::write_u16(const u16& addr, const u16& data) {
 	}
 
 }
+
+bool MEMORY::address_in_range(const u16& addr, const u16& b_range, const u16& e_range) {
+	return addr >= b_range && addr <= e_range;
+}
+
+
 
 
 

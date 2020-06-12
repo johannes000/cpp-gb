@@ -25,10 +25,16 @@ public:
 	void incPC();
 	u8 getNextOPCode();
 	void printallops();
-
+	bool in_boot_r();
 
 private:
 	bool in_boot = true;
+
+	u8 read(const u16& addr);
+	void write(const u16& addr, const u8& data);
+	void write_u16(const u16& addr, const u16& data);
+
+
 
 	//REGISTER
 	Register R;

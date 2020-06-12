@@ -6,9 +6,6 @@ CPU::CPU() {}
 CPU::CPU(MEMORY* memory) {
 	initRegister();
 	mem = memory;
-
-	IR = mem->read_ptr(A_interrupt_enable);
-	IE = mem->read_ptr(A_interrupt_flags);
 }
 
 void CPU::initRegister() {
@@ -17,7 +14,7 @@ void CPU::initRegister() {
 	R.DE = 0x00D8;
 	R.HL = 0x014D;
 	R.SP = 0xFFFE;
-	R.PC = 0x0100;
+	R.PC = 0x0000;
 	OPCode = 0x00;
 }
 
@@ -55,7 +52,7 @@ void CPU::incPC() {
 }
 
 u8 CPU::getNextOPCode() {
-	return mem->read(R.PC);
+	return read(R.PC);
 }
 
 void CPU::handle_interrupt() {
@@ -63,10 +60,7 @@ void CPU::handle_interrupt() {
 
 bool CPU::interrupts() {
 	if (!IME) {
-		if ((*IE & *IR & 0x1F) == 0)
-			return false;
-		else
-			return true;
+		return false;
 	}
 	return (JIR_state() & JIE_state()) || (SIR_state() & SIE_state()) || (TIR_state() & TIE_state()) || (LIR_state() & LIE_state()) || (VIR_state() & VIE_state());
 }
@@ -84,9 +78,9 @@ void CPU::printallops() {
 	u16 mypc = 0x00;
 	instruction myinstruction_info;
 	while (mypc < 0x4000) {
-		u8 myopcode = mem->read(mypc);
+		u8 myopcode = read(mypc);
 		if (myopcode == 0xCB) {
-			myopcode = mem->read(++mypc);
+			myopcode = read(++mypc);
 			myinstruction_info = prefixedinstructions[myopcode];
 		}
 		else {
@@ -101,15 +95,31 @@ void CPU::printallops() {
 		mypc += myinstruction_info.bytes;
 	}
 }
-// INTERRUPT FLAGS
-bool CPU::JIR_state() { return check_bit(JIR, mem->read(A_interrupt_flags)); };
-bool CPU::SIR_state() { return check_bit(SIR, mem->read(A_interrupt_flags)); };
-bool CPU::TIR_state() { return check_bit(TIR, mem->read(A_interrupt_flags)); };
-bool CPU::LIR_state() { return check_bit(LIR, mem->read(A_interrupt_flags)); };
-bool CPU::VIR_state() { return check_bit(VIR, mem->read(A_interrupt_flags)); };
 
-bool CPU::JIE_state() { return check_bit(JIE, mem->read(A_interrupt_enable)); };
-bool CPU::SIE_state() { return check_bit(SIE, mem->read(A_interrupt_enable)); };
-bool CPU::TIE_state() { return check_bit(TIE, mem->read(A_interrupt_enable)); };
-bool CPU::LIE_state() { return check_bit(LIE, mem->read(A_interrupt_enable)); };
-bool CPU::VIE_state() { return check_bit(VIE, mem->read(A_interrupt_enable)); };
+bool CPU::in_boot_r() {
+	return in_boot;
+}
+
+u8 CPU::read(const u16& addr) {
+	return mem->read(addr);
+}
+void CPU::write(const u16& addr, const u8& data) {
+	mem->write(addr, data);
+}
+void CPU::write_u16(const u16& addr, const u16& data) {
+	mem->write_u16(addr, data);
+}
+
+
+// INTERRUPT FLAGS
+bool CPU::JIR_state() { return check_bit(JIR, read(A_interrupt_flags)); };
+bool CPU::SIR_state() { return check_bit(SIR, read(A_interrupt_flags)); };
+bool CPU::TIR_state() { return check_bit(TIR, read(A_interrupt_flags)); };
+bool CPU::LIR_state() { return check_bit(LIR, read(A_interrupt_flags)); };
+bool CPU::VIR_state() { return check_bit(VIR, read(A_interrupt_flags)); };
+
+bool CPU::JIE_state() { return check_bit(JIE, read(A_interrupt_enable)); };
+bool CPU::SIE_state() { return check_bit(SIE, read(A_interrupt_enable)); };
+bool CPU::TIE_state() { return check_bit(TIE, read(A_interrupt_enable)); };
+bool CPU::LIE_state() { return check_bit(LIE, read(A_interrupt_enable)); };
+bool CPU::VIE_state() { return check_bit(VIE, read(A_interrupt_enable)); };

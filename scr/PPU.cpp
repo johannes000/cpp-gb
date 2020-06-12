@@ -38,6 +38,12 @@ void PPU::closeWindow() {
 	SDL_Quit();
 }
 
+PPU::PPU() {
+}
+
+PPU::~PPU() {
+}
+
 bool PPU::createWindow() {
 	// Initialize SDL
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) {

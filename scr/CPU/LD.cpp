@@ -1,31 +1,31 @@
 #include "../CPU.h"
 
 u8 CPU::opcode0x3E() {	// LD A d8
-	R.A = mem->read(R.PC + 1);
+	R.A = read(R.PC + 1);
 	return 0;
 }
 u8 CPU::opcode0x06() {	// LD B d8
-	R.B = mem->read(R.PC + 1);
+	R.B = read(R.PC + 1);
 	return 0;
 }
 u8 CPU::opcode0x0E() {	// LD C d8
-	R.C = mem->read(R.PC + 1);
+	R.C = read(R.PC + 1);
 	return 0;
 }
 u8 CPU::opcode0x16() {	// LD D d8
-	R.D = mem->read(R.PC + 1);
+	R.D = read(R.PC + 1);
 	return 0;
 }
 u8 CPU::opcode0x1E() {	// LD E d8
-	R.E = mem->read(R.PC + 1);
+	R.E = read(R.PC + 1);
 	return 0;
 }
 u8 CPU::opcode0x26() {	// LD H d8
-	R.H = mem->read(R.PC + 1);
+	R.H = read(R.PC + 1);
 	return 0;
 }
 u8 CPU::opcode0x2E() {	// LD L d8
-	R.L = mem->read(R.PC + 1);
+	R.L = read(R.PC + 1);
 	return 0;
 }
 
@@ -54,7 +54,7 @@ u8 CPU::opcode0x08() {	// LD (a16) SP
 	return 0;
 }
 u8 CPU::opcode0xFA() {	// LD A (a16)
-	R.A = mem->read(read_u16_at_pc());
+	R.A = read(read_u16_at_pc());
 	return 0;
 }
 u8 CPU::opcode0xEA() {	// LD (a16) A
@@ -62,7 +62,7 @@ u8 CPU::opcode0xEA() {	// LD (a16) A
 	return 0;
 }
 u8 CPU::opcode0x0A() {	// LD A (BC)
-	R.A = mem->read(read_u16_at_pc());
+	R.A = read(read_u16_at_pc());
 	return 0;
 }
 
@@ -75,7 +75,7 @@ u8 CPU::opcode0x79() {	// LD A C
 	return 0;
 }
 u8 CPU::opcode0xF2() {	// LD A (C)
-	R.A = mem->read(0xFF00 + R.C);
+	R.A = read(0xFF00 + R.C);
 	return 0;
 }
 u8 CPU::opcode0x7A() {	// LD A D
@@ -99,19 +99,19 @@ u8 CPU::opcode0x7F() {	// LD A A
 	return 0;
 }
 u8 CPU::opcode0x7E() {	// LD A (HL)
-	R.A = mem->read(R.HL);
+	R.A = read(R.HL);
 	return 0;
 }
 u8 CPU::opcode0x1A() {	// LD A DE
-	R.A = mem->read(R.DE);
+	R.A = read(R.DE);
 	return 0;
 }
 u8 CPU::opcode0x2A() {	// LD A (HL+)
-	R.A = mem->read(R.HL++);
+	R.A = read(R.HL++);
 	return 0;
 }
 u8 CPU::opcode0x3A() {	// LD A (HL-)
-	R.A = mem->read(R.HL--);
+	R.A = read(R.HL--);
 	return 0;
 }
 u8 CPU::opcode0x22() {	// LD (HL+) A
@@ -181,7 +181,7 @@ u8 CPU::opcode0x45() {	// LD B L
 	return 0;
 }
 u8 CPU::opcode0x46() {	// LD B (HL)
-	R.B = mem->read(R.HL);
+	R.B = read(R.HL);
 	return 0;
 }
 u8 CPU::opcode0x48() {	// LD C B
@@ -209,7 +209,7 @@ u8 CPU::opcode0x4D() {	// LD C L
 	return 0;
 }
 u8 CPU::opcode0x4E() {	// LD C HL
-	R.C = mem->read(R.HL);
+	R.C = read(R.HL);
 	return 0;
 }
 u8 CPU::opcode0x50() {	// LD D B
@@ -237,7 +237,7 @@ u8 CPU::opcode0x55() {	// LD D L
 	return 0;
 }
 u8 CPU::opcode0x56() {	// LD D HL
-	R.D = mem->read(R.HL);
+	R.D = read(R.HL);
 	return 0;
 }
 u8 CPU::opcode0x5F() {	// LD E A
@@ -269,7 +269,7 @@ u8 CPU::opcode0x5D() {	// LD E L
 	return 0;
 }
 u8 CPU::opcode0x5E() {	// LD E HL
-	R.E = mem->read(R.HL);
+	R.E = read(R.HL);
 	return 0;
 }
 u8 CPU::opcode0x60() {	// LD H B
@@ -297,7 +297,7 @@ u8 CPU::opcode0x65() {	// LD H L
 	return 0;
 }
 u8 CPU::opcode0x66() {	// LD H HL
-	R.H = mem->read(R.HL);
+	R.H = read(R.HL);
 	return 0;
 }
 u8 CPU::opcode0x68() {	// LD L B
@@ -325,7 +325,7 @@ u8 CPU::opcode0x6D() {	// LD L L
 	return 0;
 }
 u8 CPU::opcode0x6E() {	// LD L HL
-	R.L = mem->read(R.HL);
+	R.L = read(R.HL);
 	return 0;
 }
 u8 CPU::opcode0x70() {	// LD HL B

@@ -3,10 +3,18 @@
 //
 
 #include <iostream>
+#include <stdexcept>
 #include "gameboy.h"
 
 int main(int argc, char* args[]) {
-	gameboy gb;
-	gb.startemu();
+	try {
+		gameboy gb;
+		gb.startemu();
+	}
+	catch (const std::exception& e) {
+		std::cerr << e.what() << std::endl;
+		return -1;
+	}
+
 	return 0;
 }

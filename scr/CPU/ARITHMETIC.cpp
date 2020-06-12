@@ -129,7 +129,9 @@ u8 CPU::opcode0x2C() {	// INC L
 	return 0;
 }
 u8 CPU::opcode0x34() {	// INC (HL)
-	inc_u8_reg(mem->read_ptr(R.HL));
+	u8 data = read(R.HL);
+	inc_u8_reg(&data);
+	write(R.HL, data);
 	return 0;
 }
 u8 CPU::opcode0x13() {	// INC DE
@@ -177,7 +179,9 @@ u8 CPU::opcode0x2D() {	// DEC L
 	return 0;
 }
 u8 CPU::opcode0x35() {	// DEC (HL)
-	dec_u8_reg(mem->read_ptr(R.HL));
+	u8 data = read(R.HL);
+	dec_u8_reg(&data);
+	write(R.HL, data);
 	return 0;
 }
 u8 CPU::opcode0x0B() {	// DEC BC
@@ -223,7 +227,8 @@ u8 CPU::opcode0x85() {	// ADD A L
 	return 0;
 }
 u8 CPU::opcode0x86() {	// ADD A HL
-	add_r8_r8(&R.A, mem->read_ptr(R.HL));
+	u8 data = read(R.HL);
+	add_r8_r8(&R.A, &data);
 	return 0;
 }
 u8 CPU::opcode0x87() {	// ADD A A
@@ -248,7 +253,8 @@ u8 CPU::opcode0x39() {	// ADD HL SP
 }
 
 u8 CPU::opcode0xC6() {	// ADD A d8
-	add_r8_r8(&R.A, mem->read_ptr(R.PC + 1));
+	u8 data = read_u8_at_pc();
+	add_r8_r8(&R.A, &data);
 	return 0;
 }
 u8 CPU::opcode0xE8() {	// ADD SP r8
@@ -281,7 +287,8 @@ u8 CPU::opcode0x95() {	// SUB L
 	return 0;
 }
 u8 CPU::opcode0x96() {	// SUB HL
-	sub_r8_r8(&R.A, mem->read_ptr(R.HL));
+	u8 data = read(R.HL);
+	sub_r8_r8(&R.A, &data);
 	return 0;
 }
 u8 CPU::opcode0x97() {	// SUB A
@@ -289,11 +296,13 @@ u8 CPU::opcode0x97() {	// SUB A
 	return 0;
 }
 u8 CPU::opcode0xD6() {	// SUB d8
-	sub_r8_r8(&R.A, mem->read_ptr(R.PC + 1));
+	u8 data = read_u8_at_pc();
+	sub_r8_r8(&R.A, &data);
 	return 0;
 }
 u8 CPU::opcode0xE6() {	// AND d8
-	and_r8_r8(&R.A, mem->read_ptr(R.PC + 1));
+	u8 data = read_u8_at_pc();
+	and_r8_r8(&R.A, &data);
 	return 0;
 }
 u8 CPU::opcode0xA0() {	// AND B
@@ -321,7 +330,8 @@ u8 CPU::opcode0xA5() {	// AND L
 	return 0;
 }
 u8 CPU::opcode0xA6() {	// AND HL
-	and_r8_r8(&R.A, mem->read_ptr(R.HL));
+	u8 data = read(R.HL);
+	and_r8_r8(&R.A, &data);
 	return 0;
 }
 u8 CPU::opcode0xA7() {	// AND A
@@ -353,15 +363,18 @@ u8 CPU::opcode0xB5() {	// OR L
 	return 0;
 }
 u8 CPU::opcode0xB6() {	// OR HL
-	or_r8_r8(&R.A, mem->read_ptr(R.HL));
+	u8 data = read(R.HL);
+	or_r8_r8(&R.A, &data);
 	return 0;
 }
 u8 CPU::opcode0xB7() {	// OR A
-	or_r8_r8(&R.A, mem->read_ptr(R.HL));
+	u8 data = read(R.HL);
+	or_r8_r8(&R.A, &data);
 	return 0;
 }
 u8 CPU::opcode0xF6() {	// OR d8
-	or_r8_r8(&R.A, mem->read_ptr(R.PC + 1));
+	u8 data = read_u8_at_pc();
+	or_r8_r8(&R.A, &data);
 	return 0;
 }
 
@@ -390,7 +403,8 @@ u8 CPU::opcode0x9D() {	// SBC A L
 	return 0;
 }
 u8 CPU::opcode0x9E() {	// SBC A HL
-	sbc_r8_r8(&R.A, mem->read_ptr(R.HL));
+	u8 data = read(R.HL);
+	sbc_r8_r8(&R.A, &data);
 	return 0;
 }
 u8 CPU::opcode0x9F() {	// SBC A A
@@ -398,12 +412,14 @@ u8 CPU::opcode0x9F() {	// SBC A A
 	return 0;
 }
 u8 CPU::opcode0xDE() {	// SBC A d8
-	sbc_r8_r8(&R.A, mem->read_ptr(R.PC + 1));
+	u8 data = read_u8_at_pc();
+	sbc_r8_r8(&R.A, &data);
 	return 0;
 }
 
 u8 CPU::opcode0xEE() {	// XOR d8
-	xor_r8_r8(&R.A, mem->read_ptr(R.PC + 1));
+	u8 data = read_u8_at_pc();
+	xor_r8_r8(&R.A, &data);
 	return 0;
 }
 u8 CPU::opcode0xA8() {	// XOR B
@@ -431,7 +447,8 @@ u8 CPU::opcode0xAD() {	// XOR L
 	return 0;
 }
 u8 CPU::opcode0xAE() {	// XOR HL
-	xor_r8_r8(&R.A, mem->read_ptr(R.HL));
+	u8 data = read(R.HL);
+	xor_r8_r8(&R.A, &data);
 	return 0;
 }
 u8 CPU::opcode0xAF() {	// XOR A
@@ -463,7 +480,8 @@ u8 CPU::opcode0xBD() {	// CP L
 	return 0;
 }
 u8 CPU::opcode0xBE() {	// CP HL
-	cp_r8_r8(&R.A, mem->read_ptr(R.HL));
+	u8 data = read(R.HL);
+	cp_r8_r8(&R.A, &data);
 	return 0;
 }
 u8 CPU::opcode0xBF() {	// CP A
@@ -471,7 +489,8 @@ u8 CPU::opcode0xBF() {	// CP A
 	return 0;
 }
 u8 CPU::opcode0xFE() {	// CP d8
-	cp_r8_r8(&R.A, mem->read_ptr(R.PC + 1));
+	u8 data = read_u8_at_pc();
+	cp_r8_r8(&R.A, &data);
 	return 0;
 }
 u8 CPU::opcode0x88() {	// ADC A B
@@ -499,7 +518,8 @@ u8 CPU::opcode0x8D() {	// ADC A L
 	return 0;
 }
 u8 CPU::opcode0x8E() {	// ADC A HL
-	adc_r8_r8(&R.A, mem->read_ptr(R.HL));
+	u8 data = read(R.HL);
+	adc_r8_r8(&R.A, &data);
 	return 0;
 }
 u8 CPU::opcode0x8F() {	// ADC A A
@@ -507,6 +527,7 @@ u8 CPU::opcode0x8F() {	// ADC A A
 	return 0;
 }
 u8 CPU::opcode0xCE() {	// ADC A d8	
-	adc_r8_r8(&R.A, mem->read_ptr(R.PC + 1));
+	u8 data = read_u8_at_pc();
+	adc_r8_r8(&R.A, &data);
 	return 0;
 }

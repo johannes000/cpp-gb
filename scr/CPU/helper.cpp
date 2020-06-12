@@ -8,16 +8,16 @@ u16 CPU::u8_to_u16(const u8& data_lb, const u8& data_hb) {
 
 // Merged die Werte auf die PC + 1 und PC + 2 zeigt in ein u16
 u16 CPU::read_u16_at_pc() {
-	return u8_to_u16(mem->read(R.PC + 2), mem->read(R.PC + 1));
+	return u8_to_u16(read(R.PC + 2), read(R.PC + 1));
 }
 u16 CPU::read_u16_sp() {
-	return u8_to_u16(mem->read(R.SP + 1), mem->read(R.SP));
+	return u8_to_u16(read(R.SP + 1), read(R.SP));
 }
 i8 CPU::read_i8_at_pc() {
 	return static_cast<i8>(read_u8_at_pc());
 }
 u8 CPU::read_u8_at_pc() {
-	return mem->read(R.PC + 1);
+	return read(R.PC + 1);
 }
 
 

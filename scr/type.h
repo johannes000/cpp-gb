@@ -3,7 +3,7 @@
 #define TYPE_H_GUARD
 
 #include <cstdint>
-
+#include <stdexcept>
 
 typedef unsigned char u8;
 typedef unsigned short u16;

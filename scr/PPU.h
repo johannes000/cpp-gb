@@ -7,6 +7,8 @@
 
 class PPU {
 public:
+	PPU();
+	~PPU();
 	bool createWindow();
 	void renderScreen();
 	void waitforinput();

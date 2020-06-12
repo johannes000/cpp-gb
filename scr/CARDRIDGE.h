@@ -16,15 +16,15 @@ public:
 	~CARDRIDGE();
 
 	bool loadROM(const char* romFile);
-	void getRomInfo();
-	void printRom();
 
 	u8 read(const u16& addr);
 	u8* read_ptr(const u16& addr);
 	void write(const u16& addr, const u8& data);
 private:
+	void fill_rom_info();
+	void printRom();
 
-	std::vector<u8> rom;
+	std::vector<u8> card;
 	u8 checkSum = 0;
 	u8 calcCheckSum();
 
@@ -36,6 +36,8 @@ public:
 		CType ctype = CType::MBC1;
 		ROMSize romsize = ROMSize::KB32;
 		RAMSize ramsize = RAMSize::None;
+		int rom_banks;
+		int ram_banks;
 	}rom_info;
 };
 
