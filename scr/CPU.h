@@ -28,10 +28,12 @@ public:
 
 
 private:
+	bool in_boot = true;
+
 	//REGISTER
 	Register R;
 	void initRegister();
-	u16 oldPC;
+	u16 oldPC = 0x00;
 
 	//INTERRUPTS
 
@@ -50,11 +52,11 @@ private:
 	const u8 LIR = 1;		// Bit 1 – LCD STAT Interrupt Requested(1 = Requested)
 	const u8 VIR = 0;		// Bit 0 – Vertical Blank Interrupt Requested(1 = Requested)
 
-	bool JIR_state() { return check_bit(JIR, A_interrupt_flags); };
-	bool SIR_state() { return check_bit(SIR, A_interrupt_flags); };
-	bool TIR_state() { return check_bit(TIR, A_interrupt_flags); };
-	bool LIR_state() { return check_bit(LIR, A_interrupt_flags); };
-	bool VIR_state() { return check_bit(VIR, A_interrupt_flags); };
+	bool JIR_state();
+	bool SIR_state();
+	bool TIR_state();
+	bool LIR_state();
+	bool VIR_state();
 
 	// FF0F - IF - Interrupt Flag (R/W)
 	u8* IE = nullptr;
@@ -64,18 +66,16 @@ private:
 	const u8 LIE = 1;	// Bit 1 – LCD STAT Interrupt Enable(1 = Enable, 0 = Disable)
 	const u8 VIE = 0;	// Bit 0 – Vertical Blank Interrupt Enable(1 = Enable, 0 = Disable)
 
-	bool JIE_state() { return check_bit(JIE, A_interrupt_enable); };
-	bool SIE_state() { return check_bit(SIE, A_interrupt_enable); };
-	bool TIE_state() { return check_bit(TIE, A_interrupt_enable); };
-	bool LIE_state() { return check_bit(LIE, A_interrupt_enable); };
-	bool VIE_state() { return check_bit(VIE, A_interrupt_enable); };
+	bool JIE_state();
+	bool SIE_state();
+	bool TIE_state();
+	bool LIE_state();
+	bool VIE_state();
 
 	void handle_interrupt();
 	bool interrupts();
 	//FLAGS
 private:
-	void print_flags();
-
 	void set_flag_if(const Flag&, bool condition);
 	void set_flag(const Flag&);								//setze flag auf true egal was
 	void set_flags(const Flag&, const Flag&);				//setze flag auf true egal was

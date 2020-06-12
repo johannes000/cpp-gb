@@ -1,8 +1,8 @@
 #include "CARDRIDGE.h"
 
 
-CARDRIDGE::CARDRIDGE(MEMORY* m) {
-	mem = m;
+CARDRIDGE::CARDRIDGE() {
+
 }
 CARDRIDGE::~CARDRIDGE() {
 
@@ -14,28 +14,13 @@ bool CARDRIDGE::loadROM(const char* romFile) {
 		std::cerr << "Kann die Datei nicht oeffnen : " << romFile << std::endl;
 		return false;
 	}
-	std::vector<u8> data(std::istreambuf_iterator<char>(is), {});
-	rom = data;
-
-
+	std::vector<u8> rom(std::istreambuf_iterator<char>(is), {});
+	this->rom = rom;
 	getRomInfo();
-	romintomem();
 
 	return true;
 }
 
-void CARDRIDGE::romintomem() {
-	romintomem(0x0000, 0x7FFF, 0x0100);
-}
-
-void CARDRIDGE::romintomem(u16 romBeg, u16 romEnd, u16 dest) {
-	auto b = (rom.begin() + romBeg);
-	auto e = (rom.begin() + romEnd);
-	u16 i = dest;
-	while (b != e) {
-		mem->write(i++, *(b++));
-	}
-}
 
 void CARDRIDGE::getRomInfo() {
 	if (rom.size() == 0)
@@ -57,12 +42,8 @@ void CARDRIDGE::printRom() {
 		if ((i++) % 255 == 0) {
 			std::cout << std::endl;
 		}
-		std::cout << static_cast<u8>(s) << " ";
+		std::cout << std::hex << static_cast<int>(s) << " ";
 	}
-}
-
-u8 CARDRIDGE::readAddr(u16 addr) {
-	return rom[addr];
 }
 
 u8 CARDRIDGE::calcCheckSum() {
@@ -73,4 +54,16 @@ u8 CARDRIDGE::calcCheckSum() {
 
 	}
 	return checkSum;
+}
+
+u8 CARDRIDGE::read(const u16& addr) {
+	return rom.at(addr);
+}
+
+u8* CARDRIDGE::read_ptr(const u16& addr) {
+	return &rom.at(addr);
+}
+void CARDRIDGE::write(const u16& addr, const u8& data) {
+	rom.at(addr) = data;
+
 }

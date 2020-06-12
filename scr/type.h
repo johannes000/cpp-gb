@@ -4,10 +4,6 @@
 
 #include <cstdint>
 
-//ADDRESSES
-constexpr auto A_interrupt_flags = 0xFF0F;
-constexpr auto A_interrupt_enable = 0xFFFF;
-
 
 typedef unsigned char u8;
 typedef unsigned short u16;
@@ -15,13 +11,17 @@ typedef unsigned short u16;
 typedef signed char i8;
 typedef signed short i16;
 
+//ADDRESSES
+constexpr u16 A_interrupt_flags = 0xFF0F;
+constexpr u16 A_interrupt_enable = 0xFFFF;
+
 typedef const u8 IF; // Interrupt Flags
 
 const enum class Flag {
 	z = 7, // Zero Flag
 	n = 6, // Add/Sub-Flag 
 	h = 5, // Half Carry Flag
-	c = 4, // Carry Flag
+	c = 4 // Carry Flag
 };
 
 struct Register {

@@ -17,7 +17,8 @@ void CPU::initRegister() {
 	R.DE = 0x00D8;
 	R.HL = 0x014D;
 	R.SP = 0xFFFE;
-	R.PC = 0x0000;
+	R.PC = 0x0100;
+	OPCode = 0x00;
 }
 
 u8 CPU::parseOPCode(u8& opcode) {
@@ -57,10 +58,8 @@ u8 CPU::getNextOPCode() {
 	return mem->read(R.PC);
 }
 
-
 void CPU::handle_interrupt() {
 }
-
 
 bool CPU::interrupts() {
 	if (!IME) {
@@ -84,7 +83,7 @@ void CPU::print_last_opcode() {
 void CPU::printallops() {
 	u16 mypc = 0x00;
 	instruction myinstruction_info;
-	for (size_t i = 0; i < 0x4FFF; i++) {
+	while (mypc < 0x4000) {
 		u8 myopcode = mem->read(mypc);
 		if (myopcode == 0xCB) {
 			myopcode = mem->read(++mypc);
@@ -93,7 +92,7 @@ void CPU::printallops() {
 		else {
 			myinstruction_info = instructions[myopcode];
 		}
-		std::cout << "0x" << std::hex << std::uppercase << (int)(myopcode) << " " << myinstruction_info.mnemonic;
+		std::cout << "0x" << std::hex << std::uppercase << (int)(mypc) << " " << myinstruction_info.mnemonic;
 		if (myinstruction_info.bytes == 3)
 			std::cout << " " << (int)(read_u16_at_pc());
 		if (myinstruction_info.bytes == 2)
@@ -102,3 +101,15 @@ void CPU::printallops() {
 		mypc += myinstruction_info.bytes;
 	}
 }
+// INTERRUPT FLAGS
+bool CPU::JIR_state() { return check_bit(JIR, mem->read(A_interrupt_flags)); };
+bool CPU::SIR_state() { return check_bit(SIR, mem->read(A_interrupt_flags)); };
+bool CPU::TIR_state() { return check_bit(TIR, mem->read(A_interrupt_flags)); };
+bool CPU::LIR_state() { return check_bit(LIR, mem->read(A_interrupt_flags)); };
+bool CPU::VIR_state() { return check_bit(VIR, mem->read(A_interrupt_flags)); };
+
+bool CPU::JIE_state() { return check_bit(JIE, mem->read(A_interrupt_enable)); };
+bool CPU::SIE_state() { return check_bit(SIE, mem->read(A_interrupt_enable)); };
+bool CPU::TIE_state() { return check_bit(TIE, mem->read(A_interrupt_enable)); };
+bool CPU::LIE_state() { return check_bit(LIE, mem->read(A_interrupt_enable)); };
+bool CPU::VIE_state() { return check_bit(VIE, mem->read(A_interrupt_enable)); };

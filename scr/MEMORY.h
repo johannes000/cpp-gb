@@ -10,12 +10,17 @@
 
 #include "type.h"
 #include "CPU.h"
+#include "CARDRIDGE.h"
 
+class CPU;
+class CARDRIDGE;
 
 class MEMORY {
 public:
-	MEMORY();
+	MEMORY(CARDRIDGE*);
 	~MEMORY();
+
+	CARDRIDGE* cardridge;
 
 	u8 read(const u16& addr);
 	u8* read_ptr(const u16& addr);

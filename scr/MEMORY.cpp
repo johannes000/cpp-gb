@@ -1,7 +1,10 @@
 #include "MEMORY.h"
 
-MEMORY::MEMORY() {
+MEMORY::MEMORY(CARDRIDGE* card) {
 	memory.fill(0);
+
+	cardridge = card;
+
 	// bootrom in memory
 	std::copy(boot.begin(), (boot.begin() + 0xFF), memory.begin());
 
@@ -42,30 +45,50 @@ MEMORY::~MEMORY() {
 }
 
 u8 MEMORY::read(const u16& addr) {
-	if (addr >= 0x00 && addr <= 0xFFFF)
-		return memory[addr];
+	if (addr >= 0x00 && addr <= 0x7FFF) {
+		return cardridge->read(addr);
+	}
+	else if (addr >= 0x8000 && addr <= 0xFFFF) {
+		return memory.at(addr);
+	}
+	else if (addr >= 0xA000 && addr <= 0xDFFF) {
+
+	}
 	return 0x00;
 }
 u8* MEMORY::read_ptr(const u16& addr) {
 	if (addr >= 0x00 && addr <= 0xFFFF)
-		return &memory[addr];
+		return &memory.at(addr);
 	return 0x00;
 }
 void MEMORY::write(const u16& addr, const u8& data) {
-	if (addr >= 0x00 && addr <= 0xFFFF)
-		memory[addr] = data;
+	if (addr >= 0x8000 && addr <= 0x9FFF) {
+
+		memory.at(addr) = data;
+	}
+	else if (addr >= 0xA000 && addr <= 0xDFFF) {
+		cardridge->write(addr, data);
+	}
+	else if (addr >= 0xE000 && addr <= 0xFDFF) {
+		memory.at(addr - 0x2000) = data;
+	}
+	else if (addr >= 0xFE00 && addr <= 0xFFFF) {
+		if (!(addr >= 0xFEA0 && addr <= 0xFEFF))
+			memory.at(addr) = data;
+	}
+	else {
+		std::cout << std::hex << "0x" << (int)(addr) << " not writeable." << std::endl;
+	}
 }
 
 void MEMORY::write_u16(const u16& addr, const u16& data) {
 	if (addr >= 0x00 && (addr + 1) < 0xFFFF) {
 		u8 data_lb = data >> 8;
 		u8 data_hb = data & 0xFF;
-		memory[addr] = data_hb;
-		memory[addr + 1] = data_lb;
+		write(addr, data_hb);
+		write(addr + 1, data_lb);
 	}
-	else {
-		std::cout << "Addresse: " << addr << " out of Range(0x0000,0xFFFF)";
-	}
+
 }
 
 

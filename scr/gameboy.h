@@ -14,10 +14,10 @@ public:
 	~gameboy();
 
 	PPU ppu;
-	MEMORY mem;
+	CARDRIDGE rom;
+	MEMORY mem = (&rom);
 	CPU cpu = (&mem);
 
-	CARDRIDGE rom = (&mem);
 
 	void startemu();
 private:

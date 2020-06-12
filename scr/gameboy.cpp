@@ -11,8 +11,8 @@ gameboy::~gameboy() {
 void gameboy::startemu() {
 	ppu.createWindow();
 	ppu.renderScreen();
-	//rom.loadROM("./testroms/cpu_instrs/cpu_instrs.gb");
-	//cpu.printallops();
+	rom.loadROM("./testroms/cpu_instrs/cpu_instrs.gb");
+	// cpu.printallops();
 	for (size_t i = 0; i < 255; i++) {
 		cpu.update();
 		ppu.waitforinput();

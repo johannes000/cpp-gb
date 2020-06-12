@@ -41,6 +41,7 @@ u8 CPU::opcode0x28() {	// JR Z r8
 		R.PC += read_i8_at_pc();
 		return 1;
 	}
+	return 0;
 }
 u8 CPU::opcode0x30() {	// JR NC r8
 	if (!check_flag(Flag::c)) {

@@ -8,26 +8,23 @@
 #include <vector>
 
 #include "type.h"
-#include "MEMORY.h"
 
-class MEMORY;
 
 class CARDRIDGE {
 public:
-	CARDRIDGE(MEMORY*);
+	CARDRIDGE();
 	~CARDRIDGE();
 
-	MEMORY* mem = nullptr;
-
-	bool loadROM(const char*);
+	bool loadROM(const char* romFile);
 	void getRomInfo();
 	void printRom();
-	u8 readAddr(u16);
 
+	u8 read(const u16& addr);
+	u8* read_ptr(const u16& addr);
+	void write(const u16& addr, const u8& data);
 private:
+
 	std::vector<u8> rom;
-	void romintomem();
-	void romintomem(u16 romBeg, u16 romEnd, u16 dest);
 	u8 checkSum = 0;
 	u8 calcCheckSum();
 
