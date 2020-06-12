@@ -54,8 +54,6 @@ void CARDRIDGE::fill_rom_info() {
 	case ROMSize::MB1:
 		switch (rom_info.ctype) {
 		case CType::MBC1:
-		case CType::MBC1_RAM:
-		case CType::MBC1_RAM_BATTERY:
 			rom_info.rom_banks = 63;
 			break;
 		default:
@@ -140,66 +138,13 @@ u8 CARDRIDGE::calcCheckSum() {
 }
 
 u8 CARDRIDGE::read(const u16& addr) {
-	switch (rom_info.ctype) {
-	case CType::ROM_ONLY:
-		break;
-	case CType::MBC1:
-	case CType::MBC1_RAM:
-	case CType::MBC1_RAM_BATTERY:
-		break;
-	case CType::MBC2:
-	case CType::MBC2_BATTERY:
-		break;
-	case CType::MBC3:
-	case CType::MBC3_RAM:
-	case CType::MBC3_RAM_BATTERY:
-	case CType::MBC3_TIMER_BATTERY:
-	case CType::MBC3_TIMER_RAM_BATTERY:
-		break;
-	case CType::MBC5:
-	case CType::MBC5_RAM:
-	case CType::MBC5_RUMBLE:
-	case CType::MBC5_RUMBLE_RAM:
-	case CType::MBC5_RAM_BATTERY:
-	case CType::MBC5_RUMBLE_RAM_BATTERY:
-		break;
-	case CType::MBC6:
-		break;
-	default:
-		break;
-	}
 	return card.at(addr);
 }
 
+u8* CARDRIDGE::read_ptr(const u16& addr) {
+	return &card.at(addr);
+}
 void CARDRIDGE::write(const u16& addr, const u8& data) {
-	switch (rom_info.ctype) {
-	case CType::ROM_ONLY:
-		break;
-	case CType::MBC1:
-	case CType::MBC1_RAM:
-	case CType::MBC1_RAM_BATTERY:
-		break;
-	case CType::MBC2:
-	case CType::MBC2_BATTERY:
-		break;
-	case CType::MBC3_TIMER_BATTERY:
-	case CType::MBC3_TIMER_RAM_BATTERY:
-	case CType::MBC3:
-	case CType::MBC3_RAM:
-	case CType::MBC3_RAM_BATTERY:
-		break;
-	case CType::MBC5:
-	case CType::MBC5_RAM:
-	case CType::MBC5_RAM_BATTERY:
-	case CType::MBC5_RUMBLE:
-	case CType::MBC5_RUMBLE_RAM:
-	case CType::MBC5_RUMBLE_RAM_BATTERY:
-		break;
-	case CType::MBC6:
-		break;
-	default:
-		break;
-	}
 	card.at(addr) = data;
 
 }
