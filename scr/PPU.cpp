@@ -4,14 +4,14 @@ PPU::PPU(MEMORY* m) : mem(m) {
 	createWindow();
 	renderScreen();
 	v_ram = std::vector<u8>(VRAM_SIZE, 0x00);
-	update_lcdc();
+	update_lcd_control();
 }
 
 PPU::~PPU() {
 	closeWindow();
 }
 void PPU::update() {
-	update_lcdc();
+	update_lcd_control();
 }
 
 void PPU::renderScreen() {
@@ -76,9 +76,9 @@ void PPU::closeWindow() {
 	SDL_Quit();
 }
 
-void PPU::update_lcdc() {
+void PPU::update_lcd_control() {
 	u8 LCD_data = read(LCD_CONTROL);
-	lcdc = {
+	lcd_control = {
 		(bool)((LCD_data >> 7) & 1),
 		(bool)((LCD_data >> 6) & 1),
 		(bool)((LCD_data >> 5) & 1),

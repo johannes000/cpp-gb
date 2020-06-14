@@ -99,17 +99,6 @@ private:
 
 	bool check_flag(const Flag&);							//gibt flag status wieder
 
-	void set_bit_if(u8& value, const u8 bit, bool condition);
-	void set_bit_if(u16& value, const u16 bit, bool condition);
-	void set_bit(u8& value, const u8 bit);
-	void set_bit(u16& value, const u16 bit);
-	void reset_bit(u8& value, const u8 bit);
-	void reset_bit(u16& value, const u16 bit);
-	void toggle_bit(u8& value, const u8 bit);
-	void toggle_bit(u16& value, const u16 bit);
-	bool check_bit(const u8& value, const u8& bit);
-	bool check_bit(const u16& value, const u16& bit);
-
 
 	//OPCODES
 private:

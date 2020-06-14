@@ -17,6 +17,7 @@ constexpr u16 INTERRUPT_ENABLE = 0xFFFF;
 
 constexpr u16 CARD_ROM = 0x0000;
 constexpr u16 CARD_ROM_0 = 0x0000;
+constexpr u16 BOOT_ROM_END = 0x00FF;
 constexpr u16 CARD_ROM_0_END = 0x3FFF;
 constexpr u16 CARD_ROM_END = 0x7000;
 constexpr u16 BIOS = 0x0000;
@@ -43,11 +44,25 @@ constexpr u16 ZERO_PAGE_RAM_END = 0xFFFF;
 // LCD
 constexpr u8 GB_LCD_SIZE_WIDTH = 160;
 constexpr u8 GB_LCD_SIZE_HEIGHT = 144;
+
 constexpr u16 LCD_CONTROL = 0xFF40;
+constexpr u16 LCD_STATUS = 0xFF41;
+
+constexpr u16 LCD_SCY = 0xFF42;			// SCY - Scroll Y (R/W)
+constexpr u16 LCD_SCX = 0xFF43;			// SCX - Scroll X (R/W)
+constexpr u16 LCD_LY = 0xFF44;			// LY - LCDC Y-Coordinate (R)
+constexpr u16 LCD_LYC = 0xFF45;			// LYC - LY Compare (R/W)
+constexpr u16 LCD_WY = 0xFF4A;			// WY - Window Y Position (R/W)
+constexpr u16 LCD_WX = 0xFF4B;			// WX - Window X Position minus 7 (R/W)
+
+constexpr u16 BG_PALETTE_DATA = 0xFF47;	// BGP - BG Palette Data (R/W) - Non CGB Mode Only
+constexpr u16 BG_PALETTE_DATA_0 = 0xFF48;// OBP0 - Object Palette 0 Data (R/W) - Non CGB Mode Only
+constexpr u16 BG_PALETTE_DATA_1 = 0xFF49;// OBP1 - Object Palette 1 Data (R/W) - Non CGB Mode Only
+
+constexpr u16 DMA_TRANSFER = 0xFF46;	// DMA Transfer and Start Address (R/W)
+
 
 constexpr int VERTICAL_REFRESH_CYCLES = 70224;
-
-
 
 typedef const u8 IF; // Interrupt Flags
 
@@ -171,6 +186,20 @@ const enum class DestCode {
 	NON_JAP = 0x01,
 };
 
+
+void set_bit_if(u8& value, const u8& bit, bool condition);
+void set_bit_if(u16& value, const u16& bit, bool condition);
+
+void set_bit(u8& value, const u8& bit);
+void set_bit(u16& value, const u16& bit);
+
+void reset_bit(u8& value, const u8& bit);
+void reset_bit(u16& value, const u16& bit);
+
+void toggle_bit(u8& value, const u8& bit);
+void toggle_bit(u16& value, const u16& bit);
+
+bool check_bit(const u8& value, const u8& bit);
+bool check_bit(const u16& value, const u16& bit);
+
 #endif // !TYPE_H_GUARD
-
-

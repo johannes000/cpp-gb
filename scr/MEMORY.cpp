@@ -41,8 +41,8 @@ MEMORY::~MEMORY() {
 }
 
 u8 MEMORY::read(const u16& addr) {
-	if (addr >= CARD_ROM && addr <= CARD_ROM_END) {
-		if (cpu->in_boot_r() && address_in_range(addr, 0x0000, 0x0FF)) {
+	if (addr <= CARD_ROM_END) {
+		if (cpu->in_boot_r() && addr <= BOOT_ROM_END) {
 			return boot.at(addr);
 		}
 		return cardridge->read(addr);
@@ -72,6 +72,14 @@ u8 MEMORY::read(const u16& addr) {
 }
 
 void MEMORY::write(const u16& addr, const u8& data) {
+	switch (addr) {
+		case DMA_TRANSFER: // This register starts the OAM DMA transfer
+			dma_transfer(data);
+			break;
+		default:
+			break;
+	}
+
 	if (addr >= GRAPHICS_RAM && addr <= GRAPHICS_RAM_END) {
 		ppu->write(addr, data);
 	}
@@ -104,8 +112,13 @@ void MEMORY::write_u16(const u16& addr, const u16& data) {
 	}
 }
 
-bool MEMORY::address_in_range(const u16& addr, const u16& b_range, const u16& e_range) {
-	return addr >= b_range && addr <= e_range;
+void MEMORY::dma_transfer(u8& data) {
+	memory.at(DMA_TRANSFER) = data;
+	u16 addr = data << 8;
+	for (u8 i = 0; i < 0xA0; i++) {
+		write(0xFE00 + i, read(addr + i));
+	}
+
 }
 
 
