@@ -12,6 +12,7 @@ void gameboy::startemu() {
 	for (size_t i = 0; i < 255; i++) {
 		cpu.update();
 		ppu.waitforinput();
+		ppu.update();
 		SDL_Delay(200);
 	}
 

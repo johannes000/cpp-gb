@@ -9,8 +9,9 @@
 #include <stdio.h>
 #include <vector>
 
-constexpr u16 VRAM_SIZE = 0x1FFF;
-constexpr u16 OAM_SIZE = 0x009F;
+constexpr u16 VRAM_SIZE = 0x2000;
+constexpr u16 OAM_SIZE = 0x0100;
+
 
 class MEMORY;
 
@@ -19,9 +20,10 @@ public:
 	PPU(MEMORY* m);
 	~PPU();
 	void waitforinput();
+	void update();
 
-	void ppu_write(const u16& addr, const u8& data);
-	u8 ppu_read(const u16& addr);
+	void write(const u16& addr, const u8& data);
+	u8 read(const u16& addr);
 private:
 	MEMORY* mem;
 
@@ -31,14 +33,26 @@ private:
 
 	SDL_Event event = event;
 	// Screen dimension constants
-	const int SCREEN_WIDTH = 640;
-	const int SCREEN_HEIGHT = 480;
+
+	const int SCREEN_WIDTH = GB_LCD_SIZE_WIDTH;
+	const int SCREEN_HEIGHT = GB_LCD_SIZE_HEIGHT;
 	SDL_Window* window = NULL;
 	SDL_Surface* screenSurface = NULL;
 
 	std::vector<u8> v_ram;
 	std::vector<u8> sprite_attribute_table;
 
+	struct LCD_Control {
+		bool lcd_power;				// Bit 7 - LCD Power(0 = Off, 1 = On)
+		bool window_tile_map;		// Bit 6 - Window Tile Map(0 = 9800h - 9BFFh, 1 = 9C00h - 9FFFh)
+		bool window_enable;			// Bit 5 - Window Enable(0 = Disabled, 1 = Enabled)
+		bool bg_window_tileset;		// Bit 4 - BG & Window Tileset(0 = 8800h - 97FFh, 1 = 8000h - 8FFFh)
+		bool bg_tile_map;			// Bit 3 - BG Tile Map(0 = 9800h - 9BFFh, 1 = 9C00h - 9FFFh)
+		bool sprite_size;			// Bit 2 - Sprite Size(0 = 8×8, 1 = 8×16)
+		bool sprites_enabled;		// Bit 1 - Sprites Enabled(0 = Disabled, 1 = Enabled)
+		bool bg_enabled;			// Bit 0 - BG Enabled(in DMG) (0 = Disabled, 1 = Enabled)
+	}lcdc;
+	void update_lcdc();
 };
 
 #endif // !PPU_H_GUARD

@@ -51,6 +51,9 @@
     <ClCompile Include="scr\CPU\SHIFT.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
+    <ClCompile Include="scr\type.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="scr\type.h">

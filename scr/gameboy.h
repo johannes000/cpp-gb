@@ -13,10 +13,10 @@ public:
 	gameboy();
 	~gameboy();
 
-	PPU ppu;
 	CARDRIDGE card;
 	MEMORY mem;
 	CPU cpu;
+	PPU ppu;
 
 	void startemu();
 private:

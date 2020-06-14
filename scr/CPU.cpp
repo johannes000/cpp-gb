@@ -58,7 +58,7 @@ bool CPU::interrupts() {
 
 void CPU::print_last_opcode() {
 	std::cout << "0x" << std::hex << std::uppercase << (int)(oldPC) << " "
-		<< instruction_info.mnemonic;
+		<< instruction_info.mnemonic << "\t" << (int)(OPCode);
 	if (instruction_info.bytes == 3) std::cout << " " << (int)(read_u16_at_pc());
 	if (instruction_info.bytes == 2) std::cout << " 0x" << (int)(read_u8_at_pc());
 	std::cout << std::endl;
@@ -76,7 +76,7 @@ void CPU::printallops() {
 		else {
 			myinstruction_info = instructions[myopcode];
 		}
-		std::cout << "0x" << std::hex << std::uppercase << (int)(mypc) << " "
+		std::cout << "0x" << std::hex << std::uppercase << (int)(mypc) << "\t"
 			<< myinstruction_info.mnemonic;
 		if (myinstruction_info.bytes == 3)
 			std::cout << " " << (int)(read_u16_at_pc());

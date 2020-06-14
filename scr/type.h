@@ -40,6 +40,15 @@ constexpr u16 MEMORY_MAPPED_IO_END = 0xFF7F;
 constexpr u16 ZERO_PAGE_RAM = 0xFF80;
 constexpr u16 ZERO_PAGE_RAM_END = 0xFFFF;
 
+// LCD
+constexpr u8 GB_LCD_SIZE_WIDTH = 160;
+constexpr u8 GB_LCD_SIZE_HEIGHT = 144;
+constexpr u16 LCD_CONTROL = 0xFF40;
+
+constexpr int VERTICAL_REFRESH_CYCLES = 70224;
+
+
+
 typedef const u8 IF; // Interrupt Flags
 
 const enum class Flag {
@@ -161,5 +170,7 @@ const enum class DestCode {
 	JAP = 0x00,
 	NON_JAP = 0x01,
 };
+
 #endif // !TYPE_H_GUARD
+
 

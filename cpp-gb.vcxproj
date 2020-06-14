@@ -179,6 +179,7 @@
     <ClCompile Include="scr\MEMORY.cpp" />
     <ClCompile Include="scr\PPU.cpp" />
     <ClCompile Include="scr\main.cpp" />
+    <ClCompile Include="scr\type.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="scr\CARDRIDGE.h" />

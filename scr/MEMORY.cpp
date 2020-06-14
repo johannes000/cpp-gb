@@ -48,7 +48,7 @@ u8 MEMORY::read(const u16& addr) {
 		return cardridge->read(addr);
 	}
 	else if (addr >= GRAPHICS_RAM && addr <= GRAPHICS_RAM_END) {
-		return ppu->ppu_read(addr);
+		return ppu->read(addr);
 	}
 	else if (addr >= CARD_EXTERNAL_RAM && addr <= CARD_EXTERNAL_RAM_END) {
 		return cardridge->read(addr);
@@ -60,7 +60,7 @@ u8 MEMORY::read(const u16& addr) {
 		return memory.at(addr - WORKING_RAM_SHADOW_OFFSET);
 	}
 	else if (addr >= SPRITE_INFORMATION && addr <= SPRITE_INFORMATION_END) {
-		return ppu->ppu_read(addr);
+		return ppu->read(addr);
 	}
 	else if (addr >= MEMORY_MAPPED_IO && addr <= MEMORY_MAPPED_IO_END) {
 		return memory.at(addr);
@@ -73,7 +73,7 @@ u8 MEMORY::read(const u16& addr) {
 
 void MEMORY::write(const u16& addr, const u8& data) {
 	if (addr >= GRAPHICS_RAM && addr <= GRAPHICS_RAM_END) {
-		ppu->ppu_write(addr, data);
+		ppu->write(addr, data);
 	}
 	else if (addr >= CARD_EXTERNAL_RAM && addr <= CARD_EXTERNAL_RAM_END) {
 		cardridge->write(addr, data);
@@ -85,7 +85,7 @@ void MEMORY::write(const u16& addr, const u8& data) {
 		memory.at(addr - WORKING_RAM_SHADOW_OFFSET) = data;
 	}
 	else if (addr >= SPRITE_INFORMATION && addr <= SPRITE_INFORMATION_END) {
-		return ppu->ppu_write(addr, data);
+		return ppu->write(addr, data);
 	}
 	else if (addr >= MEMORY_MAPPED_IO && addr <= MEMORY_MAPPED_IO_END) {
 		memory.at(addr) = data;

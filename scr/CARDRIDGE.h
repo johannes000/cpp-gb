@@ -9,8 +9,8 @@
 
 #include "type.h"
 
-constexpr u16 ROM_BANK_SIZE = 0x1FFF;
-constexpr u16 RAM_BANK_SIZE = 0x3FFF;
+constexpr u16 ROM_BANK_SIZE = 0x2000;
+constexpr u16 RAM_BANK_SIZE = 0x4000;
 
 class CARDRIDGE {
 public:

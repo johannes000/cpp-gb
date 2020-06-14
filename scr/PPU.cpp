@@ -3,15 +3,19 @@
 PPU::PPU(MEMORY* m) : mem(m) {
 	createWindow();
 	renderScreen();
-
 	v_ram = std::vector<u8>(VRAM_SIZE, 0x00);
+	update_lcdc();
 }
 
 PPU::~PPU() {
 	closeWindow();
 }
+void PPU::update() {
+	update_lcdc();
+}
 
 void PPU::renderScreen() {
+
 	screenSurface = SDL_GetWindowSurface(window);
 	// Fill the surface white
 	SDL_FillRect(screenSurface, NULL,
@@ -44,7 +48,8 @@ void PPU::waitforinput() {
 	}
 }
 
-void PPU::ppu_write(const u16& addr, const u8& data) {
+
+void PPU::write(const u16& addr, const u8& data) {
 	if (addr >= GRAPHICS_RAM && addr <= GRAPHICS_RAM_END) {
 		v_ram[addr - GRAPHICS_RAM] = data;
 	}
@@ -54,7 +59,7 @@ void PPU::ppu_write(const u16& addr, const u8& data) {
 };
 
 
-u8 PPU::ppu_read(const u16& addr) {
+u8 PPU::read(const u16& addr) {
 	if (addr >= GRAPHICS_RAM && addr <= GRAPHICS_RAM_END) {
 		return v_ram.at(addr - GRAPHICS_RAM);
 	}
@@ -69,6 +74,20 @@ void PPU::closeWindow() {
 
 	// Quit SDL subsystems
 	SDL_Quit();
+}
+
+void PPU::update_lcdc() {
+	u8 LCD_data = read(LCD_CONTROL);
+	lcdc = {
+		(bool)((LCD_data >> 7) & 1),
+		(bool)((LCD_data >> 6) & 1),
+		(bool)((LCD_data >> 5) & 1),
+		(bool)((LCD_data >> 4) & 1),
+		(bool)((LCD_data >> 3) & 1),
+		(bool)((LCD_data >> 2) & 1),
+		(bool)((LCD_data >> 1) & 1),
+		(bool)((LCD_data >> 0) & 1)
+	};
 }
 
 
