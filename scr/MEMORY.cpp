@@ -112,7 +112,7 @@ void MEMORY::write_u16(const u16& addr, const u16& data) {
 	}
 }
 
-void MEMORY::dma_transfer(u8& data) {
+void MEMORY::dma_transfer(const u8& data) {
 	memory.at(DMA_TRANSFER) = data;
 	u16 addr = data << 8;
 	for (u8 i = 0; i < 0xA0; i++) {
