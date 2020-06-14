@@ -9,6 +9,8 @@
 
 #include "type.h"
 
+constexpr u16 ROM_BANK_SIZE = 0x1FFF;
+constexpr u16 RAM_BANK_SIZE = 0x3FFF;
 
 class CARDRIDGE {
 public:
@@ -21,10 +23,16 @@ public:
 	u8* read_ptr(const u16& addr);
 	void write(const u16& addr, const u8& data);
 private:
-	void fill_rom_info();
+	void fill_cardridge_info();
 	void printRom();
+	void build_ram();
 
-	std::vector<u8> card;
+	std::vector<u8> rom;
+	std::vector<std::vector<u8>> ram;
+
+	int selected_ram_bank = 0;
+	int selected_rom_bank = 0;
+
 	u8 checkSum = 0;
 	u8 calcCheckSum();
 

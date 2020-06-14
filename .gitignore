@@ -408,5 +408,5 @@ MigrationBackup/
 # End of https://www.toptal.com/developers/gitignore/api/visualstudio,c++,windows
 
 #testroms for the emulator
-.testroms/
-.gb
+testroms/
+*.gb

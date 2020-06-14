@@ -41,47 +41,57 @@ MEMORY::~MEMORY() {
 }
 
 u8 MEMORY::read(const u16& addr) {
-	if (addr >= 0x00 && addr <= 0x7FFF) {
-		switch (cardridge->rom_info.ctype) {
-		case CType::MBC1:
-		case CType::MBC2:
-		case CType::MBC3:
-		case CType::MBC5:
-		case CType::MBC6:
-		default:
-			if (cpu->in_boot_r() && address_in_range(addr, 0x0000, 0x0FF)) {
-				return boot.at(addr);
-			}
-			return cardridge->read(addr);
-			break;
+	if (addr >= CARD_ROM && addr <= CARD_ROM_END) {
+		if (cpu->in_boot_r() && address_in_range(addr, 0x0000, 0x0FF)) {
+			return boot.at(addr);
 		}
+		return cardridge->read(addr);
 	}
-	else if (addr >= 0x8000 && addr <= 0xFFFF) {
+	else if (addr >= GRAPHICS_RAM && addr <= GRAPHICS_RAM_END) {
+		return ppu->ppu_read(addr);
+	}
+	else if (addr >= CARD_EXTERNAL_RAM && addr <= CARD_EXTERNAL_RAM_END) {
+		return cardridge->read(addr);
+	}
+	else if (addr >= WORKING_RAM && addr <= WORKING_RAM_END) {
 		return memory.at(addr);
 	}
-	else if (addr >= 0xA000 && addr <= 0xDFFF) {
-
+	else if (addr >= WORKING_RAM_SHADOW && addr <= WORKING_RAM_SHADOW_END) {
+		return memory.at(addr - WORKING_RAM_SHADOW_OFFSET);
+	}
+	else if (addr >= SPRITE_INFORMATION && addr <= SPRITE_INFORMATION_END) {
+		return ppu->ppu_read(addr);
+	}
+	else if (addr >= MEMORY_MAPPED_IO && addr <= MEMORY_MAPPED_IO_END) {
+		return memory.at(addr);
+	}
+	else if (addr >= ZERO_PAGE_RAM && addr <= ZERO_PAGE_RAM_END) {
+		return memory.at(addr);
 	}
 	return 0x00;
 }
 
 void MEMORY::write(const u16& addr, const u8& data) {
-
-	if (addr >= 0x8000 && addr <= 0x9FFF) {
-		memory.at(addr) = data;
+	if (addr >= GRAPHICS_RAM && addr <= GRAPHICS_RAM_END) {
+		ppu->ppu_write(addr, data);
 	}
-	else if (addr >= 0xA000 && addr <= 0xDFFF) {
+	else if (addr >= CARD_EXTERNAL_RAM && addr <= CARD_EXTERNAL_RAM_END) {
 		cardridge->write(addr, data);
 	}
-	else if (addr >= 0xE000 && addr <= 0xFDFF) {
-		memory.at(addr - 0x2000) = data;
+	else if (addr >= WORKING_RAM && addr <= WORKING_RAM_END) {
+		memory.at(addr) = data;
 	}
-	else if (addr >= 0xFE00 && addr <= 0xFFFF) {
-		if (!(addr >= 0xFEA0 && addr <= 0xFEFF))
-			memory.at(addr) = data;
+	else if (addr >= WORKING_RAM_SHADOW && addr <= WORKING_RAM_SHADOW_END) {
+		memory.at(addr - WORKING_RAM_SHADOW_OFFSET) = data;
 	}
-	else {
-		std::cout << std::hex << "0x" << (int)(addr) << " not writeable." << std::endl;
+	else if (addr >= SPRITE_INFORMATION && addr <= SPRITE_INFORMATION_END) {
+		return ppu->ppu_write(addr, data);
+	}
+	else if (addr >= MEMORY_MAPPED_IO && addr <= MEMORY_MAPPED_IO_END) {
+		memory.at(addr) = data;
+	}
+	else if (addr >= ZERO_PAGE_RAM && addr <= ZERO_PAGE_RAM_END) {
+		memory.at(addr) = data;
 	}
 }
 

@@ -1,9 +1,6 @@
 #include "CPU.h"
 
-
-CPU::CPU(MEMORY* memory) : mem(memory) {
-	initRegister();
-}
+CPU::CPU(MEMORY* memory) : mem(memory) { initRegister(); }
 
 CPU::~CPU() {}
 
@@ -34,10 +31,8 @@ u8 CPU::parseOPCode(u8& opcode) {
 
 void CPU::update() {
 	oldPC = R.PC;
-	if (interrupts())
-		std::cout << "INTERRUPT" << std::endl;
-	if (IME_scheduled)
-		IME = true;
+	if (interrupts()) std::cout << "INTERRUPT" << std::endl;
+	if (IME_scheduled) IME = true;
 
 	OPCode = getNextOPCode();
 	u8 jp = parseOPCode(OPCode);
@@ -46,30 +41,26 @@ void CPU::update() {
 	if (jp == 0) incPC();
 }
 
-void CPU::incPC() {
-	R.PC += instruction_info.bytes;
-}
+void CPU::incPC() { R.PC += instruction_info.bytes; }
 
-u8 CPU::getNextOPCode() {
-	return read(R.PC);
-}
+u8 CPU::getNextOPCode() { return read(R.PC); }
 
-void CPU::handle_interrupt() {
-}
+void CPU::handle_interrupt() {}
 
 bool CPU::interrupts() {
 	if (!IME) {
 		return false;
 	}
-	return (JIR_state() & JIE_state()) || (SIR_state() & SIE_state()) || (TIR_state() & TIE_state()) || (LIR_state() & LIE_state()) || (VIR_state() & VIE_state());
+	return (JIR_state() & JIE_state()) || (SIR_state() & SIE_state()) ||
+		(TIR_state() & TIE_state()) || (LIR_state() & LIE_state()) ||
+		(VIR_state() & VIE_state());
 }
 
 void CPU::print_last_opcode() {
-	std::cout << "0x" << std::hex << std::uppercase << (int)(oldPC) << " " << instruction_info.mnemonic;
-	if (instruction_info.bytes == 3)
-		std::cout << " " << (int)(read_u16_at_pc());
-	if (instruction_info.bytes == 2)
-		std::cout << " 0x" << (int)(read_u8_at_pc());
+	std::cout << "0x" << std::hex << std::uppercase << (int)(oldPC) << " "
+		<< instruction_info.mnemonic;
+	if (instruction_info.bytes == 3) std::cout << " " << (int)(read_u16_at_pc());
+	if (instruction_info.bytes == 2) std::cout << " 0x" << (int)(read_u8_at_pc());
 	std::cout << std::endl;
 }
 
@@ -85,7 +76,8 @@ void CPU::printallops() {
 		else {
 			myinstruction_info = instructions[myopcode];
 		}
-		std::cout << "0x" << std::hex << std::uppercase << (int)(mypc) << " " << myinstruction_info.mnemonic;
+		std::cout << "0x" << std::hex << std::uppercase << (int)(mypc) << " "
+			<< myinstruction_info.mnemonic;
 		if (myinstruction_info.bytes == 3)
 			std::cout << " " << (int)(read_u16_at_pc());
 		if (myinstruction_info.bytes == 2)
@@ -95,20 +87,15 @@ void CPU::printallops() {
 	}
 }
 
-bool CPU::in_boot_r() {
-	return in_boot;
-}
+bool CPU::in_boot_r() { return in_boot; }
 
-u8 CPU::read(const u16& addr) {
-	return mem->read(addr);
-}
+u8 CPU::read(const u16& addr) { return mem->read(addr); }
 void CPU::write(const u16& addr, const u8& data) {
 	mem->write(addr, data);
 }
 void CPU::write_u16(const u16& addr, const u16& data) {
 	mem->write_u16(addr, data);
 }
-
 
 // INTERRUPT FLAGS
 bool CPU::JIR_state() { return check_bit(JIR, read(INTERRUPT_FLAGS)); };

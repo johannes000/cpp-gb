@@ -15,6 +15,7 @@ typedef signed short i16;
 constexpr u16 INTERRUPT_FLAGS = 0xFF0F;
 constexpr u16 INTERRUPT_ENABLE = 0xFFFF;
 
+constexpr u16 CARD_ROM = 0x0000;
 constexpr u16 CARD_ROM_0 = 0x0000;
 constexpr u16 CARD_ROM_0_END = 0x3FFF;
 constexpr u16 CARD_ROM_END = 0x7000;
@@ -31,13 +32,13 @@ constexpr u16 WORKING_RAM = 0xC000;
 constexpr u16 WORKING_RAM_END = 0xDFFF;
 constexpr u16 WORKING_RAM_SHADOW = 0xE000;
 constexpr u16 WORKING_RAM_SHADOW_END = 0xFDFF;
+constexpr u16 WORKING_RAM_SHADOW_OFFSET = 0x2000;
 constexpr u16 SPRITE_INFORMATION = 0xFE00;
 constexpr u16 SPRITE_INFORMATION_END = 0xFE9F;
 constexpr u16 MEMORY_MAPPED_IO = 0xFF00;
 constexpr u16 MEMORY_MAPPED_IO_END = 0xFF7F;
 constexpr u16 ZERO_PAGE_RAM = 0xFF80;
 constexpr u16 ZERO_PAGE_RAM_END = 0xFFFF;
-
 
 typedef const u8 IF; // Interrupt Flags
 

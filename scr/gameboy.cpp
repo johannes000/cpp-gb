@@ -1,7 +1,7 @@
 #include "gameboy.h"
 
 
-gameboy::gameboy() :cpu(&mem), mem(&cpu, &card, &ppu), ppu() {}
+gameboy::gameboy() :cpu(&mem), mem(&cpu, &card, &ppu), ppu(&mem) {}
 
 gameboy::~gameboy() {}
 
