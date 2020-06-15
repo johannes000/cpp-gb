@@ -1,15 +1,14 @@
 #include "PPU.h"
 #include <cassert>
-u8 xx = 0x00;
 
 PPU::PPU(MEMORY* m) : mem(m) {
 	createWindow();
-
 	v_ram = std::vector<u8>(VRAM_SIZE, 0x00);
 	sprite_attribute_table = std::vector<u8>(OAM_SIZE, 0x00);
-	//memset(gb_screen, 0xc1, sizeof(gb_screen));
 
+	memset(gb_screen, 0xFF, sizeof(gb_screen));
 
+	renderScreen();
 	update_lcd_control();
 }
 
@@ -18,7 +17,7 @@ PPU::~PPU() {
 }
 void PPU::update() {
 	update_lcd_control();
-	memset(gb_screen, xx++, sizeof(gb_screen));
+	render_tiles();
 	renderScreen();
 }
 
@@ -32,7 +31,19 @@ void PPU::waitforinput() {
 					exit(0);
 					break;
 				case SDL_KEYDOWN:
-					quit = true;
+					switch (event.key.keysym.sym) {
+						case SDLK_p:
+							sel_pal = (++sel_pal) % Palettes.size();
+							render_tiles();
+							renderScreen();
+							break;
+						case SDLK_ESCAPE:
+							exit(0);
+							break;
+						default:
+							quit = true;
+							break;
+					}
 					break;
 				default:
 					break;
@@ -90,10 +101,24 @@ void PPU::update_lcd_control() {
 	};
 }
 
+void PPU::render_tiles() {
+	int c = 0;
+	for (auto& p : gb_screen) {
+		u8 pp = mem->read((0x0104 + c++) % 0x2F);
+		p.R = Palettes[sel_pal][(pp >> 2) & 3].R;
+		p.G = Palettes[sel_pal][(pp >> 2) & 3].G;
+		p.B = Palettes[sel_pal][(pp >> 2) & 3].B;
+	}
+}
+
 bool PPU::createWindow() {
 	SDL_Init(SDL_INIT_VIDEO);
-	window = SDL_CreateWindow("cpp-gb", SDL_WINDOWPOS_UNDEFINED,
-							  SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
+	window = SDL_CreateWindow("cpp-gb",
+							  SDL_WINDOWPOS_UNDEFINED,
+							  SDL_WINDOWPOS_UNDEFINED,
+							  SCREEN_WIDTH * 4,
+							  SCREEN_HEIGHT * 4,
+							  SDL_WINDOW_SHOWN);
 	// Create renderer for window
 	renderer = SDL_CreateRenderer(window, -1,
 								  SDL_RENDERER_ACCELERATED);
@@ -108,7 +133,8 @@ bool PPU::createWindow() {
 void PPU::renderScreen() {
 	assert(renderer && texture);
 	SDL_UpdateTexture(texture, NULL,
-					  gb_screen, GB_LCD_SIZE_WIDTH * sizeof(u8) * 3);
+					  gb_screen,
+					  GB_LCD_SIZE_WIDTH * sizeof(u8) * 3);
 	SDL_RenderClear(renderer);
 	SDL_RenderCopy(renderer, texture, NULL, NULL);
 	SDL_RenderPresent(renderer);

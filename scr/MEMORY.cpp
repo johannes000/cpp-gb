@@ -42,30 +42,38 @@ MEMORY::~MEMORY() {
 
 u8 MEMORY::read(const u16& addr) {
 	if (addr <= CARD_ROM_END) {
-		if (cpu->in_boot_r() && addr <= BOOT_ROM_END) {
+		if (cpu->in_boot_r() &&
+			addr <= BOOT_ROM_END) {
 			return boot.at(addr);
 		}
 		return cardridge->read(addr);
 	}
-	else if (addr >= GRAPHICS_RAM && addr <= GRAPHICS_RAM_END) {
+	else if (addr >= GRAPHICS_RAM &&
+			 addr <= GRAPHICS_RAM_END) {
 		return ppu->read(addr);
 	}
-	else if (addr >= CARD_EXTERNAL_RAM && addr <= CARD_EXTERNAL_RAM_END) {
+	else if (addr >= CARD_EXTERNAL_RAM &&
+			 addr <= CARD_EXTERNAL_RAM_END) {
 		return cardridge->read(addr);
 	}
-	else if (addr >= WORKING_RAM && addr <= WORKING_RAM_END) {
+	else if (addr >= WORKING_RAM &&
+			 addr <= WORKING_RAM_END) {
 		return memory.at(addr);
 	}
-	else if (addr >= WORKING_RAM_SHADOW && addr <= WORKING_RAM_SHADOW_END) {
+	else if (addr >= WORKING_RAM_SHADOW &&
+			 addr <= WORKING_RAM_SHADOW_END) {
 		return memory.at(addr - WORKING_RAM_SHADOW_OFFSET);
 	}
-	else if (addr >= SPRITE_INFORMATION && addr <= SPRITE_INFORMATION_END) {
+	else if (addr >= SPRITE_INFORMATION &&
+			 addr <= SPRITE_INFORMATION_END) {
 		return ppu->read(addr);
 	}
-	else if (addr >= MEMORY_MAPPED_IO && addr <= MEMORY_MAPPED_IO_END) {
+	else if (addr >= MEMORY_MAPPED_IO &&
+			 addr <= MEMORY_MAPPED_IO_END) {
 		return memory.at(addr);
 	}
-	else if (addr >= ZERO_PAGE_RAM && addr <= ZERO_PAGE_RAM_END) {
+	else if (addr >= ZERO_PAGE_RAM &&
+			 addr <= ZERO_PAGE_RAM_END) {
 		return memory.at(addr);
 	}
 	return 0x00;
@@ -80,25 +88,32 @@ void MEMORY::write(const u16& addr, const u8& data) {
 			break;
 	}
 
-	if (addr >= GRAPHICS_RAM && addr <= GRAPHICS_RAM_END) {
+	if (addr >= GRAPHICS_RAM &&
+		addr <= GRAPHICS_RAM_END) {
 		ppu->write(addr, data);
 	}
-	else if (addr >= CARD_EXTERNAL_RAM && addr <= CARD_EXTERNAL_RAM_END) {
+	else if (addr >= CARD_EXTERNAL_RAM &&
+			 addr <= CARD_EXTERNAL_RAM_END) {
 		cardridge->write(addr, data);
 	}
-	else if (addr >= WORKING_RAM && addr <= WORKING_RAM_END) {
+	else if (addr >= WORKING_RAM &&
+			 addr <= WORKING_RAM_END) {
 		memory.at(addr) = data;
 	}
-	else if (addr >= WORKING_RAM_SHADOW && addr <= WORKING_RAM_SHADOW_END) {
+	else if (addr >= WORKING_RAM_SHADOW &&
+			 addr <= WORKING_RAM_SHADOW_END) {
 		memory.at(addr - WORKING_RAM_SHADOW_OFFSET) = data;
 	}
-	else if (addr >= SPRITE_INFORMATION && addr <= SPRITE_INFORMATION_END) {
+	else if (addr >= SPRITE_INFORMATION &&
+			 addr <= SPRITE_INFORMATION_END) {
 		return ppu->write(addr, data);
 	}
-	else if (addr >= MEMORY_MAPPED_IO && addr <= MEMORY_MAPPED_IO_END) {
+	else if (addr >= MEMORY_MAPPED_IO &&
+			 addr <= MEMORY_MAPPED_IO_END) {
 		memory.at(addr) = data;
 	}
-	else if (addr >= ZERO_PAGE_RAM && addr <= ZERO_PAGE_RAM_END) {
+	else if (addr >= ZERO_PAGE_RAM &&
+			 addr <= ZERO_PAGE_RAM_END) {
 		memory.at(addr) = data;
 	}
 	else if (addr == INTERRUPT_ENABLE_REG) {
