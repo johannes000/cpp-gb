@@ -1,9 +1,15 @@
 #include "PPU.h"
+#include <cassert>
+u8 xx = 0x00;
 
 PPU::PPU(MEMORY* m) : mem(m) {
 	createWindow();
-	renderScreen();
+
 	v_ram = std::vector<u8>(VRAM_SIZE, 0x00);
+	sprite_attribute_table = std::vector<u8>(OAM_SIZE, 0x00);
+	//memset(gb_screen, 0xc1, sizeof(gb_screen));
+
+
 	update_lcd_control();
 }
 
@@ -12,28 +18,15 @@ PPU::~PPU() {
 }
 void PPU::update() {
 	update_lcd_control();
+	memset(gb_screen, xx++, sizeof(gb_screen));
+	renderScreen();
 }
 
-void PPU::renderScreen() {
-
-	screenSurface = SDL_GetWindowSurface(window);
-	// Fill the surface white
-	SDL_FillRect(screenSurface, NULL,
-				 SDL_MapRGB(screenSurface->format, 0xFF, 0xFF, 0xFF));
-
-	// Update the surface
-	SDL_UpdateWindowSurface(window);
-
-	// Wait two seconds
-	SDL_Delay(20);
-
-}
 
 void PPU::waitforinput() {
 	bool quit = false;
 	while (!quit) {
 		if (SDL_WaitEvent(&event)) {
-			/* We are only worried about SDL_KEYDOWN and SDL_KEYUP events */
 			switch (event.type) {
 				case SDL_QUIT:
 					exit(0);
@@ -50,8 +43,13 @@ void PPU::waitforinput() {
 
 
 void PPU::write(const u16& addr, const u8& data) {
-	if (addr >= GRAPHICS_RAM && addr <= GRAPHICS_RAM_END) {
+	if (addr >= GRAPHICS_RAM
+		&& addr <= GRAPHICS_RAM_END) {
 		v_ram[addr - GRAPHICS_RAM] = data;
+	}
+	else if (addr >= SPRITE_INFORMATION
+			 && addr <= SPRITE_INFORMATION_END) {
+		sprite_attribute_table[addr - SPRITE_INFORMATION] = data;
 	}
 	else {
 		mem->write(addr, data);
@@ -60,7 +58,8 @@ void PPU::write(const u16& addr, const u8& data) {
 
 
 u8 PPU::read(const u16& addr) {
-	if (addr >= GRAPHICS_RAM && addr <= GRAPHICS_RAM_END) {
+	if (addr >= GRAPHICS_RAM
+		&& addr <= GRAPHICS_RAM_END) {
 		return v_ram.at(addr - GRAPHICS_RAM);
 	}
 	else {
@@ -71,7 +70,8 @@ u8 PPU::read(const u16& addr) {
 void PPU::closeWindow() {
 	// Destroy window
 	SDL_DestroyWindow(window);
-
+	SDL_DestroyTexture(texture);
+	SDL_DestroyRenderer(renderer);
 	// Quit SDL subsystems
 	SDL_Quit();
 }
@@ -90,22 +90,27 @@ void PPU::update_lcd_control() {
 	};
 }
 
-
 bool PPU::createWindow() {
-	// Initialize SDL
-	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
-		printf("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
-	}
-	else {
-		// Create window
-		window = SDL_CreateWindow("Gameboy", 200, 200, SCREEN_WIDTH,
-								  SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
-		if (window == NULL) {
-			printf("Window could not be created! SDL_Error: %s\n",
-				   SDL_GetError());
-			return false;
-		}
-	}
+	SDL_Init(SDL_INIT_VIDEO);
+	window = SDL_CreateWindow("cpp-gb", SDL_WINDOWPOS_UNDEFINED,
+							  SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
+	// Create renderer for window
+	renderer = SDL_CreateRenderer(window, -1,
+								  SDL_RENDERER_ACCELERATED);
+	texture = SDL_CreateTexture(renderer,
+								SDL_PIXELFORMAT_RGB24,
+								SDL_TEXTUREACCESS_STREAMING,
+								SCREEN_WIDTH, SCREEN_HEIGHT);
 
 	return true;
 }
+
+void PPU::renderScreen() {
+	assert(renderer && texture);
+	SDL_UpdateTexture(texture, NULL,
+					  gb_screen, GB_LCD_SIZE_WIDTH * sizeof(u8) * 3);
+	SDL_RenderClear(renderer);
+	SDL_RenderCopy(renderer, texture, NULL, NULL);
+	SDL_RenderPresent(renderer);
+}
+

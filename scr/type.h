@@ -12,8 +12,8 @@ typedef signed char i8;
 typedef signed short i16;
 
 //ADDRESSES
-constexpr u16 INTERRUPT_FLAGS = 0xFF0F;
-constexpr u16 INTERRUPT_ENABLE = 0xFFFF;
+constexpr u16 INTERRUPT_FLAGS_REG = 0xFF0F;
+constexpr u16 INTERRUPT_ENABLE_REG = 0xFFFF;
 
 constexpr u16 CARD_ROM = 0x0000;
 constexpr u16 CARD_ROM_0 = 0x0000;
@@ -39,7 +39,7 @@ constexpr u16 SPRITE_INFORMATION_END = 0xFE9F;
 constexpr u16 MEMORY_MAPPED_IO = 0xFF00;
 constexpr u16 MEMORY_MAPPED_IO_END = 0xFF7F;
 constexpr u16 ZERO_PAGE_RAM = 0xFF80;
-constexpr u16 ZERO_PAGE_RAM_END = 0xFFFF;
+constexpr u16 ZERO_PAGE_RAM_END = 0xFFFE;
 
 // LCD
 constexpr u8 GB_LCD_SIZE_WIDTH = 160;
@@ -61,8 +61,15 @@ constexpr u16 BG_PALETTE_DATA_1 = 0xFF49;// OBP1 - Object Palette 1 Data (R/W) -
 
 constexpr u16 DMA_TRANSFER = 0xFF46;	// DMA Transfer and Start Address (R/W)
 
-
 constexpr int VERTICAL_REFRESH_CYCLES = 70224;
+
+const enum class Colors {
+	white = 0,
+	light_gray = 1,
+	dark_gray = 2,
+	black = 3,
+};
+
 
 typedef const u8 IF; // Interrupt Flags
 

@@ -1,6 +1,8 @@
 #include "CPU.h"
 
-CPU::CPU(MEMORY* memory) : mem(memory) { initRegister(); }
+CPU::CPU(MEMORY* memory) : mem(memory) {
+	initRegister();
+}
 
 CPU::~CPU() {}
 
@@ -45,16 +47,7 @@ void CPU::incPC() { R.PC += instruction_info.bytes; }
 
 u8 CPU::getNextOPCode() { return read(R.PC); }
 
-void CPU::handle_interrupt() {}
 
-bool CPU::interrupts() {
-	if (!IME) {
-		return false;
-	}
-	return (JIR_state() & JIE_state()) || (SIR_state() & SIE_state()) ||
-		(TIR_state() & TIE_state()) || (LIR_state() & LIE_state()) ||
-		(VIR_state() & VIE_state());
-}
 
 void CPU::print_last_opcode() {
 	std::cout << "0x" << std::hex << std::uppercase << (int)(oldPC) << " "
@@ -89,6 +82,7 @@ void CPU::printallops() {
 
 bool CPU::in_boot_r() { return in_boot; }
 
+
 u8 CPU::read(const u16& addr) { return mem->read(addr); }
 void CPU::write(const u16& addr, const u8& data) {
 	mem->write(addr, data);
@@ -98,14 +92,34 @@ void CPU::write_u16(const u16& addr, const u16& data) {
 }
 
 // INTERRUPT FLAGS
-bool CPU::JIR_state() { return check_bit(JIR, read(INTERRUPT_FLAGS)); };
-bool CPU::SIR_state() { return check_bit(SIR, read(INTERRUPT_FLAGS)); };
-bool CPU::TIR_state() { return check_bit(TIR, read(INTERRUPT_FLAGS)); };
-bool CPU::LIR_state() { return check_bit(LIR, read(INTERRUPT_FLAGS)); };
-bool CPU::VIR_state() { return check_bit(VIR, read(INTERRUPT_FLAGS)); };
 
-bool CPU::JIE_state() { return check_bit(JIE, read(INTERRUPT_ENABLE)); };
-bool CPU::SIE_state() { return check_bit(SIE, read(INTERRUPT_ENABLE)); };
-bool CPU::TIE_state() { return check_bit(TIE, read(INTERRUPT_ENABLE)); };
-bool CPU::LIE_state() { return check_bit(LIE, read(INTERRUPT_ENABLE)); };
-bool CPU::VIE_state() { return check_bit(VIE, read(INTERRUPT_ENABLE)); };
+void CPU::handle_interrupt(u8 val) {
+	write(INTERRUPT_ENABLE_REG, val);
+	ie_flags.update(this);
+	if_flags.update(this);
+}
+
+
+bool CPU::interrupts() {
+	if (!IME) {
+		return false;
+	}
+	return 0;
+}
+void CPU::IE_Flags::update(CPU* cpu) {
+	u8 data = cpu->read(INTERRUPT_ENABLE_REG);
+	JIR = check_bit(data, 4);
+	SIR = check_bit(data, 3);
+	TIR = check_bit(data, 2);
+	LIR = check_bit(data, 1);
+	VIR = check_bit(data, 0);
+}
+
+void CPU::IF_Flags::update(CPU* cpu) {
+	u8 data = cpu->read(INTERRUPT_FLAGS_REG);
+	JIE = check_bit(data, 4);
+	SIE = check_bit(data, 3);
+	TIE = check_bit(data, 2);
+	LIE = check_bit(data, 1);
+	VIE = check_bit(data, 0);
+}

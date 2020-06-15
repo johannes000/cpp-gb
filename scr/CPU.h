@@ -21,9 +21,15 @@ public:
 	u8 parseOPCode(u8&);
 	void update();
 	void incPC();
+
 	u8 getNextOPCode();
 	void printallops();
+
 	bool in_boot_r();
+
+	void interrupt_enable(u8 val);
+
+	int cycles = 0;
 
 private:
 	MEMORY* mem = nullptr;
@@ -49,38 +55,33 @@ private:
 	bool IME_scheduled = false;
 	bool DI_scheduled = false;
 
+public:
 	// FFFF - IE - Interrupt Enable (R/W)
-	u8* IR = nullptr;
-	const u8 JIR = 4;		// Bit 4 – Joypad Interrupt Requested(1 = Requested);
-	const u8 SIR = 3;		// Bit 3 – Serial Interrupt Requested(1 = Requested)
-	const u8 TIR = 2;		// Bit 2 – Timer Interrupt Requested(1 = Requested)
-	const u8 LIR = 1;		// Bit 1 – LCD STAT Interrupt Requested(1 = Requested)
-	const u8 VIR = 0;		// Bit 0 – Vertical Blank Interrupt Requested(1 = Requested)
+	struct IE_Flags {
+		bool JIR;	// Bit 4 – Joypad Interrupt Requested(1 = Requested);
+		bool SIR;	// Bit 3 – Serial Interrupt Requested(1 = Requested)
+		bool TIR;	// Bit 2 – Timer Interrupt Requested(1 = Requested)
+		bool LIR;	// Bit 1 – LCD STAT Interrupt Requested(1 = Requested)
+		bool VIR;	// Bit 0 – Vertical Blank Interrupt Requested(1 = Requested)
+		void update(CPU*);
+	} ie_flags;
 
-	bool JIR_state();
-	bool SIR_state();
-	bool TIR_state();
-	bool LIR_state();
-	bool VIR_state();
 
 	// FF0F - IF - Interrupt Flag (R/W)
-	u8* IE = nullptr;
-	const u8 JIE = 4;	// Bit 4 – Joypad Interrupt Enable(1 = Enable, 0 = Disable)
-	const u8 SIE = 3;	// Bit 3 – Serial Interrupt Enable(1 = Enable, 0 = Disable)
-	const u8 TIE = 2;	// Bit 2 – Timer Interrupt Enable(1 = Enable, 0 = Disable)
-	const u8 LIE = 1;	// Bit 1 – LCD STAT Interrupt Enable(1 = Enable, 0 = Disable)
-	const u8 VIE = 0;	// Bit 0 – Vertical Blank Interrupt Enable(1 = Enable, 0 = Disable)
-
-	bool JIE_state();
-	bool SIE_state();
-	bool TIE_state();
-	bool LIE_state();
-	bool VIE_state();
-
-	void handle_interrupt();
-	bool interrupts();
-	//FLAGS
+	struct IF_Flags {
+		bool JIE;	// Bit 0: V - Blank  Interrupt Enable(INT 40h)  (1 = Enable)
+		bool SIE;	// Bit 1 : LCD STAT Interrupt Enable(INT 48h)  (1 = Enable)
+		bool TIE;	// Bit 2 : Timer    Interrupt Enable(INT 50h)  (1 = Enable)
+		bool LIE;	// Bit 3 : Serial   Interrupt Enable(INT 58h)  (1 = Enable)
+		bool VIE;	// Bit 4 : Joypad   Interrupt Enable(INT 60h)  (1 = Enable)
+		void update(CPU*);
+	}if_flags;
+	void handle_interrupt(u8 val);
 private:
+	bool interrupts();
+
+
+	//FLAGS
 	void set_flag_if(const Flag&, bool condition);
 	void set_flag(const Flag&);								//setze flag auf true egal was
 	void set_flags(const Flag&, const Flag&);				//setze flag auf true egal was

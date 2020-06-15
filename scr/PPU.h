@@ -27,6 +27,11 @@ public:
 private:
 	MEMORY* mem;
 
+	SDL_Window* window = nullptr;
+	SDL_Surface* screenSurface = nullptr;
+	SDL_Renderer* renderer = nullptr;
+	SDL_Texture* texture = nullptr;
+
 	bool createWindow();
 	void renderScreen();
 	void closeWindow();
@@ -36,8 +41,6 @@ private:
 
 	const int SCREEN_WIDTH = GB_LCD_SIZE_WIDTH;
 	const int SCREEN_HEIGHT = GB_LCD_SIZE_HEIGHT;
-	SDL_Window* window = NULL;
-	SDL_Surface* screenSurface = NULL;
 
 	std::vector<u8> v_ram;
 	std::vector<u8> sprite_attribute_table;
@@ -56,9 +59,9 @@ private:
 
 	enum class LCD_Status {
 		lyc = 6,				// Bit 6 - LYC = LY Coincidence Interrupt(1 = Enable) (Read / Write)
-		oam_inter = 5,			// Bit 5 - Mode 2 OAM Interrupt(1 = Enable) (Read / Write)
-		v_blank_inter = 4,		// Bit 4 - Mode 1 V - Blank Interrupt(1 = Enable) (Read / Write)
-		h_blank_inter = 3,		// Bit 3 - Mode 0 H - Blank Interrupt(1 = Enable) (Read / Write)
+		oam_interupt = 5,		// Bit 5 - Mode 2 OAM Interrupt(1 = Enable) (Read / Write)
+		v_blank_interupt = 4,	// Bit 4 - Mode 1 V - Blank Interrupt(1 = Enable) (Read / Write)
+		h_blank_interupt = 3,	// Bit 3 - Mode 0 H - Blank Interrupt(1 = Enable) (Read / Write)
 		coincidence_flag = 2,	// Bit 2 - Coincidence Flag(0:LYC<>LY, 1 : LYC = LY) (Read Only)
 		mode_flag_1 = 1,		// Bit 1 - 0 - Mode Flag(Mode 0 - 3, see below) (Read Only)
 		mode_flag_0 = 0			// 0: During H - Blank
@@ -67,9 +70,15 @@ private:
 								// 3 : During Transferring Data to LCD Driver
 	}lcd_status;
 
-	struct LCD {
-
+	struct Pixel {
+		// SDL_PIXELFORMAT_RGB24
+		// Stored in memory as the bytes R, G, B
+		// (R at the lowest address, B at the highest address).
+		u8 R;
+		u8 G;
+		u8 B;
 	};
+	Pixel gb_screen[GB_LCD_SIZE_HEIGHT * GB_LCD_SIZE_WIDTH];
 };
 
 #endif // !PPU_H_GUARD

@@ -101,6 +101,9 @@ void MEMORY::write(const u16& addr, const u8& data) {
 	else if (addr >= ZERO_PAGE_RAM && addr <= ZERO_PAGE_RAM_END) {
 		memory.at(addr) = data;
 	}
+	else if (addr == INTERRUPT_ENABLE_REG) {
+		cpu->handle_interrupt(data);
+	}
 }
 
 void MEMORY::write_u16(const u16& addr, const u16& data) {
@@ -118,7 +121,7 @@ void MEMORY::dma_transfer(const u8& data) {
 	for (u8 i = 0; i < 0xA0; i++) {
 		write(0xFE00 + i, read(addr + i));
 	}
-
+	cpu->cycles += 160;
 }
 
 
