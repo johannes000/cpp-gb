@@ -54,8 +54,8 @@ private:
 		bool sprite_size;			// Bit 2 - Sprite Size(0 = 8×8, 1 = 8×16)
 		bool sprites_enabled;		// Bit 1 - Sprites Enabled(0 = Disabled, 1 = Enabled)
 		bool bg_enabled;			// Bit 0 - BG Enabled(in DMG) (0 = Disabled, 1 = Enabled)
+		void update(u8 data);
 	}lcd_control;
-	void update_lcd_control();
 
 	enum class LCD_Status {
 		lyc = 6,				// Bit 6 - LYC = LY Coincidence Interrupt(1 = Enable) (Read / Write)
@@ -78,7 +78,9 @@ private:
 		u8 G;
 		u8 B;
 	};
+
 	Pixel gb_screen[GB_LCD_SIZE_HEIGHT * GB_LCD_SIZE_WIDTH];
+
 	std::vector<std::vector<Pixel>> Palettes =
 		std::vector<std::vector<Pixel>>{
 		{{0xE0,0xF8,0xD0},{0x88,0xC0,0x70},{0x34,0x68,0x56},{0x08,0x18,0x20}}, // classic grün
@@ -88,6 +90,8 @@ private:
 	};
 	u8 sel_pal = 0;
 	void render_tiles();
+
+	void change_palette();
 
 };
 

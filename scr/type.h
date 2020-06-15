@@ -42,8 +42,8 @@ constexpr u16 ZERO_PAGE_RAM = 0xFF80;
 constexpr u16 ZERO_PAGE_RAM_END = 0xFFFE;
 
 // LCD
-constexpr u8 GB_LCD_SIZE_WIDTH = 160;
-constexpr u8 GB_LCD_SIZE_HEIGHT = 144;
+constexpr int GB_LCD_SIZE_WIDTH = 160;
+constexpr int GB_LCD_SIZE_HEIGHT = 144;
 
 constexpr u16 LCD_CONTROL = 0xFF40;
 constexpr u16 LCD_STATUS = 0xFF41;

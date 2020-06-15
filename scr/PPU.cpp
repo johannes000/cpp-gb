@@ -5,18 +5,17 @@ PPU::PPU(MEMORY* m) : mem(m) {
 	createWindow();
 	v_ram = std::vector<u8>(VRAM_SIZE, 0x00);
 	sprite_attribute_table = std::vector<u8>(OAM_SIZE, 0x00);
-
 	memset(gb_screen, 0xFF, sizeof(gb_screen));
+	lcd_control.update(read(LCD_CONTROL));
 
 	renderScreen();
-	update_lcd_control();
 }
 
 PPU::~PPU() {
 	closeWindow();
 }
 void PPU::update() {
-	update_lcd_control();
+	lcd_control.update(read(LCD_CONTROL));
 	render_tiles();
 	renderScreen();
 }
@@ -24,32 +23,32 @@ void PPU::update() {
 
 void PPU::waitforinput() {
 	bool quit = false;
-	while (!quit) {
-		if (SDL_WaitEvent(&event)) {
-			switch (event.type) {
-				case SDL_QUIT:
+
+	SDL_PollEvent(&event);
+	switch (event.type) {
+		case SDL_QUIT:
+			exit(0);
+			break;
+		case SDL_KEYDOWN:
+			switch (event.key.keysym.sym) {
+				case SDLK_p:
+					sel_pal = (++sel_pal) % Palettes.size();
+					std::cout << "P" << std::endl;
+					render_tiles();
+					renderScreen();
+					break;
+				case SDLK_ESCAPE:
 					exit(0);
 					break;
-				case SDL_KEYDOWN:
-					switch (event.key.keysym.sym) {
-						case SDLK_p:
-							sel_pal = (++sel_pal) % Palettes.size();
-							render_tiles();
-							renderScreen();
-							break;
-						case SDLK_ESCAPE:
-							exit(0);
-							break;
-						default:
-							quit = true;
-							break;
-					}
-					break;
 				default:
+					quit = true;
 					break;
 			}
-		}
+			break;
+		default:
+			break;
 	}
+
 }
 
 
@@ -87,29 +86,26 @@ void PPU::closeWindow() {
 	SDL_Quit();
 }
 
-void PPU::update_lcd_control() {
-	u8 LCD_data = read(LCD_CONTROL);
-	lcd_control = {
-		(bool)((LCD_data >> 7) & 1),
-		(bool)((LCD_data >> 6) & 1),
-		(bool)((LCD_data >> 5) & 1),
-		(bool)((LCD_data >> 4) & 1),
-		(bool)((LCD_data >> 3) & 1),
-		(bool)((LCD_data >> 2) & 1),
-		(bool)((LCD_data >> 1) & 1),
-		(bool)((LCD_data >> 0) & 1)
-	};
-}
 
 void PPU::render_tiles() {
 	int c = 0;
-	for (auto& p : gb_screen) {
-		u8 pp = mem->read((0x0104 + c++) % 0x2F);
-		p.R = Palettes[sel_pal][(pp >> 2) & 3].R;
-		p.G = Palettes[sel_pal][(pp >> 2) & 3].G;
-		p.B = Palettes[sel_pal][(pp >> 2) & 3].B;
+	bool exit = false;
+	int s = GB_LCD_SIZE_HEIGHT * GB_LCD_SIZE_WIDTH;
+	for (u16 i = 0x104; i < 0x9FFF; i += 2) {
+		u8 data1 = read(i);
+		u8 data2 = read(i + 1);
+		for (size_t j = 0; j < 8; j++) {
+			u8 p1 = (data1 >> j) & 1 + (data2 >> j) & 1;
+			gb_screen[c % s].R = Palettes[sel_pal][p1].R;
+			gb_screen[c % s].G = Palettes[sel_pal][p1].G;
+			gb_screen[c % s].B = Palettes[sel_pal][p1].B;
+			c++;
+		}
+		if (c == s - 1)
+			break;
 	}
 }
+
 
 bool PPU::createWindow() {
 	SDL_Init(SDL_INIT_VIDEO);
@@ -140,3 +136,15 @@ void PPU::renderScreen() {
 	SDL_RenderPresent(renderer);
 }
 
+void PPU::LCD_Control::update(u8 data) {
+	*this = {
+		(bool)((data >> 7) & 1),
+		(bool)((data >> 6) & 1),
+		(bool)((data >> 5) & 1),
+		(bool)((data >> 4) & 1),
+		(bool)((data >> 3) & 1),
+		(bool)((data >> 2) & 1),
+		(bool)((data >> 1) & 1),
+		(bool)((data >> 0) & 1)
+	};
+}

@@ -30,16 +30,18 @@ u8 CPU::parseOPCode(u8& opcode) {
 	}
 	return function;
 }
-
+int cc = 0;
 void CPU::update() {
 	oldPC = R.PC;
 	if (interrupts()) std::cout << "INTERRUPT" << std::endl;
 	if (IME_scheduled) IME = true;
 
+	if (!(++cc % 1000))
+		std::cout << cc << std::endl;
+
 	OPCode = getNextOPCode();
 	u8 jp = parseOPCode(OPCode);
-
-	print_last_opcode();
+	//print_last_opcode();
 	if (jp == 0) incPC();
 }
 
@@ -83,7 +85,11 @@ void CPU::printallops() {
 bool CPU::in_boot_r() { return in_boot; }
 
 
-u8 CPU::read(const u16& addr) { return mem->read(addr); }
+u8 CPU::read(const u16& addr) {
+	if (in_boot && R.PC == 0x100)
+		in_boot = false;
+	return mem->read(addr);
+}
 void CPU::write(const u16& addr, const u8& data) {
 	mem->write(addr, data);
 }
