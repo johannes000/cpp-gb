@@ -1,6 +1,6 @@
 #include "CPU.h"
 
-CPU::CPU(MEMORY* memory) : mem(memory) {
+CPU::CPU(MEMORY* m) : mem(m) {
 	initRegister();
 }
 
@@ -35,10 +35,8 @@ void CPU::update() {
 	oldPC = R.PC;
 	if (interrupts()) std::cout << "INTERRUPT" << std::endl;
 	if (IME_scheduled) IME = true;
-
-	if (!(++cc % 1000))
-		std::cout << cc << std::endl;
-
+	//if (!(++cc % 1000))
+	//	std::cout << cc << std::endl;
 	OPCode = getNextOPCode();
 	u8 jp = parseOPCode(OPCode);
 	//print_last_opcode();

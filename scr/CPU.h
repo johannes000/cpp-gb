@@ -32,7 +32,7 @@ public:
 	int cycles = 0;
 
 private:
-	MEMORY* mem = nullptr;
+	std::unique_ptr<MEMORY> mem;
 	bool in_boot = true;
 
 	u8 read(const u16& addr);

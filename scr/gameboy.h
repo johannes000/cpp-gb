@@ -20,6 +20,9 @@ public:
 
 	void startemu();
 private:
+	const int MAX_CYCLES = 70224;
+	const float FPS = 59.73f;
+	const float DELAY_TIME = 1000.0f / FPS;
 };
 
 #endif // !GAMEBOY_H_GUARD

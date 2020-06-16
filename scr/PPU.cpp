@@ -1,5 +1,6 @@
 #include "PPU.h"
 #include <cassert>
+#include <cstdio>
 
 PPU::PPU(MEMORY* m) : mem(m) {
 	createWindow();
@@ -11,10 +12,22 @@ PPU::PPU(MEMORY* m) : mem(m) {
 	renderScreen();
 }
 
+
+
 PPU::~PPU() {
 	closeWindow();
+	Uint32 fps_lasttime = SDL_GetTicks(); //the last recorded time.
 }
 void PPU::update() {
+	fps_frames++;
+	if (fps_lasttime < SDL_GetTicks() - FPS_INTERVAL * 1000) {
+		fps_lasttime = SDL_GetTicks();
+		fps_current = fps_frames;
+		fps_frames = 0;
+		sprintf_s(fps_text, "%.2d", fps_current);
+		SDL_SetWindowTitle(window, fps_text);
+	}
+
 	lcd_control.update(read(LCD_CONTROL));
 	render_tiles();
 	renderScreen();
@@ -32,7 +45,6 @@ void PPU::waitforinput() {
 		case SDL_KEYDOWN:
 			switch (event.key.keysym.sym) {
 				case SDLK_p:
-					sel_pal = (++sel_pal) % Palettes.size();
 					std::cout << "P" << std::endl;
 					render_tiles();
 					renderScreen();
@@ -96,9 +108,9 @@ void PPU::render_tiles() {
 		u8 data2 = read(i + 1);
 		for (size_t j = 0; j < 8; j++) {
 			u8 p1 = (data1 >> j) & 1 + (data2 >> j) & 1;
-			gb_screen[c % s].R = Palettes[sel_pal][p1].R;
-			gb_screen[c % s].G = Palettes[sel_pal][p1].G;
-			gb_screen[c % s].B = Palettes[sel_pal][p1].B;
+			gb_screen[c % s].R = palette_classic_gruen[p1].R;
+			gb_screen[c % s].G = palette_classic_gruen[p1].G;
+			gb_screen[c % s].B = palette_classic_gruen[p1].B;
 			c++;
 		}
 		if (c == s - 1)

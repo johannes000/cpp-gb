@@ -9,6 +9,8 @@
 #include <stdio.h>
 #include <vector>
 
+constexpr auto FPS_INTERVAL = 1.0; //seconds.;
+
 constexpr u16 VRAM_SIZE = 0x2000;
 constexpr u16 OAM_SIZE = 0x0100;
 
@@ -79,20 +81,24 @@ private:
 		u8 B;
 	};
 
+
 	Pixel gb_screen[GB_LCD_SIZE_HEIGHT * GB_LCD_SIZE_WIDTH];
 
-	std::vector<std::vector<Pixel>> Palettes =
-		std::vector<std::vector<Pixel>>{
-		{{0xE0,0xF8,0xD0},{0x88,0xC0,0x70},{0x34,0x68,0x56},{0x08,0x18,0x20}}, // classic grün
-		{{175,203,70},{121,170,109},{34,111,95},{8,41,85}}, // Forum
-		{{0xDF,0xDF,0xDF},{0xA9,0xA9,0xA9},{0x54,0x54,0x54},{0x00,0x0,0x0}}, // schwarz weiss
-		{{255,255,255},{192,192,192},{96,96,96},{0x0,0x0,0x0}}, // schwarz weiss
-	};
+	Pixel palette_classic_gruen[4] = { { 0xE0, 0xF8, 0xD0 }, { 0x88,0xC0,0x70 }, { 0x34,0x68,0x56 }, { 0x08,0x18,0x20 } }; // classic grün
+	Pixel palette_forum[4]{ {175, 203, 70}, { 121,170,109 }, { 34,111,95 }, { 8,41,85 } }; // Forum
+	Pixel palette_schwarz_weiss[4] = { {0xDF, 0xDF, 0xDF}, { 0xA9,0xA9,0xA9 }, { 0x54,0x54,0x54 }, { 0x00,0x0,0x0 } }; // schwarz weiss
+	Pixel palette_schwarz_weiss_2[4] = { {255, 255, 255}, { 192,192,192 }, { 96,96,96 }, { 0x0,0x0,0x0 } }; // schwarz weiss
+
+	Pixel cur_palette[4];
+
 	u8 sel_pal = 0;
 	void render_tiles();
+private:
 
-	void change_palette();
-
+	Uint32 fps_lasttime = SDL_GetTicks(); //the last recorded time.
+	Uint32 fps_current; //the current FPS.
+	Uint32 fps_frames = 0; //frames passed since the last recorded fps.
+	char fps_text[8];
 };
 
 #endif // !PPU_H_GUARD
