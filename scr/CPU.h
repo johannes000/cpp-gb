@@ -19,7 +19,7 @@ public:
 	~CPU();
 
 	u8 parseOPCode(u8&);
-	void update();
+	int update();
 	void incPC();
 
 	u8 getNextOPCode();
@@ -109,7 +109,7 @@ private:
 		u8 bytes = 0;
 		u8 cycles = 0;
 	};
-	instruction instruction_info;
+	instruction current_instruction_info;
 	u8 OPCode;
 	bool prefix = false;
 

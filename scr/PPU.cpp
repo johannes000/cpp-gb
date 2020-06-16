@@ -2,12 +2,18 @@
 #include <cassert>
 #include <cstdio>
 
-PPU::PPU(MEMORY* m) : mem(m) {
+PPU::PPU(MEMORY* m) :mem(m) {
+
 	createWindow();
 	v_ram = std::vector<u8>(VRAM_SIZE, 0x00);
 	sprite_attribute_table = std::vector<u8>(OAM_SIZE, 0x00);
 	memset(gb_screen, 0xFF, sizeof(gb_screen));
 	lcd_control.update(read(LCD_CONTROL));
+
+	std::copy(std::begin(palette_classic_gruen), std::end(palette_classic_gruen), std::begin(palette_forum));
+
+	Uint32 fps_lasttime = SDL_GetTicks(); //the last recorded time.
+
 
 	renderScreen();
 }
@@ -16,20 +22,20 @@ PPU::PPU(MEMORY* m) : mem(m) {
 
 PPU::~PPU() {
 	closeWindow();
-	Uint32 fps_lasttime = SDL_GetTicks(); //the last recorded time.
 }
 void PPU::update() {
+
 	fps_frames++;
 	if (fps_lasttime < SDL_GetTicks() - FPS_INTERVAL * 1000) {
 		fps_lasttime = SDL_GetTicks();
 		fps_current = fps_frames;
 		fps_frames = 0;
-		sprintf_s(fps_text, "%.2d", fps_current);
+		sprintf_s(fps_text, "%d", fps_current);
+		render_tiles();
 		SDL_SetWindowTitle(window, fps_text);
 	}
 
 	lcd_control.update(read(LCD_CONTROL));
-	render_tiles();
 	renderScreen();
 }
 
@@ -101,20 +107,27 @@ void PPU::closeWindow() {
 
 void PPU::render_tiles() {
 	int c = 0;
-	bool exit = false;
 	int s = GB_LCD_SIZE_HEIGHT * GB_LCD_SIZE_WIDTH;
+
+	//for (u16 i = 0; i < 2; i++) {
+	//	gb_screen[c % s].R = current_palette[3].R;
+	//	gb_screen[c % s].G = current_palette[3].G;
+	//	gb_screen[c++ % s].B = current_palette[3].B;
+	//}
 	for (u16 i = 0x104; i < 0x9FFF; i += 2) {
 		u8 data1 = read(i);
 		u8 data2 = read(i + 1);
+
 		for (size_t j = 0; j < 8; j++) {
-			u8 p1 = (data1 >> j) & 1 + (data2 >> j) & 1;
-			gb_screen[c % s].R = palette_classic_gruen[p1].R;
-			gb_screen[c % s].G = palette_classic_gruen[p1].G;
-			gb_screen[c % s].B = palette_classic_gruen[p1].B;
+			u8 p1 = ((data1 >> j) & 1) + (((data2 >> j) & 1));
+			gb_screen[c % s].R = current_palette[p1].R;
+			gb_screen[c % s].G = current_palette[p1].G;
+			gb_screen[c % s].B = current_palette[p1].B;
 			c++;
+			if (c == s - 1)
+				break;
 		}
-		if (c == s - 1)
-			break;
+
 	}
 }
 
