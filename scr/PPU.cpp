@@ -11,7 +11,6 @@ PPU::PPU(MEMORY* m) :mem(m) {
 	memset(gb_screen, 0xFF, sizeof(gb_screen));
 	lcd_control.update(this);
 	renderScreen();
-	LCD_Mode lcd_mode;
 }
 
 PPU::~PPU() {
@@ -95,11 +94,14 @@ void PPU::waitforinput() {
 
 void PPU::write(const u16& addr, const u8& data) {
 	if (addr >= GRAPHICS_RAM
-		&& addr <= GRAPHICS_RAM_END) {
+		&& addr <= GRAPHICS_RAM_END
+		&& lcd_mode != LCD_Mode::VRAM) {
 		v_ram[addr - GRAPHICS_RAM] = data;
 	}
 	else if (addr >= SPRITE_INFORMATION
-			 && addr <= SPRITE_INFORMATION_END) {
+			 && addr <= SPRITE_INFORMATION_END
+			 && (lcd_mode == LCD_Mode::H_Blank
+			 || lcd_mode == LCD_Mode::V_Blank)) {
 		sprite_attribute_table[addr - SPRITE_INFORMATION] = data;
 	}
 	else {
@@ -219,6 +221,7 @@ bool PPU::get_lcd_state(const LCD_State& s) const {
 	return check_bit(lcd_register.LCD_STATUS, static_cast<u8>(s));
 }
 
+u16 start = 0x0000;
 
 void PPU::render_tiles() {
 	int c = 0;
@@ -229,12 +232,12 @@ void PPU::render_tiles() {
 	//	gb_screen[c % s].G = current_palette[3].G;
 	//	gb_screen[c++ % s].B = current_palette[3].B;
 	//}
-	for (u16 i = 0x104; i < 0x9FFF; i += 2) {
-		u8 data1 = read(i);
-		u8 data2 = read(i + 1);
+	for (u16 i = (0 + start) % v_ram.size(); i < v_ram.size(); i += 2) {
+		u8* data1 = &v_ram[i];
+		u8* data2 = &v_ram[i + 1];
 
 		for (size_t j = 0; j < 8; j++) {
-			int p1 = ((data1 >> j) & 1) + (((data2 >> j) & 1));
+			int p1 = (*data1 >> j) & 1 + (*data2 >> j) & 1;
 			gb_screen[c % s].R = Palettes[current_palette][p1].R;
 			gb_screen[c % s].G = Palettes[current_palette][p1].G;
 			gb_screen[c % s].B = Palettes[current_palette][p1].B;
@@ -244,6 +247,7 @@ void PPU::render_tiles() {
 		}
 
 	}
+	start++;
 }
 
 

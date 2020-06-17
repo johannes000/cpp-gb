@@ -77,7 +77,7 @@ private:
 	SDL_Texture* texture = nullptr;
 
 	// Speicher
-private:
+public:
 	std::vector<u8> v_ram;
 	std::vector<u8> sprite_attribute_table;
 
