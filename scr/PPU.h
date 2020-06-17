@@ -83,6 +83,24 @@ private:
 
 private:
 	// LCD Data
+	struct LCD_Register {
+		u8 LCD_CONTROL;
+		u8 LCD_STATUS;
+
+		u8 LCD_SCY;			// SCY - Scroll Y (R/W)
+		u8 LCD_SCX;			// SCX - Scroll X (R/W)
+		u8 LCD_LY;				// LY - LCDC Y-Coordinate (R)
+		u8 LCD_LYC;			// LYC - LY Compare (R/W)
+		u8 LCD_WY;				// WY - Window Y Position (R/W)
+		u8 LCD_WX;				// WX - Window X Position minus 7 (R/W)
+
+		u8 BG_PALETTE_DATA;	// BGP - BG Palette Data (R/W) - Non CGB Mode Only
+		u8 BG_PALETTE_DATA_0;	// OBP0 - Object Palette 0 Data (R/W) - Non CGB Mode Only
+		u8 BG_PALETTE_DATA_1;	// OBP1 - Object Palette 1 Data (R/W) - Non CGB Mode Only
+
+	}lcd_register;
+
+
 	struct LCD_Control {
 		bool lcd_power;				// Bit 7 - LCD Power(0 = Off, 1 = On)
 		bool window_tile_map;		// Bit 6 - Window Tile Map(0 = 9800h - 9BFFh, 1 = 9C00h - 9FFFh)
@@ -112,7 +130,7 @@ private:
 	void get_lcd_mode();
 	void set_lcd_state(const LCD_State& s);
 	void reset_lcd_state(const LCD_State& s);
-	bool get_lcd_state(const LCD_State& s);
+	bool get_lcd_state(const LCD_State& s)const;
 
 private:
 	// Paletten

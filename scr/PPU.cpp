@@ -42,6 +42,8 @@ void PPU::update(int cycles) {
 		// 0: During H - Blank (204 cycles)
 		case PPU::LCD_Mode::H_Blank:
 			if (cycles_in_mode >= 204) {	// H-Blank vorbei
+				u8 asd = 2;
+				asd = 2;
 			}
 			break;
 			// 1 : During V - Blank
@@ -101,7 +103,44 @@ void PPU::write(const u16& addr, const u8& data) {
 		sprite_attribute_table[addr - SPRITE_INFORMATION] = data;
 	}
 	else {
-		mem->write(addr, data);
+		switch (addr) {
+			case LCD_CONTROL:
+				lcd_register.LCD_CONTROL = data;
+				break;
+			case LCD_STATUS:
+				lcd_register.LCD_STATUS = data;
+				break;
+			case LCD_SCY:
+				lcd_register.LCD_SCY = data;
+				break;
+			case LCD_SCX:
+				lcd_register.LCD_SCX = data;
+				break;
+			case LCD_LY:
+				lcd_register.LCD_LY = data;
+				break;
+			case LCD_LYC:
+				lcd_register.LCD_LYC = data;
+				break;
+			case LCD_WY:
+				lcd_register.LCD_WY = data;
+				break;
+			case LCD_WX:
+				lcd_register.LCD_WX = data;
+				break;
+			case BG_PALETTE_DATA:
+				lcd_register.BG_PALETTE_DATA = data;
+				break;
+			case BG_PALETTE_DATA_0:
+				lcd_register.BG_PALETTE_DATA_0 = data;
+				break;
+			case BG_PALETTE_DATA_1:
+				lcd_register.BG_PALETTE_DATA_1 = data;
+				break;
+			default:
+				mem->write(addr, data);
+				break;
+		}
 	}
 };
 
@@ -112,7 +151,32 @@ u8 PPU::read(const u16& addr) {
 		return v_ram.at(addr - GRAPHICS_RAM);
 	}
 	else {
-		return mem->read(addr);
+		switch (addr) {
+			case LCD_CONTROL:
+				return lcd_register.LCD_CONTROL;
+			case LCD_STATUS:
+				return lcd_register.LCD_STATUS;
+			case LCD_SCY:
+				return lcd_register.LCD_SCY;
+			case LCD_SCX:
+				return lcd_register.LCD_SCX;
+			case LCD_LY:
+				return lcd_register.LCD_LY;
+			case LCD_LYC:
+				return lcd_register.LCD_LYC;
+			case LCD_WY:
+				return lcd_register.LCD_WY;
+			case LCD_WX:
+				return lcd_register.LCD_WX;
+			case BG_PALETTE_DATA:
+				return lcd_register.BG_PALETTE_DATA;
+			case BG_PALETTE_DATA_0:
+				return lcd_register.BG_PALETTE_DATA_0;
+			case BG_PALETTE_DATA_1:
+				return lcd_register.BG_PALETTE_DATA_1;
+			default:
+				return mem->read(addr);
+		}
 	}
 }
 
@@ -127,37 +191,32 @@ void PPU::closeWindow() {
 
 void PPU::set_lcd_mode(LCD_Mode m) {
 	// Schreibt den gewünschten mode ins LCD Status register 
-	// und in die mode variable
 	u8 mode = static_cast<u8>(m);
 	if (mode > 3)
 		return;
-	u8 data = read(LCD_STATUS);
-	mode & 1 ? set_bit(data, 0) : reset_bit(data, 0);
-	mode & 2 ? set_bit(data, 1) : reset_bit(data, 1);
-	write(LCD_STATUS, data);
-	get_lcd_mode();
+	u8* data = &lcd_register.LCD_STATUS;
+	mode & 1 ? set_bit(*data, 0) : reset_bit(*data, 0);
+	mode & 2 ? set_bit(*data, 1) : reset_bit(*data, 1);
 }
 
 void PPU::get_lcd_mode() {
 	// Liest den LCD Mode aus dem LCD Status register 
-	u8 data = read(LCD_STATUS);
-	lcd_mode = static_cast<LCD_Mode>(data & 3);
+	u8* data = &lcd_register.LCD_STATUS;
+	lcd_mode = static_cast<LCD_Mode>(*data & 3);
 }
 
 void PPU::set_lcd_state(const LCD_State& s) {
-	u8 data = read(LCD_STATUS);
-	set_bit(data, static_cast<u8>(s));
-	write(LCD_STATUS, data);
+	u8* data = &lcd_register.LCD_STATUS;
+	set_bit(*data, static_cast<u8>(s));
 }
 
 void PPU::reset_lcd_state(const LCD_State& s) {
-	u8 data = read(LCD_STATUS);
-	reset_bit(data, static_cast<u8>(s));
-	write(LCD_STATUS, data);
+	u8* data = &lcd_register.LCD_STATUS;
+	reset_bit(*data, static_cast<u8>(s));
 }
 
-bool PPU::get_lcd_state(const LCD_State& s) {
-	return check_bit(read(LCD_STATUS), static_cast<u8>(s));
+bool PPU::get_lcd_state(const LCD_State& s) const {
+	return check_bit(lcd_register.LCD_STATUS, static_cast<u8>(s));
 }
 
 
@@ -219,15 +278,15 @@ void PPU::renderScreen() {
 }
 
 void PPU::LCD_Control::update(PPU* ppu) {
-	u8 data = ppu->read(LCD_CONTROL);
+	u8* data = &ppu->lcd_register.LCD_CONTROL;
 	*this = {
-		(bool)((data >> 7) & 1),
-		(bool)((data >> 6) & 1),
-		(bool)((data >> 5) & 1),
-		(bool)((data >> 4) & 1),
-		(bool)((data >> 3) & 1),
-		(bool)((data >> 2) & 1),
-		(bool)((data >> 1) & 1),
-		(bool)((data >> 0) & 1)
+		(bool)((*data >> 7) & 1),
+		(bool)((*data >> 6) & 1),
+		(bool)((*data >> 5) & 1),
+		(bool)((*data >> 4) & 1),
+		(bool)((*data >> 3) & 1),
+		(bool)((*data >> 2) & 1),
+		(bool)((*data >> 1) & 1),
+		(bool)((*data >> 0) & 1)
 	};
 }

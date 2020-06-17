@@ -11,11 +11,12 @@ gameboy::~gameboy() {
 
 void gameboy::startemu() {
 	int cycles = 0;
+	mem.reset();
 	card.loadROM("./testroms/tetris.gb");
 	// cpu.printallops();
 
 	while (true) {
-		cycles += cpu.update();
+		cycles = cpu.update();
 		std::cout << std::dec << cycles << std::endl;
 		ppu.waitforinput();
 		ppu.update(cycles);
