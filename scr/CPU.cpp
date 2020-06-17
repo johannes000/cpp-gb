@@ -39,6 +39,7 @@ int CPU::update() {
 	//	std::cout << cc << std::endl;
 	OPCode = getNextOPCode();
 	u8 jp = parseOPCode(OPCode);
+	print_last_opcode();
 	if (jp == 0) incPC();
 	return current_instruction_info.cycles;
 }

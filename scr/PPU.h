@@ -16,6 +16,22 @@ constexpr u16 VRAM_SIZE = 0x2000;
 constexpr u16 OAM_SIZE = 0x0100;
 
 
+
+// Period	/					GPU mode number	/	Time spent(clocks)
+// Scanline(accessing OAM)				2				80
+// Scanline(accessing VRAM)				3				172
+// Horizontal blank						0				204
+// One line(scan and blank)								456
+// Vertical blank						1				4560 (10 lines)
+// Full frame(scans and vblank)							70224
+
+constexpr int CLOCKS_SCANLINE_OAM = 80;
+constexpr int CLOCKS_SCANLINE_VRAM = 172;
+constexpr int CLOCKS_HORIZONTAL_BLANK = 204;
+constexpr int CLOCKS_SCANLINE = CLOCKS_SCANLINE_OAM + CLOCKS_SCANLINE_VRAM + CLOCKS_HORIZONTAL_BLANK;
+constexpr int CLOCKS_VERTICAL_BLANK = CLOCKS_SCANLINE * 10;
+constexpr int CLOCKS_FULL_FRAME = 70224;
+
 class MEMORY;
 
 class PPU {
@@ -23,31 +39,50 @@ public:
 	PPU(MEMORY* m);
 	~PPU();
 	void waitforinput();
-	void update();
+	void update(int cycles);
 
 	void write(const u16& addr, const u8& data);
 	u8 read(const u16& addr);
 private:
 	MEMORY* mem;
 
-	SDL_Window* window = nullptr;
-	SDL_Surface* screenSurface = nullptr;
-	SDL_Renderer* renderer = nullptr;
-	SDL_Texture* texture = nullptr;
+	int cycles_in_mode;
+	int line;
+
+	// 0: During H - Blank
+	// 1 : During V - Blank
+	// 2 : OAM Access
+	// 3 : VRAM Access
+	enum class LCD_Mode {
+		H_Blank,
+		V_Blank,
+		OAM,
+		VRAM,
+	}lcd_mode;
 
 	bool createWindow();
 	void renderScreen();
 	void closeWindow();
 
 	SDL_Event event = event;
-	// Screen dimension constants
 
+	// SDL sachen 
+private:
 	const int SCREEN_WIDTH = GB_LCD_SIZE_WIDTH;
 	const int SCREEN_HEIGHT = GB_LCD_SIZE_HEIGHT;
 
+	SDL_Window* window = nullptr;
+	SDL_Surface* screenSurface = nullptr;
+	SDL_Renderer* renderer = nullptr;
+	SDL_Texture* texture = nullptr;
+
+	// Speicher
+private:
 	std::vector<u8> v_ram;
 	std::vector<u8> sprite_attribute_table;
 
+private:
+	// LCD Data
 	struct LCD_Control {
 		bool lcd_power;				// Bit 7 - LCD Power(0 = Off, 1 = On)
 		bool window_tile_map;		// Bit 6 - Window Tile Map(0 = 9800h - 9BFFh, 1 = 9C00h - 9FFFh)
@@ -57,10 +92,10 @@ private:
 		bool sprite_size;			// Bit 2 - Sprite Size(0 = 8×8, 1 = 8×16)
 		bool sprites_enabled;		// Bit 1 - Sprites Enabled(0 = Disabled, 1 = Enabled)
 		bool bg_enabled;			// Bit 0 - BG Enabled(in DMG) (0 = Disabled, 1 = Enabled)
-		void update(u8 data);
+		void update(PPU* ppu);
 	}lcd_control;
 
-	enum class LCD_Status {
+	const enum class LCD_State {
 		lyc = 6,				// Bit 6 - LYC = LY Coincidence Interrupt(1 = Enable) (Read / Write)
 		oam_interupt = 5,		// Bit 5 - Mode 2 OAM Interrupt(1 = Enable) (Read / Write)
 		v_blank_interupt = 4,	// Bit 4 - Mode 1 V - Blank Interrupt(1 = Enable) (Read / Write)
@@ -71,8 +106,16 @@ private:
 								// 1 : During V - Blank
 								// 2 : During Searching OAM
 								// 3 : During Transferring Data to LCD Driver
-	}lcd_status;
+	};
 
+	void set_lcd_mode(LCD_Mode mode);
+	void get_lcd_mode();
+	void set_lcd_state(const LCD_State& s);
+	void reset_lcd_state(const LCD_State& s);
+	bool get_lcd_state(const LCD_State& s);
+
+private:
+	// Paletten
 	struct Pixel {
 		// SDL_PIXELFORMAT_RGB24
 		// Stored in memory as the bytes R, G, B
@@ -92,16 +135,11 @@ private:
 
 	Pixel gb_screen[GB_LCD_SIZE_HEIGHT * GB_LCD_SIZE_WIDTH];
 
-	Pixel palette_classic_gruen[4] = { { 0xE0, 0xF8, 0xD0 }, { 0x88,0xC0,0x70 }, { 0x34,0x68,0x56 }, { 0x08,0x18,0x20 } }; // classic grün
-	Pixel palette_forum[4] = { {175, 203, 70}, { 121,170,109 }, { 34,111,95 }, { 8,41,85 } }; // Forum
-	Pixel palette_schwarz_weiss[4] = { {0xDF, 0xDF, 0xDF}, { 0xA9,0xA9,0xA9 }, { 0x54,0x54,0x54 }, { 0x00,0x0,0x0 } }; // schwarz weiss
-	Pixel palette_schwarz_weiss_2[4] = { {255, 255, 255}, { 192,192,192 }, { 96,96,96 }, { 0x0,0x0,0x0 } }; // schwarz weiss
+	int current_palette = 0;
 
-	Pixel current_palette[4];
 	void render_tiles();
-
 private:
-
+	// Daten zum FPS berechnen
 	Uint32 fps_lasttime = SDL_GetTicks(); //the last recorded time.
 	Uint32 fps_current; //the current FPS.
 	Uint32 fps_frames = 0; //frames passed since the last recorded fps.

@@ -3,39 +3,59 @@
 #include <cstdio>
 
 PPU::PPU(MEMORY* m) :mem(m) {
-
 	createWindow();
+
 	v_ram = std::vector<u8>(VRAM_SIZE, 0x00);
 	sprite_attribute_table = std::vector<u8>(OAM_SIZE, 0x00);
+
 	memset(gb_screen, 0xFF, sizeof(gb_screen));
-	lcd_control.update(read(LCD_CONTROL));
-
-	std::copy(std::begin(palette_classic_gruen), std::end(palette_classic_gruen), std::begin(palette_forum));
-
-	Uint32 fps_lasttime = SDL_GetTicks(); //the last recorded time.
-
-
+	lcd_control.update(this);
 	renderScreen();
+	LCD_Mode lcd_mode;
 }
-
-
 
 PPU::~PPU() {
 	closeWindow();
 }
-void PPU::update() {
 
+void PPU::update(int cycles) {
+	lcd_control.update(this);
+
+	// FPS rechner
 	fps_frames++;
 	if (fps_lasttime < SDL_GetTicks() - FPS_INTERVAL * 1000) {
 		fps_lasttime = SDL_GetTicks();
 		fps_current = fps_frames;
 		fps_frames = 0;
 		sprintf_s(fps_text, "%d", fps_current);
-		render_tiles();
 		SDL_SetWindowTitle(window, fps_text);
 	}
 
-	lcd_control.update(read(LCD_CONTROL));
+	get_lcd_mode();
+	cycles_in_mode += cycles;
+	switch (lcd_mode) {
+		// OAM		Mode 2  2_____2_____2_____2_____2_____2___________________2____
+		// VRAM		Mode 3  _33____33____33____33____33____33__________________3___
+		// H_Blank	Mode 0  ___000___000___000___000___000___000________________000
+		// V_Blank	Mode 1  ____________________________________11111111111111_____
+
+		// 0: During H - Blank (204 cycles)
+		case PPU::LCD_Mode::H_Blank:
+			if (cycles_in_mode >= 204) {	// H-Blank vorbei
+			}
+			break;
+			// 1 : During V - Blank
+		case PPU::LCD_Mode::V_Blank:
+			break;
+			// 2 : During Searching OAM
+		case PPU::LCD_Mode::OAM:
+			break;
+			// 3 : VRAM Access
+		case PPU::LCD_Mode::VRAM:
+			break;
+		default:
+			break;
+	}
 	renderScreen();
 }
 
@@ -52,6 +72,7 @@ void PPU::waitforinput() {
 			switch (event.key.keysym.sym) {
 				case SDLK_p:
 					std::cout << "P" << std::endl;
+					current_palette = (current_palette + 1) % Palettes.size();
 					render_tiles();
 					renderScreen();
 					break;
@@ -104,6 +125,41 @@ void PPU::closeWindow() {
 	SDL_Quit();
 }
 
+void PPU::set_lcd_mode(LCD_Mode m) {
+	// Schreibt den gewünschten mode ins LCD Status register 
+	// und in die mode variable
+	u8 mode = static_cast<u8>(m);
+	if (mode > 3)
+		return;
+	u8 data = read(LCD_STATUS);
+	mode & 1 ? set_bit(data, 0) : reset_bit(data, 0);
+	mode & 2 ? set_bit(data, 1) : reset_bit(data, 1);
+	write(LCD_STATUS, data);
+	get_lcd_mode();
+}
+
+void PPU::get_lcd_mode() {
+	// Liest den LCD Mode aus dem LCD Status register 
+	u8 data = read(LCD_STATUS);
+	lcd_mode = static_cast<LCD_Mode>(data & 3);
+}
+
+void PPU::set_lcd_state(const LCD_State& s) {
+	u8 data = read(LCD_STATUS);
+	set_bit(data, static_cast<u8>(s));
+	write(LCD_STATUS, data);
+}
+
+void PPU::reset_lcd_state(const LCD_State& s) {
+	u8 data = read(LCD_STATUS);
+	reset_bit(data, static_cast<u8>(s));
+	write(LCD_STATUS, data);
+}
+
+bool PPU::get_lcd_state(const LCD_State& s) {
+	return check_bit(read(LCD_STATUS), static_cast<u8>(s));
+}
+
 
 void PPU::render_tiles() {
 	int c = 0;
@@ -119,10 +175,10 @@ void PPU::render_tiles() {
 		u8 data2 = read(i + 1);
 
 		for (size_t j = 0; j < 8; j++) {
-			u8 p1 = ((data1 >> j) & 1) + (((data2 >> j) & 1));
-			gb_screen[c % s].R = current_palette[p1].R;
-			gb_screen[c % s].G = current_palette[p1].G;
-			gb_screen[c % s].B = current_palette[p1].B;
+			int p1 = ((data1 >> j) & 1) + (((data2 >> j) & 1));
+			gb_screen[c % s].R = Palettes[current_palette][p1].R;
+			gb_screen[c % s].G = Palettes[current_palette][p1].G;
+			gb_screen[c % s].B = Palettes[current_palette][p1].B;
 			c++;
 			if (c == s - 1)
 				break;
@@ -159,9 +215,11 @@ void PPU::renderScreen() {
 	SDL_RenderClear(renderer);
 	SDL_RenderCopy(renderer, texture, NULL, NULL);
 	SDL_RenderPresent(renderer);
+
 }
 
-void PPU::LCD_Control::update(u8 data) {
+void PPU::LCD_Control::update(PPU* ppu) {
+	u8 data = ppu->read(LCD_CONTROL);
 	*this = {
 		(bool)((data >> 7) & 1),
 		(bool)((data >> 6) & 1),
