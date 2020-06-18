@@ -133,20 +133,6 @@ const enum class CGBFlag {
   ON = 0xC0,   // - Game works on CGB only(physically the same as 80h).
 };
 
-struct Rom_Info {
-  char title[15] = "";
-  bool SGBFlag = false;
-
-  CGBFlag cgb = CGBFlag::ON;
-  CType ctype = CType::MBC1;
-
-  ROMSize romsize = ROMSize::KB32;
-  RAMSize ramsize = RAMSize::None;
-
-  int rom_banks;
-  int ram_banks;
-};
-
 const enum class CType {  // Cartridge Type
   ROM_ONLY = 0x00,
   MBC1 = 0x01,
@@ -206,6 +192,20 @@ const enum class RAMSize {
 const enum class DestCode {
   JAP = 0x00,
   NON_JAP = 0x01,
+};
+
+struct Rom_Info {
+  char title[15] = "";
+  bool SGBFlag = false;
+
+  CGBFlag cgb = CGBFlag::ON;
+  CType ctype = CType::MBC1;
+
+  ROMSize romsize = ROMSize::KB32;
+  RAMSize ramsize = RAMSize::None;
+
+  int rom_banks;
+  int ram_banks;
 };
 
 void set_bit_if(u8 &value, const u8 &bit, bool condition);

@@ -1,4 +1,5 @@
 #include "PPU.h"
+
 #include <cassert>
 #include <cstdio>
 
@@ -31,24 +32,24 @@ void PPU::update(int cycles) {
   get_lcd_mode();
   cycles_in_mode += cycles;
   switch (lcd_mode) {
-  // 0: During H - Blank (204 cycles)
-  case PPU::LCD_Mode::H_Blank:
-    if (cycles_in_mode >= 204) { // H-Blank vorbei
-      u8 asd = 2;
-      asd = 2;
-    }
-    break;
-    // 1 : During V - Blank
-  case PPU::LCD_Mode::V_Blank:
-    break;
-    // 2 : During Searching OAM
-  case PPU::LCD_Mode::OAM:
-    break;
-    // 3 : VRAM Access
-  case PPU::LCD_Mode::VRAM:
-    break;
-  default:
-    break;
+    // 0: During H - Blank (204 cycles)
+    case PPU::LCD_Mode::H_Blank:
+      if (cycles_in_mode >= 204) {  // H-Blank vorbei
+        u8 asd = 2;
+        asd = 2;
+      }
+      break;
+      // 1 : During V - Blank
+    case PPU::LCD_Mode::V_Blank:
+      break;
+      // 2 : During Searching OAM
+    case PPU::LCD_Mode::OAM:
+      break;
+      // 3 : VRAM Access
+    case PPU::LCD_Mode::VRAM:
+      break;
+    default:
+      break;
   }
   renderScreen();
 }
@@ -58,27 +59,27 @@ void PPU::waitforinput() {
 
   SDL_PollEvent(&event);
   switch (event.type) {
-  case SDL_QUIT:
-    exit(0);
-    break;
-  case SDL_KEYDOWN:
-    switch (event.key.keysym.sym) {
-    case SDLK_p:
-      std::cout << "P" << std::endl;
-      current_palette = (current_palette + 1) % Palettes.size();
-      render_tiles();
-      renderScreen();
-      break;
-    case SDLK_ESCAPE:
+    case SDL_QUIT:
       exit(0);
       break;
-    default:
-      quit = true;
+    case SDL_KEYDOWN:
+      switch (event.key.keysym.sym) {
+        case SDLK_p:
+          std::cout << "P" << std::endl;
+          current_palette = (current_palette + 1) % Palettes.size();
+          render_tiles();
+          renderScreen();
+          break;
+        case SDLK_ESCAPE:
+          exit(0);
+          break;
+        default:
+          quit = true;
+          break;
+      }
       break;
-    }
-    break;
-  default:
-    break;
+    default:
+      break;
   }
 }
 
@@ -91,42 +92,42 @@ void PPU::write(const u16 &addr, const u8 &data) {
     sprite_attribute_table[addr - SPRITE_INFORMATION] = data;
   } else {
     switch (addr) {
-    case LCD_CONTROL:
-      lcd_register.LCD_CONTROL = data;
-      break;
-    case LCD_STATUS:
-      lcd_register.LCD_STATUS = data;
-      break;
-    case LCD_SCY:
-      lcd_register.LCD_SCY = data;
-      break;
-    case LCD_SCX:
-      lcd_register.LCD_SCX = data;
-      break;
-    case LCD_LY:
-      lcd_register.LCD_LY = data;
-      break;
-    case LCD_LYC:
-      lcd_register.LCD_LYC = data;
-      break;
-    case LCD_WY:
-      lcd_register.LCD_WY = data;
-      break;
-    case LCD_WX:
-      lcd_register.LCD_WX = data;
-      break;
-    case BG_PALETTE_DATA:
-      lcd_register.BG_PALETTE_DATA = data;
-      break;
-    case BG_PALETTE_DATA_0:
-      lcd_register.BG_PALETTE_DATA_0 = data;
-      break;
-    case BG_PALETTE_DATA_1:
-      lcd_register.BG_PALETTE_DATA_1 = data;
-      break;
-    default:
-      mem->write(addr, data);
-      break;
+      case LCD_CONTROL:
+        lcd_register.LCD_CONTROL = data;
+        break;
+      case LCD_STATUS:
+        lcd_register.LCD_STATUS = data;
+        break;
+      case LCD_SCY:
+        lcd_register.LCD_SCY = data;
+        break;
+      case LCD_SCX:
+        lcd_register.LCD_SCX = data;
+        break;
+      case LCD_LY:
+        lcd_register.LCD_LY = data;
+        break;
+      case LCD_LYC:
+        lcd_register.LCD_LYC = data;
+        break;
+      case LCD_WY:
+        lcd_register.LCD_WY = data;
+        break;
+      case LCD_WX:
+        lcd_register.LCD_WX = data;
+        break;
+      case BG_PALETTE_DATA:
+        lcd_register.BG_PALETTE_DATA = data;
+        break;
+      case BG_PALETTE_DATA_0:
+        lcd_register.BG_PALETTE_DATA_0 = data;
+        break;
+      case BG_PALETTE_DATA_1:
+        lcd_register.BG_PALETTE_DATA_1 = data;
+        break;
+      default:
+        mem->write(addr, data);
+        break;
     }
   }
 };
@@ -136,30 +137,30 @@ u8 PPU::read(const u16 &addr) {
     return v_ram.at(addr - GRAPHICS_RAM);
   } else {
     switch (addr) {
-    case LCD_CONTROL:
-      return lcd_register.LCD_CONTROL;
-    case LCD_STATUS:
-      return lcd_register.LCD_STATUS;
-    case LCD_SCY:
-      return lcd_register.LCD_SCY;
-    case LCD_SCX:
-      return lcd_register.LCD_SCX;
-    case LCD_LY:
-      return lcd_register.LCD_LY;
-    case LCD_LYC:
-      return lcd_register.LCD_LYC;
-    case LCD_WY:
-      return lcd_register.LCD_WY;
-    case LCD_WX:
-      return lcd_register.LCD_WX;
-    case BG_PALETTE_DATA:
-      return lcd_register.BG_PALETTE_DATA;
-    case BG_PALETTE_DATA_0:
-      return lcd_register.BG_PALETTE_DATA_0;
-    case BG_PALETTE_DATA_1:
-      return lcd_register.BG_PALETTE_DATA_1;
-    default:
-      return mem->read(addr);
+      case LCD_CONTROL:
+        return lcd_register.LCD_CONTROL;
+      case LCD_STATUS:
+        return lcd_register.LCD_STATUS;
+      case LCD_SCY:
+        return lcd_register.LCD_SCY;
+      case LCD_SCX:
+        return lcd_register.LCD_SCX;
+      case LCD_LY:
+        return lcd_register.LCD_LY;
+      case LCD_LYC:
+        return lcd_register.LCD_LYC;
+      case LCD_WY:
+        return lcd_register.LCD_WY;
+      case LCD_WX:
+        return lcd_register.LCD_WX;
+      case BG_PALETTE_DATA:
+        return lcd_register.BG_PALETTE_DATA;
+      case BG_PALETTE_DATA_0:
+        return lcd_register.BG_PALETTE_DATA_0;
+      case BG_PALETTE_DATA_1:
+        return lcd_register.BG_PALETTE_DATA_1;
+      default:
+        return mem->read(addr);
     }
   }
 }
@@ -176,8 +177,7 @@ void PPU::closeWindow() {
 void PPU::set_lcd_mode(LCD_Mode m) {
   // Schreibt den gew�nschten mode ins LCD Status register
   u8 mode = static_cast<u8>(m);
-  if (mode > 3)
-    return;
+  if (mode > 3) return;
   u8 *data = &lcd_register.LCD_STATUS;
   mode & 1 ? set_bit(*data, 0) : reset_bit(*data, 0);
   mode & 2 ? set_bit(*data, 1) : reset_bit(*data, 1);
@@ -224,8 +224,7 @@ void PPU::render_tiles() {
       gb_screen[c % s].G = Palettes[current_palette][p1].G;
       gb_screen[c % s].B = Palettes[current_palette][p1].B;
       c++;
-      if (c == s - 3)
-        break;
+      if (c == s - 3) break;
     }
   }
   start++;
