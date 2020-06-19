@@ -9,7 +9,8 @@ PPU::PPU(MEMORY *m) : mem(m) {
   v_ram = std::vector<u8>(VRAM_SIZE, 0x00);
   sprite_attribute_table = std::vector<u8>(OAM_SIZE, 0x00);
 
-  memset(gb_screen, 0xFF, sizeof(gb_screen));
+  memset(lcd_buffer, 0xFF, sizeof(lcd_buffer));
+  memset(lcd_buffer_old, 0xFF, sizeof(lcd_buffer_old));
   lcd_control.update(this);
   renderScreen();
 }
@@ -32,23 +33,50 @@ void PPU::update(int cycles) {
   get_lcd_mode();
   cycles_in_mode += cycles;
   switch (lcd_mode) {
-    // 0: During H - Blank (204 cycles)
-    case PPU::LCD_Mode::H_Blank:
-      if (cycles_in_mode >= 204) {  // H-Blank vorbei
-        u8 asd = 2;
-        asd = 2;
+      // MODE 2 : Searching OAM Guckt vor jeder line ins OAM um die, für die
+      // aktuelle line, benötigten sprites zu suchen
+    case PPU::LCD_Mode::OAM:
+      if (cycles_in_mode >= CLOCKS_SCANLINE_OAM) {
+        cycles_in_mode = 0;
+        lcd_mode = LCD_Mode::VRAM;
       }
       break;
-      // 1 : During V - Blank
-    case PPU::LCD_Mode::V_Blank:
-      break;
-      // 2 : During Searching OAM
-    case PPU::LCD_Mode::OAM:
-      break;
-      // 3 : VRAM Access
+
+      // MODE 3 : VRAM Zugriff Pixel Transfer
     case PPU::LCD_Mode::VRAM:
+      if (cycles_in_mode >= CLOCKS_SCANLINE_VRAM) {
+        cycles_in_mode = 0;
+        lcd_mode = LCD_Mode::H_Blank;
+        buffer_scanline();
+      }
       break;
-    default:
+
+      // MODE 0: H - Blank (204 cycles) nach jeder line
+    case PPU::LCD_Mode::H_Blank:
+      if (cycles_in_mode >= CLOCKS_HORIZONTAL_BLANK) {  // H-Blank vorbei
+        cycles_in_mode = 0;
+
+        // H-Blank sachen
+
+        if (current_line++ == GB_LCD_SIZE_HEIGHT) {
+          // alle lines für dieses Frame gebuffert,
+          // das frame kann jetzt gerendered werden
+          render_frame();
+          lcd_mode = LCD_Mode::V_Blank;
+        } else {
+          lcd_mode = LCD_Mode::OAM;
+        }
+      }
+      break;
+
+      // MODE 1 : V - Blank nachdem jede linie gezeichnet wurde
+    case PPU::LCD_Mode::V_Blank:
+      if (cycles_in_mode >= CLOCKS_VERTICAL_BLANK) {
+        cycles_in_mode = 0;
+        if (current_line++ == VERTICAL_BLANK_LINES) {
+          lcd_mode = LCD_Mode::OAM;
+        }
+      }
       break;
   }
   renderScreen();
@@ -66,8 +94,8 @@ void PPU::waitforinput() {
       switch (event.key.keysym.sym) {
         case SDLK_p:
           std::cout << "P" << std::endl;
-          current_palette = (current_palette + 1) % Palettes.size();
-          render_tiles();
+          current_palette = current_palette + 1 % Palettes.size();
+          render_frame();
           renderScreen();
           break;
         case SDLK_ESCAPE:
@@ -84,11 +112,9 @@ void PPU::waitforinput() {
 }
 
 void PPU::write(const u16 &addr, const u8 &data) {
-  if (addr >= GRAPHICS_RAM && addr <= GRAPHICS_RAM_END &&
-      lcd_mode != LCD_Mode::VRAM) {
+  if (addr >= GRAPHICS_RAM && addr <= GRAPHICS_RAM_END) {
     v_ram[addr - GRAPHICS_RAM] = data;
-  } else if (addr >= SPRITE_INFORMATION && addr <= SPRITE_INFORMATION_END &&
-             (lcd_mode == LCD_Mode::H_Blank || lcd_mode == LCD_Mode::V_Blank)) {
+  } else if (addr >= SPRITE_INFORMATION && addr <= SPRITE_INFORMATION_END) {
     sprite_attribute_table[addr - SPRITE_INFORMATION] = data;
   } else {
     switch (addr) {
@@ -175,7 +201,7 @@ void PPU::closeWindow() {
 }
 
 void PPU::set_lcd_mode(LCD_Mode m) {
-  // Schreibt den gew�nschten mode ins LCD Status register
+  // Schreibt den gewünschten mode ins LCD Status register
   u8 mode = static_cast<u8>(m);
   if (mode > 3) return;
   u8 *data = &lcd_register.LCD_STATUS;
@@ -185,16 +211,19 @@ void PPU::set_lcd_mode(LCD_Mode m) {
 
 void PPU::get_lcd_mode() {
   // Liest den LCD Mode aus dem LCD Status register
+  // und aktualisiert die lokale variable
   u8 *data = &lcd_register.LCD_STATUS;
   lcd_mode = static_cast<LCD_Mode>(*data & 3);
 }
 
 void PPU::set_lcd_state(const LCD_State &s) {
+  // setzt den gewünschten status im LCD Status Register
   u8 *data = &lcd_register.LCD_STATUS;
   set_bit(*data, static_cast<u8>(s));
 }
 
 void PPU::reset_lcd_state(const LCD_State &s) {
+  // setzt den gewünschten status im LCD Status Register zurück
   u8 *data = &lcd_register.LCD_STATUS;
   reset_bit(*data, static_cast<u8>(s));
 }
@@ -205,7 +234,9 @@ bool PPU::get_lcd_state(const LCD_State &s) const {
 
 u16 start = 0x0000;
 
-void PPU::render_tiles() {
+void PPU::buffer_scanline() {}
+
+void PPU::render_frame() {
   int c = 0;
   int s = GB_LCD_SIZE_HEIGHT * GB_LCD_SIZE_WIDTH;
 
@@ -214,15 +245,15 @@ void PPU::render_tiles() {
   //	gb_screen[c % s].G = current_palette[3].G;
   //	gb_screen[c++ % s].B = current_palette[3].B;
   //}
-  for (u16 i = (0 + start) % v_ram.size(); i < v_ram.size(); i += 2) {
+  for (u16 i = (0 + start) % v_ram.size(); i < v_ram.size(); i++) {
     u8 data1 = v_ram.at(i);
-    u8 data2 = v_ram.at(i + 1);
+    u8 data2 = v_ram.at(++i);
 
     for (size_t j = 0; j < 8; j++) {
       int p1 = (data1 >> j) & 1 + (data2 >> j) & 1;
-      gb_screen[c % s].R = Palettes[current_palette][p1].R;
-      gb_screen[c % s].G = Palettes[current_palette][p1].G;
-      gb_screen[c % s].B = Palettes[current_palette][p1].B;
+      lcd_buffer[c % s].R = Palettes[current_palette][p1].R;
+      lcd_buffer[c % s].G = Palettes[current_palette][p1].G;
+      lcd_buffer[c % s].B = Palettes[current_palette][p1].B;
       c++;
       if (c == s - 3) break;
     }
@@ -246,7 +277,7 @@ bool PPU::createWindow() {
 
 void PPU::renderScreen() {
   assert(renderer && texture);
-  SDL_UpdateTexture(texture, NULL, gb_screen,
+  SDL_UpdateTexture(texture, NULL, lcd_buffer,
                     GB_LCD_SIZE_WIDTH * sizeof(u8) * 3);
   SDL_RenderClear(renderer);
   SDL_RenderCopy(renderer, texture, NULL, NULL);

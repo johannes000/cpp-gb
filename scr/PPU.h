@@ -31,6 +31,8 @@ constexpr int CLOCKS_SCANLINE =
 constexpr int CLOCKS_VERTICAL_BLANK = CLOCKS_SCANLINE * 10;
 constexpr int CLOCKS_FULL_FRAME = 70224;
 
+constexpr int VERTICAL_BLANK_LINES = 10;
+
 class MEMORY;
 
 class PPU {
@@ -47,7 +49,7 @@ class PPU {
   MEMORY *mem;
 
   int cycles_in_mode;
-  int line;
+  int current_line = 0;
 
   // 0: During H - Blank
   // 1 : During V - Blank
@@ -104,18 +106,18 @@ class PPU {
 
   struct LCD_Control {
     bool lcd_power;          // Bit 7 - LCD Power(0 = Off, 1 = On)
-    bool window_tile_map;    // Bit 6 - Window Tile Map(0 = 9800h - 9BFFh, 1 =
-                             // 9C00h - 9FFFh)
+    bool window_tile_map;    // Bit 6 - Window Tile Map
+                             //(0 = 9800h - 9BFFh, 1 = 9C00h - 9FFFh)
     bool window_enable;      // Bit 5 - Window Enable(0 = Disabled, 1 = Enabled)
     bool bg_window_tileset;  // Bit 4 - BG & Window Tileset(0 = 8800h -
                              // 97FFh, 1 = 8000h - 8FFFh)
-    bool bg_tile_map;      // Bit 3 - BG Tile Map(0 = 9800h - 9BFFh, 1 = 9C00h -
-                           // 9FFFh)
-    bool sprite_size;      // Bit 2 - Sprite Size(0 = 8�8, 1 = 8�16)
-    bool sprites_enabled;  // Bit 1 - Sprites Enabled(0 = Disabled, 1 =
-                           // Enabled)
-    bool bg_enabled;       // Bit 0 - BG Enabled(in DMG) (0 = Disabled, 1 =
-                           // Enabled)
+    bool bg_tile_map;        // Bit 3 - BG Tile Map
+                             // (0 = 9800h - 9BFFh, 1 = 9C00h - 9FFFh)
+    bool sprite_size;        // Bit 2 - Sprite Size(0 = 8�8, 1 = 8�16)
+    bool sprites_enabled;    // Bit 1 - Sprites Enabled
+                             // (0 = Disabled, 1 = Enabled)
+    bool bg_enabled;         // Bit 0 - BG Enabled(in DMG)
+                             // (0 = Disabled, 1 = Enabled)
     void update(PPU *ppu);
   } lcd_control;
 
@@ -124,10 +126,10 @@ class PPU {
                            //(1 = Enable) (Read / Write)
     oam_interupt = 5,      // Bit 5 - Mode 2 OAM Interrupt
                            //(1 = Enable) (Read / Write)
-    v_blank_interupt = 4,  // Bit 4 - Mode 1 V - Blank Interrupt/(1 =
-                           // Enable) (Read / Write)
-    h_blank_interupt = 3,  // Bit 3 - Mode 0 H - Blank Interrupt/(1 =
-                           // Enable) (Read / Write)
+    v_blank_interupt = 4,  // Bit 4 - Mode 1 V - Blank Interrupt
+                           //(1 = Enable) (Read / Write)
+    h_blank_interupt = 3,  // Bit 3 - Mode 0 H - Blank Interrupt
+                           //(1 = Enable) (Read / Write)
     coincidence_flag = 2,  // Bit 2 - Coincidence Flag
                            //(0:LYC<>LY, 1 : LYC = LY) (Read Only)
     mode_flag_1 = 1,       // Bit 1 - 0 - Mode Flag
@@ -144,17 +146,15 @@ class PPU {
   void reset_lcd_state(const LCD_State &s);
   bool get_lcd_state(const LCD_State &s) const;
 
+  // LCD Render Funktionen
+  Pixel lcd_buffer[GB_LCD_SIZE_HEIGHT * GB_LCD_SIZE_WIDTH];
+  Pixel lcd_buffer_old[GB_LCD_SIZE_HEIGHT * GB_LCD_SIZE_WIDTH];
+
+  void buffer_scanline();
+  void render_frame();
+
  private:
   // Paletten
-  struct Pixel {
-    // SDL_PIXELFORMAT_RGB24
-    // Stored in memory as the bytes R, G, B
-    // (R at the lowest address, B at the highest address).
-    u8 R;
-    u8 G;
-    u8 B;
-  };
-
   std::vector<std::vector<Pixel>> Palettes = std::vector<std::vector<Pixel>>{
       {{0xE0, 0xF8, 0xD0},
        {0x88, 0xC0, 0x70},
@@ -174,11 +174,7 @@ class PPU {
        {0x0, 0x0, 0x0}},  // schwarz weiss
   };
 
-  Pixel gb_screen[GB_LCD_SIZE_HEIGHT * GB_LCD_SIZE_WIDTH];
-
   int current_palette = 0;
-
-  void render_tiles();
 
  private:
   // Daten zum FPS berechnen

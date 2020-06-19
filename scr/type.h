@@ -208,6 +208,15 @@ struct Rom_Info {
   int ram_banks;
 };
 
+struct Pixel {
+  // SDL_PIXELFORMAT_RGB24
+  // Stored in memory as the bytes R, G, B
+  // (R at the lowest address, B at the highest address).
+  u8 R;
+  u8 G;
+  u8 B;
+};
+
 void set_bit_if(u8 &value, const u8 &bit, bool condition);
 void set_bit_if(u16 &value, const u16 &bit, bool condition);
 
