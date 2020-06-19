@@ -12,6 +12,7 @@ PPU::PPU(MEMORY *m) : mem(m) {
   memset(lcd_buffer, 0xFF, sizeof(lcd_buffer));
   memset(lcd_buffer_old, 0xFF, sizeof(lcd_buffer_old));
   lcd_control.update(this);
+  render_frame();
   renderScreen();
 }
 
@@ -38,7 +39,7 @@ void PPU::update(int cycles) {
     case PPU::LCD_Mode::OAM:
       if (cycles_in_mode >= CLOCKS_SCANLINE_OAM) {
         cycles_in_mode = 0;
-        lcd_mode = LCD_Mode::VRAM;
+        set_lcd_mode(LCD_Mode::VRAM);
       }
       break;
 
@@ -46,7 +47,7 @@ void PPU::update(int cycles) {
     case PPU::LCD_Mode::VRAM:
       if (cycles_in_mode >= CLOCKS_SCANLINE_VRAM) {
         cycles_in_mode = 0;
-        lcd_mode = LCD_Mode::H_Blank;
+        set_lcd_mode(LCD_Mode::H_Blank);
         buffer_scanline();
       }
       break;
@@ -62,9 +63,9 @@ void PPU::update(int cycles) {
           // alle lines für dieses Frame gebuffert,
           // das frame kann jetzt gerendered werden
           render_frame();
-          lcd_mode = LCD_Mode::V_Blank;
+          set_lcd_mode(LCD_Mode::V_Blank);
         } else {
-          lcd_mode = LCD_Mode::OAM;
+          set_lcd_mode(LCD_Mode::OAM);
         }
       }
       break;
@@ -74,7 +75,7 @@ void PPU::update(int cycles) {
       if (cycles_in_mode >= CLOCKS_VERTICAL_BLANK) {
         cycles_in_mode = 0;
         if (current_line++ == VERTICAL_BLANK_LINES) {
-          lcd_mode = LCD_Mode::OAM;
+          set_lcd_mode(LCD_Mode::OAM);
         }
       }
       break;
@@ -234,30 +235,20 @@ bool PPU::get_lcd_state(const LCD_State &s) const {
 
 u16 start = 0x0000;
 
-void PPU::buffer_scanline() {}
+void PPU::buffer_scanline() { std::cout << " BUFFER " << std::endl; }
 
 void PPU::render_frame() {
+  std::cout << " RENDER " << std::endl;
+
   int c = 0;
   int s = GB_LCD_SIZE_HEIGHT * GB_LCD_SIZE_WIDTH;
 
-  // for (u16 i = 0; i < 2; i++) {
-  //	gb_screen[c % s].R = current_palette[3].R;
-  //	gb_screen[c % s].G = current_palette[3].G;
-  //	gb_screen[c++ % s].B = current_palette[3].B;
-  //}
-  for (u16 i = (0 + start) % v_ram.size(); i < v_ram.size(); i++) {
-    u8 data1 = v_ram.at(i);
-    u8 data2 = v_ram.at(++i);
-
-    for (size_t j = 0; j < 8; j++) {
-      int p1 = (data1 >> j) & 1 + (data2 >> j) & 1;
-      lcd_buffer[c % s].R = Palettes[current_palette][p1].R;
-      lcd_buffer[c % s].G = Palettes[current_palette][p1].G;
-      lcd_buffer[c % s].B = Palettes[current_palette][p1].B;
-      c++;
-      if (c == s - 3) break;
-    }
+  for (auto &p : lcd_buffer) {
+    p.R = Palettes[0][(BG_PALETTE_DATA & 1) & (BG_PALETTE_DATA & 2)].R;
+    p.G = Palettes[0][(BG_PALETTE_DATA & 1) & (BG_PALETTE_DATA & 2)].G;
+    p.B = Palettes[0][(BG_PALETTE_DATA & 1) & (BG_PALETTE_DATA & 2)].B;
   }
+
   start++;
 }
 
@@ -285,7 +276,7 @@ void PPU::renderScreen() {
 }
 
 void PPU::LCD_Control::update(PPU *ppu) {
-  u8 *data = &ppu->lcd_register.LCD_CONTROL;
+  Register *data = &ppu->lcd_register.LCD_CONTROL;
   *this = {(bool)((*data >> 7) & 1), (bool)((*data >> 6) & 1),
            (bool)((*data >> 5) & 1), (bool)((*data >> 4) & 1),
            (bool)((*data >> 3) & 1), (bool)((*data >> 2) & 1),

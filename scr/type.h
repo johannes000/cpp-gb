@@ -11,6 +11,8 @@ typedef unsigned short u16;
 typedef signed char i8;
 typedef signed short i16;
 
+typedef unsigned char Register;
+
 // ADDRESSES
 constexpr u16 INTERRUPT_FLAGS_REG = 0xFF0F;
 constexpr u16 INTERRUPT_ENABLE_REG = 0xFFFF;
@@ -82,7 +84,7 @@ const enum class Flag {
   c = 4   // Carry Flag
 };
 
-struct Register {
+struct CPU_Register {
   struct {
     union {
       struct {

@@ -24,21 +24,21 @@ class CPU {
   void printallops();
 
   bool in_boot_r();
-
   void interrupt_enable(u8 val);
-
-  int cycles = 0;
-
- private:
-  std::unique_ptr<MEMORY> mem;
-  bool in_boot = true;
 
   u8 read(const u16 &addr);
   void write(const u16 &addr, const u8 &data);
   void write_u16(const u16 &addr, const u16 &data);
 
+ private:
+  MEMORY *mem;
+
+  int cycles = 0;
+  bool in_boot = true;
+
+ private:
   // REGISTER
-  Register R;
+  CPU_Register R;
   void initRegister();
   u16 oldPC = 0x00;
 
@@ -53,6 +53,7 @@ class CPU {
 
  public:
   // FFFF - IE - Interrupt Enable (R/W)
+  Register IE_Register = 0x00;
   struct IE_Flags {
     bool JIR;  // Bit 4 – Joypad Interrupt Requested(1 = Requested);
     bool SIR;  // Bit 3 – Serial Interrupt Requested(1 = Requested)
@@ -63,6 +64,7 @@ class CPU {
   } ie_flags;
 
   // FF0F - IF - Interrupt Flag (R/W)
+  Register IF_Register = 0x00;
   struct IF_Flags {
     bool JIE;  // Bit 0: V - Blank  Interrupt Enable(INT 40h)  (1 = Enable)
     bool SIE;  // Bit 1 : LCD STAT Interrupt Enable(INT 48h)  (1 = Enable)

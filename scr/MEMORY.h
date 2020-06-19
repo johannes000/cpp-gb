@@ -16,7 +16,7 @@ class PPU;
 class CARDRIDGE;
 
 class MEMORY {
-public:
+ public:
   MEMORY(CPU *c, CARDRIDGE *card, PPU *p);
   ~MEMORY();
 
@@ -25,7 +25,7 @@ public:
   void write(const u16 &addr, const u8 &data);
   void write_u16(const u16 &addr, const u16 &data);
 
-private:
+ private:
   std::shared_ptr<CARDRIDGE> cardridge;
   PPU *ppu;
   CPU *cpu;
@@ -60,8 +60,8 @@ private:
 
   void dma_transfer(const u8 &data);
 
-public:
+ public:
   void reset();
 };
 
-#endif // !MEMORY_H_GUARD
+#endif  // !MEMORY_H_GUARD

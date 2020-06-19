@@ -11,7 +11,15 @@ void CPU::initRegister() {
   R.HL = 0x014D;
   R.SP = 0xFFFE;
   R.PC = 0x0000;
+  oldPC = 0x0000;
+
   OPCode = 0x00;
+  cycles = 0;
+
+  in_boot = true;
+  IME = false;
+  IME_scheduled = false;
+  DI_scheduled = false;
 }
 
 u8 CPU::parseOPCode(u8 &opcode) {
@@ -27,7 +35,7 @@ u8 CPU::parseOPCode(u8 &opcode) {
   }
   return function;
 }
-int cc = 0;
+
 int CPU::update() {
   oldPC = R.PC;
   if (interrupts()) std::cout << "INTERRUPT" << std::endl;
@@ -38,6 +46,7 @@ int CPU::update() {
   u8 jp = parseOPCode(OPCode);
   print_last_opcode();
   if (jp == 0) incPC();
+  cycles += current_instruction_info.cycles;
   return current_instruction_info.cycles;
 }
 
@@ -80,10 +89,30 @@ void CPU::printallops() {
 bool CPU::in_boot_r() { return in_boot; }
 
 u8 CPU::read(const u16 &addr) {
-  if (in_boot && R.PC == 0x100) in_boot = false;
-  return mem->read(addr);
+  switch (addr) {
+    case INTERRUPT_ENABLE_REG:
+      return IE_Register;
+    case INTERRUPT_FLAGS_REG:
+      return IF_Register;
+    default:
+      if (in_boot && R.PC == 0x100) in_boot = false;
+      return mem->read(addr);
+  }
 }
-void CPU::write(const u16 &addr, const u8 &data) { mem->write(addr, data); }
+void CPU::write(const u16 &addr, const u8 &data) {
+  switch (addr) {
+    case INTERRUPT_ENABLE_REG:
+      IE_Register = data;
+      break;
+    case INTERRUPT_FLAGS_REG:
+      IF_Register = data;
+      break;
+    default:
+      if (in_boot && R.PC == 0x100) in_boot = false;
+      mem->write(addr, data);
+      break;
+  }
+}
 void CPU::write_u16(const u16 &addr, const u16 &data) {
   mem->write_u16(addr, data);
 }

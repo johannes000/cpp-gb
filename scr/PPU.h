@@ -86,21 +86,22 @@ class PPU {
  private:
   // LCD Data
   struct LCD_Register {
-    u8 LCD_CONTROL;
-    u8 LCD_STATUS;
+    Register LCD_CONTROL;
+    Register LCD_STATUS;
 
-    u8 LCD_SCY;  // SCY - Scroll Y (R/W)
-    u8 LCD_SCX;  // SCX - Scroll X (R/W)
-    u8 LCD_LY;   // LY - LCDC Y-Coordinate (R)
-    u8 LCD_LYC;  // LYC - LY Compare (R/W)
-    u8 LCD_WY;   // WY - Window Y Position (R/W)
-    u8 LCD_WX;   // WX - Window X Position minus 7 (R/W)
+    Register LCD_SCY;  // SCY - Scroll Y (R/W)
+    Register LCD_SCX;  // SCX - Scroll X (R/W)
+    Register LCD_LY;   // LY - LCDC Y-Coordinate (R)
+    Register LCD_LYC;  // LYC - LY Compare (R/W)
+    Register LCD_WY;   // WY - Window Y Position (R/W)
+    Register LCD_WX;   // WX - Window X Position minus 7 (R/W)
 
-    u8 BG_PALETTE_DATA;    // BGP - BG Palette Data (R/W) - Non CGB Mode Only
-    u8 BG_PALETTE_DATA_0;  // OBP0 - Object Palette 0 Data (R/W) - Non CGB
-                           // Mode Only
-    u8 BG_PALETTE_DATA_1;  // OBP1 - Object Palette 1 Data (R/W) - Non CGB
-                           // Mode Only
+    Register BG_PALETTE_DATA;    // BGP - BG Palette Data (R/W)
+                                 // - Non CGB Mode Only
+    Register BG_PALETTE_DATA_0;  // OBP0 - Object Palette 0 Data (R/W)
+                                 // - Non CGB Mode Only
+    Register BG_PALETTE_DATA_1;  // OBP1 - Object Palette 1 Data (R/W)
+                                 // - Non CGB Mode Only
 
   } lcd_register;
 
@@ -113,7 +114,7 @@ class PPU {
                              // 97FFh, 1 = 8000h - 8FFFh)
     bool bg_tile_map;        // Bit 3 - BG Tile Map
                              // (0 = 9800h - 9BFFh, 1 = 9C00h - 9FFFh)
-    bool sprite_size;        // Bit 2 - Sprite Size(0 = 8�8, 1 = 8�16)
+    bool sprite_size;        // Bit 2 - Sprite Size(0 = 8x8, 1 = 8x16)
     bool sprites_enabled;    // Bit 1 - Sprites Enabled
                              // (0 = Disabled, 1 = Enabled)
     bool bg_enabled;         // Bit 0 - BG Enabled(in DMG)
