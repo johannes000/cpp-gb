@@ -40,11 +40,10 @@ int CPU::update() {
   oldPC = R.PC;
   if (interrupts()) std::cout << "INTERRUPT" << std::endl;
   if (IME_scheduled) IME = true;
-  // if (!(++cc % 1000))
-  //	std::cout << cc << std::endl;
+
   OPCode = getNextOPCode();
   u8 jp = parseOPCode(OPCode);
-  print_last_opcode();
+  // print_last_opcode();
   if (jp == 0) incPC();
   cycles += current_instruction_info.cycles;
   return current_instruction_info.cycles;

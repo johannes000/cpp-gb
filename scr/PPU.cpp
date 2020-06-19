@@ -20,17 +20,6 @@ PPU::~PPU() { closeWindow(); }
 
 void PPU::update(int cycles) {
   lcd_control.update(this);
-
-  // FPS rechner
-  fps_frames++;
-  if (fps_lasttime < SDL_GetTicks() - FPS_INTERVAL * 1000) {
-    fps_lasttime = SDL_GetTicks();
-    fps_current = fps_frames;
-    fps_frames = 0;
-    sprintf_s(fps_text, "%d", fps_current);
-    SDL_SetWindowTitle(window, fps_text);
-  }
-
   get_lcd_mode();
   cycles_in_mode += cycles;
   switch (lcd_mode) {
@@ -56,13 +45,14 @@ void PPU::update(int cycles) {
     case PPU::LCD_Mode::H_Blank:
       if (cycles_in_mode >= CLOCKS_HORIZONTAL_BLANK) {  // H-Blank vorbei
         cycles_in_mode = 0;
-
+        // std::cout << std::dec << current_line << std::endl;
         // H-Blank sachen
-
         if (current_line++ == GB_LCD_SIZE_HEIGHT) {
           // alle lines für dieses Frame gebuffert,
           // das frame kann jetzt gerendered werden
+          current_line = 0;
           render_frame();
+          renderScreen();
           set_lcd_mode(LCD_Mode::V_Blank);
         } else {
           set_lcd_mode(LCD_Mode::OAM);
@@ -72,15 +62,15 @@ void PPU::update(int cycles) {
 
       // MODE 1 : V - Blank nachdem jede linie gezeichnet wurde
     case PPU::LCD_Mode::V_Blank:
-      if (cycles_in_mode >= CLOCKS_VERTICAL_BLANK) {
+      if (cycles_in_mode >= CLOCKS_SCANLINE) {
         cycles_in_mode = 0;
         if (current_line++ == VERTICAL_BLANK_LINES) {
+          current_line = 0;
           set_lcd_mode(LCD_Mode::OAM);
         }
       }
       break;
   }
-  renderScreen();
 }
 
 void PPU::waitforinput() {
@@ -235,10 +225,18 @@ bool PPU::get_lcd_state(const LCD_State &s) const {
 
 u16 start = 0x0000;
 
-void PPU::buffer_scanline() { std::cout << " BUFFER " << std::endl; }
+void PPU::buffer_scanline() {}
 
 void PPU::render_frame() {
-  std::cout << " RENDER " << std::endl;
+  // FPS rechner
+  fps_frames++;
+  if (fps_lasttime < SDL_GetTicks() - FPS_INTERVAL * 1000) {
+    fps_lasttime = SDL_GetTicks();
+    fps_current = fps_frames;
+    fps_frames = 0;
+    sprintf_s(fps_text, "%d", fps_current);
+    SDL_SetWindowTitle(window, fps_text);
+  }
 
   int c = 0;
   int s = GB_LCD_SIZE_HEIGHT * GB_LCD_SIZE_WIDTH;
@@ -248,8 +246,6 @@ void PPU::render_frame() {
     p.G = Palettes[0][(BG_PALETTE_DATA & 1) & (BG_PALETTE_DATA & 2)].G;
     p.B = Palettes[0][(BG_PALETTE_DATA & 1) & (BG_PALETTE_DATA & 2)].B;
   }
-
-  start++;
 }
 
 bool PPU::createWindow() {
