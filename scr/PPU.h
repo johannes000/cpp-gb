@@ -63,7 +63,6 @@ class PPU {
   } lcd_mode;
 
   bool createWindow();
-  void renderScreen();
   void closeWindow();
 
   SDL_Event event = event;
@@ -148,10 +147,9 @@ class PPU {
   bool get_lcd_state(const LCD_State &s) const;
 
   // LCD Render Funktionen
-  Pixel lcd_buffer[GB_LCD_SIZE_HEIGHT * GB_LCD_SIZE_WIDTH];
-  Pixel lcd_buffer_old[GB_LCD_SIZE_HEIGHT * GB_LCD_SIZE_WIDTH];
+  std::vector<Pixel> lcd_buffer;
 
-  void buffer_scanline();
+  void buffer_scanline(int line);
   void render_frame();
 
  private:

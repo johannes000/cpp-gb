@@ -9,11 +9,12 @@ PPU::PPU(MEMORY *m) : mem(m) {
   v_ram = std::vector<u8>(VRAM_SIZE, 0x00);
   sprite_attribute_table = std::vector<u8>(OAM_SIZE, 0x00);
 
-  memset(lcd_buffer, 0xFF, sizeof(lcd_buffer));
-  memset(lcd_buffer_old, 0xFF, sizeof(lcd_buffer_old));
+  lcd_buffer = std::vector<Pixel>(GB_LCD_SIZE_WIDTH * GB_LCD_SIZE_HEIGHT,
+                                  {0x00, 0x00, 0x00});
   lcd_control.update(this);
+  set_lcd_mode(LCD_Mode::OAM);
+
   render_frame();
-  renderScreen();
 }
 
 PPU::~PPU() { closeWindow(); }
@@ -37,7 +38,7 @@ void PPU::update(int cycles) {
       if (cycles_in_mode >= CLOCKS_SCANLINE_VRAM) {
         cycles_in_mode = 0;
         set_lcd_mode(LCD_Mode::H_Blank);
-        buffer_scanline();
+        buffer_scanline(current_line);
       }
       break;
 
@@ -52,7 +53,7 @@ void PPU::update(int cycles) {
           // das frame kann jetzt gerendered werden
           current_line = 0;
           render_frame();
-          renderScreen();
+          waitforinput();
           set_lcd_mode(LCD_Mode::V_Blank);
         } else {
           set_lcd_mode(LCD_Mode::OAM);
@@ -85,9 +86,7 @@ void PPU::waitforinput() {
       switch (event.key.keysym.sym) {
         case SDLK_p:
           std::cout << "P" << std::endl;
-          current_palette = current_palette + 1 % Palettes.size();
-          render_frame();
-          renderScreen();
+          current_palette = (current_palette + 1) % Palettes.size();
           break;
         case SDLK_ESCAPE:
           exit(0);
@@ -223,9 +222,7 @@ bool PPU::get_lcd_state(const LCD_State &s) const {
   return check_bit(lcd_register.LCD_STATUS, static_cast<u8>(s));
 }
 
-u16 start = 0x0000;
-
-void PPU::buffer_scanline() {}
+void PPU::buffer_scanline(int line) {}
 
 void PPU::render_frame() {
   // FPS rechner
@@ -237,19 +234,25 @@ void PPU::render_frame() {
     sprintf_s(fps_text, "%d", fps_current);
     SDL_SetWindowTitle(window, fps_text);
   }
+  SDL_RenderClear(renderer);
 
-  int c = 0;
-  int s = GB_LCD_SIZE_HEIGHT * GB_LCD_SIZE_WIDTH;
-
-  for (auto &p : lcd_buffer) {
-    p.R = Palettes[0][(BG_PALETTE_DATA & 1) & (BG_PALETTE_DATA & 2)].R;
-    p.G = Palettes[0][(BG_PALETTE_DATA & 1) & (BG_PALETTE_DATA & 2)].G;
-    p.B = Palettes[0][(BG_PALETTE_DATA & 1) & (BG_PALETTE_DATA & 2)].B;
+  for (int i = 0; i < 23040; i++) {
+    if (rand() % 2) {
+      int pal = rand() % 4;
+      lcd_buffer[i].R = Palettes[current_palette][pal].R;
+      lcd_buffer[i].G = Palettes[current_palette][pal].G;
+      lcd_buffer[i].B = Palettes[current_palette][pal].B;
+    }
   }
+
+  SDL_UpdateTexture(texture, NULL, &lcd_buffer[0], GB_LCD_SIZE_WIDTH * 3);
+  SDL_RenderCopy(renderer, texture, NULL, NULL);
+  SDL_RenderPresent(renderer);
 }
 
 bool PPU::createWindow() {
-  SDL_Init(SDL_INIT_VIDEO);
+  SDL_Init(SDL_INIT_EVERYTHING);
+
   window = SDL_CreateWindow("cpp-gb", SDL_WINDOWPOS_UNDEFINED,
                             SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH * 4,
                             SCREEN_HEIGHT * 4, SDL_WINDOW_SHOWN);
@@ -260,15 +263,6 @@ bool PPU::createWindow() {
                               SCREEN_HEIGHT);
 
   return true;
-}
-
-void PPU::renderScreen() {
-  assert(renderer && texture);
-  SDL_UpdateTexture(texture, NULL, lcd_buffer,
-                    GB_LCD_SIZE_WIDTH * sizeof(u8) * 3);
-  SDL_RenderClear(renderer);
-  SDL_RenderCopy(renderer, texture, NULL, NULL);
-  SDL_RenderPresent(renderer);
 }
 
 void PPU::LCD_Control::update(PPU *ppu) {

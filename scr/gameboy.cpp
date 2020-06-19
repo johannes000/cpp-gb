@@ -19,8 +19,6 @@ void gameboy::startemu() {
   while (true) {
     last_cycle = cpu.update();
     cycles += last_cycle;
-
-    ppu.waitforinput();
     ppu.update(last_cycle * 4);
     // SDL_Delay(20);
   }
