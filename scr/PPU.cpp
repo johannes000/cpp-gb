@@ -35,7 +35,6 @@ void PPU::update(int cycles) {
 
       // MODE 3 : VRAM Zugriff Pixel Transfer
     case PPU::LCD_Mode::VRAM:
-      buffer_cycle(lcd_register.LCD_LY, cycles_in_mode, cycles);
       if (cycles_in_mode >= CLOCKS_SCANLINE_VRAM) {
         cycles_in_mode = 0;
         set_lcd_mode(LCD_Mode::H_Blank);
@@ -46,6 +45,7 @@ void PPU::update(int cycles) {
     case PPU::LCD_Mode::H_Blank:
       if (cycles_in_mode >= CLOCKS_HORIZONTAL_BLANK) {  // H-Blank vorbei
         cycles_in_mode = 0;
+        buffer_line(lcd_register.LCD_LY);
         // H-Blank sachen
         if (++lcd_register.LCD_LY == GB_LCD_SIZE_HEIGHT) {
           // alle lines für dieses Frame gebuffert,
@@ -221,9 +221,7 @@ bool PPU::get_lcd_state(const LCD_State &s) const {
   return check_bit(lcd_register.LCD_STATUS, static_cast<u8>(s));
 }
 
-void PPU::buffer_cycle(u8 line, int cycle, int pixel_to_buffer) {
-  if (cycle - pixel_to_buffer > GB_LCD_SIZE_WIDTH) return;
-
+void PPU::buffer_line(u8 line) {
   lcd_control.update(this);
   if (lcd_control.bg_enabled) {
     // BG Tile Map Display Select
@@ -233,11 +231,11 @@ void PPU::buffer_cycle(u8 line, int cycle, int pixel_to_buffer) {
     const u8 bg_pallete = lcd_register.BG_PALETTE_DATA;
 
     int width = GB_LCD_SIZE_WIDTH;
+    // Festlegen wo im Vector die Pixel gesetzt werden
     int y = line;
-    int x = cycle - pixel_to_buffer;
     int pal = rand() % 4;
-    for (int i = 0; i <= pixel_to_buffer; i++) {
-      int index = ((width * y) + x + i);
+    for (int i = 0; i <= GB_LCD_SIZE_WIDTH; i++) {
+      size_t index = ((width * y) + i);
       if (index >= lcd_buffer.size()) return;
       lcd_buffer[index].R = Palettes[current_palette][pal].R;
       lcd_buffer[index].G = Palettes[current_palette][pal].G;

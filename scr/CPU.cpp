@@ -94,7 +94,11 @@ u8 CPU::read(const u16 &addr) {
     case INTERRUPT_FLAGS_REG:
       return IF_Register;
     default:
-      if (in_boot && R.PC == 0x100) in_boot = false;
+      if (in_boot && R.PC > 0x100) {
+        in_boot = false;
+        std::cout << "Boot verlassen nach: " << std::dec << cycles << " Cycles"
+                  << std::endl;
+      }
       return mem->read(addr);
   }
 }
@@ -107,7 +111,11 @@ void CPU::write(const u16 &addr, const u8 &data) {
       IF_Register = data;
       break;
     default:
-      if (in_boot && R.PC == 0x100) in_boot = false;
+      if (in_boot && R.PC >= 0x100) {
+        in_boot = false;
+        std::cout << "Boot verlassen nach: " << std::dec << cycles << " Cycles"
+                  << std::endl;
+      }
       mem->write(addr, data);
       break;
   }

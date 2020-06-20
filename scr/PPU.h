@@ -165,7 +165,7 @@ class PPU {
   // LCD Render Funktionen
   std::vector<Pixel> lcd_buffer;
 
-  void buffer_cycle(u8 line, int cycle, int pixel_to_buffer);
+  void buffer_line(u8 line);
   void render_frame();
 
  private:
