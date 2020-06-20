@@ -35,10 +35,10 @@ void PPU::update(int cycles) {
 
       // MODE 3 : VRAM Zugriff Pixel Transfer
     case PPU::LCD_Mode::VRAM:
+      buffer_cycle(lcd_register.LCD_LY, cycles_in_mode, cycles);
       if (cycles_in_mode >= CLOCKS_SCANLINE_VRAM) {
         cycles_in_mode = 0;
         set_lcd_mode(LCD_Mode::H_Blank);
-        buffer_scanline(current_line);
       }
       break;
 
@@ -46,12 +46,10 @@ void PPU::update(int cycles) {
     case PPU::LCD_Mode::H_Blank:
       if (cycles_in_mode >= CLOCKS_HORIZONTAL_BLANK) {  // H-Blank vorbei
         cycles_in_mode = 0;
-        // std::cout << std::dec << current_line << std::endl;
         // H-Blank sachen
-        if (current_line++ == GB_LCD_SIZE_HEIGHT) {
+        if (++lcd_register.LCD_LY == GB_LCD_SIZE_HEIGHT) {
           // alle lines für dieses Frame gebuffert,
           // das frame kann jetzt gerendered werden
-          current_line = 0;
           render_frame();
           waitforinput();
           set_lcd_mode(LCD_Mode::V_Blank);
@@ -65,8 +63,8 @@ void PPU::update(int cycles) {
     case PPU::LCD_Mode::V_Blank:
       if (cycles_in_mode >= CLOCKS_SCANLINE) {
         cycles_in_mode = 0;
-        if (current_line++ == VERTICAL_BLANK_LINES) {
-          current_line = 0;
+        if (++lcd_register.LCD_LY == VERTICAL_BLANK_LINES) {
+          lcd_register.LCD_LY = 0;
           set_lcd_mode(LCD_Mode::OAM);
         }
       }
@@ -121,7 +119,8 @@ void PPU::write(const u16 &addr, const u8 &data) {
         lcd_register.LCD_SCX = data;
         break;
       case LCD_LY:
-        lcd_register.LCD_LY = data;
+        // Writing will reset the counter.
+        lcd_register.LCD_LY = 0;
         break;
       case LCD_LYC:
         lcd_register.LCD_LYC = data;
@@ -222,7 +221,30 @@ bool PPU::get_lcd_state(const LCD_State &s) const {
   return check_bit(lcd_register.LCD_STATUS, static_cast<u8>(s));
 }
 
-void PPU::buffer_scanline(int line) {}
+void PPU::buffer_cycle(u8 line, int cycle, int pixel_to_buffer) {
+  if (cycle - pixel_to_buffer > GB_LCD_SIZE_WIDTH) return;
+
+  lcd_control.update(this);
+  if (lcd_control.bg_enabled) {
+    // BG Tile Map Display Select
+    const u16 bg_tileset = lcd_control.bg_window_tileset ? 0x8000 : 0x8800;
+    const u16 wdw_tilemap = lcd_control.window_tile_map ? 0x9C00 : 0x9800;
+    const u16 bg_tilemap = lcd_control.bg_tile_map ? 0x9C00 : 0x9800;
+    const u8 bg_pallete = lcd_register.BG_PALETTE_DATA;
+
+    int width = GB_LCD_SIZE_WIDTH;
+    int y = line;
+    int x = cycle - pixel_to_buffer;
+    int pal = rand() % 4;
+    for (int i = 0; i <= pixel_to_buffer; i++) {
+      int index = ((width * y) + x + i);
+      if (index >= lcd_buffer.size()) return;
+      lcd_buffer[index].R = Palettes[current_palette][pal].R;
+      lcd_buffer[index].G = Palettes[current_palette][pal].G;
+      lcd_buffer[index].B = Palettes[current_palette][pal].B;
+    }
+  }
+}
 
 void PPU::render_frame() {
   // FPS rechner
@@ -236,14 +258,14 @@ void PPU::render_frame() {
   }
   SDL_RenderClear(renderer);
 
-  for (int i = 0; i < 23040; i++) {
-    if (rand() % 2) {
-      int pal = rand() % 4;
-      lcd_buffer[i].R = Palettes[current_palette][pal].R;
-      lcd_buffer[i].G = Palettes[current_palette][pal].G;
-      lcd_buffer[i].B = Palettes[current_palette][pal].B;
-    }
-  }
+  // for (int i = 0; i < 23040; i++) {
+  //  if (rand() % 2) {
+  //    int pal = rand() % 4;
+  //    lcd_buffer[i].R = Palettes[current_palette][pal].R;
+  //    lcd_buffer[i].G = Palettes[current_palette][pal].G;
+  //    lcd_buffer[i].B = Palettes[current_palette][pal].B;
+  //  }
+  //}
 
   SDL_UpdateTexture(texture, NULL, &lcd_buffer[0], GB_LCD_SIZE_WIDTH * 3);
   SDL_RenderCopy(renderer, texture, NULL, NULL);

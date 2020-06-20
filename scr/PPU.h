@@ -16,12 +16,28 @@ constexpr auto FPS_INTERVAL = 1.0;  // seconds.;
 constexpr u16 VRAM_SIZE = 0x2000;
 constexpr u16 OAM_SIZE = 0x0100;
 
-// Period	/					GPU mode number	/
-// Time spent(clocks) Scanline(accessing OAM)				2 80
-// Scanline(accessing VRAM)				3 172 Horizontal blank
-// 0 204 One line(scan and blank) 456
+// Period
+// GPU mode number
+// Time spent(clocks)
+
+// Scanline(accessing OAM)
+// 2
+// 80
+// Scanline(accessing VRAM)
+// 3
+// 172
+// Horizontal blank
+// 0
+// 204
+// One line(scan and blank)
+//
+// 456
 // Vertical blank						1
-// 4560 (10 lines) Full frame(scans and vblank) 70224
+//
+// 4560 (10 lines)
+// Full frame(scans and vblank)
+//
+// 70224
 
 constexpr int CLOCKS_SCANLINE_OAM = 80;
 constexpr int CLOCKS_SCANLINE_VRAM = 172;
@@ -31,7 +47,7 @@ constexpr int CLOCKS_SCANLINE =
 constexpr int CLOCKS_VERTICAL_BLANK = CLOCKS_SCANLINE * 10;
 constexpr int CLOCKS_FULL_FRAME = 70224;
 
-constexpr int VERTICAL_BLANK_LINES = 10;
+constexpr int VERTICAL_BLANK_LINES = 154;
 
 class MEMORY;
 
@@ -49,7 +65,6 @@ class PPU {
   MEMORY *mem;
 
   int cycles_in_mode;
-  int current_line = 0;
 
   // 0: During H - Blank
   // 1 : During V - Blank
@@ -85,6 +100,7 @@ class PPU {
  private:
   // LCD Data
   struct LCD_Register {
+    // u8 Werte die mit hilfe ihrer Adressen von der GB CPU beschrieben werden
     Register LCD_CONTROL;
     Register LCD_STATUS;
 
@@ -149,7 +165,7 @@ class PPU {
   // LCD Render Funktionen
   std::vector<Pixel> lcd_buffer;
 
-  void buffer_scanline(int line);
+  void buffer_cycle(u8 line, int cycle, int pixel_to_buffer);
   void render_frame();
 
  private:
