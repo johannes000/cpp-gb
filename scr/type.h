@@ -2,9 +2,6 @@
 #ifndef TYPE_H_GUARD
 #define TYPE_H_GUARD
 
-#include <cstdint>
-#include <stdexcept>
-
 typedef unsigned char u8;
 typedef unsigned short u16;
 
@@ -68,7 +65,7 @@ constexpr u16 DMA_TRANSFER = 0xFF46;  // DMA Transfer and Start Address (R/W)
 
 constexpr int VERTICAL_REFRESH_CYCLES = 70224;
 
-const enum class Colors {
+enum class Colors {
   white = 0,
   light_gray = 1,
   dark_gray = 2,
@@ -77,7 +74,7 @@ const enum class Colors {
 
 typedef const u8 IF;  // Interrupt Flags
 
-const enum class Flag {
+enum class Flag {
   z = 7,  // Zero Flag
   n = 6,  // Add/Sub-Flag
   h = 5,  // Half Carry Flag
@@ -130,12 +127,12 @@ struct CPU_Register {
 };
 
 // ROM INFO
-const enum class CGBFlag {
+enum class CGBFlag {
   OFF = 0x80,  // - Game supports CGB functions, but works on old gameboys also.
   ON = 0xC0,   // - Game works on CGB only(physically the same as 80h).
 };
 
-const enum class CType {  // Cartridge Type
+enum class CType {  // Cartridge Type
   ROM_ONLY = 0x00,
   MBC1 = 0x01,
   MBC1_RAM = 0x02,
@@ -167,7 +164,7 @@ const enum class CType {  // Cartridge Type
 
 };
 
-const enum class ROMSize {
+enum class ROMSize {
   KB32 = 0x00,   //(no ROM banking)
   KB64 = 0x01,   //(4 banks)
   KB128 = 0x02,  //(8 banks)
@@ -182,7 +179,7 @@ const enum class ROMSize {
   MB1_5 = 0x54,  //(96 banks)
 };
 
-const enum class RAMSize {
+enum class RAMSize {
   None = 0x00,
   KB2 = 0x01,
   KB8 = 0x02,
@@ -191,7 +188,7 @@ const enum class RAMSize {
   KB64 = 0x05,   // (8 banks of 8KBytes each)
 };
 
-const enum class DestCode {
+enum class DestCode {
   JAP = 0x00,
   NON_JAP = 0x01,
 };
@@ -203,11 +200,11 @@ struct Rom_Info {
   CGBFlag cgb = CGBFlag::ON;
   CType ctype = CType::MBC1;
 
-  ROMSize romsize = ROMSize::KB32;
-  RAMSize ramsize = RAMSize::None;
+  ROMSize rom_size = ROMSize::KB32;
+  RAMSize ram_size = RAMSize::None;
 
-  int rom_banks;
-  int ram_banks;
+  int rom_banks{};
+  int ram_banks{};
 };
 
 struct Pixel {

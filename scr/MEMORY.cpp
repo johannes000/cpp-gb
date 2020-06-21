@@ -1,7 +1,7 @@
 #include "MEMORY.h"
 
 MEMORY::MEMORY(CPU *c, CARDRIDGE *card, PPU *p)
-    : cpu(c), cardridge(card), ppu(p) {}
+    : cardridge(card), ppu(p), cpu(c) {}
 
 MEMORY::~MEMORY() {}
 
@@ -93,8 +93,8 @@ void MEMORY::write(const u16 &addr, const u8 &data) {
 
 void MEMORY::write_u16(const u16 &addr, const u16 &data) {
   if (addr >= 0x00 && (addr + 1) < 0xFFFF) {
-    u8 data_lb = data >> 8;
-    u8 data_hb = data & 0xFF;
+    const u8 data_lb = data >> 8;
+    const u8 data_hb = data & 0xFF;
     write(addr, data_hb);
     write(addr + 1, data_lb);
   }
@@ -137,7 +137,7 @@ void MEMORY::reset() {
 
 void MEMORY::dma_transfer(const u8 &data) {
   memory.at(DMA_TRANSFER) = data;
-  u16 addr = data << 8;
+  const u16 addr = data << 8;
   for (u8 i = 0; i < 0xA0; i++) {
     write(0xFE00 + i, read(addr + i));
   }

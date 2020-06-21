@@ -1,15 +1,17 @@
 #include "CARDRIDGE.h"
 
-CARDRIDGE::CARDRIDGE() {}
-CARDRIDGE::~CARDRIDGE() {}
+#include <fstream>
+#include <iostream>
 
-bool CARDRIDGE::loadROM(const char *romFile) {
-  std::ifstream is(romFile, std::ios::binary);
+CARDRIDGE::CARDRIDGE() : rom_info() {}
+
+bool CARDRIDGE::load_rom(const char *rom_file) {
+  std::ifstream is(rom_file, std::ios::binary);
   if (!is) {
-    std::cerr << "Kann die Datei nicht oeffnen : " << romFile << std::endl;
+    std::cerr << "Kann die Datei nicht oeffnen : " << rom_file << std::endl;
     return false;
   }
-  std::vector<u8> rom(std::istreambuf_iterator<char>(is), {});
+  const std::vector<u8> rom(std::istreambuf_iterator<char>(is), {});
   this->rom = rom;
 
   fill_cardridge_info();
@@ -18,24 +20,24 @@ bool CARDRIDGE::loadROM(const char *romFile) {
   return true;
 }
 
-void CARDRIDGE::build_ram() {
+void CARDRIDGE::build_ram() const {
   std::vector<std::vector<u8>> ram(rom_info.ram_banks + 1,
                                    std::vector<u8>(ROM_BANK_SIZE, 0xFF));
 }
 
 void CARDRIDGE::fill_cardridge_info() {
-  if (rom.size() == 0) return;
+  if (rom.empty()) return;
   if (calcCheckSum() != rom[0x14D]) {
-    std::cout << "Checkrum FAIL!" << std::endl;
+    std::cout << "Checksum FAIL!" << std::endl;
     return;
   }
 
   std::memcpy(rom_info.title, &rom[0x134], 15);
-  rom_info.cgb = (CGBFlag)rom[0x143];
-  rom_info.ctype = (CType)rom[0x147];
+  rom_info.cgb = static_cast<CGBFlag>(rom[0x143]);
+  rom_info.ctype = static_cast<CType>(rom[0x147]);
 
-  rom_info.romsize = (ROMSize)rom[0x148];
-  switch (rom_info.romsize) {
+  rom_info.rom_size = static_cast<ROMSize>(rom[0x148]);
+  switch (rom_info.rom_size) {
     case ROMSize::KB32:
       rom_info.rom_banks = 0;
       break;
@@ -46,8 +48,6 @@ void CARDRIDGE::fill_cardridge_info() {
       rom_info.rom_banks = 8;
       break;
     case ROMSize::KB256:
-      rom_info.rom_banks = 16;
-      break;
     case ROMSize::KB512:
       rom_info.rom_banks = 16;
       break;
@@ -90,14 +90,10 @@ void CARDRIDGE::fill_cardridge_info() {
       break;
   }
 
-  rom_info.ramsize = (RAMSize)rom[0x149];
-  switch (rom_info.ramsize) {
+  rom_info.ram_size = static_cast<RAMSize>(rom[0x149]);
+  switch (rom_info.ram_size) {
     case RAMSize::None:
-      rom_info.ram_banks = 0;
-      break;
     case RAMSize::KB2:
-      rom_info.ram_banks = 0;
-      break;
     case RAMSize::KB8:
       rom_info.ram_banks = 0;
       break;
@@ -115,7 +111,7 @@ void CARDRIDGE::fill_cardridge_info() {
   }
 }
 
-void CARDRIDGE::printRom() {
+void CARDRIDGE::print_rom() {
   int i = 0;
   for (auto s : rom) {
     if ((i++) % 255 == 0) {
@@ -133,13 +129,14 @@ u8 CARDRIDGE::calcCheckSum() {
   return checkSum;
 }
 
-Rom_Info *CARDRIDGE::get_rominfo() { return &rom_info; }
+Rom_Info *CARDRIDGE::get_rom_info() { return &rom_info; }
 
 u8 CARDRIDGE::read(const u16 &addr) {
   if (addr >= 0x0000 && addr <= 0x7FFF)
     return rom.at(addr);
   else if (addr >= 0xA000 && addr <= 0xBFFF)
     return ram[selected_ram_bank][addr];
+  return 0xFF;
 }
 
 u8 *CARDRIDGE::read_ptr(const u16 &addr) {

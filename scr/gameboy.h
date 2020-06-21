@@ -8,7 +8,7 @@
 #include "PPU.h"
 
 class gameboy {
-public:
+ public:
   gameboy();
   ~gameboy();
 
@@ -17,12 +17,9 @@ public:
   CPU cpu;
   PPU ppu;
 
-  void startemu();
+  void start_emu();
 
-private:
-  const int MAX_CYCLES = 70224;
-  const float FPS = 59.73f;
-  const float DELAY_TIME = 1000.0f / FPS;
+ private:
 };
 
-#endif // !GAMEBOY_H_GUARD
+#endif  // !GAMEBOY_H_GUARD

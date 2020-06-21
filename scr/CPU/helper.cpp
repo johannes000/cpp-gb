@@ -40,7 +40,7 @@ void CPU::reset_flags(const Flag &F1, const Flag &F2, const Flag &F3) {
 }
 void CPU::reset_all_flags() { R.F = 0x00; }
 
-bool CPU::check_flag(const Flag &F) {
+bool CPU::check_flag(const Flag &F) const {
   return check_bit(R.F, static_cast<u8>(F));
 }
 

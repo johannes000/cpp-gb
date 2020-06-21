@@ -1,20 +1,20 @@
 #include "gameboy.h"
 
-#include <time.h>
+gameboy::gameboy() : mem(&cpu, &card, &ppu), cpu(&mem), ppu(&mem) {}
 
-#include <chrono>
-#include <thread>
+gameboy::~gameboy() {
+  delete &mem;
+  delete &card;
+  delete &ppu;
+  delete &cpu;
+}
 
-gameboy::gameboy() : cpu(&mem), mem(&cpu, &card, &ppu), ppu(&mem) {}
-
-gameboy::~gameboy() {}
-
-void gameboy::startemu() {
-  int cycles = 0;
-  int last_cycle = 0;
+void gameboy::start_emu() {
+  auto cycles = 0;
+  auto last_cycle = 0;
   mem.reset();
-  card.loadROM("./testroms/tetris.gb");
-  // cpu.printallops();
+  card.load_rom("./testroms/tetris.gb");
+  // cpu.print_all_ops();
 
   while (true) {
     last_cycle = cpu.update();

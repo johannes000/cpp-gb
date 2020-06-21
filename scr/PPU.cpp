@@ -1,8 +1,5 @@
 #include "PPU.h"
 
-#include <cassert>
-#include <cstdio>
-
 PPU::PPU(MEMORY *m) : mem(m) {
   createWindow();
 
@@ -20,7 +17,7 @@ PPU::PPU(MEMORY *m) : mem(m) {
 
 PPU::~PPU() { closeWindow(); }
 
-void PPU::update(int cycles) {
+void PPU::update(const int cycles) {
   lcd_control.update(this);
   load_lcd_mode();
   cycles_in_mode += cycles;
@@ -52,7 +49,7 @@ void PPU::update(int cycles) {
           // alle lines für dieses Frame gebuffert,
           // das frame kann jetzt gerendered werden
           render_frame();
-          waitforinput();
+          wait_for_input();
           set_lcd_mode(LCD_Mode::V_Blank);
         } else {
           set_lcd_mode(LCD_Mode::OAM);
@@ -73,25 +70,21 @@ void PPU::update(int cycles) {
   }
 }
 
-void PPU::waitforinput() {
-  bool quit = false;
-
+void PPU::wait_for_input() {
   SDL_PollEvent(&event);
   switch (event.type) {
     case SDL_QUIT:
       exit(0);
-      break;
     case SDL_KEYDOWN:
       switch (event.key.keysym.sym) {
         case SDLK_p:
           std::cout << "P" << std::endl;
-          current_palette = (current_palette + 1) % Palettes.size();
+          current_palette =
+              (current_palette + 1) % static_cast<int>(Palettes.size());
           break;
         case SDLK_ESCAPE:
           exit(0);
-          break;
         default:
-          quit = true;
           break;
       }
       break;
@@ -181,7 +174,7 @@ u8 PPU::read(const u16 &addr) const {
   }
 }
 
-void PPU::closeWindow() {
+void PPU::closeWindow() const {
   // Destroy window
   SDL_DestroyWindow(window);
   SDL_DestroyTexture(texture);
@@ -192,10 +185,10 @@ void PPU::closeWindow() {
 
 void PPU::set_lcd_mode(LCD_Mode m) {
   // Schreibt den gewünschten mode ins LCD Status register
-  u8 mode = static_cast<u8>(m);
+  const auto mode = static_cast<u8>(m);
   if (mode > 3) return;
   lcd_mode = m;
-  u8 *data = &lcd_register.LCD_STATUS;
+  auto *const data = &lcd_register.LCD_STATUS;
   mode & 1 ? set_bit(*data, 0) : reset_bit(*data, 0);
   mode & 2 ? set_bit(*data, 1) : reset_bit(*data, 1);
 }
@@ -203,19 +196,19 @@ void PPU::set_lcd_mode(LCD_Mode m) {
 void PPU::load_lcd_mode() {
   // Liest den LCD Mode aus dem LCD Status register
   // und aktualisiert die lokale variable
-  u8 *data = &lcd_register.LCD_STATUS;
+  auto *const data = &lcd_register.LCD_STATUS;
   lcd_mode = static_cast<LCD_Mode>(*data & 3);
 }
 
 void PPU::set_lcd_state(const LCD_State &s) {
   // setzt den gewünschten status im LCD Status Register
-  u8 *data = &lcd_register.LCD_STATUS;
+  auto *const data = &lcd_register.LCD_STATUS;
   set_bit(*data, static_cast<u8>(s));
 }
 
 void PPU::reset_lcd_state(const LCD_State &s) {
   // setzt den gewünschten status im LCD Status Register zurück
-  u8 *data = &lcd_register.LCD_STATUS;
+  auto *const data = &lcd_register.LCD_STATUS;
   reset_bit(*data, static_cast<u8>(s));
 }
 
@@ -223,7 +216,7 @@ bool PPU::get_lcd_state(const LCD_State &s) const {
   return check_bit(lcd_register.LCD_STATUS, static_cast<u8>(s));
 }
 
-void PPU::buffer_line(u8 line) {
+void PPU::buffer_line(const u8 line) {
   lcd_control.update(this);
   if (lcd_control.bg_enabled) {
     // BG Tile Map Display Select
@@ -231,36 +224,36 @@ void PPU::buffer_line(u8 line) {
     const u16 bg_tileset = lcd_control.bg_window_tileset ? 0x8000 : 0x8800;
     const u16 wdw_tilemap = lcd_control.window_tile_map ? 0x9C00 : 0x9800;
     const u16 bg_tilemap = lcd_control.bg_tile_map ? 0x9C00 : 0x9800;
-    const u8 bg_pallete = lcd_register.BG_PALETTE_DATA;
+    const auto bg_pallete = lcd_register.BG_PALETTE_DATA;
 
     // Festlegen wo im Vector die Pixel gesetzt werden
-    int y = line;
-    int sc_y = (y + lcd_register.LCD_SCY) % GB_LCD_SIZE_HEIGHT;
+    const int y = line;
+    const auto sc_y = (y + lcd_register.LCD_SCY) % GB_LCD_SIZE_HEIGHT;
 
-    int pal = rand() % 4;
-    for (int x = 0; x <= GB_LCD_SIZE_WIDTH - 1; x++) {
-      int sc_x = (x + lcd_register.LCD_SCX) % GB_LCD_SIZE_WIDTH;
+    const auto pal = rand() % 4;
+    for (auto x = 0; x <= GB_LCD_SIZE_WIDTH - 1; x++) {
+      const auto sc_x = (x + lcd_register.LCD_SCX) % GB_LCD_SIZE_WIDTH;
 
-      // Welches tile in der bg_tilemap
-      int tile_x = sc_x / TILE_WIDTH;
-      int tile_y = sc_y / TILE_WIDTH;
+      // Welches tile in der bg_tile-map
+      const auto tile_x = sc_x / TILE_WIDTH;
+      const auto tile_y = sc_y / TILE_WIDTH;
 
       // Welcher Pixel im tile
-      int tile_pixel_x = sc_x % TILE_WIDTH;
-      int tile_pixel_y = sc_y % TILE_HEIGHT;
+      auto tile_pixel_x = sc_x % TILE_WIDTH;
+      auto tile_pixel_y = sc_y % TILE_HEIGHT;
 
       // Adresse des tiles im vram
-      int addr = bg_tilemap + tile_y * TILE_PER_LINE + tile_x;
+      const auto addr = bg_tilemap + tile_y * TILE_PER_LINE + tile_x;
 
-      // Ob die bg_tilemap adressen signed sind oder nicht
+      // Ob die bg_tile-map adressen signed sind oder nicht
       int tile;
       if (lcd_control.bg_window_tileset) {
-        tile = (i8)read(addr);
+        tile = static_cast<i8>(read(addr));
       } else {
         tile = read(addr);
       }
 
-      size_t index = ((GB_LCD_SIZE_WIDTH * y) + x);
+      const size_t index = ((GB_LCD_SIZE_WIDTH * y) + x);
       if (index >= lcd_buffer.size()) return;
 
       lcd_buffer[index].R = Palettes[current_palette][pal].R;
@@ -273,8 +266,8 @@ void PPU::buffer_line(u8 line) {
 void PPU::render_frame() {
   // FPS rechner
   fps_frames++;
-  if (fps_lasttime < SDL_GetTicks() - FPS_INTERVAL * 1000) {
-    fps_lasttime = SDL_GetTicks();
+  if (fps_last_time < SDL_GetTicks() - FPS_INTERVAL * 1000) {
+    fps_last_time = SDL_GetTicks();
     fps_current = fps_frames;
     fps_frames = 0;
     sprintf_s(fps_text, "%d", fps_current);
@@ -286,7 +279,7 @@ void PPU::render_frame() {
   SDL_RenderPresent(renderer);
 }
 
-LCD_Mode PPU::mode() { return lcd_mode; }
+LCD_Mode PPU::mode() const { return lcd_mode; }
 
 bool PPU::createWindow() {
   SDL_Init(SDL_INIT_EVERYTHING);
@@ -304,9 +297,10 @@ bool PPU::createWindow() {
 }
 
 void PPU::LCD_Control::update(PPU *ppu) {
-  Register *data = &ppu->lcd_register.LCD_CONTROL;
-  *this = {(bool)((*data >> 7) & 1), (bool)((*data >> 6) & 1),
-           (bool)((*data >> 5) & 1), (bool)((*data >> 4) & 1),
-           (bool)((*data >> 3) & 1), (bool)((*data >> 2) & 1),
-           (bool)((*data >> 1) & 1), (bool)((*data >> 0) & 1)};
+  auto *const data = &ppu->lcd_register.LCD_CONTROL;
+  *this = {
+      static_cast<bool>((*data >> 7) & 1), static_cast<bool>((*data >> 6) & 1),
+      static_cast<bool>((*data >> 5) & 1), static_cast<bool>((*data >> 4) & 1),
+      static_cast<bool>((*data >> 3) & 1), static_cast<bool>((*data >> 2) & 1),
+      static_cast<bool>((*data >> 1) & 1), static_cast<bool>((*data >> 0) & 1)};
 }

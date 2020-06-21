@@ -2,8 +2,6 @@
 #ifndef CPU_H_GUARD
 #define CPU_H_GUARD
 
-#include <array>
-#include <iostream>
 #include <vector>
 
 #include "MEMORY.h"
@@ -13,22 +11,20 @@ class MEMORY;
 
 class CPU {
  public:
-  CPU(MEMORY *);
-  ~CPU();
+  explicit CPU(MEMORY *);
 
-  u8 parseOPCode(u8 &);
+  u8 parse_op_code(u8 &);
   int update();
-  void incPC();
+  void inc_pc();
 
-  u8 getNextOPCode();
-  void printallops();
+  u8 get_next_op_code();
+  void print_all_ops();
 
-  bool in_boot_r();
-  void interrupt_enable(u8 val);
+  bool in_boot_r() const;
 
   u8 read(const u16 &addr);
   void write(const u16 &addr, const u8 &data);
-  void write_u16(const u16 &addr, const u16 &data);
+  void write_u16(const u16 &addr, const u16 &data) const;
 
  private:
   MEMORY *mem;
@@ -38,9 +34,9 @@ class CPU {
 
  private:
   // REGISTER
-  CPU_Register R;
-  void initRegister();
-  u16 oldPC = 0x00;
+  CPU_Register R{};
+  void init_register();
+  u16 old_pc = 0x00;
 
   // INTERRUPTS
 
@@ -61,7 +57,7 @@ class CPU {
     bool LIR;  // Bit 1 – LCD STAT Interrupt Requested(1 = Requested)
     bool VIR;  // Bit 0 – Vertical Blank Interrupt Requested(1 = Requested)
     void update(CPU *);
-  } ie_flags;
+  } ie_flags{};
 
   // FF0F - IF - Interrupt Flag (R/W)
   Register IF_Register = 0x00;
@@ -72,11 +68,11 @@ class CPU {
     bool LIE;  // Bit 3 : Serial   Interrupt Enable(INT 58h)  (1 = Enable)
     bool VIE;  // Bit 4 : Joypad   Interrupt Enable(INT 60h)  (1 = Enable)
     void update(CPU *);
-  } if_flags;
+  } if_flags{};
   void handle_interrupt(u8 val);
 
  private:
-  bool interrupts();
+  bool interrupts() const;
 
   // FLAGS
   void set_flag_if(const Flag &, bool condition);
@@ -96,7 +92,7 @@ class CPU {
   void toggle_flags(const Flag &F1, const Flag &F2, const Flag &F3);
   void toggle_all_flags();
 
-  bool check_flag(const Flag &);  // gibt flag status wieder
+  bool check_flag(const Flag &) const;  // gibt flag status wieder
 
   // OPCODES
  private:
@@ -107,17 +103,17 @@ class CPU {
     u8 cycles = 0;
   };
   instruction current_instruction_info;
-  u8 OPCode;
+  u8 op_code{};
   bool prefix = false;
 
-  // oft benutzte Anweisugen
+  // oft benutzte Anweisungen
   u8 read_u8_at_pc();
   u16 read_u16_at_pc();
   u16 read_u16_sp();
 
   i8 read_i8_at_pc();
 
-  u16 u8_to_u16(const u8 &data_lb, const u8 &data_hb);
+  static u16 u8_to_u16(const u8 &data_lb, const u8 &data_hb);
 
   // ARITHMETIC
   void xor_r8_r8(u8 *data1, const u8 *data2);
@@ -129,12 +125,12 @@ class CPU {
   void inc_u8_reg(u8 *reg);
   void dec_u8_reg(u8 *reg);
 
-  void add_r8_r8(u8 *reg, u8 *value);
+  void add_r8_r8(u8 *reg, const u8 *value);
   void adc_r8_r8(u8 *reg, u8 *value);
 
-  void add_r16_r16(u16 *reg, u16 *value);
+  void add_r16_r16(u16 *reg, const u16 *value);
 
-  void sub_r8_r8(u8 *reg, u8 *value);
+  void sub_r8_r8(u8 *reg, const u8 *value);
   void sbc_r8_r8(u8 *reg, u8 *value);
 
   // JUMPS
@@ -413,7 +409,11 @@ class CPU {
       {"ILLEGAL_FC", &CPU::opcode0xFC, 1, 1},
       {"ILLEGAL_FD", &CPU::opcode0xFD, 1, 1},
       {"CP d8", &CPU::opcode0xFE, 2, 2},
-      {"RST 38H", &CPU::opcode0xFF, 1, 4}};
+      {"RST 38H", &CPU::opcode0xFF, 1, 4},
+      {"STOP", &CPU::opcode0x10, 1, 1},
+
+  };
+
   const std::vector<instruction> prefixedinstructions = {
       {"RLC B", &CPU::prefixedopcode0x00, 2, 2},
       {"RLC C", &CPU::prefixedopcode0x01, 2, 2},

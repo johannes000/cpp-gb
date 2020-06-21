@@ -2,7 +2,6 @@
 #ifndef MEMORY_H_GUARD
 #define MEMORY_H_GUARD
 
-#include <algorithm>
 #include <iostream>
 #include <vector>
 

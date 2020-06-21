@@ -3,9 +3,7 @@
 #define PPU_H_GUARD
 
 #include <SDL.h>
-#include <stdio.h>
 
-#include <array>
 #include <vector>
 
 #include "MEMORY.h"
@@ -20,10 +18,10 @@ constexpr u16 OAM_SIZE = 0x0100;
 // GPU mode number
 // Time spent(clocks)
 
-// Scanline(accessing OAM)
+// Scan line(accessing OAM)
 // 2
 // 80
-// Scanline(accessing VRAM)
+// Scan line(accessing VRAM)
 // 3
 // 172
 // Horizontal blank
@@ -55,12 +53,13 @@ constexpr int TILE_PER_LINE = 32;
 
 class MEMORY;
 
+// ReSharper disable once CppInconsistentNaming
 class PPU {
  public:
-  PPU(MEMORY *m);
+  explicit PPU(MEMORY *m);
   ~PPU();
-  void waitforinput();
-  void update(int cycles);
+  void wait_for_input();
+  void update(const int cycles);
 
   void write(const u16 &addr, const u8 &data);
   u8 read(const u16 &addr) const;
@@ -68,10 +67,10 @@ class PPU {
  private:
   MEMORY *mem;
 
-  int cycles_in_mode;
+  int cycles_in_mode{};
 
   bool createWindow();
-  void closeWindow();
+  void closeWindow() const;
 
   SDL_Event event = event;
 
@@ -113,7 +112,7 @@ class PPU {
     Register BG_PALETTE_DATA_1;  // OBP1 - Object Palette 1 Data (R/W)
                                  // - Non CGB Mode Only
 
-  } lcd_register;
+  } lcd_register{};
 
   struct LCD_Control {
     bool lcd_power;          // Bit 7 - LCD Power(0 = Off, 1 = On)
@@ -130,25 +129,25 @@ class PPU {
     bool bg_enabled;         // Bit 0 - BG Enabled(in DMG)
                              // (0 = Disabled, 1 = Enabled)
     void update(PPU *ppu);
-  } lcd_control;
+  } lcd_control{};
 
-  const enum class LCD_State {
-    lyc = 6,               // Bit 6 - LYC = LY Coincidence Interrupt
-                           //(1 = Enable) (Read / Write)
-    oam_interupt = 5,      // Bit 5 - Mode 2 OAM Interrupt
-                           //(1 = Enable) (Read / Write)
-    v_blank_interupt = 4,  // Bit 4 - Mode 1 V - Blank Interrupt
-                           //(1 = Enable) (Read / Write)
-    h_blank_interupt = 3,  // Bit 3 - Mode 0 H - Blank Interrupt
-                           //(1 = Enable) (Read / Write)
-    coincidence_flag = 2,  // Bit 2 - Coincidence Flag
-                           //(0:LYC<>LY, 1 : LYC = LY) (Read Only)
-    mode_flag_1 = 1,       // Bit 1 - 0 - Mode Flag
-                           // (Mode 0 - 3, see below) (Read Only)
-    mode_flag_0 = 0        // 0: During H - Blank
-                           // 1 : During V - Blank
-                           // 2 : During Searching OAM
-                           // 3 : During Transferring Data to LCD Driver
+  enum class LCD_State {
+    lyc = 6,                // Bit 6 - LYC = LY Coincidence Interrupt
+                            //(1 = Enable) (Read / Write)
+    oam_interrupt = 5,      // Bit 5 - Mode 2 OAM Interrupt
+                            //(1 = Enable) (Read / Write)
+    v_blank_interrupt = 4,  // Bit 4 - Mode 1 V - Blank Interrupt
+                            //(1 = Enable) (Read / Write)
+    h_blank_interrupt = 3,  // Bit 3 - Mode 0 H - Blank Interrupt
+                            //(1 = Enable) (Read / Write)
+    coincidence_flag = 2,   // Bit 2 - Coincidence Flag
+                            //(0:LYC<>LY, 1 : LYC = LY) (Read Only)
+    mode_flag_1 = 1,        // Bit 1 - 0 - Mode Flag
+                            // (Mode 0 - 3, see below) (Read Only)
+    mode_flag_0 = 0         // 0: During H - Blank
+                            // 1 : During V - Blank
+                            // 2 : During Searching OAM
+                            // 3 : During Transferring Data to LCD Driver
   };
 
   void set_lcd_mode(LCD_Mode mode);
@@ -160,11 +159,11 @@ class PPU {
   // LCD Render Funktionen
   std::vector<Pixel> lcd_buffer;
 
-  void buffer_line(u8 line);
+  void buffer_line(const u8 line);
   void render_frame();
 
  public:
-  LCD_Mode mode();
+  LCD_Mode mode() const;
 
  private:
   // Paletten
@@ -191,10 +190,10 @@ class PPU {
 
  private:
   // Daten zum FPS berechnen
-  Uint32 fps_lasttime = SDL_GetTicks();  // the last recorded time.
-  Uint32 fps_current;                    // the current FPS.
+  Uint32 fps_last_time = SDL_GetTicks();  // the last recorded time.
+  Uint32 fps_current{};                   // the current FPS.
   Uint32 fps_frames = 0;  // frames passed since the last recorded fps.
-  char fps_text[8];
+  char fps_text[8]{};
 };
 
 #endif  // !PPU_H_GUARD

@@ -2,14 +2,15 @@
 // die Ausführung des Programms.
 //
 
-#include "gameboy.h"
 #include <iostream>
 #include <stdexcept>
+
+#include "gameboy.h"
 
 int main(int argc, char *args[]) {
   try {
     gameboy gb;
-    gb.startemu();
+    gb.start_emu();
   } catch (const std::exception &e) {
     std::cerr << e.what() << std::endl;
     return -1;
