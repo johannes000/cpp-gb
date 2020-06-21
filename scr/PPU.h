@@ -49,6 +49,10 @@ constexpr int CLOCKS_FULL_FRAME = 70224;
 
 constexpr int VERTICAL_BLANK_LINES = 154;
 
+constexpr int TILE_WIDTH = 8;
+constexpr int TILE_HEIGHT = 8;
+constexpr int TILE_PER_LINE = 32;
+
 class MEMORY;
 
 class PPU {
@@ -59,23 +63,12 @@ class PPU {
   void update(int cycles);
 
   void write(const u16 &addr, const u8 &data);
-  u8 read(const u16 &addr);
+  u8 read(const u16 &addr) const;
 
  private:
   MEMORY *mem;
 
   int cycles_in_mode;
-
-  // 0: During H - Blank
-  // 1 : During V - Blank
-  // 2 : OAM Access
-  // 3 : VRAM Access
-  enum class LCD_Mode {
-    H_Blank,
-    V_Blank,
-    OAM,
-    VRAM,
-  } lcd_mode;
 
   bool createWindow();
   void closeWindow();
@@ -99,6 +92,8 @@ class PPU {
 
  private:
   // LCD Data
+  LCD_Mode lcd_mode;
+
   struct LCD_Register {
     // u8 Werte die mit hilfe ihrer Adressen von der GB CPU beschrieben werden
     Register LCD_CONTROL;
@@ -157,7 +152,7 @@ class PPU {
   };
 
   void set_lcd_mode(LCD_Mode mode);
-  void get_lcd_mode();
+  void load_lcd_mode();
   void set_lcd_state(const LCD_State &s);
   void reset_lcd_state(const LCD_State &s);
   bool get_lcd_state(const LCD_State &s) const;
@@ -167,6 +162,9 @@ class PPU {
 
   void buffer_line(u8 line);
   void render_frame();
+
+ public:
+  LCD_Mode mode();
 
  private:
   // Paletten

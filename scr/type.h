@@ -219,6 +219,17 @@ struct Pixel {
   u8 B;
 };
 
+// 0: During H - Blank
+// 1 : During V - Blank
+// 2 : OAM Access
+// 3 : VRAM Access
+enum class LCD_Mode {
+  H_Blank,
+  V_Blank,
+  OAM,
+  VRAM,
+};
+
 void set_bit_if(u8 &value, const u8 &bit, bool condition);
 void set_bit_if(u16 &value, const u16 &bit, bool condition);
 
