@@ -221,8 +221,9 @@ void PPU::buffer_line(const u8 line) {
   lcd_control.update(this);
   if (lcd_control.bg_enabled) {
     // BG Tile Map Display Select
-    //                                                   unsigned : signed
-    const u16 bg_tileset = lcd_control.bg_window_tileset ? 0x8000 : 0x8800;
+    const u16 bg_tileset =
+        lcd_control.bg_window_tileset ? 0x8000 : 0x8800;  // unsigned : signed
+
     const u16 wdw_tilemap = lcd_control.window_tile_map ? 0x9C00 : 0x9800;
     const u16 bg_tilemap = lcd_control.bg_tile_map ? 0x9C00 : 0x9800;
     const auto bg_pallete = lcd_register.BG_PALETTE_DATA;
@@ -238,7 +239,7 @@ void PPU::buffer_line(const u8 line) {
       const auto tile_x = sc_x / TILE_WIDTH;
       const auto tile_y = sc_y / TILE_WIDTH;
 
-      // Welcher Pixel im tile
+      // Welcher Pixel im Tile
       auto tile_pixel_x = sc_x % TILE_WIDTH;
       const auto tile_pixel_y = sc_y % TILE_HEIGHT;
 
@@ -259,7 +260,7 @@ void PPU::buffer_line(const u8 line) {
       // Schreibe das gefundene Tile in den Buffer
       for (; tile_pixel_x <= TILE_WIDTH && x <= GB_LCD_SIZE_WIDTH - 1;
            x++, tile_pixel_x++) {
-        const auto index = ((GB_LCD_SIZE_WIDTH * y) + x);
+        const size_t index = ((GB_LCD_SIZE_WIDTH * y) + x);
         if (index >= lcd_buffer.size()) return;
         lcd_buffer[index].R = Palettes[current_palette][pal].R;
         lcd_buffer[index].G = Palettes[current_palette][pal].G;
