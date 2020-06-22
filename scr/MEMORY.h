@@ -24,7 +24,7 @@ class MEMORY {
   void write_u16(const u16 &addr, const u16 &data);
 
  private:
-  std::shared_ptr<CARDRIDGE> cardridge;
+  CARDRIDGE* cardridge;
   PPU *ppu;
   CPU *cpu;
 

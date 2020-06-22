@@ -2,6 +2,8 @@
 
 #include <fstream>
 #include <iostream>
+#include <cstring>
+
 
 CARDRIDGE::CARDRIDGE() : rom_info() {}
 

@@ -276,7 +276,7 @@ void PPU::render_frame() {
     fps_last_time = SDL_GetTicks();
     fps_current = fps_frames;
     fps_frames = 0;
-    sprintf_s(fps_text, "%d", fps_current);
+    sprintf(fps_text, "%d", fps_current);
     SDL_SetWindowTitle(window, fps_text);
   }
   SDL_RenderClear(renderer);

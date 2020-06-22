@@ -1,4 +1,5 @@
 #include "../CPU.h"
+#include <climits>
 
 void CPU::test_n_bit_set_z(const u8 bit, const u8 *reg) {
   // wenn bit gesetzt setze Zero Flag

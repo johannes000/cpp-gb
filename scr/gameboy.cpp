@@ -10,7 +10,7 @@ void gameboy::start_emu() {
   auto cycles = 0;
   auto last_cycle = 0;
   mem.reset();
-  card.load_rom("./testroms/tetris.gb");
+  card.load_rom("./../testroms/tetris.gb");
   // cpu.print_all_ops();
 
   while (true) {
