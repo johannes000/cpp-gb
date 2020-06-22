@@ -7,16 +7,17 @@ gameboy::~gameboy() {
 }
 
 void gameboy::start_emu() {
-  auto cycles = 0;
-  auto last_cycle = 0;
-  mem.reset();
-  card.load_rom("./../testroms/tetris.gb");
-  // cpu.print_all_ops();
+    auto cycles = 0;
+    auto last_cycle = 0;
+    mem.reset();
+    card.load_rom("./../testroms/tetris.gb");
+    // cpu.print_all_ops();
+    bool quit = false;
+    while (!quit) {
+        last_cycle = cpu.update();
+        cycles += last_cycle;
+        ppu.update(last_cycle * 4);
 
-  while (true) {
-    last_cycle = cpu.update();
-    cycles += last_cycle;
-    ppu.update(last_cycle * 4);
-    // SDL_Delay(20);
-  }
+        // SDL_Delay(20);
+    }
 }
