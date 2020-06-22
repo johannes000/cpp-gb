@@ -3,10 +3,7 @@
 gameboy::gameboy() : mem(&cpu, &card, &ppu), cpu(&mem), ppu(&mem) {}
 
 gameboy::~gameboy() {
-  delete &mem;
-  delete &card;
-  delete &ppu;
-  delete &cpu;
+
 }
 
 void gameboy::start_emu() {

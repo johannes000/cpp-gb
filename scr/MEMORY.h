@@ -1,4 +1,3 @@
-#pragma once
 #ifndef MEMORY_H_GUARD
 #define MEMORY_H_GUARD
 
@@ -29,8 +28,6 @@ class MEMORY {
   PPU *ppu;
   CPU *cpu;
 
-  int active_rom_bank = 0;
-  int active_ram_bank = 0;
 
   std::vector<u8> memory;
   std::vector<u8> boot = {

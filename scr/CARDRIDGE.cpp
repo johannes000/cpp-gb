@@ -27,12 +27,8 @@ void CARDRIDGE::build_ram() const {
 
 void CARDRIDGE::fill_cardridge_info() {
   if (rom.empty()) return;
-  if (calcCheckSum() != rom[0x14D]) {
-    std::cout << "Checksum FAIL!" << std::endl;
-    return;
-  }
 
-  std::memcpy(rom_info.title, &rom[0x134], 15);
+  memcpy(rom_info.title, &rom[0x134], 15);
   rom_info.cgb = static_cast<CGBFlag>(rom[0x143]);
   rom_info.ctype = static_cast<CType>(rom[0x147]);
 
@@ -122,10 +118,9 @@ void CARDRIDGE::print_rom() {
 }
 
 u8 CARDRIDGE::calcCheckSum() {
-  if (checkSum == 0) {
-    int i = 0x0134;
-    while (i <= 0x014C) checkSum = checkSum - rom[i++] - 1;
-  }
+  int checkSum = 0;
+  int i = 0x0134;
+  while (i <= 0x014C) checkSum -= (rom[i++] - 1);
   return checkSum;
 }
 

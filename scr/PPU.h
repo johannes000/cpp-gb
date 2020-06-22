@@ -1,8 +1,13 @@
-#pragma once
+
 #ifndef PPU_H_GUARD
 #define PPU_H_GUARD
 
+#define SDL_WARNINGS 26812
+
+#pragma warning(push)
+#pragma warning(disable : SDL_WARNINGS)
 #include <SDL.h>
+#pragma warning(pop)
 
 #include <vector>
 
@@ -69,10 +74,10 @@ class PPU {
 
   int cycles_in_mode{};
 
-  bool createWindow();
-  void closeWindow() const;
+  bool create_window();
+  void close_window() const;
 
-  SDL_Event event = event;
+  SDL_Event event{};
 
   // SDL sachen
  private:
@@ -80,7 +85,6 @@ class PPU {
   const int SCREEN_HEIGHT = GB_LCD_SIZE_HEIGHT;
 
   SDL_Window *window = nullptr;
-  SDL_Surface *screenSurface = nullptr;
   SDL_Renderer *renderer = nullptr;
   SDL_Texture *texture = nullptr;
 

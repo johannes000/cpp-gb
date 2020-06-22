@@ -1,4 +1,3 @@
-#pragma once
 #ifndef CARDRIDGE_H_GUARD
 #define CARDRIDGE_H_GUARD
 
@@ -28,10 +27,8 @@ class CARDRIDGE {
   std::vector<u8> rom;
   std::vector<std::vector<u8>> ram;
 
-  int selected_ram_bank = 0;
-  int selected_rom_bank = 0;
+  int selected_ram_bank{0};
 
-  u8 checkSum = 0;
   u8 calcCheckSum();
 
  public:

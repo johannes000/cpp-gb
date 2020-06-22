@@ -1,7 +1,7 @@
 #include "PPU.h"
 
 PPU::PPU(MEMORY *m) : mem(m) {
-  createWindow();
+  create_window();
 
   v_ram = std::vector<u8>(VRAM_SIZE, 0x00);
   sprite_attribute_table = std::vector<u8>(OAM_SIZE, 0x00);
@@ -15,7 +15,7 @@ PPU::PPU(MEMORY *m) : mem(m) {
   render_frame();
 }
 
-PPU::~PPU() { closeWindow(); }
+PPU::~PPU() { close_window(); }
 
 void PPU::update(const int cycles) {
   lcd_control.update(this);
@@ -174,7 +174,7 @@ u8 PPU::read(const u16 &addr) const {
   }
 }
 
-void PPU::closeWindow() const {
+void PPU::close_window() const {
   // Destroy window
   SDL_DestroyWindow(window);
   SDL_DestroyTexture(texture);
@@ -215,7 +215,8 @@ void PPU::reset_lcd_state(const LCD_State &s) {
 bool PPU::get_lcd_state(const LCD_State &s) const {
   return check_bit(lcd_register.LCD_STATUS, static_cast<u8>(s));
 }
-
+int pal = -1;
+int pp = 0;
 void PPU::buffer_line(const u8 line) {
   lcd_control.update(this);
   if (lcd_control.bg_enabled) {
@@ -230,9 +231,8 @@ void PPU::buffer_line(const u8 line) {
     const int y = line;
     const auto sc_y = (y + lcd_register.LCD_SCY) % GB_LCD_SIZE_HEIGHT;
 
-    const auto pal = rand() % 4;
-    for (auto x = 0; x <= GB_LCD_SIZE_WIDTH - 1; x++) {
-      const auto sc_x = (x + lcd_register.LCD_SCX) % GB_LCD_SIZE_WIDTH;
+    for (auto x = 0; x <= GB_LCD_SIZE_WIDTH - 1;) {
+      const auto sc_x = (x + lcd_register.LCD_SCX + pp) % GB_LCD_SIZE_WIDTH;
 
       // Welches tile in der bg_tile-map
       const auto tile_x = sc_x / TILE_WIDTH;
@@ -240,7 +240,7 @@ void PPU::buffer_line(const u8 line) {
 
       // Welcher Pixel im tile
       auto tile_pixel_x = sc_x % TILE_WIDTH;
-      auto tile_pixel_y = sc_y % TILE_HEIGHT;
+      const auto tile_pixel_y = sc_y % TILE_HEIGHT;
 
       // Adresse des tiles im vram
       const auto addr = bg_tilemap + tile_y * TILE_PER_LINE + tile_x;
@@ -248,17 +248,23 @@ void PPU::buffer_line(const u8 line) {
       // Ob die bg_tile-map adressen signed sind oder nicht
       int tile;
       if (lcd_control.bg_window_tileset) {
-        tile = static_cast<i8>(read(addr));
+        // Offset signed Zahl
+        tile = read(addr) + 128;
       } else {
         tile = read(addr);
       }
 
-      const size_t index = ((GB_LCD_SIZE_WIDTH * y) + x);
-      if (index >= lcd_buffer.size()) return;
+      pal = (pal + 1) % 4;
 
-      lcd_buffer[index].R = Palettes[current_palette][pal].R;
-      lcd_buffer[index].G = Palettes[current_palette][pal].G;
-      lcd_buffer[index].B = Palettes[current_palette][pal].B;
+      // Schreibe das gefundene Tile in den Buffer
+      for (; tile_pixel_x <= TILE_WIDTH && x <= GB_LCD_SIZE_WIDTH - 1;
+           x++, tile_pixel_x++) {
+        const auto index = ((GB_LCD_SIZE_WIDTH * y) + x);
+        if (index >= lcd_buffer.size()) return;
+        lcd_buffer[index].R = Palettes[current_palette][pal].R;
+        lcd_buffer[index].G = Palettes[current_palette][pal].G;
+        lcd_buffer[index].B = Palettes[current_palette][pal].B;
+      }
     }
   }
 }
@@ -274,14 +280,14 @@ void PPU::render_frame() {
     SDL_SetWindowTitle(window, fps_text);
   }
   SDL_RenderClear(renderer);
-  SDL_UpdateTexture(texture, NULL, &lcd_buffer[0], GB_LCD_SIZE_WIDTH * 3);
-  SDL_RenderCopy(renderer, texture, NULL, NULL);
+  SDL_UpdateTexture(texture, nullptr, &lcd_buffer[0], GB_LCD_SIZE_WIDTH * 3);
+  SDL_RenderCopy(renderer, texture, nullptr, nullptr);
   SDL_RenderPresent(renderer);
 }
 
 LCD_Mode PPU::mode() const { return lcd_mode; }
 
-bool PPU::createWindow() {
+bool PPU::create_window() {
   SDL_Init(SDL_INIT_EVERYTHING);
 
   window = SDL_CreateWindow("cpp-gb", SDL_WINDOWPOS_UNDEFINED,
