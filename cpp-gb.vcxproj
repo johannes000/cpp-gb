@@ -79,7 +79,7 @@
     <RunCodeAnalysis>false</RunCodeAnalysis>
     <EnableMicrosoftCodeAnalysis>false</EnableMicrosoftCodeAnalysis>
     <EnableClangTidyCodeAnalysis>true</EnableClangTidyCodeAnalysis>
-    <ClangTidyChecks>--exclude ["C:\Users\knaub\source\SDL2-2.0.12\include"]</ClangTidyChecks>
+    <ClangTidyChecks>--exclude "C:\Users\knaub\source\SDL2-2.0.12\include"</ClangTidyChecks>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
