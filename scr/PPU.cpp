@@ -268,12 +268,12 @@ void PPU::buffer_line(const u8 line) {
             const auto sc_x = (x + lcd_register.LCD_SCX) % GB_LCD_SIZE_WIDTH;
 
             // Welches tile in der bg_tile-map
-            const auto tile_x = sc_x / TILE_WIDTH;
-            const auto tile_y = sc_y / TILE_WIDTH;
+            const auto tile_x = (sc_x / TILE_WIDTH);
+            const auto tile_y = (sc_y / TILE_HEIGHT);
 
             // Welcher Pixel im tile
             u8 tile_pixel_x = (sc_x % TILE_WIDTH + 1);
-            const u8 tile_pixel_y = sc_y % TILE_HEIGHT;
+            const u8 tile_pixel_y = (sc_y % TILE_HEIGHT);
 
             // Adresse des Tiles im vram
             const u16 tile_addr = bg_tilemap + (tile_y * TILE_PER_LINE + tile_x);
@@ -294,8 +294,8 @@ void PPU::buffer_line(const u8 line) {
                 const u8 p_line_1 = read(tile_addr_start);
                 const u8 p_line_2 = read(tile_addr_start + 1);
 
-                const u8 color = static_cast<u8>(check_bit(p_line_1, tile_pixel_x - 1u) << 1u) |
-                                 check_bit(p_line_2, tile_pixel_x - 1u);
+                const u8 color = static_cast<u8>(check_bit(p_line_1, 8 - tile_pixel_x) << 1u) |
+                                 check_bit(p_line_2, 8 - tile_pixel_x);
 
                 const auto index = ((GB_LCD_SIZE_WIDTH * y) + x);
                 lcd_buffer[index].R = Palettes[current_palette][color].R;

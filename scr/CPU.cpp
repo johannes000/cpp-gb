@@ -11,7 +11,7 @@ void CPU::init_register() {
     R.HL = 0x014D;
     R.SP = 0xFFFE;
     R.PC = 0x0000;
-    old_pc = 0x0150;
+    old_pc = 0x0000;
 
     op_code = 0x00;
     cycles = 0;
@@ -43,7 +43,7 @@ int CPU::update() {
 
     op_code = get_next_op_code();
     const auto jp = parse_op_code(op_code);
-    // print_last_opcode();
+    print_last_opcode();
     if (jp == 0) inc_pc();
     cycles += current_instruction_info.cycles;
     return current_instruction_info.cycles;

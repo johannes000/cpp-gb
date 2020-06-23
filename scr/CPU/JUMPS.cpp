@@ -4,7 +4,7 @@ void CPU::push_r16_reg(const u16 *reg) {
 // Push register pair nn onto stack.
 // Decrement Stack Pointer(SP) twice
     const u8 low = *reg & 0xFFu;
-    const u8 high = (*reg & 0xFF00u) >> 4u;
+    const u8 high = (*reg & 0xFF00u) >> 8u;
     write(--R.SP, high);
     write(--R.SP, low);
 }
@@ -13,7 +13,7 @@ void CPU::pop_r16_reg(u16 *reg) {
     // Pop two bytes off stack into register pair nn.
     // Increment Stack Pointer(SP) twice
     const u8 low = read(R.SP++);
-    const u16 high = read(R.SP++) << 4u;
+    const u16 high = read(R.SP++) << 8u;
     *reg = low | high;
 }
 
@@ -31,13 +31,13 @@ void CPU::call() {
 
 u8 CPU::opcode0x18() {  // JR r8
     R.PC += read_i8_at_pc();
-    return 1;
+    return 0;
 }
 
 u8 CPU::opcode0x20() {  // JR NZ r8
     if (!check_flag(Flag::z)) {
-        R.PC += read_i8_at_pc();
-        return 1;
+        R.PC += read_i8_at_pc();;
+        return 0;
     }
     return 0;
 }
@@ -45,7 +45,7 @@ u8 CPU::opcode0x20() {  // JR NZ r8
 u8 CPU::opcode0x28() {  // JR Z r8
     if (check_flag(Flag::z)) {
         R.PC += read_i8_at_pc();
-        return 1;
+        return 0;
     }
     return 0;
 }
@@ -53,7 +53,7 @@ u8 CPU::opcode0x28() {  // JR Z r8
 u8 CPU::opcode0x30() {  // JR NC r8
     if (!check_flag(Flag::c)) {
         R.PC += read_i8_at_pc();
-        return 1;
+        return 0;
     }
     return 0;
 }
@@ -61,7 +61,7 @@ u8 CPU::opcode0x30() {  // JR NC r8
 u8 CPU::opcode0x38() {  // JR C r8
     if (check_flag(Flag::c)) {
         R.PC += read_i8_at_pc();
-        return 1;
+        return 0;
     }
     return 0;
 }

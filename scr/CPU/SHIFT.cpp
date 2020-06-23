@@ -3,7 +3,7 @@
 
 void CPU::test_n_bit_set_z(const u8 bit, const u8 *reg) {
     // wenn bit gesetzt setze Zero Flag
-    set_flag_if(Flag::z, check_bit(*reg, bit));
+    set_flag_if(Flag::z, !check_bit(*reg, bit));
     set_flag(Flag::h);
     reset_flag(Flag::n);
 }
