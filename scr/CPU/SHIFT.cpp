@@ -11,8 +11,8 @@ void CPU::test_n_bit_set_z(const u8 bit, const u8 *reg) {
 void CPU::rot_right_c_r8(u8 *reg) {
     // Rotate register r8 right.
     // [0] ->[7 -> 0]->C
-    const u8 b0 = *reg & 1;
-    *reg >>= 1;
+    const u8 b0 = *reg & 1u;
+    *reg >>= 1u;
 
     set_flag_if(Flag::c, b0 == 1);
     set_bit_if(*reg, 7, b0 == 1);
@@ -24,8 +24,8 @@ void CPU::rot_right_c_r8(u8 *reg) {
 void CPU::rot_left_c_r8(u8 *reg) {
     // Rotate register r8 left.
     // C < -[7 < -0] < -[7]
-    const u8 b7 = *reg & 0x80;
-    *reg <<= 1;
+    const u8 b7 = *reg & 0x80u;
+    *reg <<= 1u;
 
     set_flag_if(Flag::c, b7 == 1);
     set_bit_if(*reg, 0, b7 == 0x80);
@@ -37,11 +37,11 @@ void CPU::rot_left_c_r8(u8 *reg) {
 void CPU::rot_left_r8(u8 *reg) {
     // Rotate bits in register r8 left through carry.
     // C <-[7 < -0] <-C
-    const u8 b7 = *reg & 0x80;
-    *reg <<= 1;
+    const u8 b7 = *reg & 0x80u;
+    *reg <<= 1u;
 
     set_bit_if(*reg, 0, check_flag(Flag::c));
-    set_flag_if(Flag::c, b7 == 0x80);
+    set_flag_if(Flag::c, b7 & 0x80u);
     set_flag_if(Flag::z, *reg == 0);
     reset_flags(Flag::n, Flag::h);
 }
@@ -49,8 +49,8 @@ void CPU::rot_left_r8(u8 *reg) {
 void CPU::rot_right_r8(u8 *reg) {
     // Rotate register r8 right through carry.
     // C ->[7 -> 0]->C
-    const u8 b7 = *reg & 1;
-    *reg >>= 1;
+    const u8 b7 = *reg & 1u;
+    *reg >>= 1u;
     set_bit_if(*reg, 7, check_flag(Flag::c));
 
     set_flag_if(Flag::c, b7 == 1);
@@ -116,7 +116,8 @@ u8 CPU::opcode0x07() {  // RLCA
 }
 
 u8 CPU::opcode0x17() {  // RLA
-    R.A = (R.A << 1) | (R.A >> (sizeof(u8) * CHAR_BIT - 1));
+    shift_left_a_r8(&R.A);
+    reset_flag((Flag::z));
     return 0;
 }
 

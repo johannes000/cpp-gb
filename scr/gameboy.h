@@ -8,18 +8,20 @@
 #include "PPU.h"
 
 class gameboy {
- public:
-  gameboy();
-  ~gameboy();
+public:
+    gameboy();
 
-  CARDRIDGE card;
-  MEMORY mem;
-  CPU cpu;
-  PPU ppu;
+    ~gameboy();
 
-  void start_emu();
+    CARDRIDGE card;
+    MEMORY mem;
+    CPU cpu;
+    PPU ppu;
 
- private:
+    void start_emu();
+
+private:
+    bool step_mode;
 };
 
 #endif  // !GAMEBOY_H_GUARD

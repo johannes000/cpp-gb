@@ -4,7 +4,10 @@ PPU::PPU(MEMORY *m) : mem(m) {
     create_window();
 
     v_ram = std::vector<u8>(VRAM_SIZE, 0xFF);
-    sprite_attribute_table = std::vector<u8>(OAM_SIZE, 0x1F);
+    for (auto &v : v_ram) v = rand() % 0xFF;
+
+    sprite_attribute_table = std::vector<u8>(OAM_SIZE, 0xFF);
+    // for (auto &v : sprite_attribute_table) v = rand() % 0x04;
 
     lcd_buffer = std::vector<Pixel>(GB_LCD_SIZE_WIDTH * GB_LCD_SIZE_HEIGHT,
                                     {0x00, 0x00, 0x00});
@@ -17,7 +20,6 @@ PPU::PPU(MEMORY *m) : mem(m) {
 
 PPU::~PPU() { close_window(); }
 
-int pp = 0;
 
 void PPU::update(const int cycles) {
     lcd_control.update(this);
@@ -72,6 +74,7 @@ void PPU::update(const int cycles) {
     }
 }
 
+
 void PPU::wait_for_input() {
     SDL_PollEvent(&event);
     switch (event.type) {
@@ -92,6 +95,35 @@ void PPU::wait_for_input() {
             break;
         default:
             break;
+    }
+}
+
+void PPU::next_step() {
+    bool quit = false;
+    while (!quit) {
+        SDL_PollEvent(&event);
+        switch (event.type) {
+            case SDL_QUIT:
+                exit(0);
+            case SDL_KEYDOWN:
+                switch (event.key.keysym.sym) {
+                    case SDLK_s:
+                        quit = true;
+                        break;
+                    case SDLK_p:
+                        std::cout << "P" << std::endl;
+                        current_palette =
+                                (current_palette + 1) % static_cast<int>(Palettes.size());
+                        break;
+                    case SDLK_ESCAPE:
+                        exit(0);
+                    default:
+                        break;
+                }
+                break;
+            default:
+                break;
+        }
     }
 }
 
@@ -141,7 +173,8 @@ void PPU::write(const u16 &addr, const u8 &data) {
                 break;
         }
     }
-};
+}
+
 
 u8 PPU::read(const u16 &addr) const {
     if (addr >= GRAPHICS_RAM && addr <= GRAPHICS_RAM_END) {
@@ -191,8 +224,8 @@ void PPU::set_lcd_mode(LCD_Mode m) {
     if (mode > 3) return;
     lcd_mode = m;
     auto *const data = &lcd_register.LCD_STATUS;
-    mode & 1 ? set_bit(*data, 0) : reset_bit(*data, 0);
-    mode & 2 ? set_bit(*data, 1) : reset_bit(*data, 1);
+    mode & 1u ? set_bit(*data, 0) : reset_bit(*data, 0);
+    mode & 2u ? set_bit(*data, 1) : reset_bit(*data, 1);
 }
 
 void PPU::load_lcd_mode() {
@@ -218,17 +251,14 @@ bool PPU::get_lcd_state(const LCD_State &s) const {
     return check_bit(lcd_register.LCD_STATUS, static_cast<u8>(s));
 }
 
-int pal = -1;
-
 void PPU::buffer_line(const u8 line) {
     lcd_control.update(this);
     if (lcd_control.bg_enabled) {
-        lcd_register.LCD_SCX++;
         // BG Tile Map Display Select
         const u16 bg_tileset = lcd_control.bg_window_tileset ? 0x8000 : 0x8800;//unsigned : signed
         const u16 wdw_tilemap = lcd_control.window_tile_map ? 0x9C00 : 0x9800;
         const u16 bg_tilemap = lcd_control.bg_tile_map ? 0x9C00 : 0x9800;
-        const auto bg_pallete = lcd_register.BG_PALETTE_DATA;
+        const u16 bg_pallete = lcd_register.BG_PALETTE_DATA;
 
         // Festlegen wo im Vector die Pixel gesetzt werden
         const int y = line;
@@ -242,7 +272,7 @@ void PPU::buffer_line(const u8 line) {
             const auto tile_y = sc_y / TILE_WIDTH;
 
             // Welcher Pixel im tile
-            auto tile_pixel_x = sc_x % TILE_WIDTH;
+            u8 tile_pixel_x = (sc_x % TILE_WIDTH + 1);
             const u8 tile_pixel_y = sc_y % TILE_HEIGHT;
 
             // Adresse des Tiles im vram
@@ -261,10 +291,11 @@ void PPU::buffer_line(const u8 line) {
             // Schreibe das gefundene Tile in den Buffer
             for (; tile_pixel_x <= TILE_WIDTH && x <= GB_LCD_SIZE_WIDTH - 1;
                    x++, tile_pixel_x++) {
-                u8 p_line_1 = read(tile_addr_start);
-                u8 p_line_2 = read(tile_addr_start + 1);
+                const u8 p_line_1 = read(tile_addr_start);
+                const u8 p_line_2 = read(tile_addr_start + 1);
 
-                u8 color = (check_bit(p_line_1, 7 - tile_pixel_x - 1) | check_bit(p_line_2, 7 - tile_pixel_x - 1));
+                const u8 color = static_cast<u8>(check_bit(p_line_1, tile_pixel_x - 1u) << 1u) |
+                                 check_bit(p_line_2, tile_pixel_x - 1u);
 
                 const auto index = ((GB_LCD_SIZE_WIDTH * y) + x);
                 lcd_buffer[index].R = Palettes[current_palette][color].R;
@@ -308,11 +339,17 @@ bool PPU::create_window() {
     return true;
 }
 
+
 void PPU::LCD_Control::update(PPU *ppu) {
-    auto *const data = &ppu->lcd_register.LCD_CONTROL;
+
+    const u8 *data = &ppu->lcd_register.LCD_CONTROL;
     *this = {
-            static_cast<bool>((*data >> 7) & 1), static_cast<bool>((*data >> 6) & 1),
-            static_cast<bool>((*data >> 5) & 1), static_cast<bool>((*data >> 4) & 1),
-            static_cast<bool>((*data >> 3) & 1), static_cast<bool>((*data >> 2) & 1),
-            static_cast<bool>((*data >> 1) & 1), static_cast<bool>((*data >> 0) & 1)};
+            static_cast<bool>((*data >> 7u) & 1u),
+            static_cast<bool>((*data >> 6u) & 1u),
+            static_cast<bool>((*data >> 5u) & 1u),
+            static_cast<bool>((*data >> 4u) & 1u),
+            static_cast<bool>((*data >> 3u) & 1u),
+            static_cast<bool>((*data >> 2u) & 1u),
+            static_cast<bool>((*data >> 1u) & 1u),
+            static_cast<bool>((*data >> 0u) & 1u)};
 }

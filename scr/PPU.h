@@ -67,7 +67,7 @@ public:
 
     ~PPU();
 
-    void wait_for_input();
+    void next_step();
 
     void update(const int cycles);
 
@@ -78,6 +78,8 @@ public:
 private:
     MEMORY *mem;
 
+    void wait_for_input();
+
     int cycles_in_mode{};
 
     bool create_window();
@@ -85,6 +87,7 @@ private:
     void close_window() const;
 
     SDL_Event event{};
+
 
     // SDL sachen
 private:

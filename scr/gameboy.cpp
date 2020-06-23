@@ -17,7 +17,11 @@ void gameboy::start_emu() {
         last_cycle = cpu.update();
         cycles += last_cycle;
         ppu.update(last_cycle * 4);
-
+        step_mode = false;
+        if (step_mode) {
+            cpu.print_last_opcode();
+            ppu.next_step();
+        }
         // SDL_Delay(20);
     }
 }
