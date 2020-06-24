@@ -10,8 +10,7 @@ void CPU::push_r16_reg(const u16 *reg) {
 }
 
 void CPU::pop_r16_reg(u16 *reg) {
-    // Pop two bytes off stack into register pair nn.
-    // Increment Stack Pointer(SP) twice
+    // Popt 2 u8s vom stack ins reg
     const u8 low = read(R.SP++);
     const u16 high = read(R.SP++) << 8u;
     *reg = low | high;
@@ -19,11 +18,11 @@ void CPU::pop_r16_reg(u16 *reg) {
 
 void CPU::ret() {
     //  Pop two bytes from stack & jump to that address.
-    R.PC = read_u16_sp();
-    R.SP += 2;
+    pop_r16_reg(&R.PC);
 }
 
 void CPU::call() {
+    // Push address of next instruction onto stack and then jump to address nn.
     u16 next_inst = R.PC + 3;
     push_r16_reg(&next_inst);
     R.PC = read_u16_at_pc();

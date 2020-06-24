@@ -261,19 +261,22 @@ void PPU::buffer_line(const u8 line) {
         const u16 bg_pallete = lcd_register.BG_PALETTE_DATA;
 
         // Festlegen wo im Vector die Pixel gesetzt werden
-        const int y = line;
-        const auto sc_y = (y + lcd_register.LCD_SCY) % GB_LCD_SIZE_HEIGHT;
-        const auto tile_y = (sc_y / TILE_HEIGHT);
+        const auto y = line;
 
-        for (auto x = 0; x <= GB_LCD_SIZE_WIDTH - 1;) {
+        for (auto x = 0; x < GB_LCD_SIZE_WIDTH;) {
             const auto sc_x = (x + lcd_register.LCD_SCX) % GB_LCD_SIZE_WIDTH;
+            const auto sc_y = (y + lcd_register.LCD_SCY) % GB_LCD_SIZE_HEIGHT;
 
             // Welches tile in der bg_tile-map
-            const auto tile_x = (sc_x / TILE_WIDTH);
+            const auto bg_map_x = sc_x % BG_MAP_SIZE;
+            const auto bg_map_y = sc_y % BG_MAP_SIZE;
+
+            const auto tile_y = (bg_map_y / TILE_HEIGHT);
+            const auto tile_x = (bg_map_x / TILE_WIDTH);
 
             // Welcher Pixel im tile
-            u8 tile_pixel_x = (sc_x % TILE_WIDTH + 1);
-            const u8 tile_pixel_y = (sc_y % TILE_HEIGHT);
+            auto tile_pixel_x = (bg_map_x % TILE_WIDTH) + 1;
+            const auto tile_pixel_y = bg_map_y % TILE_HEIGHT;
 
             // Adresse des Tiles im vram
             const u16 tile_addr = bg_tilemap + (tile_y * TILE_PER_LINE + tile_x);

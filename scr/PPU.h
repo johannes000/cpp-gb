@@ -54,9 +54,10 @@ constexpr int CLOCKS_FULL_FRAME = 70224;
 
 constexpr int VERTICAL_BLANK_LINES = 154;
 
-constexpr int TILE_WIDTH = 8u;
-constexpr int TILE_HEIGHT = 8u;
-constexpr int TILE_PER_LINE = 32u;
+constexpr unsigned int TILE_WIDTH = 8u;
+constexpr unsigned int TILE_HEIGHT = 8u;
+constexpr unsigned int TILE_PER_LINE = 32u;
+constexpr unsigned int BG_MAP_SIZE = 256u;
 
 class MEMORY;
 
