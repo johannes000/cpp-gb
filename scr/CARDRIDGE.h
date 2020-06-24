@@ -5,8 +5,8 @@
 
 #include "type.h"
 
-constexpr u16 ROM_BANK_SIZE = 0x2000;
-constexpr u16 RAM_BANK_SIZE = 0x4000;
+constexpr u16 CARD_ROM_BANK_SIZE = 0x2000;
+constexpr u16 CARD_RAM_BANK_SIZE = 0x4000;
 
 class CARDRIDGE {
 public:
@@ -30,7 +30,7 @@ private:
     std::vector<u8> rom;
     std::vector<std::vector<u8>> ram;
 
-    int selected_ram_bank{0};
+    int selected_ram_bank = 0;
 
 public:
     Rom_Info *get_rom_info();

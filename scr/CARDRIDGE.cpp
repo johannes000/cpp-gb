@@ -13,19 +13,20 @@ bool CARDRIDGE::load_rom(const char *rom_file) {
         std::cerr << "Kann die Datei nicht oeffnen : " << rom_file << std::endl;
         return false;
     }
-    const std::vector<u8> rom(std::istreambuf_iterator<char>(is), {});
-    this->rom = rom;
+    const std::vector<u8> romf(std::istreambuf_iterator<char>(is), {});
+    this->rom = romf;
 
     fill_cardridge_info();
-    build_ram();
+
+    for (int i = 0; i < rom_info.ram_banks + 1; ++i) {
+        ram.push_back(std::vector<u8>(CARD_RAM_BANK_SIZE, 0xFF));
+    }
 
     return true;
-
 }
 
 void CARDRIDGE::build_ram() const {
-    std::vector<std::vector<u8>> ram(rom_info.ram_banks + 1,
-                                     std::vector<u8>(ROM_BANK_SIZE, 0xFF));
+
 }
 
 void CARDRIDGE::fill_cardridge_info() {
@@ -125,11 +126,13 @@ Rom_Info *CARDRIDGE::get_rom_info() { return &rom_info; }
 u8 CARDRIDGE::read(const u16 &addr) {
     if (addr >= 0x0000 && addr <= 0x7FFF)
         return rom.at(addr);
-    else if (addr >= 0xA000 && addr <= 0xBFFF)
-        return ram[selected_ram_bank][addr];
+    else if (addr >= 0xA000 && addr <= 0xBFFF) {
+        return ram[selected_ram_bank][addr - CARD_EXTERNAL_RAM];
+    }
     return 0xFF;
 }
 
 void CARDRIDGE::write(const u16 &addr, const u8 &data) {
-    if (addr >= 0xA000 && addr <= 0xBFFF) ram[selected_ram_bank][addr] = data;
+    int a = ram[0].at(0xbfff - CARD_EXTERNAL_RAM);
+    if (addr >= 0xA000 && addr <= 0xBFFF) ram[selected_ram_bank].at(addr - CARD_EXTERNAL_RAM) = data;
 }

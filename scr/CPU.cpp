@@ -43,8 +43,10 @@ int CPU::update() {
 
     op_code = get_next_op_code();
     const auto jp = parse_op_code(op_code);
-    if (!in_boot && false)
+#if 0
+    if (!in_boot)
         print_last_opcode();
+#endif
     if (jp == 0) inc_pc();
     cycles += current_instruction_info.cycles;
     return current_instruction_info.cycles;

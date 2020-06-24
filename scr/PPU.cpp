@@ -25,7 +25,7 @@ u16 oldlyc = 0;
 void PPU::update(const int cycles) {
     lcd_control.update(this);
     if (oldlyc != lcd_register.LCD_LYC) {
-        std::cout << "lcy geändert alt: " << (int) oldlyc << " neu: " << lcd_register.LCD_LYC << std::endl;
+        std::cout << "lcy geändert alt: " << (int) oldlyc << " neu: " << (int) lcd_register.LCD_LYC << std::endl;
     }
     oldlyc = lcd_register.LCD_LYC;
     load_lcd_mode();
@@ -184,6 +184,8 @@ void PPU::write(const u16 &addr, const u8 &data) {
 u8 PPU::read(const u16 &addr) const {
     if (addr >= GRAPHICS_RAM && addr <= GRAPHICS_RAM_END) {
         return v_ram.at(addr - GRAPHICS_RAM);
+    } else if (addr >= SPRITE_INFORMATION && addr <= SPRITE_INFORMATION_END) {
+        return sprite_attribute_table.at(addr - SPRITE_INFORMATION);
     } else {
         switch (addr) {
             case LCD_CONTROL:
