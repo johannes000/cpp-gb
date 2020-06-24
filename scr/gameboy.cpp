@@ -10,8 +10,9 @@ void gameboy::start_emu() {
     auto cycles = 0;
     auto last_cycle = 0;
     mem.reset();
-    card.load_rom("./../testroms/tetris.gb");
-    //card.load_rom("./../testroms/cpu_instrs/cpu_instrs.gb");
+    //card.load_rom("./../testroms/tetris.gb");
+    card.load_rom("./../testroms/cpu_instrs/individual/07-jr,jp,call,ret,rst.gb");
+    card.load_rom("./../testroms/cpu_instrs/cpu_instrs.gb");
     // cpu.print_all_ops();
     bool quit = false;
     step_mode = false;

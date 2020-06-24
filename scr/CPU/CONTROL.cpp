@@ -62,6 +62,7 @@ u8 CPU::opcode0xFB() {  // EI
 }
 
 u8 CPU::opcode0x76() {  // HALT
+    //TODO: Für morgen
     std::cout << "0x76 nicht implementiert" << std::endl;
     return 0;
 }
