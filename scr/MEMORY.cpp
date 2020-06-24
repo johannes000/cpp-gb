@@ -1,7 +1,12 @@
 #include "MEMORY.h"
+#include <iostream>
+#include <fstream>
+
 
 MEMORY::MEMORY(CPU *c, CARDRIDGE *card, PPU *p)
-        : cardridge(card), ppu(p), cpu(c) {}
+        : cardridge(card), ppu(p), cpu(c) {
+    load_boot_rom();
+}
 
 MEMORY::~MEMORY() {}
 
@@ -61,6 +66,7 @@ void MEMORY::write(const u16 &addr, const u8 &data) {
         ppu->write(addr, data);
     } else if (addr >= MEMORY_MAPPED_IO && addr <= MEMORY_MAPPED_IO_END) {
         switch (addr) {
+
             case LCD_CONTROL:
             case LCD_STATUS:
             case LCD_SCY:
@@ -103,6 +109,8 @@ void MEMORY::write_u16(const u16 &addr, const u16 &data) {
 void MEMORY::reset() {
     memory = std::vector<u8>(0x10000, 0);
 
+    load_boot_rom();
+
     write(0xFF05, 0x00);  // TIMA
     write(0xFF06, 0x00);  // TMA
     write(0xFF07, 0x00);  // TAC
@@ -142,4 +150,16 @@ void MEMORY::dma_transfer(const u8 &data) {
     for (u8 i = 0; i < 0xA0; i++) {
         write(0xFE00 + i, read(addr + i));
     }
+}
+
+bool MEMORY::load_boot_rom() {
+    std::ifstream is(boot_rom_path, std::ios::binary);
+    if (!is) {
+        std::cerr << "Kann die Boot Rom nicht öffnen!" << std::endl;
+        std::abort();
+        return false;
+    }
+    const std::vector<u8> romf(std::istreambuf_iterator<char>(is), {});
+    this->boot = romf;
+    return true;
 }
