@@ -42,13 +42,12 @@ void CPU::inc_u8_reg(u8 *reg) {
 }
 
 void CPU::dec_u8_reg(u8 *reg) {
-    // Decrement register.
-
+    // Decrement register
     *reg = *reg - 1;
 
     set_flag(Flag::n);
 
-    set_flag_if(Flag::h, (*reg & 0x0Fu) == 0x0Fu);
+    set_flag_if(Flag::h, (*reg & 0x0F) == 0x0F);
     set_flag_if(Flag::z, *reg == 0);
 }
 
@@ -169,7 +168,7 @@ u8 CPU::opcode0x0D() {  // DEC C
 }
 
 u8 CPU::opcode0x15() {  // DEC D
-    dec_u8_reg(&R.C);
+    dec_u8_reg(&R.D);
     return 0;
 }
 

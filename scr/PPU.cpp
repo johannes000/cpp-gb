@@ -20,9 +20,14 @@ PPU::PPU(MEMORY *m) : mem(m) {
 
 PPU::~PPU() { close_window(); }
 
+u16 oldlyc = 0;
 
 void PPU::update(const int cycles) {
     lcd_control.update(this);
+    if (oldlyc != lcd_register.LCD_LYC) {
+        std::cout << "lcy geändert alt: " << (int) oldlyc << " neu: " << lcd_register.LCD_LYC << std::endl;
+    }
+    oldlyc = lcd_register.LCD_LYC;
     load_lcd_mode();
     cycles_in_mode += cycles;
     switch (lcd_mode) {
@@ -264,15 +269,15 @@ void PPU::buffer_line(const u8 line) {
         const auto y = line;
 
         for (auto x = 0; x < GB_LCD_SIZE_WIDTH;) {
-            const auto sc_x = (x + lcd_register.LCD_SCX) % GB_LCD_SIZE_WIDTH;
-            const auto sc_y = (y + lcd_register.LCD_SCY) % GB_LCD_SIZE_HEIGHT;
+            const auto sc_x = (x + lcd_register.LCD_SCX);
+            const auto sc_y = (y + lcd_register.LCD_SCY);
 
             // Welches tile in der bg_tile-map
             const auto bg_map_x = sc_x % BG_MAP_SIZE;
             const auto bg_map_y = sc_y % BG_MAP_SIZE;
 
-            const auto tile_y = (bg_map_y / TILE_HEIGHT);
             const auto tile_x = (bg_map_x / TILE_WIDTH);
+            const auto tile_y = (bg_map_y / TILE_HEIGHT);
 
             // Welcher Pixel im tile
             auto tile_pixel_x = (bg_map_x % TILE_WIDTH) + 1;
@@ -281,14 +286,13 @@ void PPU::buffer_line(const u8 line) {
             // Adresse des Tiles im vram
             const u16 tile_addr = bg_tilemap + (tile_y * TILE_PER_LINE + tile_x);
 
-            // Welche Tile ID im vram
             const u8 tile_id = read(tile_addr);
 
             const u16 tile_addr_in_tileset = lcd_control.bg_window_tileset ? tile_id * TILE_WIDTH * 2 // unsigned
                                                                            : (static_cast<i8>(tile_id) + 128) *
                                                                              TILE_WIDTH * 2; // signed
 
-            const u16 tile_addr_start = bg_tileset + tile_pixel_y * 2 + tile_addr_in_tileset;
+            const u16 tile_addr_start = (tile_pixel_y * 2) + bg_tileset + +tile_addr_in_tileset;
 
 
             // Schreibe das gefundene Tile in den Buffer

@@ -3,7 +3,7 @@
 #include "../CPU.h"
 
 u8 CPU::opcode0x3E() {  // LD A d8
-    R.A = read(R.PC + 1);
+    R.A = read_u8_at_pc();
     return 0;
 }
 
@@ -78,7 +78,7 @@ u8 CPU::opcode0xEA() {  // LD (a16) A
 }
 
 u8 CPU::opcode0x0A() {  // LD A (BC)
-    R.A = read(read_u16_at_pc());
+    R.A = read(R.BC);
     return 0;
 }
 
