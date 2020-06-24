@@ -11,16 +11,45 @@ void gameboy::start_emu() {
     auto last_cycle = 0;
     mem.reset();
     card.load_rom("./../testroms/tetris.gb");
+    //card.load_rom("./../testroms/cpu_instrs/cpu_instrs.gb");
     // cpu.print_all_ops();
     bool quit = false;
+    step_mode = false;
     while (!quit) {
+
         last_cycle = cpu.update();
         cycles += last_cycle;
         ppu.update(last_cycle * 4);
-        step_mode = false;
-        if (step_mode) {
-            ppu.next_step();
+
+        if (cycles >= VERTICAL_REFRESH_CYCLES) {
+            cycles = 0;
+            SDL_PollEvent(&event);
+            switch (event.type) {
+                case SDL_QUIT:
+                    exit(0);
+                case SDL_KEYDOWN:
+                    switch (event.key.keysym.sym) {
+                        case SDLK_n:
+                            step_mode = !step_mode;
+                            break;
+                        case SDLK_b:
+                            show_opcode = !show_opcode;
+                            break;
+                        case SDLK_ESCAPE:
+                            exit(0);
+                        default:
+                            break;
+                    }
+                    break;
+                default:
+                    break;
+            }
         }
-        // SDL_Delay(20);
+        if (step_mode)
+            ppu.next_step();
+        if (show_opcode)
+            cpu.print_last_opcode();
+
+
     }
 }

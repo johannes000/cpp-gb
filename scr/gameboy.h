@@ -6,6 +6,7 @@
 #include "CPU.h"
 #include "MEMORY.h"
 #include "PPU.h"
+#include "SDL.h"
 
 class gameboy {
 public:
@@ -21,7 +22,9 @@ public:
     void start_emu();
 
 private:
-    bool step_mode;
+    bool step_mode{};
+    bool show_opcode{};
+    SDL_Event event{};
 };
 
 #endif  // !GAMEBOY_H_GUARD

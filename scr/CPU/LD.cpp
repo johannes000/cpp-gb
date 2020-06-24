@@ -438,9 +438,10 @@ u8 CPU::opcode0x36() {  // LD (HL) d8
 u8 CPU::opcode0xF8() {  // LD HL SP + r8
     const i8 r8 = read_i8_at_pc();
     const u16 result = R.SP + r8;
-    const u16 check = R.SP ^r8 ^((result) & 0xFFFF);
+    const u16 check = (R.SP ^ r8 ^ ((result) & 0xFFFFu));
     set_flag_if(Flag::c, check_bit(check, 7));
     set_flag_if(Flag::h, check_bit(check, 3));
+
     R.HL = result;
     reset_flags(Flag::z, Flag::n);
     return 0;
@@ -457,6 +458,7 @@ u8 CPU::opcode0xE0() {  // LDH a8 A
 }
 
 u8 CPU::opcode0xF0() {  // LDH A a8
-    R.A = 0xFF00 + read_u8_at_pc();
+    // Load value in register A from byte at address n16, provided it is between $FF00 and $FFFF.
+    R.A = read(0xFF00 + read_u8_at_pc());
     return 0;
 }

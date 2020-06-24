@@ -232,7 +232,7 @@ void PPU::load_lcd_mode() {
     // Liest den LCD Mode aus dem LCD Status register
     // und aktualisiert die lokale variable
     auto *const data = &lcd_register.LCD_STATUS;
-    lcd_mode = static_cast<LCD_Mode>(*data & 3);
+    lcd_mode = static_cast<LCD_Mode>(*data & 3u);
 }
 
 void PPU::set_lcd_state(const LCD_State &s) {
@@ -256,20 +256,20 @@ void PPU::buffer_line(const u8 line) {
     if (lcd_control.bg_enabled) {
         // BG Tile Map Display Select
         const u16 bg_tileset = lcd_control.bg_window_tileset ? 0x8000 : 0x8800;//unsigned : signed
-        const u16 wdw_tilemap = lcd_control.window_tile_map ? 0x9C00 : 0x9800;
         const u16 bg_tilemap = lcd_control.bg_tile_map ? 0x9C00 : 0x9800;
+        const u16 wdw_tilemap = lcd_control.window_tile_map ? 0x9C00 : 0x9800;
         const u16 bg_pallete = lcd_register.BG_PALETTE_DATA;
 
         // Festlegen wo im Vector die Pixel gesetzt werden
         const int y = line;
         const auto sc_y = (y + lcd_register.LCD_SCY) % GB_LCD_SIZE_HEIGHT;
+        const auto tile_y = (sc_y / TILE_HEIGHT);
 
         for (auto x = 0; x <= GB_LCD_SIZE_WIDTH - 1;) {
             const auto sc_x = (x + lcd_register.LCD_SCX) % GB_LCD_SIZE_WIDTH;
 
             // Welches tile in der bg_tile-map
             const auto tile_x = (sc_x / TILE_WIDTH);
-            const auto tile_y = (sc_y / TILE_HEIGHT);
 
             // Welcher Pixel im tile
             u8 tile_pixel_x = (sc_x % TILE_WIDTH + 1);
@@ -307,7 +307,7 @@ void PPU::buffer_line(const u8 line) {
 }
 
 void PPU::render_frame() {
-    // FPS rechner
+    // FPS Rechner
     fps_frames++;
     if (fps_last_time < SDL_GetTicks() - FPS_INTERVAL * 1000) {
         fps_last_time = SDL_GetTicks();
@@ -344,12 +344,13 @@ void PPU::LCD_Control::update(PPU *ppu) {
 
     const u8 *data = &ppu->lcd_register.LCD_CONTROL;
     *this = {
-            static_cast<bool>((*data >> 7u) & 1u),
-            static_cast<bool>((*data >> 6u) & 1u),
-            static_cast<bool>((*data >> 5u) & 1u),
-            static_cast<bool>((*data >> 4u) & 1u),
-            static_cast<bool>((*data >> 3u) & 1u),
-            static_cast<bool>((*data >> 2u) & 1u),
-            static_cast<bool>((*data >> 1u) & 1u),
-            static_cast<bool>((*data >> 0u) & 1u)};
+            check_bit(*data, 7),
+            check_bit(*data, 6),
+            check_bit(*data, 5),
+            check_bit(*data, 4),
+            check_bit(*data, 3),
+            check_bit(*data, 2),
+            check_bit(*data, 1),
+            check_bit(*data, 0),
+    };
 }

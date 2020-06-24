@@ -89,7 +89,7 @@ private:
     SDL_Event event{};
 
 
-    // SDL sachen
+    // SDL Sachen
 private:
     const int SCREEN_WIDTH = GB_LCD_SIZE_WIDTH;
     const int SCREEN_HEIGHT = GB_LCD_SIZE_HEIGHT;
@@ -105,7 +105,7 @@ private:
 
 private:
     // LCD Data
-    LCD_Mode lcd_mode;
+    LCD_Mode lcd_mode{};
 
     struct LCD_Register {
         // u8 Werte die mit hilfe ihrer Adressen von der GB CPU beschrieben werden
