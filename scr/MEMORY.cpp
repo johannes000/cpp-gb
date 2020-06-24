@@ -84,6 +84,7 @@ void MEMORY::write(const u16 &addr, const u8 &data) {
                 dma_transfer(data);
                 break;
             case INTERRUPT_FLAGS_REG:
+            case IN_BOOT_ADDRESS:
                 cpu->write(addr, data);
                 break;
             default:
@@ -146,7 +147,7 @@ void MEMORY::reset() {
 
 void MEMORY::dma_transfer(const u8 &data) {
     memory.at(DMA_TRANSFER) = data;
-    const u16 addr = data << 8;
+    const u16 addr = data << 8u;
     for (u8 i = 0; i < 0xA0; i++) {
         write(0xFE00 + i, read(addr + i));
     }
@@ -157,7 +158,6 @@ bool MEMORY::load_boot_rom() {
     if (!is) {
         std::cerr << "Kann die Boot Rom nicht öffnen!" << std::endl;
         std::abort();
-        return false;
     }
     const std::vector<u8> romf(std::istreambuf_iterator<char>(is), {});
     this->boot = romf;

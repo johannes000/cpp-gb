@@ -43,8 +43,8 @@ int CPU::update() {
 
     op_code = get_next_op_code();
     const auto jp = parse_op_code(op_code);
-#if 0
-    if (in_boot)
+#if 1
+    if (!in_boot)
         print_last_opcode();
 #endif
     if (jp == 0) inc_pc();
@@ -97,6 +97,8 @@ u8 CPU::read(const u16 &addr) {
             return IE_Register;
         case INTERRUPT_FLAGS_REG:
             return IF_Register;
+        case IN_BOOT_ADDRESS:
+            return in_boot;
         default:
             if (in_boot && R.PC > 0x100) {
                 in_boot = false;
@@ -115,12 +117,12 @@ void CPU::write(const u16 &addr, const u8 &data) {
         case INTERRUPT_FLAGS_REG:
             IF_Register = data;
             break;
+        case IN_BOOT_ADDRESS:
+            if (in_boot)
+                std::cout << "Boot verlassen nach: " << std::dec << cycles << " Cycles" << std::endl;
+            in_boot = false;
+            break;
         default:
-            if (in_boot && R.PC >= 0x100) {
-                in_boot = false;
-                std::cout << "Boot verlassen nach: " << std::dec << cycles << " Cycles"
-                          << std::endl;
-            }
             mem->write(addr, data);
             break;
     }
