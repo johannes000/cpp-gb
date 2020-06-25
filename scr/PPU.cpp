@@ -55,10 +55,6 @@ void PPU::update(const int cycles) {
                 buffer_line(lcd_register.LCD_LY);
                 // H-Blank sachen
                 if (++lcd_register.LCD_LY == GB_LCD_SIZE_HEIGHT) {
-                    // alle lines für dieses Frame gebuffert,
-                    // das frame kann jetzt gerendered werden
-                    render_frame();
-                    wait_for_input();
                     set_lcd_mode(LCD_Mode::V_Blank);
                 } else {
                     set_lcd_mode(LCD_Mode::OAM);
@@ -72,63 +68,13 @@ void PPU::update(const int cycles) {
                 cycles_in_mode = 0;
                 if (++lcd_register.LCD_LY == VERTICAL_BLANK_LINES) {
                     lcd_register.LCD_LY = 0;
+                    // alle lines für dieses Frame gebuffert,
+                    // das frame kann jetzt gerendered werden
+                    render_frame();
                     set_lcd_mode(LCD_Mode::OAM);
                 }
             }
             break;
-    }
-}
-
-
-void PPU::wait_for_input() {
-    SDL_PollEvent(&event);
-    switch (event.type) {
-        case SDL_QUIT:
-            exit(0);
-        case SDL_KEYDOWN:
-            switch (event.key.keysym.sym) {
-                case SDLK_p:
-                    std::cout << "P" << std::endl;
-                    current_palette =
-                            (current_palette + 1) % static_cast<int>(Palettes.size());
-                    break;
-                case SDLK_ESCAPE:
-                    exit(0);
-                default:
-                    break;
-            }
-            break;
-        default:
-            break;
-    }
-}
-
-void PPU::next_step() {
-    bool quit = false;
-    while (!quit) {
-        SDL_PollEvent(&event);
-        switch (event.type) {
-            case SDL_QUIT:
-                exit(0);
-            case SDL_KEYDOWN:
-                switch (event.key.keysym.sym) {
-                    case SDLK_s:
-                        quit = true;
-                        break;
-                    case SDLK_p:
-                        std::cout << "P" << std::endl;
-                        current_palette =
-                                (current_palette + 1) % static_cast<int>(Palettes.size());
-                        break;
-                    case SDLK_ESCAPE:
-                        exit(0);
-                    default:
-                        break;
-                }
-                break;
-            default:
-                break;
-        }
     }
 }
 

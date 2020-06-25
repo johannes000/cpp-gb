@@ -79,8 +79,6 @@ public:
 private:
     MEMORY *mem;
 
-    void wait_for_input();
-
     int cycles_in_mode{};
 
     bool create_window();

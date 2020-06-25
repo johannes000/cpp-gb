@@ -62,7 +62,12 @@ constexpr u16 BG_PALETTE_DATA_0 =
 constexpr u16 BG_PALETTE_DATA_1 =
         0xFF49;  // OBP1 - Object Palette 1 Data (R/W) - Non CGB Mode Only
 
-constexpr u16 DMA_TRANSFER = 0xFF46;  // DMA Transfer and Start Address (R/W)
+// JOYPAD REGISTER
+constexpr u16 JOY_P1_REGISTER = 0xFF00;
+
+
+constexpr u16
+        DMA_TRANSFER = 0xFF46;  // DMA Transfer and Start Address (R/W)
 
 constexpr int VERTICAL_REFRESH_CYCLES = 70224;
 
@@ -228,21 +233,51 @@ enum class LCD_Mode {
     VRAM,
 };
 
+
+enum class GB_Key {
+    // Bit 7 - Not used
+    // Bit 6 - Not used
+    // Bit 5 - P15 Select Button Keys      (0=Select)
+    // Bit 4 - P14 Select Direction Keys   (0=Select)
+    // Bit 3 - P13 Input Down  or Start    (0=Pressed) (Read Only)
+    // Bit 2 - P12 Input Up    or Select   (0=Pressed) (Read Only)
+    // Bit 1 - P11 Input Left  or Button B (0=Pressed) (Read Only)
+    // Bit 0 - P10 Input Right or Button A (0=Pressed) (Read Only)
+    Right,
+    Left,
+    Up,
+    Down,
+    A,
+    B,
+    Select,
+    Start,
+
+};
+
 void set_bit_if(u8 &value, const u8 &bit, bool condition);
 
-void set_bit_if(u16 &value, const u16 &bit, bool condition);
+void set_bit_if(u16 &value,
+                const u16 &bit,
+                bool condition
+);
 
 void set_bit(u8 &value, const u8 &bit);
 
-void set_bit(u16 &value, const u16 &bit);
+void set_bit(u16 &value,
+             const u16 &bit
+);
 
 void reset_bit(u8 &value, const u8 &bit);
 
-void reset_bit(u16 &value, const u16 &bit);
+void reset_bit(u16 &value,
+               const u16 &bit
+);
 
 void toggle_bit(u8 &value, const u8 &bit);
 
-void toggle_bit(u16 &value, const u16 &bit);
+void toggle_bit(u16 &value,
+                const u16 &bit
+);
 
 bool check_bit(const u8 &value, const u8 &bit);
 

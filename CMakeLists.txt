@@ -23,6 +23,6 @@ add_executable(cpp-gb
         scr/gameboy.cpp scr/gameboy.h
         scr/MEMORY.cpp scr/MEMORY.h
         scr/PPU.cpp scr/PPU.h
-        scr/type.cpp scr/type.h)
+        scr/type.cpp scr/type.h scr/CONTROLS.cpp scr/CONTROLS.h)
 
 target_link_libraries(cpp-gb -lmingw32 -lSDL2main -lSDL2 ${SDL2_LIBRARY})

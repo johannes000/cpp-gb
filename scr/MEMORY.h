@@ -8,6 +8,7 @@
 #include "CPU.h"
 #include "PPU.h"
 #include "type.h"
+#include "CONTROLS.h"
 
 class CPU;
 
@@ -15,9 +16,11 @@ class PPU;
 
 class CARDRIDGE;
 
+class CONTROLS;
+
 class MEMORY {
 public:
-    MEMORY(CPU *c, CARDRIDGE *card, PPU *p);
+    MEMORY(CPU *c, CARDRIDGE *card, PPU *p, CONTROLS *j);
 
     ~MEMORY();
 
@@ -31,6 +34,7 @@ private:
     CARDRIDGE *cardridge;
     PPU *ppu;
     CPU *cpu;
+    CONTROLS *joypad;
 
     const char *boot_rom_path = "./../boot.gb";
     std::vector<u8> memory;

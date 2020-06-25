@@ -3,8 +3,8 @@
 #include <fstream>
 
 
-MEMORY::MEMORY(CPU *c, CARDRIDGE *card, PPU *p)
-        : cardridge(card), ppu(p), cpu(c) {
+MEMORY::MEMORY(CPU *c, CARDRIDGE *card, PPU *p, CONTROLS *j)
+        : cardridge(card), ppu(p), cpu(c), joypad(j) {
     load_boot_rom();
 }
 
@@ -28,6 +28,8 @@ u8 MEMORY::read(const u16 &addr) {
         return ppu->read(addr);
     } else if (addr >= MEMORY_MAPPED_IO && addr <= MEMORY_MAPPED_IO_END) {
         switch (addr) {
+            case JOY_P1_REGISTER:
+                return joypad->read(addr);
             case LCD_CONTROL:
             case LCD_STATUS:
             case LCD_SCY:
@@ -54,6 +56,10 @@ u8 MEMORY::read(const u16 &addr) {
 }
 
 void MEMORY::write(const u16 &addr, const u8 &data) {
+    if (addr == 0xFF02 && data == 0x81)
+        std::cout << static_cast<char>(read(0xff01));
+
+
     if (addr >= GRAPHICS_RAM && addr <= GRAPHICS_RAM_END) {
         ppu->write(addr, data);
     } else if (addr >= CARD_EXTERNAL_RAM && addr <= CARD_EXTERNAL_RAM_END) {

@@ -6,6 +6,7 @@
 #include "CPU.h"
 #include "MEMORY.h"
 #include "PPU.h"
+#include "CONTROLS.h"
 #include "SDL.h"
 
 class gameboy {
@@ -18,6 +19,7 @@ public:
     MEMORY mem;
     CPU cpu;
     PPU ppu;
+    CONTROLS joypad;
 
     void start_emu();
 
