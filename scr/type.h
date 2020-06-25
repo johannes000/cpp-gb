@@ -233,24 +233,24 @@ enum class LCD_Mode {
     VRAM,
 };
 
-
+// Bit 7 - Not used
+// Bit 6 - Not used
+// Bit 5 - P15 Select Button Keys      (0=Select)
+// Bit 4 - P14 Select Direction Keys   (0=Select)
+// Bit 3 - P13 Input Down  or Start    (0=Pressed) (Read Only)
+// Bit 2 - P12 Input Up    or Select   (0=Pressed) (Read Only)
+// Bit 1 - P11 Input Left  or Button B (0=Pressed) (Read Only)
+// Bit 0 - P10 Input Right or Button A (0=Pressed) (Read Only)
 enum class GB_Key {
-    // Bit 7 - Not used
-    // Bit 6 - Not used
-    // Bit 5 - P15 Select Button Keys      (0=Select)
-    // Bit 4 - P14 Select Direction Keys   (0=Select)
-    // Bit 3 - P13 Input Down  or Start    (0=Pressed) (Read Only)
-    // Bit 2 - P12 Input Up    or Select   (0=Pressed) (Read Only)
-    // Bit 1 - P11 Input Left  or Button B (0=Pressed) (Read Only)
-    // Bit 0 - P10 Input Right or Button A (0=Pressed) (Read Only)
-    Right,
-    Left,
-    Up,
-    Down,
-    A,
-    B,
-    Select,
-    Start,
+
+    Right = 0,
+    Left = 1,
+    Up = 2,
+    Down = 3,
+    A = 4,
+    B = 5,
+    Select = 6,
+    Start = 7,
 
 };
 

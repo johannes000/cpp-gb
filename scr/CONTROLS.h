@@ -20,12 +20,9 @@ private:
     PPU *ppu;
     MEMORY *mem;
 
+    u8 joy_p1_state = 0x00;
+    u8 joy_both_states = 0x00;
 
-    void key_up(GB_Key key);
-
-    void key_down(GB_Key key);
-
-    u8 joy_p1_state{};
 
 public:
     void update_joypad(SDL_Event &event);

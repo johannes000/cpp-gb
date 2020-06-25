@@ -1,11 +1,11 @@
 #include "type.h"
 
 void set_bit_if(u8 &value, const u8 &bit, bool condition) {
-    condition ? set_bit(value, 0) : reset_bit(value, 0);
+    condition ? set_bit(value, bit) : reset_bit(value, bit);
 }
 
 void set_bit_if(u16 &value, const u16 &bit, bool condition) {
-    condition ? set_bit(value, 0) : reset_bit(value, 0);
+    condition ? set_bit(value, bit) : reset_bit(value, bit);
 }
 
 void set_bit(u8 &value, const u8 &bit) { value |= (1u << bit); }

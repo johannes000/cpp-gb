@@ -4,70 +4,40 @@
 
 #include "CONTROLS.h"
 #include <SDL.h>
+#include <iostream>
 
 CONTROLS::CONTROLS(MEMORY *m, PPU *p) : mem(m), ppu(p) {}
 
 void CONTROLS::update_joypad(SDL_Event &event) {
+    // Bit 7 - Not used
+    // Bit 6 - Not used
+    // Bit 5 - P15 Select Button Keys      (0=Select)
+    // Bit 4 - P14 Select Direction Keys   (0=Select)
+    // Bit 3 - P13 Input Down  or Start    (0=Pressed) (Read Only)
+    // Bit 2 - P12 Input Up    or Select   (0=Pressed) (Read Only)
+    // Bit 1 - P11 Input Left  or Button B (0=Pressed) (Read Only)
+    // Bit 0 - P10 Input Right or Button A (0=Pressed) (Read Only)
+    joy_both_states = 0x00;
+    joy_p1_state = 0x00;
+    auto *keystate = SDL_GetKeyboardState(nullptr);
 
-    switch (event.type) {
-        case SDL_KEYUP:
-            switch (event.key.keysym.sym) {
-                case SDLK_UP:
-                    key_up(GB_Key::Up);
-                    break;
-                case SDLK_DOWN:
-                    key_up(GB_Key::Down);
-                    break;
-                case SDLK_LEFT:
-                    key_up(GB_Key::Left);
-                    break;
-                case SDLK_RIGHT:
-                    key_up(GB_Key::Right);
-                    break;
-                case SDLK_a:
-                    key_up(GB_Key::A);
-                    break;
-                case SDLK_b:
-                    key_up(GB_Key::B);
-                    break;
-                case SDLK_KP_ENTER:
-                    key_up(GB_Key::Start);
-                    break;
-                case SDLK_BACKSPACE:
-                    key_up(GB_Key::Select);
-                    break;
-            }
-            break;
-        case SDLK_DOWN:
-            switch (event.key.keysym.sym) {
-                case SDLK_UP:
-                    key_down(GB_Key::Up);
-                    break;
-                case SDLK_DOWN:
-                    key_down(GB_Key::Down);
-                    break;
-                case SDLK_LEFT:
-                    key_down(GB_Key::Left);
-                    break;
-                case SDLK_RIGHT:
-                    key_down(GB_Key::Right);
-                    break;
-                case SDLK_a:
-                    key_down(GB_Key::A);
-                    break;
-                case SDLK_b:
-                    key_down(GB_Key::B);
-                    break;
-                case SDLK_KP_ENTER:
-                    key_down(GB_Key::Start);
-                    break;
-                case SDLK_BACKSPACE:
-                    key_down(GB_Key::Select);
-                    break;
-            }
-        default:
-            break;
-    }
+    set_bit_if(joy_both_states, static_cast<u8>(GB_Key::Up), !keystate[SDL_SCANCODE_UP]);
+    set_bit_if(joy_both_states, static_cast<u8>(GB_Key::Down), !keystate[SDL_SCANCODE_DOWN]);
+    set_bit_if(joy_both_states, static_cast<u8>(GB_Key::Left), !keystate[SDL_SCANCODE_LEFT]);
+    set_bit_if(joy_both_states, static_cast<u8>(GB_Key::Right), !keystate[SDL_SCANCODE_RIGHT]);
+    set_bit_if(joy_both_states, static_cast<u8>(GB_Key::A), !keystate[SDL_SCANCODE_A]);
+    set_bit_if(joy_both_states, static_cast<u8>(GB_Key::B), !keystate[SDL_SCANCODE_S]);
+    set_bit_if(joy_both_states, static_cast<u8>(GB_Key::Select), !keystate[SDL_SCANCODE_BACKSPACE]);
+    set_bit_if(joy_both_states, static_cast<u8>(GB_Key::Start), !keystate[SDL_SCANCODE_RETURN]);
+
+    // Buttons
+    set_bit_if(joy_p1_state, 5, (joy_both_states & 0xF0u) == 0xF0u);
+    // Directions
+    set_bit_if(joy_p1_state, 4, (joy_both_states & 0x0Fu) == 0x0Fu);
+
+    u8 buttons = (joy_both_states & 0xF0u) >> 4u;
+    u8 directions = joy_both_states & 0xFu;
+    joy_p1_state |= buttons & directions;
 }
 
 u8 CONTROLS::read(const u16 &addr) const {
@@ -83,78 +53,4 @@ void CONTROLS::write(const u16 &addr, const u8 &data) {
 
 }
 
-void CONTROLS::key_down(GB_Key key) {
-    switch (key) {
-        case GB_Key::A:
-            reset_bit(joy_p1_state, 5);
-            reset_bit(joy_p1_state, 0);
-            break;
-        case GB_Key::B:
-            reset_bit(joy_p1_state, 5);
-            reset_bit(joy_p1_state, 1);
-            break;
-        case GB_Key::Select:
-            reset_bit(joy_p1_state, 5);
-            reset_bit(joy_p1_state, 2);
-            break;
-        case GB_Key::Start:
-            reset_bit(joy_p1_state, 5);
-            reset_bit(joy_p1_state, 3);
-            break;
-        case GB_Key::Right:
-            reset_bit(joy_p1_state, 4);
-            reset_bit(joy_p1_state, 0);
-            break;
-        case GB_Key::Left:
-            reset_bit(joy_p1_state, 4);
-            reset_bit(joy_p1_state, 1);
-            break;
-        case GB_Key::Up:
-            reset_bit(joy_p1_state, 4);
-            reset_bit(joy_p1_state, 2);
-            break;
-        case GB_Key::Down:
-            reset_bit(joy_p1_state, 4);
-            reset_bit(joy_p1_state, 3);
-            break;
-    }
-
-}
-
-void CONTROLS::key_up(GB_Key key) {
-    switch (key) {
-        case GB_Key::A:
-            set_bit(joy_p1_state, 5);
-            set_bit(joy_p1_state, 0);
-            break;
-        case GB_Key::B:
-            set_bit(joy_p1_state, 5);
-            set_bit(joy_p1_state, 1);
-            break;
-        case GB_Key::Select:
-            set_bit(joy_p1_state, 5);
-            set_bit(joy_p1_state, 2);
-            break;
-        case GB_Key::Start:
-            set_bit(joy_p1_state, 5);
-            set_bit(joy_p1_state, 3);
-            break;
-        case GB_Key::Right:
-            set_bit(joy_p1_state, 4);
-            set_bit(joy_p1_state, 0);
-            break;
-        case GB_Key::Left:
-            set_bit(joy_p1_state, 4);
-            set_bit(joy_p1_state, 1);
-            break;
-        case GB_Key::Up:
-            set_bit(joy_p1_state, 4);
-            set_bit(joy_p1_state, 2);
-            break;
-        case GB_Key::Down:
-            set_bit(joy_p1_state, 4);
-            set_bit(joy_p1_state, 3);
-            break;
-    }
-}
 
