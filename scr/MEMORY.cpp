@@ -11,7 +11,7 @@ MEMORY::MEMORY(CPU *c, CARDRIDGE *card, PPU *p)
 MEMORY::~MEMORY() {}
 
 u8 MEMORY::read(const u16 &addr) {
-    if (addr <= CARD_ROM_END) {
+    if (addr <= 0x7FFF) {
         if (cpu->in_boot_r() && addr <= BOOT_ROM_END) {
             return boot.at(addr);
         }

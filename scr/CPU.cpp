@@ -40,7 +40,7 @@ int CPU::update() {
     old_pc = R.PC;
     if (interrupts()) std::cout << "INTERRUPT" << std::endl;
     if (IME_scheduled) IME = true;
-    if (R.PC == 0x0034)
+    if (R.PC == 0x7ff3)
         old_pc = R.PC;
     op_code = get_next_op_code();
     const auto jp = parse_op_code(op_code);
@@ -73,6 +73,10 @@ void CPU::print_last_opcode() {
     std::cout << " N: " << check_flag(Flag::n);
     std::cout << " H: " << check_flag(Flag::h);
     std::cout << " C: " << check_flag(Flag::c);
+    std::cout << " AF: " << (int) R.AF;
+    std::cout << " BC: " << (int) R.BC;
+    std::cout << " DE: " << (int) R.DE;
+    std::cout << " HL: " << (int) R.HL;
     std::cout << std::endl;
 }
 
@@ -109,11 +113,6 @@ u8 CPU::read(const u16 &addr) {
         case IN_BOOT_ADDRESS:
             return in_boot;
         default:
-            if (in_boot && R.PC > 0x100) {
-                in_boot = false;
-                std::cout << "Boot verlassen nach: " << std::dec << cycles << " Cycles"
-                          << std::endl;
-            }
             return mem->read(addr);
     }
 }

@@ -16,6 +16,8 @@ bool CARDRIDGE::load_rom(const char *rom_file) {
     const std::vector<u8> romf(std::istreambuf_iterator<char>(is), {});
     this->rom = romf;
 
+    std::cout << std::hex << (int) read(0x7FF3) << std::endl;
+
     fill_cardridge_info();
 
     for (int i = 0; i < rom_info.ram_banks + 1; ++i) {

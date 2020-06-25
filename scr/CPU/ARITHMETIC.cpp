@@ -4,7 +4,7 @@ void CPU::xor_r8_r8(u8 *data1, const u8 *data2) {
     // XOR data 1 und data 2 und speicher das ergebnis in data 1
     *data1 ^= *data2;
     set_flag_if(Flag::z, *data1 == 0);
-    set_flags(Flag::n, Flag::h, Flag::c);
+    reset_flags(Flag::n, Flag::h, Flag::c);
 }
 
 void CPU::and_r8_r8(u8 *reg1, const u8 *reg2) {
@@ -18,8 +18,8 @@ void CPU::and_r8_r8(u8 *reg1, const u8 *reg2) {
 void CPU::or_r8_r8(u8 *reg1, const u8 *reg2) {
     // OR reg 1 und reg 2 und Speicher das Ergebnis in data 1
     reset_all_flags();
-    *reg1 |= *reg2;
-    set_flag_if(Flag::z, *reg1 == 0);
+    R.A |= *reg2;
+    set_flag_if(Flag::z, R.A == 0);
 }
 
 void CPU::cp_r8_r8(const u8 *data1, const u8 *data2) {

@@ -26,7 +26,7 @@ void CPU::rot_left_c_r8(u8 *reg) {
     // C < -[7 < -0] < -[7]
     const u8 b7 = *reg & 0x80u;
     *reg <<= 1u;
-
+    *reg |= static_cast<u8>(b7 >> 8u);
     set_flag_if(Flag::c, b7 == 1);
     set_bit_if(*reg, 0, b7 == 0x80);
     set_flag_if(Flag::z, *reg == 0);
@@ -99,11 +99,11 @@ void CPU::shift_right_l_r8(u8 *reg) {
 
 void CPU::swap_r8(u8 *reg) {
     // Swap upper 4 bits in register r8 and the lower 4 ones.
-    u8 l_bits = *reg & 0xF0;
-    u8 h_bits = *reg & 0x0F;
+    u8 l_bits = *reg & 0xF0u;
+    u8 h_bits = *reg & 0x0Fu;
 
-    l_bits >>= 4;
-    h_bits <<= 4;
+    l_bits >>= 4u;
+    h_bits <<= 4u;
 
     *reg = l_bits | h_bits;
 }
