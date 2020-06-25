@@ -126,7 +126,7 @@ u8 CPU::opcode0x7E() {  // LD A (HL)
     return 0;
 }
 
-u8 CPU::opcode0x1A() {  // LD A DE
+u8 CPU::opcode0x1A() {  // LD A (DE)
     R.A = read(R.DE);
     return 0;
 }

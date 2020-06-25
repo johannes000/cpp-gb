@@ -23,7 +23,7 @@ void CPU::ret() {
 
 void CPU::call() {
     // Push address of next instruction onto stack and then jump to address nn.
-    u16 next_inst = R.PC + 3;
+    u16 next_inst = R.PC + current_instruction_info.bytes;
     push_r16_reg(&next_inst);
     R.PC = read_u16_at_pc();
 }
@@ -150,6 +150,7 @@ u8 CPU::opcode0xC4() {  // CALL NZ a16
 u8 CPU::opcode0xCC() {  // CALL Z a16
     if (check_flag(Flag::z)) {
         call();
+        current_instruction_info.cycles = 6;
         return 1;
     }
     return 0;
@@ -163,14 +164,19 @@ u8 CPU::opcode0xCD() {  // CALL a16
 u8 CPU::opcode0xD4() {  // CALL NC a16
     if (!check_flag(Flag::c)) {
         call();
+        current_instruction_info.cycles = 6;
         return 1;
     }
     return 0;
 }
 
 u8 CPU::opcode0xDC() {  // CALL C a16
-    if (check_flag(Flag::c)) call();
-    return 1;
+    if (check_flag(Flag::c)) {
+        call();
+        current_instruction_info.cycles = 6;
+        return 1;
+    }
+    return 0;
 }
 
 u8 CPU::opcode0xDF() {  // RST 18H

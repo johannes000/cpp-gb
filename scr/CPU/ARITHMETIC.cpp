@@ -47,7 +47,7 @@ void CPU::dec_u8_reg(u8 *reg) {
 
     set_flag(Flag::n);
 
-    set_flag_if(Flag::h, (*reg & 0x0F) == 0x0F);
+    set_flag_if(Flag::h, (*reg & 0x0Fu) == 0x0Fu);
     set_flag_if(Flag::z, *reg == 0);
 }
 
@@ -159,6 +159,7 @@ u8 CPU::opcode0x33() {  // INC SP
 
 u8 CPU::opcode0x05() {  // DEC B
     dec_u8_reg(&R.B);
+
     return 0;
 }
 

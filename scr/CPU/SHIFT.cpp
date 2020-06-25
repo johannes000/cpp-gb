@@ -37,11 +37,12 @@ void CPU::rot_left_c_r8(u8 *reg) {
 void CPU::rot_left_r8(u8 *reg) {
     // Rotate bits in register r8 left through carry.
     // C <-[7 < -0] <-C
-    const u8 b7 = *reg & 0x80u;
-    *reg <<= 1u;
+    const u8 carry = static_cast<u8>(check_flag(Flag::c));
+    set_flag_if(Flag::c, *reg & 0x80u);
 
-    set_bit_if(*reg, 0, check_flag(Flag::c));
-    set_flag_if(Flag::c, b7 & 0x80u);
+    *reg <<= 1u;
+    *reg |= carry;
+
     set_flag_if(Flag::z, *reg == 0);
     reset_flags(Flag::n, Flag::h);
 }
@@ -62,8 +63,8 @@ void CPU::rot_right_r8(u8 *reg) {
 void CPU::shift_left_a_r8(u8 *reg) {
     // Shift Left Arithmetic register r8.
     // C < -[7 < -0] < -0
-    const u8 b7 = *reg & 0x80;
-    *reg >>= 1;
+    const u8 b7 = *reg & 0x80u;
+    *reg >>= 1u;
     set_flag_if(Flag::c, b7 == 0x80);
     set_flag_if(Flag::z, *reg == 0);
 
@@ -116,7 +117,7 @@ u8 CPU::opcode0x07() {  // RLCA
 }
 
 u8 CPU::opcode0x17() {  // RLA
-    shift_left_a_r8(&R.A);
+    rot_left_r8(&R.A);
     reset_flag((Flag::z));
     return 0;
 }

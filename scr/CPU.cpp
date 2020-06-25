@@ -40,10 +40,11 @@ int CPU::update() {
     old_pc = R.PC;
     if (interrupts()) std::cout << "INTERRUPT" << std::endl;
     if (IME_scheduled) IME = true;
-
+    if (R.PC == 0x0034)
+        old_pc = R.PC;
     op_code = get_next_op_code();
     const auto jp = parse_op_code(op_code);
-#if 1
+#if 0
     if (!in_boot)
         print_last_opcode();
 #endif
@@ -61,9 +62,17 @@ void CPU::print_last_opcode() {
               << " " << current_instruction_info.mnemonic << "\t"
               << "OP: " << std::hex << static_cast<int>(op_code);
     if (current_instruction_info.bytes == 3)
-        std::cout << " " << static_cast<int>(read_u16_at_pc());
+        std::cout << "  " << static_cast<int>(read_u16_at_pc());
+    else
+        std::cout << "\t";
     if (current_instruction_info.bytes == 2)
-        std::cout << " 0x" << static_cast<int>(read_u8_at_pc());
+        std::cout << "  0x" << static_cast<int>(read_u8_at_pc()) << "\t";
+    else
+        std::cout << "\t";
+    std::cout << " Z: " << check_flag(Flag::z);
+    std::cout << " N: " << check_flag(Flag::n);
+    std::cout << " H: " << check_flag(Flag::h);
+    std::cout << " C: " << check_flag(Flag::c);
     std::cout << std::endl;
 }
 

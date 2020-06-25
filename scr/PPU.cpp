@@ -134,9 +134,9 @@ void PPU::next_step() {
 
 void PPU::write(const u16 &addr, const u8 &data) {
     if (addr >= GRAPHICS_RAM && addr <= GRAPHICS_RAM_END) {
-        v_ram[addr - GRAPHICS_RAM] = data;
+        v_ram.at(addr - GRAPHICS_RAM) = data;
     } else if (addr >= SPRITE_INFORMATION && addr <= SPRITE_INFORMATION_END) {
-        sprite_attribute_table[addr - SPRITE_INFORMATION] = data;
+        sprite_attribute_table.at(addr - SPRITE_INFORMATION) = data;
     } else {
         switch (addr) {
             case LCD_CONTROL:
@@ -260,12 +260,10 @@ bool PPU::get_lcd_state(const LCD_State &s) const {
 
 void PPU::buffer_line(const u8 line) {
     lcd_control.update(this);
-    if (lcd_control.bg_enabled) {
+    if (lcd_control.bg_enabled && lcd_control.lcd_power) {
         // BG Tile Map Display Select
-        const u16 bg_tileset = lcd_control.bg_window_tileset ? 0x8000 : 0x8800;//unsigned : signed
+        const u16 bg_tileset = lcd_control.bg_window_tileset ? 0x8000 : 0x8800;//unsigned : signed 07cb
         const u16 bg_tilemap = lcd_control.bg_tile_map ? 0x9C00 : 0x9800;
-        const u16 wdw_tilemap = lcd_control.window_tile_map ? 0x9C00 : 0x9800;
-        const u16 bg_pallete = lcd_register.BG_PALETTE_DATA;
 
         // Festlegen wo im Vector die Pixel gesetzt werden
         const auto y = line;
@@ -282,7 +280,7 @@ void PPU::buffer_line(const u8 line) {
             const auto tile_y = (bg_map_y / TILE_HEIGHT);
 
             // Welcher Pixel im tile
-            auto tile_pixel_x = (bg_map_x % TILE_WIDTH) + 1;
+            auto tile_pixel_x = (bg_map_x % TILE_WIDTH);
             const auto tile_pixel_y = bg_map_y % TILE_HEIGHT;
 
             // Adresse des Tiles im vram
@@ -293,13 +291,13 @@ void PPU::buffer_line(const u8 line) {
             const u16 tile_addr_in_tileset = lcd_control.bg_window_tileset ? tile_id * TILE_WIDTH * 2 // unsigned
                                                                            : (static_cast<i8>(tile_id) + 128) *
                                                                              TILE_WIDTH * 2; // signed
-
-            const u16 tile_addr_start = (tile_pixel_y * 2) + bg_tileset + +tile_addr_in_tileset;
-
-
+            u16 tile_addr_start = (tile_pixel_y * 2) + bg_tileset + tile_addr_in_tileset;
+            int a;
+            if (tile_pixel_y == 0x8010 && tile_id == 0x1)
+                a = 1;
             // Schreibe das gefundene Tile in den Buffer
-            for (; tile_pixel_x <= TILE_WIDTH && x <= GB_LCD_SIZE_WIDTH - 1;
-                   x++, tile_pixel_x++) {
+            for (tile_pixel_x++; tile_pixel_x <= TILE_WIDTH && x <= GB_LCD_SIZE_WIDTH - 1;
+                 x++, tile_pixel_x++) {
                 const u8 p_line_1 = read(tile_addr_start);
                 const u8 p_line_2 = read(tile_addr_start + 1);
 
