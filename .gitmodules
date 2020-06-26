@@ -1,0 +1,3 @@
+[submodule "scr/Debugger/external/imgui"]
+	path = scr/Debugger/external/imgui
+	url = https://github.com/ocornut/imgui
