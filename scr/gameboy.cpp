@@ -1,5 +1,6 @@
 #include "gameboy.h"
 
+
 gameboy::gameboy() : mem(&cpu, &card, &ppu, &joypad), cpu(&mem), ppu(&mem), joypad(&mem, &ppu) {}
 
 gameboy::~gameboy() {
@@ -10,6 +11,7 @@ void gameboy::start_emu() {
     auto cycles = 0;
     auto last_cycle = 0;
     mem.reset();
+
     //card.load_rom("./../../testroms/tetris.gb");
     //card.load_rom("./../../testroms/sml.gb");
     //card.load_rom("./../../testroms/cpu_instrs/individual/07-jr,jp,call,ret,rst.gb");
@@ -28,6 +30,7 @@ void gameboy::start_emu() {
         last_cycle = cpu.update();
         cycles += last_cycle;
         ppu.update(last_cycle * 4);
+        debug.update();
 
         if (cycles >= VERTICAL_REFRESH_CYCLES) {
             cycles = 0;

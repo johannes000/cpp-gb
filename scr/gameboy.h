@@ -8,6 +8,7 @@
 #include "PPU.h"
 #include "CONTROLS.h"
 #include "SDL.h"
+#include "Debugger/Debugger.h"
 
 class gameboy {
 public:
@@ -20,6 +21,7 @@ public:
     CPU cpu;
     PPU ppu;
     CONTROLS joypad;
+    Debugger debug;
 
     void start_emu();
 
