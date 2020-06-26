@@ -80,27 +80,6 @@ void CPU::print_last_opcode() {
     std::cout << std::endl;
 }
 
-void CPU::print_all_ops() {
-    u16 mypc = 0x00;
-    instruction myinstruction_info;
-    while (mypc < 0x4000) {
-        auto myopcode = read(mypc);
-        if (myopcode == 0xCB) {
-            myopcode = read(++mypc);
-            myinstruction_info = prefixedinstructions[myopcode];
-        } else {
-            myinstruction_info = instructions[myopcode];
-        }
-        std::cout << "0x" << std::hex << std::uppercase << static_cast<int>(mypc)
-                  << "\t" << myinstruction_info.mnemonic;
-        if (myinstruction_info.bytes == 3)
-            std::cout << " " << static_cast<int>(read_u16_at_pc());
-        if (myinstruction_info.bytes == 2)
-            std::cout << " 0x" << static_cast<int>(read_u8_at_pc());
-        std::cout << std::endl;
-        mypc += myinstruction_info.bytes;
-    }
-}
 
 bool CPU::in_boot_r() const { return in_boot; }
 

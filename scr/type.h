@@ -18,7 +18,7 @@ constexpr u16 CARD_ROM = 0x0000;
 constexpr u16 CARD_ROM_0 = 0x0000;
 constexpr u16 BOOT_ROM_END = 0x00FF;
 constexpr u16 CARD_ROM_0_END = 0x3FFF;
-constexpr u16 CARD_ROM_END = 0x7000;
+constexpr u16 CARD_ROM_END = 0x7FFF;
 constexpr u16 BIOS = 0x0000;
 constexpr u16 BIOS_END = 0x00FF;
 constexpr u16 CARD_HEADER = 0x0100;
@@ -70,15 +70,6 @@ constexpr u16
         DMA_TRANSFER = 0xFF46;  // DMA Transfer and Start Address (R/W)
 
 constexpr int VERTICAL_REFRESH_CYCLES = 70224;
-
-enum class Colors {
-    white = 0,
-    light_gray = 1,
-    dark_gray = 2,
-    black = 3,
-};
-
-typedef const u8 IF;  // Interrupt Flags
 
 enum class Flag {
     z = 7,  // Zero Flag
@@ -134,39 +125,39 @@ struct CPU_Register {
 
 // ROM INFO
 enum class CGBFlag {
-    OFF = 0x80,  // - Game supports CGB functions, but works on old gameboys also.
-    ON = 0xC0,   // - Game works on CGB only(physically the same as 80h).
+    OFF  [[maybe_unused]] = 0x80,  // - Game supports CGB functions, but works on old gameboys also.
+    ON  [[maybe_unused]] = 0xC0,   // - Game works on CGB only(physically the same as 80h).
 };
 
 enum class CType {  // Cartridge Type
-    ROM_ONLY = 0x00,
-    MBC1 = 0x01,
-    MBC1_RAM = 0x02,
-    MBC1_RAM_BATTERY = 0x03,
-    MBC2 = 0x05,
-    MBC2_BATTERY = 0x06,
-    ROM_RAM = 0x08,
-    ROM_RAM_BATTERY = 0x09,
-    MMM01 = 0x0B,
-    MMM01_RAM = 0x0C,
-    MMM01_RAM_BATTERY = 0x0D,
-    MBC3_TIMER_BATTERY = 0x0F,
-    MBC3_TIMER_RAM_BATTERY = 0x10,
-    MBC3 = 0x11,
-    MBC3_RAM = 0x12,
-    MBC3_RAM_BATTERY = 0x13,
-    MBC5 = 0x19,
-    MBC5_RAM = 0x1A,
-    MBC5_RAM_BATTERY = 0x1B,
-    MBC5_RUMBLE = 0x1C,
-    MBC5_RUMBLE_RAM = 0x1D,
-    MBC5_RUMBLE_RAM_BATTERY = 0x1E,
-    MBC6 = 0x20,
-    MBC7_SENSOR_RUMBLE_RAM_BATTERY = 022,
-    POCKET_CAMERA = 0xFC,
-    BANDAI_TAMA5 = 0xFD,
-    HuC3 = 0xFE,
-    HUC1_RAM_BATTERY = 0xFF
+    ROM_ONLY [[maybe_unused]] = 0x00,
+    MBC1  [[maybe_unused]] = 0x01,
+    MBC1_RAM [[maybe_unused]] = 0x02,
+    MBC1_RAM_BATTERY [[maybe_unused]] = 0x03,
+    MBC2  [[maybe_unused]] = 0x05,
+    MBC2_BATTERY  [[maybe_unused]] = 0x06,
+    ROM_RAM  [[maybe_unused]] = 0x08,
+    ROM_RAM_BATTERY  [[maybe_unused]] = 0x09,
+    MMM01  [[maybe_unused]] = 0x0B,
+    MMM01_RAM  [[maybe_unused]] = 0x0C,
+    MMM01_RAM_BATTERY  [[maybe_unused]] = 0x0D,
+    MBC3_TIMER_BATTERY  [[maybe_unused]] = 0x0F,
+    MBC3_TIMER_RAM_BATTERY  [[maybe_unused]] = 0x10,
+    MBC3  [[maybe_unused]] = 0x11,
+    MBC3_RAM  [[maybe_unused]] = 0x12,
+    MBC3_RAM_BATTERY  [[maybe_unused]] = 0x13,
+    MBC5  [[maybe_unused]] = 0x19,
+    MBC5_RAM  [[maybe_unused]] = 0x1A,
+    MBC5_RAM_BATTERY  [[maybe_unused]] = 0x1B,
+    MBC5_RUMBLE  [[maybe_unused]] = 0x1C,
+    MBC5_RUMBLE_RAM  [[maybe_unused]] = 0x1D,
+    MBC5_RUMBLE_RAM_BATTERY  [[maybe_unused]] = 0x1E,
+    MBC6  [[maybe_unused]] = 0x20,
+    MBC7_SENSOR_RUMBLE_RAM_BATTERY  [[maybe_unused]] = 022,
+    POCKET_CAMERA  [[maybe_unused]] = 0xFC,
+    BANDAI_TAMA5  [[maybe_unused]] = 0xFD,
+    HuC3  [[maybe_unused]] = 0xFE,
+    HUC1_RAM_BATTERY  [[maybe_unused]] = 0xFF
 
 };
 
@@ -195,8 +186,8 @@ enum class RAMSize {
 };
 
 enum class DestCode {
-    JAP = 0x00,
-    NON_JAP = 0x01,
+    JAP  [[maybe_unused]] = 0x00,
+    NON_JAP  [[maybe_unused]] = 0x01,
 };
 
 struct Rom_Info {
@@ -256,28 +247,19 @@ enum class GB_Key {
 
 void set_bit_if(u8 &value, const u8 &bit, bool condition);
 
-void set_bit_if(u16 &value,
-                const u16 &bit,
-                bool condition
-);
+void set_bit_if(u16 &value, const u16 &bit, bool condition);
 
 void set_bit(u8 &value, const u8 &bit);
 
-void set_bit(u16 &value,
-             const u16 &bit
-);
+void set_bit(u16 &value, const u16 &bit);
 
 void reset_bit(u8 &value, const u8 &bit);
 
-void reset_bit(u16 &value,
-               const u16 &bit
-);
+void reset_bit(u16 &value, const u16 &bit);
 
 void toggle_bit(u8 &value, const u8 &bit);
 
-void toggle_bit(u16 &value,
-                const u16 &bit
-);
+void toggle_bit(u16 &value, const u16 &bit);
 
 bool check_bit(const u8 &value, const u8 &bit);
 

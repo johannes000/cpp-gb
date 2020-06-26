@@ -8,10 +8,8 @@ MEMORY::MEMORY(CPU *c, CARDRIDGE *card, PPU *p, CONTROLS *j)
     load_boot_rom();
 }
 
-MEMORY::~MEMORY() {}
-
 u8 MEMORY::read(const u16 &addr) {
-    if (addr <= 0x7FFF) {
+    if (addr <= CARD_ROM_END) {
         if (cpu->in_boot_r() && addr <= BOOT_ROM_END) {
             return boot.at(addr);
         }
@@ -57,7 +55,7 @@ u8 MEMORY::read(const u16 &addr) {
 
 void MEMORY::write(const u16 &addr, const u8 &data) {
     if (addr == 0xFF02 && data == 0x81)
-        std::cout << static_cast<char>(read(0xff01));
+        std::cout << static_cast<char >(read(0xff01));
 
 
     if (addr >= GRAPHICS_RAM && addr <= GRAPHICS_RAM_END) {

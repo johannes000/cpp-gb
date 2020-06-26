@@ -22,8 +22,6 @@ class MEMORY {
 public:
     MEMORY(CPU *c, CARDRIDGE *card, PPU *p, CONTROLS *j);
 
-    ~MEMORY();
-
     u8 read(const u16 &addr);
 
     void write(const u16 &addr, const u8 &data);
@@ -36,7 +34,7 @@ private:
     CPU *cpu;
     CONTROLS *joypad;
 
-    const char *boot_rom_path = "./../boot.gb";
+    const char *boot_rom_path = "./../dmg_boot.bin";
     std::vector<u8> memory;
     std::vector<u8> boot;
 
