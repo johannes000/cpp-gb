@@ -3,18 +3,17 @@ project(cpp-gb)
 
 set(CMAKE_CXX_STANDARD 20)
 
-set(SDL2_DIR "C:\\Users\\knaub\\source\\SDL2-2.0.12\\i686-w64-mingw32")
+find_library(SDL SDL2 PATHS "./external/SDL2-2.0.12/x86_64-w64-mingw32/lib")
+find_library(SDLmain SDL2main PATHS "./external/SDL2-2.0.12/x86_64-w64-mingw32/lib")
+include_directories("./external/SDL2-2.0.12/x86_64-w64-mingw32/include/SDL2")
 
-find_library(GLFW glfw3 PATHS "./scr/Debugger/external/glfw-3.3.2.bin.WIN32/lib-mingw")
-include_directories("./scr/Debugger/external/glfw-3.3.2.bin.WIN32/include/")
+find_library(GLFW glfw3 PATHS "./external/glfw-3.3.2.bin.WIN32/lib-mingw-w64")
+include_directories("./external/glfw-3.3.2.bin.WIN32/include")
 
-add_library("glad" "./scr/Debugger/external/glad/src/glad.c")
-include_directories("./scr/Debugger/external/glad/include")
+add_library("glad" "./external/glad/src/glad.c")
+include_directories("./external/glad/include")
 
-include_directories("./scr/Debugger/external/")
-
-find_package(SDL2 REQUIRED)
-include_directories(${SDL2_INCLUDE_DIR})
+include_directories("./external/")
 
 find_package(OpenGL REQUIRED)
 
@@ -36,29 +35,30 @@ add_executable(cpp-gb
         scr/PPU.cpp scr/PPU.h
         scr/type.cpp scr/type.h
         scr/CONTROLS.cpp scr/CONTROLS.h
+        scr/Debugger/Debugger.cpp scr/Debugger/Debugger.h
 
-
-        scr/Debugger/external/imgui/imconfig.h
-        scr/Debugger/external/imgui/imgui_demo.cpp
-        scr/Debugger/external/imgui/imgui_draw.cpp
-        scr/Debugger/external/imgui/imgui_impl_glfw.cpp
-        scr/Debugger/external/imgui/imgui_impl_glfw.h
-        scr/Debugger/external/imgui/imgui_impl_opengl3.cpp
-        scr/Debugger/external/imgui/imgui_impl_opengl3.h
-        scr/Debugger/external/imgui/imgui_internal.h
-        scr/Debugger/external/imgui/imgui_widgets.cpp
-        scr/Debugger/external/imgui/imgui.cpp
-        scr/Debugger/external/imgui/imgui.h
-        scr/Debugger/external/imgui/imstb_rectpack.h
-        scr/Debugger/external/imgui/imstb_textedit.h
-        scr/Debugger/external/imgui/imstb_truetype.h scr/Debugger/Debugger.cpp scr/Debugger/Debugger.h)
+        external/imgui/imconfig.h
+        external/imgui/imgui_demo.cpp
+        external/imgui/imgui_draw.cpp
+        external/imgui/imgui_impl_glfw.cpp
+        external/imgui/imgui_impl_glfw.h
+        external/imgui/imgui_impl_opengl3.cpp
+        external/imgui/imgui_impl_opengl3.h
+        external/imgui/imgui_internal.h
+        external/imgui/imgui_widgets.cpp
+        external/imgui/imgui.cpp
+        external/imgui/imgui.h
+        external/imgui/imstb_rectpack.h
+        external/imgui/imstb_textedit.h
+        external/imgui/imstb_truetype.h)
 
 target_link_libraries(cpp-gb
         -lmingw32
         -lSDL2main
         -lSDL2
-        ${SDL2_LIBRARY}
-        ${GLFW}
+        ${SDL}
+        ${SDLmain}
         ${OPENGL_gl_LIBRARY}
+        ${GLFW}
         "glad"
         )

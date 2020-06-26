@@ -3,6 +3,7 @@
   <component name="CMakeWorkspace" PROJECT_DIR="$PROJECT_DIR$" />
   <component name="CidrRootsConfiguration">
     <libraryRoots>
+      <file path="$PROJECT_DIR$/external" />
       <file path="$PROJECT_DIR$/scr/Debugger/external" />
     </libraryRoots>
   </component>
