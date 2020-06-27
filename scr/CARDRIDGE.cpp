@@ -138,3 +138,11 @@ void CARDRIDGE::write(const u16 &addr, const u8 &data) {
     int a = ram[0].at(0xbfff - CARD_EXTERNAL_RAM);
     if (addr >= 0xA000 && addr <= 0xBFFF) ram[selected_ram_bank].at(addr - CARD_EXTERNAL_RAM) = data;
 }
+
+const std::vector<u8> &CARDRIDGE::get_rom() const {
+    return rom;
+}
+
+u8 CARDRIDGE::read_card_rom(const u16 &addr) {
+    return rom.at(addr);
+}

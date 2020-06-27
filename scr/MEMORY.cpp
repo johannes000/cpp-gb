@@ -150,11 +150,13 @@ void MEMORY::reset() {
 }
 
 void MEMORY::dma_transfer(const u8 &data) {
+
     memory.at(DMA_TRANSFER) = data;
     const u16 addr = data << 8u;
     for (u8 i = 0; i < 0xA0; i++) {
         write(0xFE00 + i, read(addr + i));
     }
+
 }
 
 bool MEMORY::load_boot_rom() {
@@ -166,4 +168,8 @@ bool MEMORY::load_boot_rom() {
     const std::vector<u8> romf(std::istreambuf_iterator<char>(is), {});
     this->boot = romf;
     return true;
+}
+
+u8 MEMORY::read_card_rom(const u16 &addr) {
+    return cardridge->read_card_rom(addr);
 }

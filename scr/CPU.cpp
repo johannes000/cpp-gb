@@ -2,6 +2,7 @@
 
 #include <iostream>
 
+
 CPU::CPU(MEMORY *m) : mem(m) { init_register(); }
 
 void CPU::init_register() {
@@ -55,7 +56,31 @@ int CPU::update() {
 
 void CPU::inc_pc() { R.PC += current_instruction_info.bytes; }
 
+u16 CPU::get_pc() const {
+    return R.PC;
+}
+
 u8 CPU::get_next_op_code() { return read(R.PC); }
+
+debug_instruction CPU::get_instruction_at_addr(u16 addr) {
+    debug_instruction debug_inst;
+    cpu_instruction inst = addr == 0xCD ? prefixedinstructions[mem->read_card_rom(addr + 1)] :
+                           instructions[mem->read_card_rom(addr)];
+    u16 intermediate = 0;
+    if (inst.bytes != 0)
+        intermediate =
+                inst.bytes == 2 ? static_cast<u16>(mem->read_card_rom(addr)) :
+                u8_to_u16(mem->read_card_rom(addr + 1), read(addr));
+
+    debug_inst = {
+            inst.mnemonic,
+            inst.bytes,
+            inst.cycles,
+            intermediate
+    };
+
+    return debug_inst;
+}
 
 void CPU::print_last_opcode() {
     std::cout << "0x" << std::hex << std::uppercase << static_cast<int>(old_pc)
@@ -95,6 +120,7 @@ u8 CPU::read(const u16 &addr) {
             return mem->read(addr);
     }
 }
+
 
 void CPU::write(const u16 &addr, const u8 &data) {
     switch (addr) {
@@ -136,18 +162,26 @@ bool CPU::interrupts() const {
 
 void CPU::IE_Flags::update(CPU *cpu) {
     const auto data = cpu->read(INTERRUPT_ENABLE_REG);
-    JIR = check_bit(data, 4);
-    SIR = check_bit(data, 3);
-    TIR = check_bit(data, 2);
-    LIR = check_bit(data, 1);
-    VIR = check_bit(data, 0);
+    *this = {
+            check_bit(data, 4),
+            check_bit(data, 3),
+            check_bit(data, 2),
+            check_bit(data, 1),
+            check_bit(data, 0),
+    };
 }
 
 void CPU::IF_Flags::update(CPU *cpu) {
     const auto data = cpu->read(INTERRUPT_FLAGS_REG);
-    JIE = check_bit(data, 4);
-    SIE = check_bit(data, 3);
-    TIE = check_bit(data, 2);
-    LIE = check_bit(data, 1);
-    VIE = check_bit(data, 0);
+    *this = {check_bit(data, 4),
+             check_bit(data, 3),
+             check_bit(data, 2),
+             check_bit(data, 1),
+             check_bit(data, 0),
+    };
+
 }
+
+
+
+

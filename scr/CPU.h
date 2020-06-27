@@ -3,6 +3,7 @@
 #define CPU_H_GUARD
 
 #include <vector>
+#include <map>
 
 #include "MEMORY.h"
 #include "type.h"
@@ -46,6 +47,9 @@ private:
     void init_register();
 
     u16 old_pc = 0x00;
+public:
+    u16 get_pc() const;
+
 
     // INTERRUPTS
 
@@ -113,20 +117,26 @@ private:
 
     // OPCODES
 private:
-    struct instruction {
-        const char *mnemonic = "";
+    struct cpu_instruction {
+        const char *mnemonic{};
 
-        u8 (CPU::*function)(void) = nullptr;
+        u8 (CPU::*function)() = nullptr;
 
-        u8 bytes = 0;
-        u8 cycles = 0;
+        u8 bytes{};
+        u8 cycles{};
     };
 
-    instruction current_instruction_info;
+
+    cpu_instruction current_instruction_info;
     u8 op_code{};
     bool prefix = false;
 
-    // oft benutzte Anweisungen
+public:
+    debug_instruction get_instruction_at_addr(u16 addr);
+
+private:
+
+    // Oft benutzte Anweisungen
     u8 read_u8_at_pc();
 
     u16 read_u16_at_pc();
@@ -190,7 +200,7 @@ private:
     void swap_r8(u8 *reg);
 
     // OPCODES
-    const std::vector<instruction> instructions = {
+    const std::vector<cpu_instruction> instructions = {
             {"NOP",         &CPU::opcode0x00, 1, 1},
             {"LD BC d16",   &CPU::opcode0x01, 3, 3},
             {"LD BC A",     &CPU::opcode0x02, 1, 2},
@@ -450,8 +460,14 @@ private:
             {"STOP",        &CPU::opcode0x10, 1, 1},
 
     };
+public:
+    const std::vector<cpu_instruction> &getInstructions() const;
 
-    const std::vector<instruction> prefixedinstructions = {
+    const std::vector<cpu_instruction> &getPrefixedinstructions() const;
+
+private:
+
+    const std::vector<cpu_instruction> prefixedinstructions = {
             {"RLC B",    &CPU::prefixedopcode0x00, 2, 2},
             {"RLC C",    &CPU::prefixedopcode0x01, 2, 2},
             {"RLC D",    &CPU::prefixedopcode0x02, 2, 2},

@@ -17,6 +17,7 @@ void Debugger::update() {
 
     imgui_demo();
     view_one();
+    CPU_view();
 
     // Rendering
     ImGui::Render();
@@ -43,18 +44,16 @@ void Debugger::imgui_demo() {
     static float f = 0.0f;
     static int counter = 0;
 
-    ImGui::Begin(
-            "Hello, world!");                          // Create a window called "Hello, world!" and append into it.
+    ImGui::Begin("Hello, world!");
 
-    ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
-    ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
+    ImGui::Text("This is some useful text.");
+    ImGui::Checkbox("Demo Window", &show_demo_window);
     ImGui::Checkbox("Another Window", &show_another_window);
 
-    ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-    ImGui::ColorEdit3("clear color", (float *) &bg_color); // Edit 3 floats representing a color
+    ImGui::SliderFloat("float", &f, 0.0f, 1.0f);
+    ImGui::ColorEdit3("clear color", (float *) &bg_color);
 
-    if (ImGui::Button(
-            "Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
+    if (ImGui::Button("Button"))
         counter++;
     ImGui::SameLine();
     ImGui::Text("counter = %d", counter);
@@ -62,4 +61,76 @@ void Debugger::imgui_demo() {
     ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate,
                 ImGui::GetIO().Framerate);
     ImGui::End();
+}
+
+void Debugger::CPU_view() {
+
+    ImGui::Begin("CPU");
+    ImGui::Columns(5, "mycolumns"); // 4-ways, with border
+    ImGui::Separator();
+    ImGui::Text("Address");
+    ImGui::NextColumn();
+    ImGui::Text("Mnemonic");
+    ImGui::NextColumn();
+    ImGui::Text("Intermediate");
+    ImGui::NextColumn();
+    ImGui::Text("Cycles");
+    ImGui::NextColumn();
+    ImGui::Text("Cycles Sum");
+    ImGui::NextColumn();
+    ImGui::Separator();
+
+
+    static int selected = -1;
+    u16 pc = cpu->get_pc();
+    auto it = dis_map.find(pc);
+    auto beg = std::prev(it, 10);
+    auto end = std::next(it, 10);
+
+    for (auto &m:dis_map)
+        while (beg != end) {
+
+            if (beg->first == it->first)
+                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.1f, 0.8f, 0.8f, 1.0f));
+
+            debug_instruction debug_inst = beg->second;
+            char address[32];
+            sprintf(address, "%04X", beg->first);
+            ImGui::Text("%s", address);
+            ImGui::NextColumn();
+            ImGui::Text("%s", debug_inst.mnemonic);
+            ImGui::NextColumn();
+            char intermediate[32];
+            if (debug_inst.bytes != 0)
+                sprintf(intermediate, "%04X", debug_inst.intermediate);
+            ImGui::Text("%s", intermediate);
+            ImGui::NextColumn();
+            char cycles[32];
+            sprintf(cycles, "%02i", debug_inst.cycles);
+            ImGui::Text("%s", cycles);
+
+            ImGui::NextColumn();
+            ImGui::NextColumn();
+            pc += debug_inst.cycles;
+            if (beg->first == it->first)
+                ImGui::PopStyleColor(1);
+
+            beg++;
+        }
+    ImGui::End();
+
+
+}
+
+void Debugger::reset() {
+
+}
+
+void Debugger::dissassamble() {
+    debug_instruction debug_inst;
+    for (int addr = 0; addr < 0x7FFF;) {
+        debug_inst = cpu->get_instruction_at_addr(addr);
+        dis_map.insert({addr, debug_inst});
+        addr += debug_inst.bytes;
+    }
 }

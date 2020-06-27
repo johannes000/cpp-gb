@@ -1,7 +1,7 @@
 #include "gameboy.h"
 
 
-gameboy::gameboy() : mem(&cpu, &card, &ppu, &joypad), cpu(&mem), ppu(&mem), joypad(&mem, &ppu) {}
+gameboy::gameboy() : mem(&cpu, &card, &ppu, &joypad), cpu(&mem), ppu(&mem), joypad(&mem, &ppu), debug(&cpu) {}
 
 gameboy::~gameboy() {
 
@@ -24,7 +24,8 @@ void gameboy::start_emu() {
     //card.load_rom("C:\\Users\\knaub\\source\\repos\\testroms\\mooneye\\acceptance\\bits\\mem_oam.gb");
     card.load_rom("C:\\Users\\knaub\\source\\repos\\testroms\\mooneye\\acceptance\\bits\\reg_f.gb");
     //card.load_rom("C:\\Users\\knaub\\source\\repos\\testroms\\mooneye\\acceptance\\bits\\mem_oam.gb");
-    // cpu.print_all_ops();
+
+    debug.dissassamble();
     bool quit = false;
     while (!quit) {
         last_cycle = cpu.update();

@@ -22,7 +22,7 @@ void CPU::ret() {
 }
 
 void CPU::call() {
-    // Push address of next instruction onto stack and then jump to address nn.
+    // Push address of next cpu_instruction onto stack and then jump to address nn.
     u16 next_inst = R.PC + current_instruction_info.bytes;
     push_r16_reg(&next_inst);
     R.PC = read_u16_at_pc();

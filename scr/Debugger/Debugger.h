@@ -5,12 +5,17 @@
 #ifndef CPP_GB_DEBUGGER_H
 #define CPP_GB_DEBUGGER_H
 
+#include "type.h"
+#include "CPU.h"
+
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 
 #include <cstdio>
 #include <cstdlib>
+
+#include <map>
 
 #if defined(IMGUI_IMPL_OPENGL_LOADER_GL3W)
 #include <GL/gl3w.h>            // Initialize with gl3wInit()
@@ -40,21 +45,33 @@ using namespace gl;
 #pragma comment(lib, "legacy_stdio_definitions")
 #endif
 
+class CPU;
 
 class Debugger {
 public:
-    Debugger();
+    explicit Debugger(CPU *c);
 
     ~Debugger();
 
     void update();
 
+    void reset();
+
+    void dissassamble();
+
 private:
+
+    CPU *cpu;
+    std::map<u16, debug_instruction> dis_map;
+
+
     void init_debug_window();
 
     static void view_one();
 
     void imgui_demo();
+
+    void CPU_view();
 
 
     void terminate_window();

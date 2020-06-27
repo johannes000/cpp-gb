@@ -203,7 +203,14 @@ struct Rom_Info {
     int rom_banks{};
     int ram_banks{};
 };
+struct debug_instruction {
+    const char *mnemonic{};
 
+    u8 bytes{};
+    u8 cycles{};
+
+    u16 intermediate{};
+};
 struct Pixel {
     // SDL_PIXELFORMAT_RGB24
     // Stored in memory as the bytes R, G, B

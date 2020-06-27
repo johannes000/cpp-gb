@@ -24,6 +24,8 @@ public:
 
     u8 read(const u16 &addr);
 
+    u8 read_card_rom(const u16 &addr);
+
     void write(const u16 &addr, const u8 &data);
 
     void write_u16(const u16 &addr, const u16 &data);
