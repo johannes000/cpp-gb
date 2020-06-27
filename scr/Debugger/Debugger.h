@@ -4,42 +4,75 @@
 
 #ifndef CPP_GB_DEBUGGER_H
 #define CPP_GB_DEBUGGER_H
-// C++
-#include <string>
-#include <iostream>
-// GLFW
-#include <glad/glad.h>
+
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
+
+#include <cstdio>
+#include <cstdlib>
+
+#if defined(IMGUI_IMPL_OPENGL_LOADER_GL3W)
+#include <GL/gl3w.h>            // Initialize with gl3wInit()
+#elif defined(IMGUI_IMPL_OPENGL_LOADER_GLEW)
+#include <GL/glew.h>            // Initialize with glewInit()
+#elif defined(IMGUI_IMPL_OPENGL_LOADER_GLAD)
+
+#include <glad/glad.h>          // Initialize with gladLoadGL()
+
+#elif defined(IMGUI_IMPL_OPENGL_LOADER_GLBINDING2)
+#define GLFW_INCLUDE_NONE       // GLFW including OpenGL headers causes ambiguity or multiple definition errors.
+#include <glbinding/Binding.h>  // Initialize with glbinding::Binding::initialize()
+#include <glbinding/gl/gl.h>
+using namespace gl;
+#elif defined(IMGUI_IMPL_OPENGL_LOADER_GLBINDING3)
+#define GLFW_INCLUDE_NONE       // GLFW including OpenGL headers causes ambiguity or multiple definition errors.
+#include <glbinding/glbinding.h>// Initialize with glbinding::initialize()
+#include <glbinding/gl/gl.h>
+using namespace gl;
+#else
+#include IMGUI_IMPL_OPENGL_LOADER_CUSTOM
+#endif
+
 #include <GLFW/glfw3.h>
 
-#include "imgui/imgui.h"
-
-#include "imgui/imgui_impl_glfw.h"
-#include "imgui/imgui_impl_opengl3.h"
+#if defined(_MSC_VER) && (_MSC_VER >= 1900) && !defined(IMGUI_DISABLE_WIN32_FUNCTIONS)
+#pragma comment(lib, "legacy_stdio_definitions")
+#endif
 
 
 class Debugger {
 public:
     Debugger();
 
+    ~Debugger();
+
     void update();
 
 private:
-    void start_debugger();
+    void init_debug_window();
 
-    void render();
+    static void view_one();
+
+    void imgui_demo();
+
+
+    void terminate_window();
+
+    static void glfw_error_callback(int error, const char *description);
+
 
     GLFWwindow *window{};
+    bool show_demo_window = true;
+    bool show_another_window = false;
 
-    static void teardown(GLFWwindow *window);
+    const ImVec4 bg_color = {0.8f, 0.8f, 0.8f, 1.0f};
 
-    std::string programName = "Debugger";
-    int windowWidth = 1200;
-    int windowHeight = 800;
-    float backgroundR = 0.1f;
-    float backgroundG = 0.3f;
-    float backgroundB = 0.2f;
+    int window_height = 900;
+    int window_width = 1200;
 
-    void composeControlView();
+    int window_xpos = 680;
+    int window_ypos = 45;
 };
 
 

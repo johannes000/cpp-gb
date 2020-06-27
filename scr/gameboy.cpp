@@ -30,9 +30,8 @@ void gameboy::start_emu() {
         last_cycle = cpu.update();
         cycles += last_cycle;
         ppu.update(last_cycle * 4);
-        debug.update();
-
         if (cycles >= VERTICAL_REFRESH_CYCLES) {
+            debug.update();
             cycles = 0;
             while (SDL_PollEvent(&event)) {
                 joypad.update_joypad(event);

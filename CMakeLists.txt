@@ -13,7 +13,7 @@ include_directories("./external/glfw-3.3.2.bin.WIN32/include")
 add_library("glad" "./external/glad/src/glad.c")
 include_directories("./external/glad/include")
 
-include_directories("./external/")
+include_directories("./external/imgui")
 
 find_package(OpenGL REQUIRED)
 
@@ -50,7 +50,7 @@ add_executable(cpp-gb
         external/imgui/imgui.h
         external/imgui/imstb_rectpack.h
         external/imgui/imstb_textedit.h
-        external/imgui/imstb_truetype.h)
+        external/imgui/imstb_truetype.h scr/Debugger/Debugger_Init.cpp)
 
 target_link_libraries(cpp-gb
         -lmingw32

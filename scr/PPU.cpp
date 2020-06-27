@@ -280,8 +280,8 @@ LCD_Mode PPU::mode() const { return lcd_mode; }
 bool PPU::create_window() {
     SDL_Init(SDL_INIT_EVERYTHING);
 
-    window = SDL_CreateWindow("cpp-gb", SDL_WINDOWPOS_UNDEFINED,
-                              SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH * 4,
+    window = SDL_CreateWindow("cpp-gb", 20,
+                              40, SCREEN_WIDTH * 4,
                               SCREEN_HEIGHT * 4, SDL_WINDOW_SHOWN);
     // Create renderer for window
     renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);

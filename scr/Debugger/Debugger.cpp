@@ -1,67 +1,65 @@
 //
 // Created by knaub on 26.06.2020.
 //
-
 #include "Debugger.h"
-#include "imgui/imgui_impl_glfw.h"
-
-void Debugger::start_debugger() {
-
-    glfwInit();
-
-    std::string gsls_version = "#version 130";
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-    window = glfwCreateWindow(windowWidth, windowHeight, programName.c_str(), nullptr, nullptr);
-    if (!window) {
-        std::cerr << "[ERROR] Couldn't create a GLFW window\n";
-        teardown(nullptr);
-        exit(-1);
-    }
-    glfwMakeContextCurrent(window);
-    ImGui_ImplGlfw_InitForOpenGL(window, true);
-    ImGui_ImplOpenGL3_Init(gsls_version.c_str());
-
-    if (!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) {
-        std::cerr << "[ERROR] Couldn't initialize GLAD" << std::endl;
-        teardown(window);
-        exit(-1);
-    } else {
-        std::cout << "[INFO] GLAD initialized\n";
-    }
-    ImGui_ImplGlfw_NewFrame();
-
-    glClearColor(backgroundR, backgroundG, backgroundB, 1.0f);
-
-
-}
-
-void Debugger::teardown(GLFWwindow *window) {
-    if (window != nullptr) { glfwDestroyWindow(window); }
-    glfwTerminate();
-}
-
-Debugger::Debugger() {
-    start_debugger();
-}
 
 void Debugger::update() {
-    ImGui::Begin("The Plan");
-    render();
-}
+
+    glfwPollEvents();
+
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+
+    if (show_demo_window)
+        ImGui::ShowDemoWindow(&show_demo_window);
 
 
-void Debugger::render() {
+    imgui_demo();
+    view_one();
+
+    // Rendering
+    ImGui::Render();
     int display_w, display_h;
     glfwGetFramebufferSize(window, &display_w, &display_h);
     glViewport(0, 0, display_w, display_h);
-    glClearColor(backgroundR, backgroundG, backgroundB, 1.0f);
+    glClearColor(bg_color.x, bg_color.y, bg_color.z, bg_color.w);
     glClear(GL_COLOR_BUFFER_BIT);
-    ImGui::Render();
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
     glfwSwapBuffers(window);
 }
 
+void Debugger::view_one() {
+    ImGui::Begin("Speicher");
 
+    ImGui::Text("JOJOJOJ");
 
+    ImGui::End();
+}
+
+void Debugger::imgui_demo() {
+
+    static float f = 0.0f;
+    static int counter = 0;
+
+    ImGui::Begin(
+            "Hello, world!");                          // Create a window called "Hello, world!" and append into it.
+
+    ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
+    ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
+    ImGui::Checkbox("Another Window", &show_another_window);
+
+    ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+    ImGui::ColorEdit3("clear color", (float *) &bg_color); // Edit 3 floats representing a color
+
+    if (ImGui::Button(
+            "Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
+        counter++;
+    ImGui::SameLine();
+    ImGui::Text("counter = %d", counter);
+
+    ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate,
+                ImGui::GetIO().Framerate);
+    ImGui::End();
+}
