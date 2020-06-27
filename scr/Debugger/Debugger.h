@@ -47,9 +47,11 @@ using namespace gl;
 
 class CPU;
 
+class PPU;
+
 class Debugger {
 public:
-    explicit Debugger(CPU *c);
+    explicit Debugger(CPU *c, PPU *ppu);
 
     ~Debugger();
 
@@ -57,11 +59,16 @@ public:
 
     void reset();
 
+    const void *frame_buffer = nullptr;
+
+    GLuint frame_texture = 0;
+
     void dissassamble();
 
 private:
 
     CPU *cpu;
+    PPU *ppu;
     std::map<u16, debug_instruction> dis_map;
 
 
@@ -72,6 +79,8 @@ private:
     void imgui_demo();
 
     void CPU_view();
+
+    void video_view();
 
 
     void terminate_window();
@@ -90,6 +99,8 @@ private:
 
     int window_xpos = 680;
     int window_ypos = 45;
+
+    static bool load_texture(GLuint *textureHandler, int width, int height, const void *data);
 };
 
 

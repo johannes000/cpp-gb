@@ -1,7 +1,7 @@
 #include "gameboy.h"
 
 
-gameboy::gameboy() : mem(&cpu, &card, &ppu, &joypad), cpu(&mem), ppu(&mem), joypad(&mem, &ppu), debug(&cpu) {}
+gameboy::gameboy() : mem(&cpu, &card, &ppu, &joypad), cpu(&mem), ppu(&mem), joypad(&mem, &ppu), debug(&cpu, &ppu) {}
 
 gameboy::~gameboy() {
 
@@ -12,7 +12,7 @@ void gameboy::start_emu() {
     auto last_cycle = 0;
     mem.reset();
 
-    //card.load_rom("./../../testroms/tetris.gb");
+    card.load_rom("./../../testroms/tetris.gb");
     //card.load_rom("./../../testroms/sml.gb");
     //card.load_rom("./../../testroms/cpu_instrs/individual/07-jr,jp,call,ret,rst.gb");
     //card.load_rom("./../../testroms/cpu_instrs/cpu_instrs.gb");
@@ -22,7 +22,7 @@ void gameboy::start_emu() {
     //card.load_rom("C:\\Users\\knaub\\source\\repos\\testroms\\mooneye\\utils\\bootrom_dumper.gb");
     //card.load_rom("C:\\Users\\knaub\\source\\repos\\testroms\\mooneye\\acceptance\\call_timing.gb");
     //card.load_rom("C:\\Users\\knaub\\source\\repos\\testroms\\mooneye\\acceptance\\bits\\mem_oam.gb");
-    card.load_rom("C:\\Users\\knaub\\source\\repos\\testroms\\mooneye\\acceptance\\bits\\reg_f.gb");
+    //card.load_rom("C:\\Users\\knaub\\source\\repos\\testroms\\mooneye\\acceptance\\bits\\reg_f.gb");
     //card.load_rom("C:\\Users\\knaub\\source\\repos\\testroms\\mooneye\\acceptance\\bits\\mem_oam.gb");
 
     debug.dissassamble();

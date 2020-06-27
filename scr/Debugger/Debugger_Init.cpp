@@ -107,10 +107,3 @@ void Debugger::terminate_window() {
     glfwTerminate();
 }
 
-Debugger::Debugger(CPU *c) : cpu(c) {
-    init_debug_window();
-}
-
-Debugger::~Debugger() {
-    terminate_window();
-}

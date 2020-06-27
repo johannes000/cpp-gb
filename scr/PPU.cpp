@@ -10,7 +10,7 @@ PPU::PPU(MEMORY *m) : mem(m) {
     // for (auto &v : sprite_attribute_table) v = rand() % 0x04;
 
     lcd_buffer = std::vector<Pixel>(GB_LCD_SIZE_WIDTH * GB_LCD_SIZE_HEIGHT,
-                                    {0x00, 0x00, 0x00});
+                                    {0xFF, 0x00, 0xFF});
     lcd_control.update(this);
 
     set_lcd_mode(LCD_Mode::OAM);
@@ -288,6 +288,10 @@ bool PPU::create_window() {
                                 SCREEN_HEIGHT);
 
     return true;
+}
+
+[[nodiscard]] const Pixel *PPU::getLcdBuffer() const {
+    return &lcd_buffer[0];
 }
 
 

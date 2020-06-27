@@ -169,6 +169,10 @@ private:
 
     // LCD Render Funktionen
     std::vector<Pixel> lcd_buffer;
+public:
+    Pixel const *getLcdBuffer() const;
+
+private:
 
     void buffer_line(const u8 line);
 
