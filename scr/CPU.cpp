@@ -62,24 +62,33 @@ u16 CPU::get_pc() const {
 
 u8 CPU::get_next_op_code() { return read(R.PC); }
 
-debug_instruction CPU::get_instruction_at_addr(u16 addr) {
+debug_instruction CPU::get_instruction_at_addr(u16 addr) const {
     debug_instruction debug_inst;
-    cpu_instruction inst = addr == 0xCD ? prefixedinstructions[mem->read_card_rom(addr + 1)] :
-                           instructions[mem->read_card_rom(addr)];
-    u16 intermediate = 0;
-    if (inst.bytes != 0)
-        intermediate =
-                inst.bytes == 2 ? static_cast<u16>(mem->read_card_rom(addr)) :
-                u8_to_u16(mem->read_card_rom(addr + 1), read(addr));
 
-    debug_inst = {
-            inst.mnemonic,
-            inst.bytes,
-            inst.cycles,
+    u8 inst_code = mem->read_card_rom(addr);
+
+    cpu_instruction cpu_inst;
+    if (inst_code == 0xCB) {
+        cpu_inst = prefixedinstructions[mem->read_card_rom(addr + 1)];
+        cpu_inst.bytes--;
+    } else {
+        cpu_inst = instructions[mem->read_card_rom(addr)];
+    }
+
+    u16 intermediate = 0;
+
+    if (cpu_inst.bytes != 1)
+        intermediate =
+                cpu_inst.bytes == 2 ? static_cast<u16>(mem->read_card_rom(addr)) :
+                u8_to_u16(mem->read_card_rom(addr + 1), mem->read_card_rom(addr));
+
+    return debug_inst = {
+            cpu_inst.mnemonic,
+            cpu_inst.bytes,
+            cpu_inst.cycles,
             intermediate
     };
 
-    return debug_inst;
 }
 
 void CPU::print_last_opcode() {

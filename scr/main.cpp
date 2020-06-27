@@ -7,14 +7,14 @@
 
 #include "gameboy.h"
 
-int main(int argc, char *args[]) {
-  try {
-    gameboy gb;
-    gb.start_emu();
-  } catch (const std::exception &e) {
-    std::cerr << e.what() << std::endl;
-    return -1;
-  }
+int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
+    try {
+        gameboy gb;
+        gb.start_emu();
+    } catch (const std::exception &e) {
+        std::cerr << e.what() << std::endl;
+        return -1;
+    }
 
-  return 0;
+    return 0;
 }

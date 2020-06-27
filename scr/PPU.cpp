@@ -238,9 +238,7 @@ void PPU::buffer_line(const u8 line) {
                                                                            : (static_cast<i8>(tile_id) + 128) *
                                                                              TILE_WIDTH * 2; // signed
             u16 tile_addr_start = (tile_pixel_y * 2) + bg_tileset + tile_addr_in_tileset;
-            int a;
-            if (tile_pixel_y == 0x8010 && tile_id == 0x1)
-                a = 1;
+
             // Schreibe das gefundene Tile in den Buffer
             for (tile_pixel_x++; tile_pixel_x <= TILE_WIDTH && x <= GB_LCD_SIZE_WIDTH - 1;
                  x++, tile_pixel_x++) {

@@ -103,12 +103,11 @@ void MEMORY::write(const u16 &addr, const u8 &data) {
 }
 
 void MEMORY::write_u16(const u16 &addr, const u16 &data) {
-    if (addr >= 0x00 && (addr + 1) < 0xFFFF) {
-        const u8 data_lb = data >> 8u;
-        const u8 data_hb = data & 0xFFu;
-        write(addr, data_hb);
-        write(addr + 1, data_lb);
-    }
+    const u8 data_lb = data >> 8u;
+    const u8 data_hb = data & 0xFFu;
+    write(addr, data_hb);
+    write(addr + 1, data_lb);
+
 }
 
 void MEMORY::reset() {

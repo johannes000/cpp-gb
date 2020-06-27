@@ -8,7 +8,7 @@
 
 CONTROLS::CONTROLS(MEMORY *m, PPU *p) : mem(m), ppu(p) {}
 
-void CONTROLS::update_joypad(SDL_Event &event) {
+void CONTROLS::update_joypad() {
     // Bit 7 - Not used
     // Bit 6 - Not used
     // Bit 5 - P15 Select Button Keys      (0=Select)
@@ -49,8 +49,5 @@ u8 CONTROLS::read(const u16 &addr) const {
     }
 }
 
-void CONTROLS::write(const u16 &addr, const u8 &data) {
-
-}
 
 

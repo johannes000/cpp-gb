@@ -27,10 +27,6 @@ bool CARDRIDGE::load_rom(const char *rom_file) {
     return true;
 }
 
-void CARDRIDGE::build_ram() const {
-
-}
-
 void CARDRIDGE::fill_cardridge_info() {
     if (rom.empty()) return;
 
@@ -113,20 +109,10 @@ void CARDRIDGE::fill_cardridge_info() {
     }
 }
 
-void CARDRIDGE::print_rom() {
-    int i = 0;
-    for (auto s : rom) {
-        if ((i++) % 255 == 0) {
-            std::cout << std::endl;
-        }
-        std::cout << std::hex << static_cast<int>(s) << " ";
-    }
-}
-
 Rom_Info *CARDRIDGE::get_rom_info() { return &rom_info; }
 
 u8 CARDRIDGE::read(const u16 &addr) {
-    if (addr >= 0x0000 && addr <= 0x7FFF)
+    if (addr <= 0x7FFF)
         return rom.at(addr);
     else if (addr >= 0xA000 && addr <= 0xBFFF) {
         return ram[selected_ram_bank][addr - CARD_EXTERNAL_RAM];
@@ -135,7 +121,6 @@ u8 CARDRIDGE::read(const u16 &addr) {
 }
 
 void CARDRIDGE::write(const u16 &addr, const u8 &data) {
-    int a = ram[0].at(0xbfff - CARD_EXTERNAL_RAM);
     if (addr >= 0xA000 && addr <= 0xBFFF) ram[selected_ram_bank].at(addr - CARD_EXTERNAL_RAM) = data;
 }
 

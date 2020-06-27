@@ -81,42 +81,42 @@ void Debugger::CPU_view() {
     ImGui::Separator();
 
 
-    static int selected = -1;
     u16 pc = cpu->get_pc();
     auto it = dis_map.find(pc);
-    auto beg = std::prev(it, 10);
-    auto end = std::next(it, 10);
+    auto beg = std::prev(it, 20);
+    auto end = std::next(it, 20);
 
-    for (auto &m:dis_map)
-        while (beg != end) {
+    while (beg != end) {
 
-            if (beg->first == it->first)
-                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.1f, 0.8f, 0.8f, 1.0f));
+        if (beg->first == it->first)
+            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.1f, 0.8f, 0.8f, 1.0f));
 
-            debug_instruction debug_inst = beg->second;
-            char address[32];
-            sprintf(address, "%04X", beg->first);
-            ImGui::Text("%s", address);
-            ImGui::NextColumn();
-            ImGui::Text("%s", debug_inst.mnemonic);
-            ImGui::NextColumn();
-            char intermediate[32];
-            if (debug_inst.bytes != 0)
-                sprintf(intermediate, "%04X", debug_inst.intermediate);
-            ImGui::Text("%s", intermediate);
-            ImGui::NextColumn();
-            char cycles[32];
-            sprintf(cycles, "%02i", debug_inst.cycles);
-            ImGui::Text("%s", cycles);
+        debug_instruction debug_inst = beg->second;
+        char address[32];
+        sprintf(address, "%04X", beg->first);
+        ImGui::Text("%s", address);
 
-            ImGui::NextColumn();
-            ImGui::NextColumn();
-            pc += debug_inst.cycles;
-            if (beg->first == it->first)
-                ImGui::PopStyleColor(1);
+        ImGui::NextColumn();
+        ImGui::Text("%s", debug_inst.mnemonic);
 
-            beg++;
-        }
+        ImGui::NextColumn();
+        char intermediate[32];
+        sprintf(intermediate, "%04X", debug_inst.intermediate);
+        ImGui::Text("%s", intermediate);
+
+        ImGui::NextColumn();
+        char cycles[32];
+        sprintf(cycles, "%02i", debug_inst.cycles);
+        ImGui::Text("%s", cycles);
+
+        ImGui::NextColumn();
+        ImGui::NextColumn();
+        pc += debug_inst.cycles;
+        if (beg->first == it->first)
+            ImGui::PopStyleColor(1);
+
+        beg++;
+    }
     ImGui::End();
 
 

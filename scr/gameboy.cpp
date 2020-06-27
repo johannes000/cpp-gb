@@ -35,7 +35,7 @@ void gameboy::start_emu() {
             debug.update();
             cycles = 0;
             while (SDL_PollEvent(&event)) {
-                joypad.update_joypad(event);
+                joypad.update_joypad();
                 switch (event.type) {
                     case SDL_QUIT:
                         exit(0);

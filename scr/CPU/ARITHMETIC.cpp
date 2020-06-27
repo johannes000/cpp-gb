@@ -15,17 +15,17 @@ void CPU::and_r8_r8(u8 *reg1, const u8 *reg2) {
     set_flag(Flag::h);
 }
 
-void CPU::or_r8_r8(u8 *reg1, const u8 *reg2) {
+void CPU::or_r8_r8(const u8 &reg) {
     // OR reg 1 und reg 2 und Speicher das Ergebnis in data 1
     reset_all_flags();
-    R.A |= *reg2;
+    R.A |= reg;
     set_flag_if(Flag::z, R.A == 0);
 }
 
 void CPU::cp_r8_r8(const u8 *data1, const u8 *data2) {
     //Subtract the value in data2 from data1 and set flags accordingly, but don't store the result. This is useful for ComParing values.
     set_flag(Flag::n);
-    set_flag_if(Flag::h, ((*data1 & 0xfu) - (*data2 & 0xfu)) < 0);
+    set_flag_if(Flag::h, ((*data1 & 0xfu) - (*data2 & 0xfu)));
     set_flag_if(Flag::c, *data1 < *data2);
     set_flag_if(Flag::z, *data1 == *data2);
 }
@@ -54,8 +54,8 @@ void CPU::dec_u8_reg(u8 *reg) {
 void CPU::add_r8_r8(u8 *reg, const u8 *value) {
     const u8 result = *reg + *value;
     reset_flag(Flag::n);
-    set_flag_if(Flag::h, (*reg & 0xF) + (*value & 0xF) > 0xF);
-    set_flag_if(Flag::c, (result & 0x100) != 0);
+    set_flag_if(Flag::h, (*reg & 0xFu) + (*value & 0xFu) > 0xFu);
+    set_flag_if(Flag::c, (result & 0x100u) != 0);
     *reg = result;
     set_flag_if(Flag::z, *reg == 0);
 }
@@ -388,50 +388,47 @@ u8 CPU::opcode0xA7() {  // AND A
 }
 
 u8 CPU::opcode0xB0() {  // OR B
-    or_r8_r8(&R.A, &R.B);
+    or_r8_r8(R.B);
     return 0;
 }
 
 u8 CPU::opcode0xB1() {  // OR C
-    or_r8_r8(&R.A, &R.C);
+    or_r8_r8(R.C);
     return 0;
 }
 
 u8 CPU::opcode0xB2() {  // OR D
-    or_r8_r8(&R.A, &R.D);
+    or_r8_r8(R.D);
     return 0;
 }
 
 u8 CPU::opcode0xB3() {  // OR E
-    or_r8_r8(&R.A, &R.E);
+    or_r8_r8(R.E);
     return 0;
 }
 
 u8 CPU::opcode0xB4() {  // OR H
-    or_r8_r8(&R.A, &R.H);
+    or_r8_r8(R.H);
     return 0;
 }
 
 u8 CPU::opcode0xB5() {  // OR L
-    or_r8_r8(&R.A, &R.L);
+    or_r8_r8(R.L);
     return 0;
 }
 
 u8 CPU::opcode0xB6() {  // OR HL
-    u8 data = read(R.HL);
-    or_r8_r8(&R.A, &data);
+    or_r8_r8(read(R.HL));
     return 0;
 }
 
 u8 CPU::opcode0xB7() {  // OR A
-    u8 data = read(R.HL);
-    or_r8_r8(&R.A, &data);
+    or_r8_r8(read(R.HL));
     return 0;
 }
 
 u8 CPU::opcode0xF6() {  // OR d8
-    u8 data = read_u8_at_pc();
-    or_r8_r8(&R.A, &data);
+    or_r8_r8(read_u8_at_pc());
     return 0;
 }
 

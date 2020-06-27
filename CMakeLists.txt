@@ -3,6 +3,24 @@ project(cpp-gb)
 
 set(CMAKE_CXX_STANDARD 20)
 
+# Link this 'library' to use the warnings specified in CompilerWarnings.cmake
+add_library(project_warnings INTERFACE)
+
+
+# standard compiler warnings
+include(cmake/CompilerWarnings.cmake)
+set_project_warnings(project_warnings)
+
+
+if (NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Debug)
+endif ()
+
+set(CMAKE_CXX_FLAGS "-O3 -Wall -Wextra -Wshadow -Wnon-virtual-dtor -Wcast-align -Wnull-dereference -Woverloaded-virtual  -Wformat=2")
+set(CMAKE_CXX_FLAGS_DEBUG "-g")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+
+
 find_library(SDL SDL2 PATHS "./external/SDL2-2.0.12/x86_64-w64-mingw32/lib")
 find_library(SDLmain SDL2main PATHS "./external/SDL2-2.0.12/x86_64-w64-mingw32/lib")
 include_directories("./external/SDL2-2.0.12/x86_64-w64-mingw32/include/SDL2")

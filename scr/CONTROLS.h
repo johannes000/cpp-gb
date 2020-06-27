@@ -17,19 +17,17 @@ public:
     CONTROLS(MEMORY *m, PPU *ppu);
 
 private:
-    PPU *ppu;
     MEMORY *mem;
+    PPU *ppu;
 
     u8 joy_p1_state = 0x00;
     u8 joy_both_states = 0x00;
 
 
 public:
-    void update_joypad(SDL_Event &event);
+    void update_joypad();
 
     [[nodiscard]] u8 read(const u16 &addr) const;
-
-    void write(const u16 &addr, const u8 &data);
 };
 
 

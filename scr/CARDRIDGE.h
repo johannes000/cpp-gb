@@ -27,10 +27,6 @@ public:
 private:
     void fill_cardridge_info();
 
-    void print_rom();
-
-    void build_ram() const;
-
     std::vector<u8> rom;
 public:
     [[nodiscard]] const std::vector<u8> &get_rom() const;

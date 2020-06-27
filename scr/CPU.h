@@ -132,7 +132,7 @@ private:
     bool prefix = false;
 
 public:
-    debug_instruction get_instruction_at_addr(u16 addr);
+    [[nodiscard]] debug_instruction get_instruction_at_addr(u16 addr) const;
 
 private:
 
@@ -152,7 +152,7 @@ private:
 
     void and_r8_r8(u8 *reg1, const u8 *reg2);
 
-    void or_r8_r8(u8 *reg1, const u8 *reg2);
+    void or_r8_r8(const u8 &reg);
 
     void cp_r8_r8(const u8 *data1, const u8 *data2);
 

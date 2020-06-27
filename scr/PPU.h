@@ -2,14 +2,8 @@
 #ifndef PPU_H_GUARD
 #define PPU_H_GUARD
 
-#define SDL_WARNINGS 26812
-
-#pragma warning(push)
-#pragma warning(disable : SDL_WARNINGS)
 
 #include <SDL.h>
-
-#pragma warning(pop)
 
 #include <vector>
 
