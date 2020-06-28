@@ -79,7 +79,6 @@ debug_instruction CPU::get_instruction_at_addr(u16 addr) const {
                 u8_to_u16(mem->read_card_rom(addr + 1), mem->read_card_rom(addr));
 
     return debug_inst = {
-            addr,
             cpu_inst.mnemonic,
             cpu_inst.bytes,
             cpu_inst.cycles,

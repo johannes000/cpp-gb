@@ -83,15 +83,15 @@ private:
     GLuint tiles_texture = 0;
 
 
-    std::vector<debug_instruction> dis_vec;
+    std::map<u16, debug_instruction> dis_map;
 
     void init_debug_window();
 
-    static void view_one();
+    void card_view();
 
     void imgui_demo();
 
-    void CPU_view();
+    void cpu_view();
 
     void video_view();
 

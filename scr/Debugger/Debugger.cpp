@@ -65,6 +65,7 @@ void Debugger::render() const {// Rendering
 }
 
 void Debugger::update_views() {
+
     glfwPollEvents();
 
     ImGui_ImplOpenGL3_NewFrame();
@@ -73,9 +74,10 @@ void Debugger::update_views() {
 
     if (show_demo_window)
         ImGui::ShowDemoWindow(&show_demo_window);
+
     imgui_demo();
-    view_one();
-    CPU_view();
+    card_view();
+    cpu_view();
     video_view();
     control_view();
 
@@ -108,15 +110,16 @@ void Debugger::control_view() {
 
 }
 
-void Debugger::view_one() {
-    ImGui::Begin("Speicher");
+void Debugger::card_view() {
+    ImGui::Begin("Rominfo");
 
-    ImGui::Text("JOJOJOJ");
+    ImGui::Text("asd");
 
     ImGui::End();
 }
 
 void Debugger::imgui_demo() {
+
 
     static float f = 0.0f;
     static int counter = 0;
@@ -140,11 +143,11 @@ void Debugger::imgui_demo() {
     ImGui::End();
 }
 
-int line = 1100;
 
-void Debugger::CPU_view() {
+void Debugger::cpu_view() {
 
     ImGui::Begin("CPU");
+    int line = 1100;
 
     u16 pc = cpu->get_pc();
     ImGui::Text("%04X", pc);
@@ -168,22 +171,26 @@ void Debugger::CPU_view() {
     ImGui::NextColumn();
     ImGui::Separator();
 
-    ImGuiListClipper clipper(0x7FFE, ImGui::GetTextLineHeightWithSpacing());
+    ImGuiListClipper clipper(0x7FFF, ImGui::GetTextLineHeightWithSpacing());
 
     //if (debug_state == Debug_State::STEP)
     //ImGui::SetScrollFromPosY(ImGui::GetCursorStartPos().y + (pc * ImGui::GetTextLineHeightWithSpacing()), 0.5f);
-    for (int i = clipper.DisplayStart; i <= clipper.DisplayEnd;) {
-        debug_instruction inst = cpu->get_instruction_at_addr(i);
 
-        if (goto_line && line == i)
+    clipper.DisplayEnd = std::min(clipper.DisplayStart + 40, 0x7FFF);
+
+    for (int i = clipper.DisplayStart; i <= clipper.DisplayEnd;) {
+        auto inst = cpu->get_instruction_at_addr(i);
+        auto addr = i;
+
+        if (goto_line && line == addr)
             ImGui::SetScrollHereY();
 
 
-        if (inst.addr == pc)
+        if (addr == pc)
             ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.1f, 0.8f, 0.8f, 1.0f));
 
         char address[32];
-        sprintf(address, "%04X", inst.addr);
+        sprintf(address, "%04X", addr);
         ImGui::Text("%s", address);
 
         ImGui::NextColumn();
@@ -195,10 +202,11 @@ void Debugger::CPU_view() {
         ImGui::Text("%s", intermediate);
         ImGui::NextColumn();
 
-        if (inst.addr == pc)
+        if (addr == pc)
             ImGui::PopStyleColor(1);
 
-        i += i + inst.bytes;
+        i += inst.bytes;
+
     }
     clipper.End();
     ImGui::EndChild();
@@ -215,7 +223,7 @@ void Debugger::dissassamble() {
     debug_instruction debug_inst;
     for (int addr = 0; addr < 0x7FFF;) {
         debug_inst = cpu->get_instruction_at_addr(addr);
-        dis_vec.push_back(debug_inst);
+        dis_map.insert({addr, debug_inst});
         addr += debug_inst.bytes;
     }
 }

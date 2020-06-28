@@ -216,7 +216,6 @@ struct Rom_Info {
 };
 
 struct debug_instruction {
-    u16 addr{};
     const char *mnemonic{};
 
     u8 bytes{};

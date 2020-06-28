@@ -25,7 +25,6 @@ void gameboy::start_emu() {
     //card.load_rom("C:\\Users\\knaub\\source\\repos\\testroms\\mooneye\\acceptance\\bits\\reg_f.gb");
     //card.load_rom("C:\\Users\\knaub\\source\\repos\\testroms\\mooneye\\acceptance\\bits\\mem_oam.gb");
 
-    debug.dissassamble();
     debug.update();
 
     bool quit = false;
