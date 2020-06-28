@@ -45,10 +45,6 @@ int CPU::update() {
         old_pc = R.PC;
     op_code = get_next_op_code();
     const auto jp = parse_op_code(op_code);
-#if 0
-    if (!in_boot)
-        print_last_opcode();
-#endif
     if (jp == 0) inc_pc();
     cycles += current_instruction_info.cycles;
     return current_instruction_info.cycles;
@@ -83,6 +79,7 @@ debug_instruction CPU::get_instruction_at_addr(u16 addr) const {
                 u8_to_u16(mem->read_card_rom(addr + 1), mem->read_card_rom(addr));
 
     return debug_inst = {
+            addr,
             cpu_inst.mnemonic,
             cpu_inst.bytes,
             cpu_inst.cycles,

@@ -1,4 +1,3 @@
-#pragma once
 #ifndef TYPE_H_GUARD
 #define TYPE_H_GUARD
 
@@ -44,7 +43,16 @@ constexpr u16 IN_BOOT_ADDRESS = 0xFF50;
 // LCD
 constexpr int GB_LCD_SIZE_WIDTH = 160;
 constexpr int GB_LCD_SIZE_HEIGHT = 144;
-// LCD Register addressen
+
+constexpr unsigned int TILE_WIDTH = 8;
+constexpr unsigned int TILE_HEIGHT = 8;
+constexpr unsigned int TILE_PER_LINE = 32;
+constexpr unsigned int BG_MAP_SIZE = 256;
+constexpr unsigned int TILE_BUFFER_WIDTH = 128;
+constexpr unsigned int TILE_BUFFER_HEIGHT = 192;
+
+
+// LCD Register Adressen
 constexpr u16 LCD_CONTROL = 0xFF40;
 constexpr u16 LCD_STATUS = 0xFF41;
 
@@ -175,7 +183,10 @@ enum class ROMSize {
     MB1_2 = 0x53,  //(80 banks)
     MB1_5 = 0x54,  //(96 banks)
 };
-
+enum class Debug_State {
+    STEP,
+    RUN
+};
 enum class RAMSize {
     None = 0x00,
     KB2 = 0x01,
@@ -205,6 +216,7 @@ struct Rom_Info {
 };
 
 struct debug_instruction {
+    u16 addr{};
     const char *mnemonic{};
 
     u8 bytes{};

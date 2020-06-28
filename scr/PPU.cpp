@@ -4,13 +4,14 @@ PPU::PPU(MEMORY *m) : mem(m) {
     create_window();
 
     v_ram = std::vector<u8>(VRAM_SIZE, 0xFF);
-    for (auto &v : v_ram) v = rand() % 0xFF;
 
     sprite_attribute_table = std::vector<u8>(OAM_SIZE, 0xFF);
     // for (auto &v : sprite_attribute_table) v = rand() % 0x04;
 
     lcd_buffer = std::vector<Pixel>(GB_LCD_SIZE_WIDTH * GB_LCD_SIZE_HEIGHT,
                                     {0xFF, 0x00, 0xFF});
+    tile_buffer = std::vector<Pixel>(128 * 192,
+                                     {0xFF, 0x00, 0xFF});
     lcd_control.update(this);
 
     set_lcd_mode(LCD_Mode::OAM);
@@ -24,10 +25,6 @@ u16 oldlyc = 0;
 
 void PPU::update(const int cycles) {
     lcd_control.update(this);
-    if (oldlyc != lcd_register.LCD_LYC) {
-        std::cout << "lcy geändert alt: " << (int) oldlyc << " neu: " << (int) lcd_register.LCD_LYC << std::endl;
-    }
-    oldlyc = lcd_register.LCD_LYC;
     load_lcd_mode();
     cycles_in_mode += cycles;
     switch (lcd_mode) {
@@ -290,8 +287,26 @@ bool PPU::create_window() {
     return true;
 }
 
-[[nodiscard]] const Pixel *PPU::getLcdBuffer() const {
+[[nodiscard]] const Pixel *PPU::get_lcd_buffer() const {
     return &lcd_buffer[0];
+}
+
+[[nodiscard]] const Pixel *PPU::get_tiles_buffer() {
+    int index = 0;
+    for (int addr = GRAPHICS_RAM; addr < 0x97FF; addr += 0x100) {
+        const u8 p_line_1 = read(addr);
+        const u8 p_line_2 = read(addr + 1);
+
+        for (int pixel = 0; pixel < 7; pixel++, index++) {
+            const u8 color = static_cast<u8>(check_bit(p_line_1, 8 - pixel) << 1u) |
+                             check_bit(p_line_2, 8 - pixel);
+
+            tile_buffer[index].R = Palettes[current_palette][color].R;
+            tile_buffer[index].G = Palettes[current_palette][color].G;
+            tile_buffer[index].B = Palettes[current_palette][color].B;
+        }
+    }
+    return &tile_buffer[0];
 }
 
 

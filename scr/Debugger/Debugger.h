@@ -45,6 +45,7 @@ using namespace gl;
 #pragma comment(lib, "legacy_stdio_definitions")
 #endif
 
+
 class CPU;
 
 class PPU;
@@ -59,18 +60,29 @@ public:
 
     void reset();
 
-    const void *frame_buffer = nullptr;
-
-    GLuint frame_texture = 0;
-
     void dissassamble();
 
 private:
-
     CPU *cpu;
     PPU *ppu;
-    std::map<u16, debug_instruction> dis_map;
 
+    Debug_State debug_state;
+
+public:
+    void setDebugState(Debug_State debugState) { debug_state = debugState; }
+
+    Debug_State getDebugState() const { return debug_state; }
+
+private:
+
+    const void *frame_buffer = nullptr;
+    const void *tiles_buffer = nullptr;
+
+    GLuint frame_texture = 0;
+    GLuint tiles_texture = 0;
+
+
+    std::vector<debug_instruction> dis_vec;
 
     void init_debug_window();
 
@@ -101,6 +113,7 @@ private:
     int window_ypos = 45;
 
     static bool load_texture(GLuint *textureHandler, int width, int height, const void *data);
+
 };
 
 

@@ -27,10 +27,12 @@ void gameboy::start_emu() {
 
     debug.dissassamble();
     bool quit = false;
+
     while (!quit) {
         last_cycle = cpu.update();
         cycles += last_cycle;
         ppu.update(last_cycle * 4);
+
         if (cycles >= VERTICAL_REFRESH_CYCLES) {
             debug.update();
             cycles = 0;
@@ -41,12 +43,6 @@ void gameboy::start_emu() {
                         exit(0);
                     case SDL_KEYDOWN:
                         switch (event.key.keysym.sym) {
-                            case SDLK_n:
-                                step_mode = !step_mode;
-                                break;
-                            case SDLK_b:
-                                show_opcode = !show_opcode;
-                                break;
                             case SDLK_ESCAPE:
                                 exit(0);
                             default:
@@ -59,4 +55,17 @@ void gameboy::start_emu() {
             }
         }
     }
+
+
+}
+
+void gameboy::step_mode() {
+
+
+}
+
+void gameboy::run_mode() {
+    last_cycle = cpu.update();
+    cycles += last_cycle;
+    ppu.update(last_cycle * 4);
 }

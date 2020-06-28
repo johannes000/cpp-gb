@@ -48,10 +48,6 @@ constexpr int CLOCKS_FULL_FRAME = 70224;
 
 constexpr int VERTICAL_BLANK_LINES = 154;
 
-constexpr unsigned int TILE_WIDTH = 8;
-constexpr unsigned int TILE_HEIGHT = 8;
-constexpr unsigned int TILE_PER_LINE = 32u;
-constexpr unsigned int BG_MAP_SIZE = 256u;
 
 class MEMORY;
 
@@ -169,16 +165,20 @@ private:
 
     // LCD Render Funktionen
     std::vector<Pixel> lcd_buffer;
+    std::vector<Pixel> tile_buffer;
 public:
-    Pixel const *getLcdBuffer() const;
+    Pixel const *get_lcd_buffer() const;
+
+    Pixel const *get_tiles_buffer();
 
 private:
 
     void buffer_line(const u8 line);
 
-    void render_frame();
 
 public:
+    void render_frame();
+
     LCD_Mode mode() const;
 
 private:
@@ -210,6 +210,7 @@ private:
     Uint32 fps_current{};                   // the current FPS.
     Uint32 fps_frames = 0;  // frames passed since the last recorded fps.
     char fps_text[8]{};
+
 };
 
 #endif  // !PPU_H_GUARD

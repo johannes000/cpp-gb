@@ -4,11 +4,14 @@
 #include "Debugger.h"
 #include <vector>
 
-Debugger::Debugger(CPU *c, PPU *p) : cpu(c), ppu(p) {
+Debugger::Debugger(CPU *c, PPU *p) : cpu(c), ppu(p), debug_state(Debug_State::RUN) {
     init_debug_window();
-    frame_buffer = ppu->getLcdBuffer();
+
+    frame_buffer = ppu->get_lcd_buffer();
+    tiles_buffer = ppu->get_tiles_buffer();
 
     load_texture(&frame_texture, GB_LCD_SIZE_WIDTH, GB_LCD_SIZE_HEIGHT, frame_buffer);
+    load_texture(&tiles_texture, TILE_BUFFER_WIDTH, TILE_BUFFER_HEIGHT, tiles_buffer);
 
 }
 
@@ -90,36 +93,36 @@ void Debugger::CPU_view() {
     ImGui::NextColumn();
     ImGui::Separator();
 
-    //TODO: Nur anzeigen wenn der Emulator im Step Modus ist
     //TODO: Rom Paging einbauen
 
     u16 pc = cpu->get_pc();
-    auto it = dis_map.find(pc);
-    auto beg = std::prev(it, 20);
-    auto end = std::next(it, 20);
-    while (beg != end) {
-        if (beg->first == it->first)
+
+    ImGuiListClipper clipper(0x7FFE, ImGui::GetTextLineHeightWithSpacing());
+    //ImGui::SetScrollFromPosY(ImGui::GetCursorStartPos().y + (pc * ImGui::GetTextLineHeightWithSpacing()), 0.5f);
+
+
+    for (int i = clipper.DisplayStart; i <= clipper.DisplayEnd; i++) {
+        if (dis_vec[i].addr == pc)
             ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.1f, 0.8f, 0.8f, 1.0f));
 
-        debug_instruction debug_inst = beg->second;
         char address[32];
-        sprintf(address, "%04X", beg->first);
+        sprintf(address, "%04X", dis_vec[i].addr);
         ImGui::Text("%s", address);
 
         ImGui::NextColumn();
-        ImGui::Text("%s", debug_inst.mnemonic);
+        ImGui::Text("%s", dis_vec[i].mnemonic);
 
         ImGui::NextColumn();
         char intermediate[32];
-        sprintf(intermediate, "%04X", debug_inst.intermediate);
+        sprintf(intermediate, "%04X", dis_vec[i].intermediate);
         ImGui::Text("%s", intermediate);
         ImGui::NextColumn();
 
-        if (beg->first == it->first)
+        if (dis_vec[i].addr == pc)
             ImGui::PopStyleColor(1);
-
-        beg++;
     }
+    clipper.End();
+
     ImGui::End();
 
 
@@ -133,7 +136,7 @@ void Debugger::dissassamble() {
     debug_instruction debug_inst;
     for (int addr = 0; addr < 0x7FFF;) {
         debug_inst = cpu->get_instruction_at_addr(addr);
-        dis_map.insert({addr, debug_inst});
+        dis_vec.push_back(debug_inst);
         addr += debug_inst.bytes;
     }
 }
@@ -143,12 +146,21 @@ void Debugger::video_view() {
     ImGui::Begin("Frame");
     glBindTexture(GL_TEXTURE_2D, frame_texture);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, GB_LCD_SIZE_WIDTH, GB_LCD_SIZE_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE,
-                 ppu->getLcdBuffer());
+                 ppu->get_lcd_buffer());
 
+    glBindTexture(GL_TEXTURE_2D, tiles_texture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, TILE_BUFFER_WIDTH, TILE_BUFFER_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE,
+                 ppu->get_tiles_buffer());
 
-    ImGui::Image((ImTextureID) (intptr_t) frame_texture, ImVec2(200, 200));
+    ImGui::Image((ImTextureID) (intptr_t) frame_texture, ImVec2(GB_LCD_SIZE_WIDTH, GB_LCD_SIZE_HEIGHT));
+
+    ImGui::Separator();
+
+    ImGui::Image((ImTextureID) (intptr_t) tiles_texture, ImVec2(TILE_BUFFER_WIDTH * 4, TILE_BUFFER_HEIGHT * 4));
 
     ImGui::End();
+
+
 }
 
 bool Debugger::load_texture(GLuint *textureHandler, int width, int height, const void *data) {
