@@ -8,8 +8,8 @@ gameboy::~gameboy() {
 }
 
 void gameboy::start_emu() {
-    auto cycles = 0;
-    auto last_cycle = 0;
+    cycles = 0;
+    last_cycle = 0;
     mem.reset();
 
     card.load_rom("./../../testroms/tetris.gb");
@@ -26,16 +26,18 @@ void gameboy::start_emu() {
     //card.load_rom("C:\\Users\\knaub\\source\\repos\\testroms\\mooneye\\acceptance\\bits\\mem_oam.gb");
 
     debug.dissassamble();
-    bool quit = false;
+    debug.update();
 
+    bool quit = false;
     while (!quit) {
         last_cycle = cpu.update();
         cycles += last_cycle;
         ppu.update(last_cycle * 4);
+        debug.step_mode();
 
         if (cycles >= VERTICAL_REFRESH_CYCLES) {
-            debug.update();
             cycles = 0;
+            debug.update();
             while (SDL_PollEvent(&event)) {
                 joypad.update_joypad();
                 switch (event.type) {
@@ -54,18 +56,10 @@ void gameboy::start_emu() {
                 }
             }
         }
+
+
     }
 
 
 }
 
-void gameboy::step_mode() {
-
-
-}
-
-void gameboy::run_mode() {
-    last_cycle = cpu.update();
-    cycles += last_cycle;
-    ppu.update(last_cycle * 4);
-}

@@ -28,12 +28,6 @@ public:
 private:
     int last_cycle{};
     int cycles{};
-    bool step;
-
-    void step_mode();
-
-    void run_mode();
-
     SDL_Event event{};
 };
 

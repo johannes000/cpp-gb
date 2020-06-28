@@ -4,7 +4,7 @@
 #include "Debugger.h"
 #include <vector>
 
-Debugger::Debugger(CPU *c, PPU *p) : cpu(c), ppu(p), debug_state(Debug_State::RUN) {
+Debugger::Debugger(CPU *c, PPU *p) : cpu(c), ppu(p), debug_state(Debug_State::STEP), next_step(false) {
     init_debug_window();
 
     frame_buffer = ppu->get_lcd_buffer();
@@ -20,23 +20,39 @@ Debugger::~Debugger() {
 }
 
 void Debugger::update() {
-
-    glfwPollEvents();
-
-    ImGui_ImplOpenGL3_NewFrame();
-    ImGui_ImplGlfw_NewFrame();
-    ImGui::NewFrame();
-
-    if (show_demo_window)
-        ImGui::ShowDemoWindow(&show_demo_window);
+    update_views();
+}
 
 
-    imgui_demo();
-    view_one();
-    CPU_view();
-    video_view();
+void Debugger::step_mode() {
+    if (debug_state != Debug_State::STEP)
+        return;
 
-    // Rendering
+    // TODO: Framelimitter einbauen
+    next_step = false;
+    while (!next_step) {
+        update_views();
+
+        while (SDL_PollEvent(&event)) {
+            switch (event.type) {
+                case SDL_QUIT:
+                    exit(0);
+                case SDL_KEYDOWN:
+                    switch (event.key.keysym.sym) {
+                        case SDLK_ESCAPE:
+                            exit(0);
+                        default:
+                            break;
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+}
+
+void Debugger::render() const {// Rendering
     ImGui::Render();
     int display_w, display_h;
     glfwGetFramebufferSize(window, &display_w, &display_h);
@@ -46,6 +62,50 @@ void Debugger::update() {
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
     glfwSwapBuffers(window);
+}
+
+void Debugger::update_views() {
+    glfwPollEvents();
+
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+
+    if (show_demo_window)
+        ImGui::ShowDemoWindow(&show_demo_window);
+    imgui_demo();
+    view_one();
+    CPU_view();
+    video_view();
+    control_view();
+
+    render();
+
+}
+
+void Debugger::control_view() {
+    ImGui::Begin("Control");
+    bool run = true;
+
+    next_step = ImGui::Button("Step");
+    run |= ImGui::Button("Run");
+
+    switch (debug_state) {
+        case Debug_State::STEP:
+            if (run) {
+                debug_state = Debug_State::RUN;
+                next_step = true;
+            }
+            break;
+        case Debug_State::RUN:
+            if (next_step)
+                debug_state = Debug_State::STEP;
+            break;
+    }
+
+
+    ImGui::End();
+
 }
 
 void Debugger::view_one() {
@@ -80,9 +140,24 @@ void Debugger::imgui_demo() {
     ImGui::End();
 }
 
+int line = 1100;
+
 void Debugger::CPU_view() {
 
     ImGui::Begin("CPU");
+
+    u16 pc = cpu->get_pc();
+    ImGui::Text("%04X", pc);
+
+    ImGui::Separator();
+    bool goto_line = ImGui::Button("Goto");
+    ImGui::SameLine();
+    ImGui::SetNextItemWidth(100);
+    goto_line |= ImGui::InputInt("##Line", &line, 0, 0, ImGuiInputTextFlags_EnterReturnsTrue);
+
+    ImGui::Separator();
+    ImGui::BeginChild("##scrollingregion");
+
     ImGui::Columns(3, "mycolumns"); // 4-ways, with border
     ImGui::Separator();
     ImGui::Text("Address");
@@ -93,36 +168,40 @@ void Debugger::CPU_view() {
     ImGui::NextColumn();
     ImGui::Separator();
 
-    //TODO: Rom Paging einbauen
-
-    u16 pc = cpu->get_pc();
-
     ImGuiListClipper clipper(0x7FFE, ImGui::GetTextLineHeightWithSpacing());
+
+    //if (debug_state == Debug_State::STEP)
     //ImGui::SetScrollFromPosY(ImGui::GetCursorStartPos().y + (pc * ImGui::GetTextLineHeightWithSpacing()), 0.5f);
+    for (int i = clipper.DisplayStart; i <= clipper.DisplayEnd;) {
+        debug_instruction inst = cpu->get_instruction_at_addr(i);
+
+        if (goto_line && line == i)
+            ImGui::SetScrollHereY();
 
 
-    for (int i = clipper.DisplayStart; i <= clipper.DisplayEnd; i++) {
-        if (dis_vec[i].addr == pc)
+        if (inst.addr == pc)
             ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.1f, 0.8f, 0.8f, 1.0f));
 
         char address[32];
-        sprintf(address, "%04X", dis_vec[i].addr);
+        sprintf(address, "%04X", inst.addr);
         ImGui::Text("%s", address);
 
         ImGui::NextColumn();
-        ImGui::Text("%s", dis_vec[i].mnemonic);
+        ImGui::Text("%s", inst.mnemonic);
 
         ImGui::NextColumn();
         char intermediate[32];
-        sprintf(intermediate, "%04X", dis_vec[i].intermediate);
+        sprintf(intermediate, "%04X", inst.intermediate);
         ImGui::Text("%s", intermediate);
         ImGui::NextColumn();
 
-        if (dis_vec[i].addr == pc)
+        if (inst.addr == pc)
             ImGui::PopStyleColor(1);
+
+        i += i + inst.bytes;
     }
     clipper.End();
-
+    ImGui::EndChild();
     ImGui::End();
 
 

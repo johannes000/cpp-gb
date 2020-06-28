@@ -62,17 +62,18 @@ public:
 
     void dissassamble();
 
+    void render() const;
+
+    void step_mode();
+
 private:
     CPU *cpu;
     PPU *ppu;
 
     Debug_State debug_state;
+    SDL_Event event;
 
-public:
-    void setDebugState(Debug_State debugState) { debug_state = debugState; }
-
-    Debug_State getDebugState() const { return debug_state; }
-
+    bool next_step;
 private:
 
     const void *frame_buffer = nullptr;
@@ -114,6 +115,9 @@ private:
 
     static bool load_texture(GLuint *textureHandler, int width, int height, const void *data);
 
+    void update_views();
+
+    void control_view();
 };
 
 
