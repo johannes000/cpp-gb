@@ -22,8 +22,6 @@ public:
 
     u8 get_next_op_code();
 
-    void print_all_ops();
-
     bool in_boot_r() const;
 
     u8 read(const u16 &addr);
@@ -32,7 +30,6 @@ public:
 
     void write_u16(const u16 &addr, const u16 &data) const;
 
-    void print_last_opcode();
 
 private:
     MEMORY *mem;
@@ -126,6 +123,7 @@ private:
 
         u8 bytes{};
         u8 cycles{};
+        bool prefixed{false};
     };
 
 

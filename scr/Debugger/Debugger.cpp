@@ -13,6 +13,9 @@ Debugger::Debugger(CPU *c, PPU *p) : cpu(c), ppu(p), debug_state(Debug_State::ST
     load_texture(&frame_texture, GB_LCD_SIZE_WIDTH, GB_LCD_SIZE_HEIGHT, frame_buffer);
     load_texture(&tiles_texture, TILE_BUFFER_WIDTH, TILE_BUFFER_HEIGHT, tiles_buffer);
 
+
+    breakpoints.push_back(0x100);
+    breakpoints.push_back(0x29A6);
 }
 
 Debugger::~Debugger() {
@@ -39,9 +42,6 @@ void Debugger::step_mode() {
             auto iter = std::find(breakpoints.begin(), breakpoints.end(), cpu->get_pc());
             if (iter != breakpoints.end())
                 debug_state = Debug_State::STEP;
-        }
-        if (cpu->get_pc() == 0x100) {
-            debug_state = Debug_State::STEP;
         }
         return;
     }
@@ -140,6 +140,8 @@ void Debugger::control_view() {
         debug_state = Debug_State::RUN;
         next_step = true;
     }
+    ImGui::SameLine();
+    debug_state == Debug_State::STEP ? ImGui::Text("STEP") : ImGui::Text("RUN");
     ImGui::End();
 
 }
@@ -182,14 +184,16 @@ void Debugger::cpu_view() {
 
     bool goto_pc = ImGui::Button("Goto PC");
 
+    // DECOMPILER
     ImGui::Separator();
-    ImGui::BeginChild("##scrollingregion");
-
-    ImGui::Columns(3, "mycolumns"); // 4-ways, with border
+    ImGui::BeginChild("##scrollingregion", ImVec2(0, 200));
+    ImGui::Columns(4, "mycolumns"); // 4-ways, with border
     ImGui::Separator();
     ImGui::Text("Address");
     ImGui::NextColumn();
     ImGui::Text("Mnemonic");
+    ImGui::NextColumn();
+    ImGui::Text("Opcode");
     ImGui::NextColumn();
     ImGui::Text("Intermediate");
     ImGui::NextColumn();
@@ -200,38 +204,58 @@ void Debugger::cpu_view() {
     if (goto_pc)
         ImGui::SetScrollFromPosY(ImGui::GetCursorStartPos().y + (pc * ImGui::GetTextLineHeightWithSpacing()), 0.5f);
 
-    // TODO: Breakpoints durch klicken hinzufügen
-    auto iter = std::upper_bound(legit_addresses.begin(), legit_addresses.end(), clipper.DisplayStart - 1);
+    auto iter = std::upper_bound(valid_addresses.begin(), valid_addresses.end(), clipper.DisplayStart - 1);
     clipper.DisplayStart = *iter;
-    clipper.DisplayEnd = std::min(clipper.DisplayStart + 50, 0x7FFF);
 
-    for (int i = clipper.DisplayStart; i <= clipper.DisplayEnd;) {
-        auto inst = cpu->get_instruction_at_addr(i);
-        auto addr = i;
+    for (int i = clipper.DisplayStart; i <= clipper.DisplayEnd; i++) {
+        auto inst = dis_map[*iter];
+        auto addr = *iter;
 
         if (addr == pc)
             ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.1f, 0.8f, 0.8f, 1.0f));
 
         char address[32];
         sprintf(address, "%04X", addr);
-        ImGui::Text("%s", address);
-
+        if (ImGui::Selectable(address, true, ImGuiSelectableFlags_SpanAllColumns))
+            breakpoints.push_back(addr);
         ImGui::NextColumn();
         ImGui::Text("%s", inst.mnemonic);
-
+        ImGui::NextColumn();
+        ImGui::Text("%02X", inst.opcode);
         ImGui::NextColumn();
         char intermediate[32];
         sprintf(intermediate, "%04X", inst.intermediate);
         ImGui::Text("%s", intermediate);
         ImGui::NextColumn();
-
         if (addr == pc)
             ImGui::PopStyleColor(1);
-
-        i += inst.bytes;
-
+        iter++;
     }
     clipper.End();
+    ImGui::EndChild();
+
+    // Breakpoints
+    ImGui::BeginChild("##ScrollingRegion");
+
+    std::sort(breakpoints.begin(), breakpoints.end());
+    ImGui::Text("Breakpoints");
+
+    auto b = breakpoints.begin();
+    auto e = breakpoints.end();
+
+    while (b != e) {
+        if (*b == pc)
+            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.1f, 0.8f, 0.8f, 1.0f));
+        char address[32];
+        sprintf(address, "%04X", *b);
+        if (ImGui::Selectable(address, true, ImGuiSelectableFlags_SpanAllColumns))
+            breakpoints.erase(b);
+
+        if (*b == pc)
+            ImGui::PopStyleColor(1);
+        b++;
+    }
+
     ImGui::EndChild();
     ImGui::End();
 
@@ -242,14 +266,18 @@ void Debugger::reset() {
 
 }
 
-void Debugger::dissassamble() {
+void Debugger::disassemble() {
     debug_instruction debug_inst;
-    for (int addr = 0; addr < 0x7FFF;) {
+    for (u16 addr = 0; addr < 0x7FFE;) {
         // Nur Adressen aus dem Card Rom nicht aus dem Bootrom
         // Deswegen kriegt man beim Booten nicht die richtigen Adressen im CPU View
-        legit_addresses.push_back(addr);
         debug_inst = cpu->get_instruction_at_addr(addr);
+        if (debug_inst.prefixed)
+            addr++;
+
         dis_map.insert({addr, debug_inst});
+        valid_addresses.push_back(addr);
+
         addr += debug_inst.bytes;
     }
 }

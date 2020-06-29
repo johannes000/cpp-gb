@@ -99,6 +99,7 @@ void CPU::shift_right_l_r8(u8 *reg) {
 
 void CPU::swap_r8(u8 *reg) {
     // Swap upper 4 bits in register r8 and the lower 4 ones.
+    reset_all_flags();
     u8 l_bits = *reg & 0xF0u;
     u8 h_bits = *reg & 0x0Fu;
 
@@ -106,6 +107,7 @@ void CPU::swap_r8(u8 *reg) {
     h_bits <<= 4u;
 
     *reg = l_bits | h_bits;
+    set_flag_if(Flag::z, *reg == 0);
 }
 
 // OPCODES

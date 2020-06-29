@@ -60,7 +60,7 @@ public:
 
     void reset();
 
-    void dissassamble();
+    void disassemble();
 
     void render() const;
 
@@ -88,9 +88,9 @@ private:
 
 
     std::map<u16, debug_instruction> dis_map;
-    std::vector<u16> legit_addresses;
+    std::vector<u16> valid_addresses;
 
-    std::vector<u8> breakpoints;
+    std::vector<u16> breakpoints;
 
     void init_debug_window();
 

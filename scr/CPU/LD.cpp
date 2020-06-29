@@ -459,6 +459,9 @@ u8 CPU::opcode0xE0() {  // LDH a8 A
 
 u8 CPU::opcode0xF0() {  // LDH A a8
     // Load value in register A from byte at address n16, provided it is between $FF00 and $FFFF.
-    R.A = read(0xFF00 + read_u8_at_pc());
+    if (R.PC > 0x29A6)
+        int a = 0;
+    auto data = read_u8_at_pc();
+    R.A = read(0xFF00 + data);
     return 0;
 }

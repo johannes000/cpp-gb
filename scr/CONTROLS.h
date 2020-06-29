@@ -7,6 +7,7 @@
 
 #include "SDL.h"
 #include "type.h"
+#include "MEMORY.h"
 
 class MEMORY;
 
@@ -15,6 +16,8 @@ class PPU;
 class CONTROLS {
 public:
     CONTROLS(MEMORY *m, PPU *ppu);
+
+    void write(const u16 &addr, const u8 &data);
 
 private:
     MEMORY *mem;

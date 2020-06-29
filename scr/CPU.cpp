@@ -60,53 +60,31 @@ u8 CPU::get_next_op_code() { return read(R.PC); }
 debug_instruction CPU::get_instruction_at_addr(u16 addr) const {
     debug_instruction debug_inst;
 
-    u8 inst_code = mem->read_card_rom(addr);
 
     cpu_instruction cpu_inst;
-    if (inst_code == 0xCB) {
-        cpu_inst = prefixedinstructions[mem->read_card_rom(addr + 1)];
-        cpu_inst.bytes--;
-    } else {
-        cpu_inst = instructions[mem->read_card_rom(addr)];
-    }
-
     u16 intermediate = 0;
 
-    if (cpu_inst.bytes != 1)
+    u8 inst_code = mem->read_card_rom(addr);
+    cpu_inst = instructions[inst_code];
+    if (inst_code == 0xCB) {
+        inst_code = mem->read_card_rom(++addr);
+        cpu_inst = prefixedinstructions[inst_code];
+        cpu_inst.bytes = 1;
+        debug_inst.prefixed = true;
+    }
+    if (cpu_inst.bytes > 1)
         intermediate =
                 cpu_inst.bytes == 2 ? static_cast<u16>(mem->read_card_rom(addr)) :
-                u8_to_u16(mem->read_card_rom(addr + 1), mem->read_card_rom(addr));
+                u8_to_u16(mem->read_card_rom((addr) + 1), mem->read_card_rom(addr));
 
     return debug_inst = {
             cpu_inst.mnemonic,
             cpu_inst.bytes,
             cpu_inst.cycles,
-            intermediate
+            inst_code,
+            intermediate,
     };
 
-}
-
-void CPU::print_last_opcode() {
-    std::cout << "0x" << std::hex << std::uppercase << static_cast<int>(old_pc)
-              << " " << current_instruction_info.mnemonic << "\t"
-              << "OP: " << std::hex << static_cast<int>(op_code);
-    if (current_instruction_info.bytes == 3)
-        std::cout << "  " << static_cast<int>(read_u16_at_pc());
-    else
-        std::cout << "\t";
-    if (current_instruction_info.bytes == 2)
-        std::cout << "  0x" << static_cast<int>(read_u8_at_pc()) << "\t";
-    else
-        std::cout << "\t";
-    std::cout << " Z: " << check_flag(Flag::z);
-    std::cout << " N: " << check_flag(Flag::n);
-    std::cout << " H: " << check_flag(Flag::h);
-    std::cout << " C: " << check_flag(Flag::c);
-    std::cout << " AF: " << (int) R.AF;
-    std::cout << " BC: " << (int) R.BC;
-    std::cout << " DE: " << (int) R.DE;
-    std::cout << " HL: " << (int) R.HL;
-    std::cout << std::endl;
 }
 
 

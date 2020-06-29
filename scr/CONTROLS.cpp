@@ -6,7 +6,7 @@
 #include <SDL.h>
 #include <iostream>
 
-CONTROLS::CONTROLS(MEMORY *m, PPU *p) : mem(m), ppu(p) {}
+CONTROLS::CONTROLS(MEMORY *m, PPU *p) : mem(m), ppu(p), joy_p1_state(0xFF) {}
 
 void CONTROLS::update_joypad() {
     // Bit 7 - Not used
@@ -18,7 +18,6 @@ void CONTROLS::update_joypad() {
     // Bit 1 - P11 Input Left  or Button B (0=Pressed) (Read Only)
     // Bit 0 - P10 Input Right or Button A (0=Pressed) (Read Only)
     joy_both_states = 0x00;
-    joy_p1_state = 0x00;
     auto *keystate = SDL_GetKeyboardState(nullptr);
 
     set_bit_if(joy_both_states, static_cast<u8>(GB_Key::Up), !keystate[SDL_SCANCODE_UP]);
@@ -46,6 +45,17 @@ u8 CONTROLS::read(const u16 &addr) const {
             return joy_p1_state;
         default:
             return 0xFF;
+    }
+}
+
+void CONTROLS::write(const u16 &addr, const u8 &data) {
+    switch (addr) {
+        case JOY_P1_REGISTER:
+            joy_p1_state = data;
+            break;
+        default:
+            mem->write(addr, data);
+            break;
     }
 }
 

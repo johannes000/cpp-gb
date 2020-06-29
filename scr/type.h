@@ -220,8 +220,9 @@ struct debug_instruction {
 
     u8 bytes{};
     u8 cycles{};
-
+    u8 opcode{};
     u16 intermediate{};
+    bool prefixed{false};
 };
 
 struct Pixel {

@@ -91,6 +91,9 @@ void MEMORY::write(const u16 &addr, const u8 &data) {
             case IN_BOOT_ADDRESS:
                 cpu->write(addr, data);
                 break;
+            case JOY_P1_REGISTER:
+                joypad->write(addr, data);
+                break;
             default:
                 memory.at(addr) = data;
                 break;
@@ -152,8 +155,10 @@ void MEMORY::dma_transfer(const u8 &data) {
 
     memory.at(DMA_TRANSFER) = data;
     const u16 addr = data << 8u;
-    for (u8 i = 0; i < 0xA0; i++) {
-        write(0xFE00 + i, read(addr + i));
+    if (addr >= 0x8000 && addr < 0xE000) {
+        for (u8 i = 0; i < 0xA0; i++) {
+            write(0xFE00 + i, read(addr + i));
+        }
     }
 
 }
