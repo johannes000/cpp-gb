@@ -20,23 +20,24 @@ void CONTROLS::update_joypad() {
     joy_both_states = 0x00;
     auto *keystate = SDL_GetKeyboardState(nullptr);
 
-    set_bit_if(joy_both_states, static_cast<u8>(GB_Key::Up), !keystate[SDL_SCANCODE_UP]);
-    set_bit_if(joy_both_states, static_cast<u8>(GB_Key::Down), !keystate[SDL_SCANCODE_DOWN]);
-    set_bit_if(joy_both_states, static_cast<u8>(GB_Key::Left), !keystate[SDL_SCANCODE_LEFT]);
-    set_bit_if(joy_both_states, static_cast<u8>(GB_Key::Right), !keystate[SDL_SCANCODE_RIGHT]);
-    set_bit_if(joy_both_states, static_cast<u8>(GB_Key::A), !keystate[SDL_SCANCODE_A]);
-    set_bit_if(joy_both_states, static_cast<u8>(GB_Key::B), !keystate[SDL_SCANCODE_S]);
-    set_bit_if(joy_both_states, static_cast<u8>(GB_Key::Select), !keystate[SDL_SCANCODE_BACKSPACE]);
-    set_bit_if(joy_both_states, static_cast<u8>(GB_Key::Start), !keystate[SDL_SCANCODE_RETURN]);
+    set_bit_if(joy_both_states, static_cast<u8>(GB_Key::Up), keystate[SDL_SCANCODE_UP]);
+    set_bit_if(joy_both_states, static_cast<u8>(GB_Key::Down), keystate[SDL_SCANCODE_DOWN]);
+    set_bit_if(joy_both_states, static_cast<u8>(GB_Key::Left), keystate[SDL_SCANCODE_LEFT]);
+    set_bit_if(joy_both_states, static_cast<u8>(GB_Key::Right), keystate[SDL_SCANCODE_RIGHT]);
+    set_bit_if(joy_both_states, static_cast<u8>(GB_Key::A), keystate[SDL_SCANCODE_A]);
+    set_bit_if(joy_both_states, static_cast<u8>(GB_Key::B), keystate[SDL_SCANCODE_S]);
+    set_bit_if(joy_both_states, static_cast<u8>(GB_Key::Select), keystate[SDL_SCANCODE_BACKSPACE]);
+    set_bit_if(joy_both_states, static_cast<u8>(GB_Key::Start), keystate[SDL_SCANCODE_RETURN]);
 
-    // Buttons
-    set_bit_if(joy_p1_state, 5, (joy_both_states & 0xF0u) == 0xF0u);
-    // Directions
-    set_bit_if(joy_p1_state, 4, (joy_both_states & 0x0Fu) == 0x0Fu);
 
     u8 buttons = (joy_both_states & 0xF0u) >> 4u;
     u8 directions = joy_both_states & 0xFu;
-    joy_p1_state |= buttons & directions;
+    joy_p1_state |= buttons | directions;
+
+    // Buttons
+    set_bit_if(joy_p1_state, 5, (joy_both_states & 0xF0u) != 0x00u);
+    // Directions
+    set_bit_if(joy_p1_state, 4, (joy_both_states & 0x0Fu) == 0x00u);
 }
 
 u8 CONTROLS::read(const u16 &addr) const {

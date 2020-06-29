@@ -9,9 +9,8 @@ PPU::PPU(MEMORY *m) : mem(m), ready_to_render(false) {
     // for (auto &v : sprite_attribute_table) v = rand() % 0x04;
 
     lcd_buffer = std::vector<Pixel>(GB_LCD_SIZE_WIDTH * GB_LCD_SIZE_HEIGHT,
-                                    {0xFF, 0x00, 0xFF});
-    tile_buffer = std::vector<Pixel>(128 * 192,
-                                     {0xFF, 0x00, 0xFF});
+                                    {0xFF, 0xFF, 0xFF});
+    tile_buffer = std::vector<std::vector<Pixel>>(385, {8 * 8, {0xFF, 0xFF, 0xFF}});
     lcd_control.update(this);
 
     set_lcd_mode(LCD_Mode::OAM);
@@ -76,6 +75,8 @@ void PPU::update(const int cycles) {
 void PPU::write(const u16 &addr, const u8 &data) {
     if (addr >= GRAPHICS_RAM && addr <= GRAPHICS_RAM_END) {
         v_ram.at(addr - GRAPHICS_RAM) = data;
+        if (addr <= 0x9800)
+            update_tile(addr - GRAPHICS_RAM);
     } else if (addr >= SPRITE_INFORMATION && addr <= SPRITE_INFORMATION_END) {
         sprite_attribute_table.at(addr - SPRITE_INFORMATION) = data;
     } else {
@@ -291,24 +292,28 @@ bool PPU::create_window() {
     return &lcd_buffer[0];
 }
 
-[[nodiscard]] const Pixel *PPU::get_tiles_buffer() {
-    int index = 0;
-    for (int addr = GRAPHICS_RAM; addr < 0x97FF; addr += 0x100) {
-        const u8 p_line_1 = read(addr);
-        const u8 p_line_2 = read(addr + 1);
+[[nodiscard]] const Pixel *PPU::get_tiles_buffer(int tile) { return &tile_buffer[tile][0]; }
 
-        for (int pixel = 0; pixel < 7; pixel++, index++) {
-            const u8 color = static_cast<u8>(check_bit(p_line_1, 8 - pixel) << 1u) |
-                             check_bit(p_line_2, 8 - pixel);
 
-            tile_buffer[index].R = Palettes[current_palette][color].R;
-            tile_buffer[index].G = Palettes[current_palette][color].G;
-            tile_buffer[index].B = Palettes[current_palette][color].B;
-        }
+void PPU::update_tile(const u16 &a) {
+    auto addr = 0x1FFEu & a;
+    auto tile_id = static_cast<u16>(addr >> 4u) & 0x1FFu;
+    auto y = static_cast<u16>(addr >> 1u) & 7u;
+
+    const u8 p_line_1 = v_ram[addr];
+    const u8 p_line_2 = v_ram[addr + 1];
+
+    for (int pixel = 0; pixel < 8; ++pixel) {
+        const u8 color = static_cast<u8>(check_bit(p_line_1, 8 - pixel) << 1u) |
+                         check_bit(p_line_2, 8 - pixel);
+
+        tile_buffer[tile_id][(y * 8) + pixel].R = Palettes[current_palette][color].R;
+        tile_buffer[tile_id][(y * 8) + pixel].G = Palettes[current_palette][color].G;
+        tile_buffer[tile_id][(y * 8) + pixel].B = Palettes[current_palette][color].B;
     }
-    return &tile_buffer[0];
-}
 
+
+}
 
 void PPU::LCD_Control::update(PPU *ppu) {
 

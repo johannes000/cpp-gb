@@ -63,6 +63,9 @@ private:
     SDL_Event event{};
 
     bool ready_to_render;
+
+    void update_tile(const u16 &addr);
+
 public:
     void render_frame();
 
@@ -156,11 +159,11 @@ private:
 
     // LCD Render Funktionen
     std::vector<Pixel> lcd_buffer;
-    std::vector<Pixel> tile_buffer;
+    std::vector<std::vector<Pixel>> tile_buffer;
 public:
     Pixel const *get_lcd_buffer() const;
 
-    Pixel const *get_tiles_buffer();
+    const Pixel *get_tiles_buffer(int tile);
 
 private:
 

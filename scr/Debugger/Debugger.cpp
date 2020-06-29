@@ -4,11 +4,11 @@
 #include "Debugger.h"
 #include <vector>
 
-Debugger::Debugger(CPU *c, PPU *p) : cpu(c), ppu(p), debug_state(Debug_State::STEP), next_step(false) {
+Debugger::Debugger(CPU *c, PPU *p) : cpu(c), ppu(p), debug_state(Debug_State::RUN), next_step(false) {
     init_debug_window();
 
     frame_buffer = ppu->get_lcd_buffer();
-    tiles_buffer = ppu->get_tiles_buffer();
+    tiles_buffer = ppu->get_tiles_buffer(0);
 
     load_texture(&frame_texture, GB_LCD_SIZE_WIDTH, GB_LCD_SIZE_HEIGHT, frame_buffer);
     load_texture(&tiles_texture, TILE_BUFFER_WIDTH, TILE_BUFFER_HEIGHT, tiles_buffer);
@@ -290,14 +290,23 @@ void Debugger::video_view() {
                  ppu->get_lcd_buffer());
 
     glBindTexture(GL_TEXTURE_2D, tiles_texture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, TILE_BUFFER_WIDTH, TILE_BUFFER_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE,
-                 ppu->get_tiles_buffer());
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, TILE_BUFFER_WIDTH, TILE_BUFFER_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+
+    const int tileSize = 16;
+    int tileCounter = 0;
+    for (int y = 0; y < 24; y++) {
+        for (int x = 0; x < 16; x++) {
+            glTexSubImage2D(GL_TEXTURE_2D, 0, x * 8, y * 8, 8, 8, GL_RGB, GL_UNSIGNED_BYTE,
+                            ppu->get_tiles_buffer(tileCounter++));
+        }
+    }
 
     ImGui::Image((ImTextureID) (intptr_t) frame_texture, ImVec2(GB_LCD_SIZE_WIDTH, GB_LCD_SIZE_HEIGHT));
 
     ImGui::Separator();
 
-    ImGui::Image((ImTextureID) (intptr_t) tiles_texture, ImVec2(TILE_BUFFER_WIDTH * 4, TILE_BUFFER_HEIGHT * 4));
+    ImGui::Image((ImTextureID) (intptr_t) tiles_texture, ImVec2(TILE_BUFFER_WIDTH * 2, TILE_BUFFER_HEIGHT * 2));
 
     ImGui::End();
 
