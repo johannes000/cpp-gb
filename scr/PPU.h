@@ -15,28 +15,13 @@ constexpr auto FPS_INTERVAL = 1.0;  // seconds.;
 constexpr u16 VRAM_SIZE = 0x2000;
 constexpr u16 OAM_SIZE = 0x0100;
 
-// Period
-// GPU mode number
-// Time spent(clocks)
-
-// Scan line(accessing OAM)
-// 2
-// 80
-// Scan line(accessing VRAM)
-// 3
-// 172
-// Horizontal blank
-// 0
-// 204
-// One line(scan and blank)
-//
-// 456
-// Vertical blank						1
-//
-// 4560 (10 lines)
-// Full frame(scans and vblank)
-//
-// 70224
+// Period                       GPU mode number     Time spent(clocks)
+// Scan line(accessing OAM)         2                   80
+// Scan line(accessing VRAM)        3                   172
+// Horizontal blank                 0                   204
+// One line(scan and blank)                             456
+// Vertical blank                   1                   4560 (10 lines)
+// Full frame(scans and vblank)                         70224
 
 constexpr int CLOCKS_SCANLINE_OAM = 80;
 constexpr int CLOCKS_SCANLINE_VRAM = 172;
@@ -76,6 +61,12 @@ private:
     void close_window() const;
 
     SDL_Event event{};
+
+    bool ready_to_render;
+public:
+    void render_frame();
+
+    bool is_ready_to_render() const { return ready_to_render; }
 
 
     // SDL Sachen
@@ -177,7 +168,6 @@ private:
 
 
 public:
-    void render_frame();
 
     LCD_Mode mode() const;
 

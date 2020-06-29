@@ -1,6 +1,6 @@
 #include "PPU.h"
 
-PPU::PPU(MEMORY *m) : mem(m) {
+PPU::PPU(MEMORY *m) : mem(m), ready_to_render(false) {
     create_window();
 
     v_ram = std::vector<u8>(VRAM_SIZE, 0xFF);
@@ -20,8 +20,6 @@ PPU::PPU(MEMORY *m) : mem(m) {
 }
 
 PPU::~PPU() { close_window(); }
-
-u16 oldlyc = 0;
 
 void PPU::update(const int cycles) {
     lcd_control.update(this);
@@ -67,7 +65,7 @@ void PPU::update(const int cycles) {
                     lcd_register.LCD_LY = 0;
                     // alle lines für dieses Frame gebuffert,
                     // das frame kann jetzt gerendered werden
-                    render_frame();
+                    ready_to_render = true;
                     set_lcd_mode(LCD_Mode::OAM);
                 }
             }
@@ -268,6 +266,8 @@ void PPU::render_frame() {
     SDL_UpdateTexture(texture, nullptr, &lcd_buffer[0], GB_LCD_SIZE_WIDTH * 3);
     SDL_RenderCopy(renderer, texture, nullptr, nullptr);
     SDL_RenderPresent(renderer);
+    ready_to_render = false;
+
 }
 
 LCD_Mode PPU::mode() const { return lcd_mode; }

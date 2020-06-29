@@ -20,13 +20,31 @@ Debugger::~Debugger() {
 }
 
 void Debugger::update() {
-    update_views();
+    switch (debug_state) {
+        case Debug_State::STEP:
+            step_mode();
+            break;
+        case Debug_State::RUN:
+            update_views();
+            break;
+    }
+
+
 }
 
 
 void Debugger::step_mode() {
-    if (debug_state != Debug_State::STEP)
+    if (debug_state != Debug_State::STEP) {
+        if (!breakpoints.empty()) {
+            auto iter = std::find(breakpoints.begin(), breakpoints.end(), cpu->get_pc());
+            if (iter != breakpoints.end())
+                debug_state = Debug_State::STEP;
+        }
+        if (cpu->get_pc() == 0x100) {
+            debug_state = Debug_State::STEP;
+        }
         return;
+    }
 
     // TODO: Framelimitter einbauen
     next_step = false;
@@ -87,25 +105,41 @@ void Debugger::update_views() {
 
 void Debugger::control_view() {
     ImGui::Begin("Control");
-    bool run = true;
+    CPU_Register cpu_regs = cpu->get_register();
 
-    next_step = ImGui::Button("Step");
-    run |= ImGui::Button("Run");
 
-    switch (debug_state) {
-        case Debug_State::STEP:
-            if (run) {
-                debug_state = Debug_State::RUN;
-                next_step = true;
-            }
-            break;
-        case Debug_State::RUN:
-            if (next_step)
-                debug_state = Debug_State::STEP;
-            break;
+    ImGui::Text("AF = %04X", cpu_regs.AF);
+    ImGui::SameLine();
+    ImGui::Text("DE = %04X", cpu_regs.DE);
+    ImGui::SameLine();
+    ImGui::Text("PC = %04X", cpu_regs.PC);
+    ImGui::Text("BC = %04X", cpu_regs.BC);
+    ImGui::SameLine();
+    ImGui::Text("HL = %04X", cpu_regs.HL);
+    ImGui::SameLine();
+    ImGui::Text("SP = %04X", cpu_regs.SP);
+
+
+    ImGui::Separator();
+
+    ImGui::Text("Z %1d", cpu->check_flag(Flag::z));
+    ImGui::SameLine();
+    ImGui::Text("N %1d", cpu->check_flag(Flag::n));
+    ImGui::SameLine();
+    ImGui::Text("H %1d", cpu->check_flag(Flag::h));
+    ImGui::SameLine();
+    ImGui::Text("C %1d", cpu->check_flag(Flag::c));
+
+    ImGui::Separator();
+    if (ImGui::Button("Step")) {
+        debug_state = Debug_State::STEP;
+        next_step = true;
     }
-
-
+    ImGui::SameLine();
+    if (ImGui::Button("Run")) {
+        debug_state = Debug_State::RUN;
+        next_step = true;
+    }
     ImGui::End();
 
 }
@@ -119,8 +153,6 @@ void Debugger::card_view() {
 }
 
 void Debugger::imgui_demo() {
-
-
     static float f = 0.0f;
     static int counter = 0;
 
@@ -147,16 +179,8 @@ void Debugger::imgui_demo() {
 void Debugger::cpu_view() {
 
     ImGui::Begin("CPU");
-    int line = 1100;
 
-    u16 pc = cpu->get_pc();
-    ImGui::Text("%04X", pc);
-
-    ImGui::Separator();
-    bool goto_line = ImGui::Button("Goto");
-    ImGui::SameLine();
-    ImGui::SetNextItemWidth(100);
-    goto_line |= ImGui::InputInt("##Line", &line, 0, 0, ImGuiInputTextFlags_EnterReturnsTrue);
+    bool goto_pc = ImGui::Button("Goto PC");
 
     ImGui::Separator();
     ImGui::BeginChild("##scrollingregion");
@@ -171,20 +195,19 @@ void Debugger::cpu_view() {
     ImGui::NextColumn();
     ImGui::Separator();
 
+    auto pc = cpu->get_pc();
     ImGuiListClipper clipper(0x7FFF, ImGui::GetTextLineHeightWithSpacing());
+    if (goto_pc)
+        ImGui::SetScrollFromPosY(ImGui::GetCursorStartPos().y + (pc * ImGui::GetTextLineHeightWithSpacing()), 0.5f);
 
-    //if (debug_state == Debug_State::STEP)
-    //ImGui::SetScrollFromPosY(ImGui::GetCursorStartPos().y + (pc * ImGui::GetTextLineHeightWithSpacing()), 0.5f);
-
-    clipper.DisplayEnd = std::min(clipper.DisplayStart + 40, 0x7FFF);
+    // TODO: Breakpoints durch klicken hinzufügen
+    auto iter = std::upper_bound(legit_addresses.begin(), legit_addresses.end(), clipper.DisplayStart - 1);
+    clipper.DisplayStart = *iter;
+    clipper.DisplayEnd = std::min(clipper.DisplayStart + 50, 0x7FFF);
 
     for (int i = clipper.DisplayStart; i <= clipper.DisplayEnd;) {
         auto inst = cpu->get_instruction_at_addr(i);
         auto addr = i;
-
-        if (goto_line && line == addr)
-            ImGui::SetScrollHereY();
-
 
         if (addr == pc)
             ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.1f, 0.8f, 0.8f, 1.0f));
@@ -222,6 +245,9 @@ void Debugger::reset() {
 void Debugger::dissassamble() {
     debug_instruction debug_inst;
     for (int addr = 0; addr < 0x7FFF;) {
+        // Nur Adressen aus dem Card Rom nicht aus dem Bootrom
+        // Deswegen kriegt man beim Booten nicht die richtigen Adressen im CPU View
+        legit_addresses.push_back(addr);
         debug_inst = cpu->get_instruction_at_addr(addr);
         dis_map.insert({addr, debug_inst});
         addr += debug_inst.bytes;

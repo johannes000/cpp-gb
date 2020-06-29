@@ -71,6 +71,10 @@ private:
     PPU *ppu;
 
     Debug_State debug_state;
+public:
+    void setDebugState(Debug_State debugState) { debug_state = debugState; }
+
+private:
     SDL_Event event;
 
     bool next_step;
@@ -84,6 +88,9 @@ private:
 
 
     std::map<u16, debug_instruction> dis_map;
+    std::vector<u16> legit_addresses;
+
+    std::vector<u8> breakpoints;
 
     void init_debug_window();
 

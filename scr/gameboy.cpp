@@ -25,34 +25,37 @@ void gameboy::start_emu() {
     //card.load_rom("C:\\Users\\knaub\\source\\repos\\testroms\\mooneye\\acceptance\\bits\\reg_f.gb");
     //card.load_rom("C:\\Users\\knaub\\source\\repos\\testroms\\mooneye\\acceptance\\bits\\mem_oam.gb");
 
+    debug.dissassamble();
     debug.update();
-
     bool quit = false;
-    while (!quit) {
-        last_cycle = cpu.update();
-        cycles += last_cycle;
-        ppu.update(last_cycle * 4);
-        debug.step_mode();
 
-        if (cycles >= VERTICAL_REFRESH_CYCLES) {
-            cycles = 0;
-            debug.update();
-            while (SDL_PollEvent(&event)) {
-                joypad.update_joypad();
-                switch (event.type) {
-                    case SDL_QUIT:
-                        exit(0);
-                    case SDL_KEYDOWN:
-                        switch (event.key.keysym.sym) {
-                            case SDLK_ESCAPE:
-                                exit(0);
-                            default:
-                                break;
-                        }
-                        break;
-                    default:
-                        break;
-                }
+    while (!quit) {
+
+        while (!ppu.is_ready_to_render()) {
+            last_cycle = cpu.update();
+            cycles += last_cycle;
+            ppu.update(last_cycle * 4);
+            debug.step_mode();
+        }
+        ppu.render_frame();
+        debug.update();
+        cycles = 0;
+
+        while (SDL_PollEvent(&event)) {
+            joypad.update_joypad();
+            switch (event.type) {
+                case SDL_QUIT:
+                    exit(0);
+                case SDL_KEYDOWN:
+                    switch (event.key.keysym.sym) {
+                        case SDLK_ESCAPE:
+                            exit(0);
+                        default:
+                            break;
+                    }
+                    break;
+                default:
+                    break;
             }
         }
 

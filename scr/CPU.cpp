@@ -41,9 +41,8 @@ int CPU::update() {
     old_pc = R.PC;
     if (interrupts()) std::cout << "INTERRUPT" << std::endl;
     if (IME_scheduled) IME = true;
-    if (R.PC == 0x7ff3)
-        old_pc = R.PC;
     op_code = get_next_op_code();
+
     const auto jp = parse_op_code(op_code);
     if (jp == 0) inc_pc();
     cycles += current_instruction_info.cycles;

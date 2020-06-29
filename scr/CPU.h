@@ -50,6 +50,7 @@ private:
 public:
     u16 get_pc() const;
 
+    const CPU_Register &get_register() const { return R; }
 
     // INTERRUPTS
 
@@ -113,6 +114,7 @@ private:
 
     void toggle_all_flags();
 
+public:
     bool check_flag(const Flag &) const;  // gibt flag status wieder
 
     // OPCODES
@@ -129,10 +131,13 @@ private:
 
     cpu_instruction current_instruction_info;
     u8 op_code{};
+
     bool prefix = false;
 
 public:
     [[nodiscard]] debug_instruction get_instruction_at_addr(u16 addr) const;
+
+    u8 get_op_code() const { return op_code; }
 
 private:
 
