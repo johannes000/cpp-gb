@@ -7,11 +7,12 @@
 Debugger::Debugger(CPU *c, PPU *p) : cpu(c), ppu(p), debug_state(Debug_State::RUN), next_step(false) {
     init_debug_window();
 
-    frame_buffer = ppu->get_lcd_buffer();
-    tiles_buffer = ppu->get_tiles_buffer(0);
+    auto tile_buffer = ppu->get_tile_buffer();
+
+    frame_buffer = (void *) ppu->get_lcd_buffer();
 
     load_texture(&frame_texture, GB_LCD_SIZE_WIDTH, GB_LCD_SIZE_HEIGHT, frame_buffer);
-    load_texture(&tiles_texture, TILE_BUFFER_WIDTH, TILE_BUFFER_HEIGHT, tiles_buffer);
+    load_texture(&tiles_texture, TILE_BUFFER_WIDTH, TILE_BUFFER_HEIGHT, &tile_buffer[0]);
 
 
     breakpoints.push_back(0x100);
@@ -130,6 +131,11 @@ void Debugger::control_view() {
     ImGui::SameLine();
     ImGui::Text("C %1d", cpu->check_flag(Flag::c));
 
+
+    LCD_Register lcd_regs = ppu->get_lcd_register();
+
+    ImGui::Separator();
+    ImGui::Text(" %d", lcd_regs.LCD_LY);
     ImGui::Separator();
     if (ImGui::Button("Step")) {
         debug_state = Debug_State::STEP;
@@ -283,7 +289,7 @@ void Debugger::disassemble() {
 }
 
 void Debugger::video_view() {
-
+    update_tile_buffer();
     ImGui::Begin("Frame");
     glBindTexture(GL_TEXTURE_2D, frame_texture);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, GB_LCD_SIZE_WIDTH, GB_LCD_SIZE_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE,
@@ -291,20 +297,13 @@ void Debugger::video_view() {
 
     glBindTexture(GL_TEXTURE_2D, tiles_texture);
 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, TILE_BUFFER_WIDTH, TILE_BUFFER_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
-
-    const int tileSize = 16;
-    int tileCounter = 0;
-    for (int y = 0; y < 24; y++) {
-        for (int x = 0; x < 16; x++) {
-            glTexSubImage2D(GL_TEXTURE_2D, 0, x * 8, y * 8, 8, 8, GL_RGB, GL_UNSIGNED_BYTE,
-                            ppu->get_tiles_buffer(tileCounter++));
-        }
-    }
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, TILE_BUFFER_WIDTH, TILE_BUFFER_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE,
+                 &ppu->get_tile_buffer()[0]);
 
     ImGui::Image((ImTextureID) (intptr_t) frame_texture, ImVec2(GB_LCD_SIZE_WIDTH, GB_LCD_SIZE_HEIGHT));
 
     ImGui::Separator();
+
 
     ImGui::Image((ImTextureID) (intptr_t) tiles_texture, ImVec2(TILE_BUFFER_WIDTH * 2, TILE_BUFFER_HEIGHT * 2));
 
@@ -312,6 +311,11 @@ void Debugger::video_view() {
 
 
 }
+
+void Debugger::update_tile_buffer() {
+
+}
+
 
 bool Debugger::load_texture(GLuint *textureHandler, int width, int height, const void *data) {
     glGenTextures(1, textureHandler);

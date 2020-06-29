@@ -233,7 +233,26 @@ struct Pixel {
     u8 G;
     u8 B;
 };
+struct LCD_Register {
+    // u8 Werte die mit hilfe ihrer Adressen von der GB CPU beschrieben werden
+    Register LCD_CONTROL;
+    Register LCD_STATUS;
 
+    Register LCD_SCY;  // SCY - Scroll Y (R/W)
+    Register LCD_SCX;  // SCX - Scroll X (R/W)
+    Register LCD_LY;   // LY - LCDC Y-Coordinate (R)
+    Register LCD_LYC;  // LYC - LY Compare (R/W)
+    Register LCD_WY;   // WY - Window Y Position (R/W)
+    Register LCD_WX;   // WX - Window X Position minus 7 (R/W)
+
+    Register BG_PALETTE_DATA;    // BGP - BG Palette Data (R/W)
+    // - Non CGB Mode Only
+    Register BG_PALETTE_DATA_0;  // OBP0 - Object Palette 0 Data (R/W)
+    // - Non CGB Mode Only
+    Register BG_PALETTE_DATA_1;  // OBP1 - Object Palette 1 Data (R/W)
+    // - Non CGB Mode Only
+
+};
 // 0: During H - Blank
 // 1 : During V - Blank
 // 2 : OAM Access

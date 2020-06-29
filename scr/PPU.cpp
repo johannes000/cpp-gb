@@ -200,7 +200,7 @@ bool PPU::get_lcd_state(const LCD_State &s) const {
     return check_bit(lcd_register.LCD_STATUS, static_cast<u8>(s));
 }
 
-void PPU::buffer_line(const u8 line) {
+/*void PPU::buffer_line(const u8 line) {
     lcd_control.update(this);
     if (lcd_control.bg_enabled && lcd_control.lcd_power) {
         // BG Tile Map Display Select
@@ -251,7 +251,52 @@ void PPU::buffer_line(const u8 line) {
             }
         }
     }
+}*/
+
+void PPU::buffer_line(const u8 line) {
+    lcd_control.update(this);
+    if (lcd_control.bg_enabled && lcd_control.lcd_power) {
+        // BG Tile Map Display Select
+        const u16 bg_tilemap = lcd_control.bg_tile_map ? 0x9C00 : 0x9800;
+
+        // Festlegen wo im Vector die Pixel gesetzt werden
+        const auto y = line;
+
+        for (auto x = 0; x < GB_LCD_SIZE_WIDTH;) {
+            const auto sc_x = (x + lcd_register.LCD_SCX);
+            const auto sc_y = (y + lcd_register.LCD_SCY);
+
+            // Welches tile in der bg_tile-map
+            const auto bg_map_x = sc_x % BG_MAP_SIZE;
+            const auto bg_map_y = sc_y % BG_MAP_SIZE;
+
+            const auto tile_x = (bg_map_x / TILE_WIDTH);
+            const auto tile_y = (bg_map_y / TILE_HEIGHT);
+
+            // Welcher Pixel im tile
+            auto tile_pixel_x = (bg_map_x % TILE_WIDTH);
+            const auto tile_pixel_y = bg_map_y % TILE_HEIGHT;
+
+            // Adresse des Tiles im vram
+            const u16 tile_addr = bg_tilemap + (tile_y * TILE_PER_LINE + tile_x);
+
+            u8 tile_id = read(tile_addr);
+
+            if (!lcd_control.bg_window_tileset) // Id ist signed, wird offsettet um es wieder zu unsignen
+                tile_id = static_cast<i8>(tile_id) + 128;
+
+            for (tile_pixel_x++; tile_pixel_x <= TILE_WIDTH && x <= GB_LCD_SIZE_WIDTH - 1;
+                 x++, tile_pixel_x++) {
+                const auto index = ((GB_LCD_SIZE_WIDTH * y) + x);
+                lcd_buffer[index].R = tile_buffer[tile_id][(tile_pixel_y * 8) + tile_pixel_x - 1].R;
+                lcd_buffer[index].G = tile_buffer[tile_id][(tile_pixel_y * 8) + tile_pixel_x - 1].G;
+                lcd_buffer[index].B = tile_buffer[tile_id][(tile_pixel_y * 8) + tile_pixel_x - 1].B;
+
+            }
+        }
+    }
 }
+
 
 void PPU::render_frame() {
     // FPS Rechner
@@ -288,12 +333,7 @@ bool PPU::create_window() {
     return true;
 }
 
-[[nodiscard]] const Pixel *PPU::get_lcd_buffer() const {
-    return &lcd_buffer[0];
-}
-
-[[nodiscard]] const Pixel *PPU::get_tiles_buffer(int tile) { return &tile_buffer[tile][0]; }
-
+[[nodiscard]] const Pixel *PPU::get_lcd_buffer() const { return &lcd_buffer[0]; }
 
 void PPU::update_tile(const u16 &a) {
     auto addr = 0x1FFEu & a;
@@ -303,10 +343,9 @@ void PPU::update_tile(const u16 &a) {
     const u8 p_line_1 = v_ram[addr];
     const u8 p_line_2 = v_ram[addr + 1];
 
-    for (int pixel = 0; pixel < 8; ++pixel) {
-        const u8 color = static_cast<u8>(check_bit(p_line_1, 8 - pixel) << 1u) |
-                         check_bit(p_line_2, 8 - pixel);
-
+    for (int pixel = 0; pixel <= 8; ++pixel) {
+        const u8 color = static_cast<u8>(check_bit(p_line_1, (7 - pixel)) |
+                                         check_bit(p_line_2, (7 - pixel)));
         tile_buffer[tile_id][(y * 8) + pixel].R = Palettes[current_palette][color].R;
         tile_buffer[tile_id][(y * 8) + pixel].G = Palettes[current_palette][color].G;
         tile_buffer[tile_id][(y * 8) + pixel].B = Palettes[current_palette][color].B;

@@ -90,26 +90,11 @@ private:
     // LCD Data
     LCD_Mode lcd_mode{};
 
-    struct LCD_Register {
-        // u8 Werte die mit hilfe ihrer Adressen von der GB CPU beschrieben werden
-        Register LCD_CONTROL;
-        Register LCD_STATUS;
+    LCD_Register lcd_register{};
+public:
+    const LCD_Register &get_lcd_register() const { return lcd_register; }
 
-        Register LCD_SCY;  // SCY - Scroll Y (R/W)
-        Register LCD_SCX;  // SCX - Scroll X (R/W)
-        Register LCD_LY;   // LY - LCDC Y-Coordinate (R)
-        Register LCD_LYC;  // LYC - LY Compare (R/W)
-        Register LCD_WY;   // WY - Window Y Position (R/W)
-        Register LCD_WX;   // WX - Window X Position minus 7 (R/W)
-
-        Register BG_PALETTE_DATA;    // BGP - BG Palette Data (R/W)
-        // - Non CGB Mode Only
-        Register BG_PALETTE_DATA_0;  // OBP0 - Object Palette 0 Data (R/W)
-        // - Non CGB Mode Only
-        Register BG_PALETTE_DATA_1;  // OBP1 - Object Palette 1 Data (R/W)
-        // - Non CGB Mode Only
-
-    } lcd_register{};
+private:
 
     struct LCD_Control {
         bool lcd_power;          // Bit 7 - LCD Power(0 = Off, 1 = On)
@@ -161,20 +146,18 @@ private:
     std::vector<Pixel> lcd_buffer;
     std::vector<std::vector<Pixel>> tile_buffer;
 public:
+    std::vector<std::vector<Pixel>> &get_tile_buffer() { return tile_buffer; }
+
+public:
+
     Pixel const *get_lcd_buffer() const;
 
-    const Pixel *get_tiles_buffer(int tile);
+    LCD_Mode mode() const;
 
 private:
 
     void buffer_line(const u8 line);
 
-
-public:
-
-    LCD_Mode mode() const;
-
-private:
     // Paletten
     std::vector<std::vector<Pixel>> Palettes = std::vector<std::vector<Pixel>>{
             {{0xE0, 0xF8, 0xD0},

@@ -80,11 +80,16 @@ private:
     bool next_step;
 private:
 
-    const void *frame_buffer = nullptr;
-    const void *tiles_buffer = nullptr;
+    struct Tile {
+        GLuint texture = 0;
+        const void *buffer = nullptr;
+    };
 
+    void *frame_buffer = nullptr;
     GLuint frame_texture = 0;
     GLuint tiles_texture = 0;
+
+    void update_tile_buffer();
 
 
     std::map<u16, debug_instruction> dis_map;
@@ -122,9 +127,11 @@ private:
 
     static bool load_texture(GLuint *textureHandler, int width, int height, const void *data);
 
+
     void update_views();
 
     void control_view();
+
 };
 
 
