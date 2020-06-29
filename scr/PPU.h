@@ -148,18 +148,12 @@ private:
 public:
     std::vector<std::vector<Pixel>> &get_tile_buffer() { return tile_buffer; }
 
-public:
-
     Pixel const *get_lcd_buffer() const;
 
     LCD_Mode mode() const;
 
-private:
-
-    void buffer_line(const u8 line);
-
-    // Paletten
-    std::vector<std::vector<Pixel>> Palettes = std::vector<std::vector<Pixel>>{
+// Paletten
+    std::vector<std::vector<Pixel>> Palettes = std::vector<std::vector<Pixel >>{
             {{0xE0, 0xF8, 0xD0},
                     {0x88, 0xC0, 0x70},
                     {0x34, 0x68, 0x56},
@@ -177,6 +171,10 @@ private:
                     {96,   96,   96},
                     {0x0,  0x0,  0x0}},  // schwarz weiss
     };
+private:
+
+    void buffer_line(const u8 line);
+
 
     int current_palette = 0;
 

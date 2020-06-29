@@ -336,19 +336,21 @@ bool PPU::create_window() {
 [[nodiscard]] const Pixel *PPU::get_lcd_buffer() const { return &lcd_buffer[0]; }
 
 void PPU::update_tile(const u16 &a) {
-    auto addr = 0x1FFEu & a;
+    auto addr = a & 0x1FFEu;
     auto tile_id = static_cast<u16>(addr >> 4u) & 0x1FFu;
     auto y = static_cast<u16>(addr >> 1u) & 7u;
 
-    const u8 p_line_1 = v_ram[addr];
-    const u8 p_line_2 = v_ram[addr + 1];
+    const u8 p_line_1 = v_ram.at(addr);
+    const u8 p_line_2 = v_ram.at(addr + 1);
 
     for (int pixel = 0; pixel <= 8; ++pixel) {
-        const u8 color = static_cast<u8>(check_bit(p_line_1, (7 - pixel)) |
-                                         check_bit(p_line_2, (7 - pixel)));
-        tile_buffer[tile_id][(y * 8) + pixel].R = Palettes[current_palette][color].R;
-        tile_buffer[tile_id][(y * 8) + pixel].G = Palettes[current_palette][color].G;
-        tile_buffer[tile_id][(y * 8) + pixel].B = Palettes[current_palette][color].B;
+        const u8 color = static_cast<u8>(check_bit(p_line_1, (7 - pixel)) << 1u) |
+                         check_bit(p_line_2, (7 - pixel));
+
+
+        tile_buffer[tile_id][(y * 8) + pixel].R = Palettes[current_palette + 1][color].R;
+        tile_buffer[tile_id][(y * 8) + pixel].G = Palettes[current_palette + 1][color].G;
+        tile_buffer[tile_id][(y * 8) + pixel].B = Palettes[current_palette + 1][color].B;
     }
 
 

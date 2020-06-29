@@ -88,6 +88,7 @@ private:
     void *frame_buffer = nullptr;
     GLuint frame_texture = 0;
     GLuint tiles_texture = 0;
+    std::vector<Pixel> tile_buffer;
 
     void update_tile_buffer();
 

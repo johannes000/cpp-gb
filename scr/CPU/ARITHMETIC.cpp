@@ -568,7 +568,7 @@ u8 CPU::opcode0xBF() {  // CP A
 }
 
 u8 CPU::opcode0xFE() {  // CP d8
-    u8 data = read_u8_at_pc();
+    auto data = read_u8_at_pc();
     cp_r8_r8(&R.A, &data);
     return 0;
 }

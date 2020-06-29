@@ -7,9 +7,9 @@
 Debugger::Debugger(CPU *c, PPU *p) : cpu(c), ppu(p), debug_state(Debug_State::RUN), next_step(false) {
     init_debug_window();
 
-    auto tile_buffer = ppu->get_tile_buffer();
-
     frame_buffer = (void *) ppu->get_lcd_buffer();
+    tile_buffer = std::vector<Pixel>(TILE_BUFFER_WIDTH * TILE_BUFFER_HEIGHT, {0xFF, 0xFF, 0xFF});
+
 
     load_texture(&frame_texture, GB_LCD_SIZE_WIDTH, GB_LCD_SIZE_HEIGHT, frame_buffer);
     load_texture(&tiles_texture, TILE_BUFFER_WIDTH, TILE_BUFFER_HEIGHT, &tile_buffer[0]);
@@ -289,8 +289,9 @@ void Debugger::disassemble() {
 }
 
 void Debugger::video_view() {
-    update_tile_buffer();
     ImGui::Begin("Frame");
+    update_tile_buffer();
+
     glBindTexture(GL_TEXTURE_2D, frame_texture);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, GB_LCD_SIZE_WIDTH, GB_LCD_SIZE_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE,
                  ppu->get_lcd_buffer());
@@ -298,7 +299,7 @@ void Debugger::video_view() {
     glBindTexture(GL_TEXTURE_2D, tiles_texture);
 
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, TILE_BUFFER_WIDTH, TILE_BUFFER_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE,
-                 &ppu->get_tile_buffer()[0]);
+                 &tile_buffer[0]);
 
     ImGui::Image((ImTextureID) (intptr_t) frame_texture, ImVec2(GB_LCD_SIZE_WIDTH, GB_LCD_SIZE_HEIGHT));
 
@@ -313,6 +314,29 @@ void Debugger::video_view() {
 }
 
 void Debugger::update_tile_buffer() {
+    u16 tileData = 0x8000;
+    for (int row = 0; row < 24; row++) {
+        for (int column = 0; column < 16; column++) {
+            u16 start = tileData + (16 * column);
+            for (int line = (row * 8); line < 8 + (row * 8); line++, start += 2) {
+                u8 p_line_1 = ppu->read(start);
+                u8 p_line_2 = ppu->read(start + 1);
+
+                for (int tileColumn = (column * 8), position = 7;
+                     tileColumn < 8 + (column * 8); tileColumn++, position--) {
+                    int index = tileColumn + line * TILE_BUFFER_WIDTH;
+                    const u8 color = static_cast<u8>(check_bit(p_line_1, (position)) << 1u) |
+                                     check_bit(p_line_2, (position));
+
+                    tile_buffer[index].R = ppu->Palettes[1][color].R;
+                    tile_buffer[index].G = ppu->Palettes[1][color].G;
+                    tile_buffer[index].B = ppu->Palettes[1][color].B;
+                }
+            }
+        }
+        tileData += 0x100;
+    }
+
 
 }
 

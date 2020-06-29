@@ -1,6 +1,8 @@
 #ifndef TYPE_H_GUARD
 #define TYPE_H_GUARD
 
+#include <vector>
+
 typedef unsigned char u8;
 typedef unsigned short u16;
 
@@ -253,6 +255,8 @@ struct LCD_Register {
     // - Non CGB Mode Only
 
 };
+
+
 // 0: During H - Blank
 // 1 : During V - Blank
 // 2 : OAM Access
