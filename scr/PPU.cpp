@@ -348,9 +348,8 @@ void PPU::update_tile(const u16 &a) {
                          check_bit(p_line_2, (7 - pixel));
 
 
-        tile_buffer[tile_id][(y * 8) + pixel].R = Palettes[current_palette + 1][color].R;
-        tile_buffer[tile_id][(y * 8) + pixel].G = Palettes[current_palette + 1][color].G;
-        tile_buffer[tile_id][(y * 8) + pixel].B = Palettes[current_palette + 1][color].B;
+        tile_buffer[tile_id][(y * 8) + pixel] = Palettes[current_palette][color];
+
     }
 
 

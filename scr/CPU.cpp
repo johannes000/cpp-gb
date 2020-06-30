@@ -12,7 +12,6 @@ void CPU::init_register() {
     R.HL = 0x014D;
     R.SP = 0xFFFE;
     R.PC = 0x0000;
-    old_pc = 0x0000;
 
     op_code = 0x00;
     cycles = 0;
@@ -38,22 +37,15 @@ u8 CPU::parse_op_code(u8 &opcode) {
 }
 
 int CPU::update() {
-    old_pc = R.PC;
-    if (interrupts()) std::cout << "INTERRUPT" << std::endl;
-    if (IME_scheduled) IME = true;
-    op_code = get_next_op_code();
-
     const auto jp = parse_op_code(op_code);
     if (jp == 0) inc_pc();
     cycles += current_instruction_info.cycles;
     return current_instruction_info.cycles;
 }
 
-void CPU::inc_pc() { R.PC += current_instruction_info.bytes; }
+void CPU::fetch_op_code() { op_code = get_next_op_code(); }
 
-u16 CPU::get_pc() const {
-    return R.PC;
-}
+void CPU::inc_pc() { R.PC += current_instruction_info.bytes; }
 
 u8 CPU::get_next_op_code() { return read(R.PC); }
 

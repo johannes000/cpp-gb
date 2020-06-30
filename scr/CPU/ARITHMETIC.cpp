@@ -1,9 +1,9 @@
 #include "../CPU.h"
 
-void CPU::xor_r8_r8(u8 *data1, const u8 *data2) {
+void CPU::xor_a_r8(const u8 *reg) {
     // XOR data 1 und data 2 und speicher das ergebnis in data 1
-    *data1 ^= *data2;
-    set_flag_if(Flag::z, *data1 == 0);
+    R.A ^= *reg;
+    set_flag_if(Flag::z, R.A == 0);
     reset_flags(Flag::n, Flag::h, Flag::c);
 }
 
@@ -22,12 +22,12 @@ void CPU::or_r8_r8(const u8 &reg) {
     set_flag_if(Flag::z, R.A == 0);
 }
 
-void CPU::cp_r8_r8(const u8 *data1, const u8 *data2) {
+void CPU::cp_a_r8(const u8 *reg) {
     //Subtract the value in data2 from data1 and set flags accordingly, but don't store the result. This is useful for ComParing values.
     set_flag(Flag::n);
-    set_flag_if(Flag::h, ((*data1 & 0xfu) - (*data2 & 0xfu)));
-    set_flag_if(Flag::c, *data1 < *data2);
-    set_flag_if(Flag::z, *data1 == *data2);
+    set_flag_if(Flag::h, ((R.A & 0xfu) - (*reg & 0xfu)));
+    set_flag_if(Flag::c, R.A < *reg);
+    set_flag_if(Flag::z, R.A == *reg);
 }
 
 void CPU::inc_u8_reg(u8 *reg) {
@@ -37,7 +37,7 @@ void CPU::inc_u8_reg(u8 *reg) {
 
     reset_flag(Flag::n);
 
-    set_flag_if(Flag::h, !(*reg & 0xFFu));
+    set_flag_if(Flag::h, !(*reg & 0x0Fu));
     set_flag_if(Flag::z, *reg == 0);
 }
 
@@ -51,48 +51,48 @@ void CPU::dec_u8_reg(u8 *reg) {
     set_flag_if(Flag::z, *reg == 0);
 }
 
-void CPU::add_r8_r8(u8 *reg, const u8 *value) {
-    const u8 result = *reg + *value;
+void CPU::add_a_r8(const u8 *value) {
+    const u8 result = R.A + *value;
     reset_flag(Flag::n);
-    set_flag_if(Flag::h, (*reg & 0xFu) + (*value & 0xFu) > 0xFu);
+    set_flag_if(Flag::h, (R.A & 0xFu) + (*value & 0xFu) > 0xFu);
     set_flag_if(Flag::c, (result & 0x100u) != 0);
-    *reg = result;
-    set_flag_if(Flag::z, *reg == 0);
+    R.A = result;
+    set_flag_if(Flag::z, R.A == 0);
 }
 
-void CPU::adc_r8_r8(u8 *reg, u8 *value) {
+void CPU::adc_a_r8(u8 *value) {
     // Add n + Carry flag to A
     u8 c;
     check_flag(Flag::c) ? c = 1 : c = 0;
     *value += c;
-    add_r8_r8(reg, value);
+    add_a_r8(value);
 }
 
 void CPU::add_r16_r16(u16 *reg, const u16 *value) {
     const u16 result = *reg + *value;
     reset_flag(Flag::n);
-    set_flag_if(Flag::h, (*reg & 0xfff) + (*value & 0xfff) > 0xfff);
-    set_flag_if(Flag::c, (result & 0x10000) != 0);
+    set_flag_if(Flag::h, (*reg & 0xfffu) + (*value & 0xfffu) > 0xfffu);
+    set_flag_if(Flag::c, (result & 0x10000u) != 0);
     *reg = result;
 }
 
-void CPU::sub_r8_r8(u8 *reg, const u8 *value) {
-    const u8 result = *reg - *value;
+void CPU::sub_a_r8(const u8 *value) {
+    const u8 result = R.A - *value;
 
     set_flag(Flag::n);
-    set_flag_if(Flag::h, ((*reg & 0xf) - (*value & 0xf)) < 0);
-    set_flag_if(Flag::c, *reg < *value);
+    set_flag_if(Flag::h, ((R.A & 0xfu) - (*value & 0xfu)) < 0);
+    set_flag_if(Flag::c, R.A < *value);
 
-    *reg = result;
-    set_flag_if(Flag::z, *reg == 0);
+    R.A = result;
+    set_flag_if(Flag::z, R.A == 0);
 }
 
-void CPU::sbc_r8_r8(u8 *reg, u8 *value) {
+void CPU::sbc_a_r8(u8 *value) {
     u8 c;
     check_flag(Flag::c) ? c = 1 : c = 0;
     *value += c;
 
-    sub_r8_r8(reg, value);
+    sub_a_r8(value);
 }
 
 u8 CPU::opcode0x3C() {  // INC A
@@ -221,43 +221,43 @@ u8 CPU::opcode0x3B() {  // DEC SP
 }
 
 u8 CPU::opcode0x80() {  // ADD A B
-    add_r8_r8(&R.A, &R.B);
+    add_a_r8(&R.B);
     return 0;
 }
 
 u8 CPU::opcode0x81() {  // ADD A C
-    add_r8_r8(&R.A, &R.C);
+    add_a_r8(&R.C);
     return 0;
 }
 
 u8 CPU::opcode0x82() {  // ADD A D
-    add_r8_r8(&R.A, &R.D);
+    add_a_r8(&R.D);
     return 0;
 }
 
 u8 CPU::opcode0x83() {  // ADD A E
-    add_r8_r8(&R.A, &R.E);
+    add_a_r8(&R.E);
     return 0;
 }
 
 u8 CPU::opcode0x84() {  // ADD A H
-    add_r8_r8(&R.A, &R.H);
+    add_a_r8(&R.H);
     return 0;
 }
 
 u8 CPU::opcode0x85() {  // ADD A L
-    add_r8_r8(&R.A, &R.L);
+    add_a_r8(&R.L);
     return 0;
 }
 
 u8 CPU::opcode0x86() {  // ADD A HL
     u8 data = read(R.HL);
-    add_r8_r8(&R.A, &data);
+    add_a_r8(&data);
     return 0;
 }
 
 u8 CPU::opcode0x87() {  // ADD A A
-    add_r8_r8(&R.A, &R.A);
+    add_a_r8(&R.A);
     return 0;
 }
 
@@ -283,60 +283,63 @@ u8 CPU::opcode0x39() {  // ADD HL SP
 
 u8 CPU::opcode0xC6() {  // ADD A d8
     u8 data = read_u8_at_pc();
-    add_r8_r8(&R.A, &data);
+    add_a_r8(&data);
     return 0;
 }
 
 u8 CPU::opcode0xE8() {  // ADD SP r8
-    u16 data = read_i8_at_pc() + 0xFF00;
-    add_r16_r16(&R.SP, &data);
+    i8 data = read_i8_at_pc();
+
+    set_flag_if(Flag::h, ((R.SP & 0x0F) + (data & 0x0F)) > 0x0F);
+    set_flag_if(Flag::c, ((R.SP & 0xFF) + (data & 0xFF)) > 0xFF);
+    R.SP += static_cast<u16>(data);
     return 0;
 }
 
 u8 CPU::opcode0x90() {  // SUB B
-    sub_r8_r8(&R.A, &R.B);
+    sub_a_r8(&R.B);
     return 0;
 }
 
 u8 CPU::opcode0x91() {  // SUB C
-    sub_r8_r8(&R.A, &R.C);
+    sub_a_r8(&R.C);
     return 0;
 }
 
 u8 CPU::opcode0x92() {  // SUB D
-    sub_r8_r8(&R.A, &R.D);
+    sub_a_r8(&R.D);
     return 0;
 }
 
 u8 CPU::opcode0x93() {  // SUB E
-    sub_r8_r8(&R.A, &R.E);
+    sub_a_r8(&R.E);
     return 0;
 }
 
 u8 CPU::opcode0x94() {  // SUB H
-    sub_r8_r8(&R.A, &R.H);
+    sub_a_r8(&R.H);
     return 0;
 }
 
 u8 CPU::opcode0x95() {  // SUB L
-    sub_r8_r8(&R.A, &R.L);
+    sub_a_r8(&R.L);
     return 0;
 }
 
 u8 CPU::opcode0x96() {  // SUB HL
     u8 data = read(R.HL);
-    sub_r8_r8(&R.A, &data);
+    sub_a_r8(&data);
     return 0;
 }
 
 u8 CPU::opcode0x97() {  // SUB A
-    sub_r8_r8(&R.A, &R.A);
+    sub_a_r8(&R.A);
     return 0;
 }
 
 u8 CPU::opcode0xD6() {  // SUB d8
     u8 data = read_u8_at_pc();
-    sub_r8_r8(&R.A, &data);
+    sub_a_r8(&data);
     return 0;
 }
 
@@ -423,7 +426,7 @@ u8 CPU::opcode0xB6() {  // OR HL
 }
 
 u8 CPU::opcode0xB7() {  // OR A
-    or_r8_r8(read(R.HL));
+    or_r8_r8(R.A);
     return 0;
 }
 
@@ -433,190 +436,190 @@ u8 CPU::opcode0xF6() {  // OR d8
 }
 
 u8 CPU::opcode0x98() {  // SBC A B
-    sbc_r8_r8(&R.A, &R.B);
+    sbc_a_r8(&R.B);
     return 0;
 }
 
 u8 CPU::opcode0x99() {  // SBC A C
-    sbc_r8_r8(&R.A, &R.C);
+    sbc_a_r8(&R.C);
     return 0;
 }
 
 u8 CPU::opcode0x9A() {  // SBC A D
-    sbc_r8_r8(&R.A, &R.D);
+    sbc_a_r8(&R.D);
     return 0;
 }
 
 u8 CPU::opcode0x9B() {  // SBC A E
-    sbc_r8_r8(&R.A, &R.E);
+    sbc_a_r8(&R.E);
     return 0;
 }
 
 u8 CPU::opcode0x9C() {  // SBC A H
-    sbc_r8_r8(&R.A, &R.H);
+    sbc_a_r8(&R.H);
     return 0;
 }
 
 u8 CPU::opcode0x9D() {  // SBC A L
-    sbc_r8_r8(&R.A, &R.L);
+    sbc_a_r8(&R.L);
     return 0;
 }
 
 u8 CPU::opcode0x9E() {  // SBC A HL
     u8 data = read(R.HL);
-    sbc_r8_r8(&R.A, &data);
+    sbc_a_r8(&data);
     return 0;
 }
 
 u8 CPU::opcode0x9F() {  // SBC A A
-    sbc_r8_r8(&R.A, &R.A);
+    sbc_a_r8(&R.A);
     return 0;
 }
 
 u8 CPU::opcode0xDE() {  // SBC A d8
     u8 data = read_u8_at_pc();
-    sbc_r8_r8(&R.A, &data);
+    sbc_a_r8(&data);
     return 0;
 }
 
 u8 CPU::opcode0xEE() {  // XOR d8
     u8 data = read_u8_at_pc();
-    xor_r8_r8(&R.A, &data);
+    xor_a_r8(&data);
     return 0;
 }
 
 u8 CPU::opcode0xA8() {  // XOR B
-    xor_r8_r8(&R.A, &R.B);
+    xor_a_r8(&R.B);
     return 0;
 }
 
 u8 CPU::opcode0xA9() {  // XOR C
-    xor_r8_r8(&R.A, &R.C);
+    xor_a_r8(&R.C);
     return 0;
 }
 
 u8 CPU::opcode0xAA() {  // XOR D
-    xor_r8_r8(&R.A, &R.D);
+    xor_a_r8(&R.D);
     return 0;
 }
 
 u8 CPU::opcode0xAB() {  // XOR E
-    xor_r8_r8(&R.A, &R.E);
+    xor_a_r8(&R.E);
     return 0;
 }
 
 u8 CPU::opcode0xAC() {  // XOR H
-    xor_r8_r8(&R.A, &R.H);
+    xor_a_r8(&R.H);
     return 0;
 }
 
 u8 CPU::opcode0xAD() {  // XOR L
-    xor_r8_r8(&R.A, &R.L);
+    xor_a_r8(&R.L);
     return 0;
 }
 
 u8 CPU::opcode0xAE() {  // XOR HL
     u8 data = read(R.HL);
-    xor_r8_r8(&R.A, &data);
+    xor_a_r8(&data);
     return 0;
 }
 
 u8 CPU::opcode0xAF() {  // XOR A
-    xor_r8_r8(&R.A, &R.A);
+    xor_a_r8(&R.A);
     return 0;
 }
 
 u8 CPU::opcode0xB8() {  // CP B
-    cp_r8_r8(&R.A, &R.B);
+    cp_a_r8(&R.B);
     return 0;
 }
 
 u8 CPU::opcode0xB9() {  // CP C
-    cp_r8_r8(&R.A, &R.C);
+    cp_a_r8(&R.C);
     return 0;
 }
 
 u8 CPU::opcode0xBA() {  // CP D
-    cp_r8_r8(&R.A, &R.D);
+    cp_a_r8(&R.D);
     return 0;
 }
 
 u8 CPU::opcode0xBB() {  // CP E
-    cp_r8_r8(&R.A, &R.E);
+    cp_a_r8(&R.E);
     return 0;
 }
 
 u8 CPU::opcode0xBC() {  // CP H
-    cp_r8_r8(&R.A, &R.H);
+    cp_a_r8(&R.H);
     return 0;
 }
 
 u8 CPU::opcode0xBD() {  // CP L
-    cp_r8_r8(&R.A, &R.L);
+    cp_a_r8(&R.L);
     return 0;
 }
 
 u8 CPU::opcode0xBE() {  // CP HL
     u8 data = read(R.HL);
-    cp_r8_r8(&R.A, &data);
+    cp_a_r8(&data);
     return 0;
 }
 
 u8 CPU::opcode0xBF() {  // CP A
-    cp_r8_r8(&R.A, &R.A);
+    cp_a_r8(&R.A);
     return 0;
 }
 
 u8 CPU::opcode0xFE() {  // CP d8
     auto data = read_u8_at_pc();
-    cp_r8_r8(&R.A, &data);
+    cp_a_r8(&data);
     return 0;
 }
 
 u8 CPU::opcode0x88() {  // ADC A B
-    adc_r8_r8(&R.A, &R.B);
+    adc_a_r8(&R.B);
     return 0;
 }
 
 u8 CPU::opcode0x89() {  // ADC A C
-    adc_r8_r8(&R.A, &R.C);
+    adc_a_r8(&R.C);
     return 0;
 }
 
 u8 CPU::opcode0x8A() {  // ADC A D
-    adc_r8_r8(&R.A, &R.D);
+    adc_a_r8(&R.D);
     return 0;
 }
 
 u8 CPU::opcode0x8B() {  // ADC A E
-    adc_r8_r8(&R.A, &R.E);
+    adc_a_r8(&R.E);
     return 0;
 }
 
 u8 CPU::opcode0x8C() {  // ADC A H
-    adc_r8_r8(&R.A, &R.H);
+    adc_a_r8(&R.H);
     return 0;
 }
 
 u8 CPU::opcode0x8D() {  // ADC A L
-    adc_r8_r8(&R.A, &R.L);
+    adc_a_r8(&R.L);
     return 0;
 }
 
 u8 CPU::opcode0x8E() {  // ADC A HL
     u8 data = read(R.HL);
-    adc_r8_r8(&R.A, &data);
+    adc_a_r8(&data);
     return 0;
 }
 
 u8 CPU::opcode0x8F() {  // ADC A A
-    adc_r8_r8(&R.A, &R.A);
+    adc_a_r8(&R.A);
     return 0;
 }
 
 u8 CPU::opcode0xCE() {  // ADC A d8
     u8 data = read_u8_at_pc();
-    adc_r8_r8(&R.A, &data);
+    adc_a_r8(&data);
     return 0;
 }
 

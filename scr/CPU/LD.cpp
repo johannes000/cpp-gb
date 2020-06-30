@@ -1,5 +1,4 @@
-// ReSharper disable IdentifierTypo
-// ReSharper disable CppInconsistentNaming
+
 #include "../CPU.h"
 
 u8 CPU::opcode0x3E() {  // LD A d8
@@ -8,32 +7,32 @@ u8 CPU::opcode0x3E() {  // LD A d8
 }
 
 u8 CPU::opcode0x06() {  // LD B d8
-    R.B = read(R.PC + 1);
+    R.B = read_u8_at_pc();
     return 0;
 }
 
 u8 CPU::opcode0x0E() {  // LD C d8
-    R.C = read(R.PC + 1);
+    R.C = read_u8_at_pc();
     return 0;
 }
 
 u8 CPU::opcode0x16() {  // LD D d8
-    R.D = read(R.PC + 1);
+    R.D = read_u8_at_pc();
     return 0;
 }
 
 u8 CPU::opcode0x1E() {  // LD E d8
-    R.E = read(R.PC + 1);
+    R.E = read_u8_at_pc();
     return 0;
 }
 
 u8 CPU::opcode0x26() {  // LD H d8
-    R.H = read(R.PC + 1);
+    R.H = read_u8_at_pc();
     return 0;
 }
 
 u8 CPU::opcode0x2E() {  // LD L d8
-    R.L = read(R.PC + 1);
+    R.L = read_u8_at_pc();
     return 0;
 }
 

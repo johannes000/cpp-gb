@@ -8,15 +8,19 @@
 #include "MEMORY.h"
 #include "type.h"
 
+
 class MEMORY;
+
 
 class CPU {
 public:
-    explicit CPU(MEMORY *);
+    explicit CPU(MEMORY *m);
 
     u8 parse_op_code(u8 &);
 
     int update();
+
+    void fetch_op_code();
 
     void inc_pc();
 
@@ -33,7 +37,6 @@ public:
 
 private:
     MEMORY *mem;
-
     int cycles = 0;
     bool in_boot = true;
 
@@ -45,7 +48,9 @@ private:
 
     u16 old_pc = 0x00;
 public:
-    u16 get_pc() const;
+    u16 get_old_pc() const { return old_pc; }
+
+    u16 get_pc() const { return R.PC; }
 
     const CPU_Register &get_register() const { return R; }
 
@@ -151,27 +156,27 @@ private:
     static u16 u8_to_u16(const u8 &data_lb, const u8 &data_hb);
 
     // ARITHMETIC
-    void xor_r8_r8(u8 *data1, const u8 *data2);
+    void xor_a_r8(const u8 *reg);
 
     void and_r8_r8(u8 *reg1, const u8 *reg2);
 
     void or_r8_r8(const u8 &reg);
 
-    void cp_r8_r8(const u8 *data1, const u8 *data2);
+    void cp_a_r8(const u8 *reg);
 
     void inc_u8_reg(u8 *reg);
 
     void dec_u8_reg(u8 *reg);
 
-    void add_r8_r8(u8 *reg, const u8 *value);
+    void add_a_r8(const u8 *value);
 
-    void adc_r8_r8(u8 *reg, u8 *value);
+    void adc_a_r8(u8 *value);
 
     void add_r16_r16(u16 *reg, const u16 *value);
 
-    void sub_r8_r8(u8 *reg, const u8 *value);
+    void sub_a_r8(const u8 *value);
 
-    void sbc_r8_r8(u8 *reg, u8 *value);
+    void sbc_a_r8(u8 *value);
 
     // JUMPS
     void push_r16_reg(const u16 *reg);

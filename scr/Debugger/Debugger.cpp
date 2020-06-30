@@ -26,7 +26,7 @@ Debugger::~Debugger() {
 void Debugger::update() {
     switch (debug_state) {
         case Debug_State::STEP:
-            step_mode();
+            handle_breakpoints();
             break;
         case Debug_State::RUN:
             update_views();
@@ -37,7 +37,7 @@ void Debugger::update() {
 }
 
 
-void Debugger::step_mode() {
+void Debugger::handle_breakpoints() {
     if (debug_state != Debug_State::STEP) {
         if (!breakpoints.empty()) {
             auto iter = std::find(breakpoints.begin(), breakpoints.end(), cpu->get_pc());
@@ -52,12 +52,12 @@ void Debugger::step_mode() {
     while (!next_step) {
         update_views();
 
-        while (SDL_PollEvent(&event)) {
-            switch (event.type) {
+        while (SDL_PollEvent(&debug_event)) {
+            switch (debug_event.type) {
                 case SDL_QUIT:
                     exit(0);
                 case SDL_KEYDOWN:
-                    switch (event.key.keysym.sym) {
+                    switch (debug_event.key.keysym.sym) {
                         case SDLK_ESCAPE:
                             exit(0);
                         default:
@@ -134,20 +134,12 @@ void Debugger::control_view() {
 
     LCD_Register lcd_regs = ppu->get_lcd_register();
 
+
     ImGui::Separator();
     ImGui::Text(" %d", lcd_regs.LCD_LY);
-    ImGui::Separator();
-    if (ImGui::Button("Step")) {
-        debug_state = Debug_State::STEP;
-        next_step = true;
-    }
     ImGui::SameLine();
-    if (ImGui::Button("Run")) {
-        debug_state = Debug_State::RUN;
-        next_step = true;
-    }
-    ImGui::SameLine();
-    debug_state == Debug_State::STEP ? ImGui::Text("STEP") : ImGui::Text("RUN");
+    ImGui::Text("JOY %04X", cpu->read(JOY_P1_REGISTER));
+
     ImGui::End();
 
 }
@@ -189,10 +181,21 @@ void Debugger::cpu_view() {
     ImGui::Begin("CPU");
 
     bool goto_pc = ImGui::Button("Goto PC");
-
+    ImGui::SameLine();
+    if (ImGui::Button("Step")) {
+        debug_state = Debug_State::STEP;
+        next_step = true;
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Run")) {
+        debug_state = Debug_State::RUN;
+        next_step = true;
+    }
+    ImGui::SameLine();
+    debug_state == Debug_State::STEP ? ImGui::Text("STEP") : ImGui::Text("RUN");
     // DECOMPILER
     ImGui::Separator();
-    ImGui::BeginChild("##scrollingregion", ImVec2(0, 200));
+    ImGui::BeginChild("##scrollingregion", ImVec2(0, 400));
     ImGui::Columns(4, "mycolumns"); // 4-ways, with border
     ImGui::Separator();
     ImGui::Text("Address");
@@ -223,7 +226,7 @@ void Debugger::cpu_view() {
         char address[32];
         sprintf(address, "%04X", addr);
         if (ImGui::Selectable(address, true, ImGuiSelectableFlags_SpanAllColumns))
-            breakpoints.push_back(addr);
+            breakpoints.push_back(*(iter));
         ImGui::NextColumn();
         ImGui::Text("%s", inst.mnemonic);
         ImGui::NextColumn();
@@ -339,6 +342,34 @@ void Debugger::update_tile_buffer() {
 
 
 }
+
+/*
+void Debugger::update_tile_buffer() {
+    u16 tileData = 0x8000;
+    for (int row = 0; row < 24; row++) {
+        for (int column = 0; column < 16; column++) {
+            u16 start = tileData + (16 * column);
+            for (int line = (row * 8); line < 8 + (row * 8); line++, start += 2) {
+                u8 p_line_1 = ppu->read(start);
+                u8 p_line_2 = ppu->read(start + 1);
+
+                for (int tileColumn = (column * 8), position = 7;
+                     tileColumn < 8 + (column * 8); tileColumn++, position--) {
+                    int index = tileColumn + line * TILE_BUFFER_WIDTH;
+                    const u8 color = static_cast<u8>(check_bit(p_line_1, (position)) << 1u) |
+                                     check_bit(p_line_2, (position));
+
+                    tile_buffer[index].R = ppu->Palettes[1][color].R;
+                    tile_buffer[index].G = ppu->Palettes[1][color].G;
+                    tile_buffer[index].B = ppu->Palettes[1][color].B;
+                }
+            }
+        }
+        tileData += 0x100;
+    }
+
+
+}*/
 
 
 bool Debugger::load_texture(GLuint *textureHandler, int width, int height, const void *data) {

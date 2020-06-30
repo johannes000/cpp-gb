@@ -103,10 +103,8 @@ void CPU::swap_r8(u8 *reg) {
     u8 l_bits = *reg & 0xF0u;
     u8 h_bits = *reg & 0x0Fu;
 
-    l_bits >>= 4u;
-    h_bits <<= 4u;
 
-    *reg = l_bits | h_bits;
+    *reg = (l_bits >> 4u) | (h_bits << 4u);
     set_flag_if(Flag::z, *reg == 0);
 }
 

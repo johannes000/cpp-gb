@@ -7,6 +7,7 @@
 
 #include "type.h"
 #include "CPU.h"
+#include "SDL.h"
 
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
@@ -64,7 +65,7 @@ public:
 
     void render() const;
 
-    void step_mode();
+    void handle_breakpoints();
 
 private:
     CPU *cpu;
@@ -75,7 +76,7 @@ public:
     void setDebugState(Debug_State debugState) { debug_state = debugState; }
 
 private:
-    SDL_Event event;
+    SDL_Event debug_event{};
 
     bool next_step;
 private:

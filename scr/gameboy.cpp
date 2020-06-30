@@ -1,7 +1,8 @@
 #include "gameboy.h"
 
 
-gameboy::gameboy() : mem(&cpu, &card, &ppu, &joypad), cpu(&mem), ppu(&mem), joypad(&mem, &ppu), debug(&cpu, &ppu) {}
+gameboy::gameboy() : mem(&cpu, &card, &ppu, &joypad), cpu(&mem), ppu(&mem), joypad(&mem, &ppu),
+                     debug(&cpu, &ppu) {}
 
 gameboy::~gameboy() {
 
@@ -13,14 +14,15 @@ void gameboy::start_emu() {
     mem.reset();
 
     //card.load_rom("./../../testroms/tetris.gb");
-    //card.load_rom("./../../testroms/sml.gb");
+    card.load_rom("./../../testroms/sml.gb");
     //card.load_rom("./../../testroms/cpu_instrs/individual/07-jr,jp,call,ret,rst.gb");
+    //card.load_rom("./../../testroms/cpu_instrs/individual/01-special.gb");
+    //card.load_rom("./../../testroms/cpu_instrs/individual/03-op sp,hl.gb");
     //card.load_rom("./../../testroms/cpu_instrs/cpu_instrs.gb");
     //card.load_rom("./../../testroms/opus5.gb");
-    card.load_rom("./../../testroms/drmario.gb");
-    //card.load_rom("C:\\Users\\knaub\\source\\repos\\testroms\\mooneye\\utils\\bootrom_dumper.gb");
-    //card.load_rom("C:\\Users\\knaub\\source\\repos\\testroms\\mooneye\\utils\\bootrom_dumper.gb");
+    //card.load_rom("./../../testroms/drmario.gb");
     //card.load_rom("C:\\Users\\knaub\\source\\repos\\testroms\\mooneye\\acceptance\\call_timing.gb");
+    //card.load_rom("C:\\Users\\knaub\\source\\repos\\testroms\\instr_timing\\instr_timing.gb");
     //card.load_rom("C:\\Users\\knaub\\source\\repos\\testroms\\mooneye\\acceptance\\bits\\mem_oam.gb");
     //card.load_rom("C:\\Users\\knaub\\source\\repos\\testroms\\mooneye\\acceptance\\bits\\reg_f.gb");
     //card.load_rom("C:\\Users\\knaub\\source\\repos\\testroms\\mooneye\\acceptance\\bits\\mem_oam.gb");
@@ -32,7 +34,8 @@ void gameboy::start_emu() {
     while (!quit) {
 
         while (!ppu.is_ready_to_render()) {
-            debug.step_mode();
+            cpu.fetch_op_code();
+            debug.handle_breakpoints();
             last_cycle = cpu.update();
             cycles += last_cycle;
             ppu.update(last_cycle * 4);
