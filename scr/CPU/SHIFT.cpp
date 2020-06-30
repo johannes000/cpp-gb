@@ -88,8 +88,8 @@ void CPU::shift_right_a_r8(u8 *reg) {
 void CPU::shift_right_l_r8(u8 *reg) {
     // Shift Right Logic register r8.
     // 0 ->[7 -> 0]->C
-    const u8 b0 = *reg & 1;
-    *reg >>= 1;
+    const u8 b0 = *reg & 1u;
+    *reg >>= 1u;
 
     set_flag_if(Flag::c, b0 == 1);
     set_flag_if(Flag::z, *reg == 0);

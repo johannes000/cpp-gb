@@ -68,7 +68,7 @@ add_executable(cpp-gb
         external/imgui/imgui.h
         external/imgui/imstb_rectpack.h
         external/imgui/imstb_textedit.h
-        external/imgui/imstb_truetype.h scr/Debugger/Debugger_Init.cpp)
+        external/imgui/imstb_truetype.h scr/Debugger/Debugger_Init.cpp scr/Debugger/Debug_helper.cpp)
 
 target_link_libraries(cpp-gb
         -lmingw32

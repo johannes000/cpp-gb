@@ -57,8 +57,9 @@ void MEMORY::write(const u16 &addr, const u8 &data) {
     if (addr == 0xFF02 && data == 0x81)
         std::cout << static_cast<char >(read(0xff01));
 
-
-    if (addr >= GRAPHICS_RAM && addr <= GRAPHICS_RAM_END) {
+    if (addr <= CARD_ROM_END) {
+        cardridge->write(addr, data);
+    } else if (addr >= GRAPHICS_RAM && addr <= GRAPHICS_RAM_END) {
         ppu->write(addr, data);
     } else if (addr >= CARD_EXTERNAL_RAM && addr <= CARD_EXTERNAL_RAM_END) {
         cardridge->write(addr, data);

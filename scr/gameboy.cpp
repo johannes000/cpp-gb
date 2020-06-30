@@ -2,7 +2,7 @@
 
 
 gameboy::gameboy() : mem(&cpu, &card, &ppu, &joypad), cpu(&mem), ppu(&mem), joypad(&mem, &ppu),
-                     debug(&cpu, &ppu) {}
+                     debug(&cpu, &ppu, &mem, &card) {}
 
 gameboy::~gameboy() {
 
@@ -13,8 +13,8 @@ void gameboy::start_emu() {
     last_cycle = 0;
     mem.reset();
 
-    //card.load_rom("./../../testroms/tetris.gb");
-    card.load_rom("./../../testroms/sml.gb");
+    card.load_rom("./../../testroms/tetris.gb");
+    //card.load_rom("./../../testroms/sml.gb");
     //card.load_rom("./../../testroms/cpu_instrs/individual/07-jr,jp,call,ret,rst.gb");
     //card.load_rom("./../../testroms/cpu_instrs/individual/01-special.gb");
     //card.load_rom("./../../testroms/cpu_instrs/individual/03-op sp,hl.gb");

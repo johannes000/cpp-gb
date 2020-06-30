@@ -51,9 +51,13 @@ class CPU;
 
 class PPU;
 
+class MEMORY;
+
+class CARDRIDGE;
+
 class Debugger {
 public:
-    explicit Debugger(CPU *c, PPU *ppu);
+    explicit Debugger(CPU *c, PPU *p, MEMORY *m, CARDRIDGE *card);
 
     ~Debugger();
 
@@ -70,6 +74,8 @@ public:
 private:
     CPU *cpu;
     PPU *ppu;
+    MEMORY *mem;
+    CARDRIDGE *cardridge;
 
     Debug_State debug_state;
 public:

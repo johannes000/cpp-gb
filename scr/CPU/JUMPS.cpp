@@ -35,7 +35,7 @@ u8 CPU::opcode0x18() {  // JR r8
 
 u8 CPU::opcode0x20() {  // JR NZ r8
     if (!check_flag(Flag::z)) {
-        R.PC += read_i8_at_pc();;
+        R.PC += read_i8_at_pc();
         return 0;
     }
     return 0;

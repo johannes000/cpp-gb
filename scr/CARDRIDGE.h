@@ -5,7 +5,7 @@
 
 #include "type.h"
 
-constexpr u16 CARD_ROM_BANK_SIZE = 0x2000;
+constexpr u16 CARD_ROM_BANK_SIZE = 0x4000;
 constexpr u16 CARD_RAM_BANK_SIZE = 0x4000;
 
 class CARDRIDGE {
@@ -20,24 +20,24 @@ public:
 
     void write(const u16 &addr, const u8 &data);
 
-    const std::vector<u8> *get_cardridge_rom();
-
     Rom_Info rom_info;
+
+    [[nodiscard]] unsigned int get_selected_rom_bank() const { return selected_rom_bank; }
 
 private:
     void fill_cardridge_info();
 
     std::vector<u8> rom;
-public:
-    [[nodiscard]] const std::vector<u8> &get_rom() const;
 
-private:
     std::vector<std::vector<u8>> ram;
 
     int selected_ram_bank = 0;
+    unsigned int selected_rom_bank = 0;
 
-public:
-    Rom_Info *get_rom_info();
+
+    bool ram_enabled;
+
+
 };
 
 #endif

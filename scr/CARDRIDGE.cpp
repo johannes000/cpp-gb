@@ -5,7 +5,7 @@
 #include <cstring>
 
 
-CARDRIDGE::CARDRIDGE() : rom_info() {}
+CARDRIDGE::CARDRIDGE() : rom_info(), ram_enabled(false) {}
 
 bool CARDRIDGE::load_rom(const char *rom_file) {
     std::ifstream is(rom_file, std::ios::binary);
@@ -109,24 +109,36 @@ void CARDRIDGE::fill_cardridge_info() {
     }
 }
 
-Rom_Info *CARDRIDGE::get_rom_info() { return &rom_info; }
-
 u8 CARDRIDGE::read(const u16 &addr) {
-    if (addr <= 0x7FFF)
-        return rom.at(addr);
-    else if (addr >= 0xA000 && addr <= 0xBFFF) {
+    if (addr <= CARD_BANKS_END)
+        return rom.at(addr + selected_rom_bank * CARD_ROM_BANK_SIZE);
+    else if (addr >= CARD_EXTERNAL_RAM && addr <= CARD_EXTERNAL_RAM_END
+             && rom_info.ram_size != RAMSize::None
+             && ram_enabled) {
         return ram[selected_ram_bank][addr - CARD_EXTERNAL_RAM];
     }
+
     return 0xFF;
 }
 
 void CARDRIDGE::write(const u16 &addr, const u8 &data) {
-    if (addr >= 0xA000 && addr <= 0xBFFF) ram[selected_ram_bank].at(addr - CARD_EXTERNAL_RAM) = data;
+    if (addr >= 0x2000 && addr <= 0x3FFF && rom_info.rom_banks > 0) {
+        selected_rom_bank = data & 0x1Fu;
+    }
+
+    if (addr >= CARD_EXTERNAL_RAM && addr <= CARD_EXTERNAL_RAM_END
+        && rom_info.ram_size != RAMSize::None
+        && ram_enabled) {
+        ram[selected_ram_bank].at(addr - CARD_EXTERNAL_RAM) = data;
+    } else if (addr <= 0x1FFF) {
+        if (data == 0x00)
+            ram_enabled = false;
+        if (data == 0xA)
+            ram_enabled = true;
+    }
+
 }
 
-const std::vector<u8> &CARDRIDGE::get_rom() const {
-    return rom;
-}
 
 u8 CARDRIDGE::read_card_rom(const u16 &addr) {
     return rom.at(addr);

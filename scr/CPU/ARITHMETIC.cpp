@@ -25,30 +25,30 @@ void CPU::or_r8_r8(const u8 &reg) {
 void CPU::cp_a_r8(const u8 *reg) {
     //Subtract the value in data2 from data1 and set flags accordingly, but don't store the result. This is useful for ComParing values.
     set_flag(Flag::n);
-    set_flag_if(Flag::h, ((R.A & 0xfu) - (*reg & 0xfu)));
+    set_flag_if(Flag::h, ((R.A & 0xfu) < (*reg & 0xfu)));
     set_flag_if(Flag::c, R.A < *reg);
     set_flag_if(Flag::z, R.A == *reg);
 }
 
 void CPU::inc_u8_reg(u8 *reg) {
     //  Increment register.
-
-    *reg = *reg + 1;
+    u8 result = *reg + 1;
 
     reset_flag(Flag::n);
 
-    set_flag_if(Flag::h, !(*reg & 0x0Fu));
-    set_flag_if(Flag::z, *reg == 0);
+    set_flag_if(Flag::h, ((*reg & 0xFu) + 0x1 > 0xF));
+    set_flag_if(Flag::z, result == 0);
+    *reg = result;
 }
 
 void CPU::dec_u8_reg(u8 *reg) {
     // Decrement register
-    *reg = *reg - 1;
+    u8 result = *reg - 1;
 
     set_flag(Flag::n);
-
-    set_flag_if(Flag::h, (*reg & 0x0Fu) == 0x0Fu);
-    set_flag_if(Flag::z, *reg == 0);
+    set_flag_if(Flag::h, (static_cast<i8>((*reg & 0xFu) - 0x1) < 0));
+    set_flag_if(Flag::z, result == 0);
+    *reg = result;
 }
 
 void CPU::add_a_r8(const u8 *value) {
@@ -77,13 +77,12 @@ void CPU::add_r16_r16(u16 *reg, const u16 *value) {
 }
 
 void CPU::sub_a_r8(const u8 *value) {
-    const u8 result = R.A - *value;
 
     set_flag(Flag::n);
-    set_flag_if(Flag::h, ((R.A & 0xfu) - (*value & 0xfu)) < 0);
-    set_flag_if(Flag::c, R.A < *value);
+    set_flag_if(Flag::h, (((R.A & 0x0Fu) < (*value & 0x0Fu))));
+    set_flag_if(Flag::c, (R.A & 0xFFu) < (*value & 0xFFu));
 
-    R.A = result;
+    R.A -= *value;
     set_flag_if(Flag::z, R.A == 0);
 }
 
@@ -159,7 +158,6 @@ u8 CPU::opcode0x33() {  // INC SP
 
 u8 CPU::opcode0x05() {  // DEC B
     dec_u8_reg(&R.B);
-
     return 0;
 }
 

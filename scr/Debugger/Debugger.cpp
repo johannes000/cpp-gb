@@ -4,7 +4,9 @@
 #include "Debugger.h"
 #include <vector>
 
-Debugger::Debugger(CPU *c, PPU *p) : cpu(c), ppu(p), debug_state(Debug_State::RUN), next_step(false) {
+Debugger::Debugger(CPU *c, PPU *p, MEMORY *m, CARDRIDGE *card) : cpu(c), ppu(p), mem(m), cardridge(card),
+                                                                 debug_state(Debug_State::RUN),
+                                                                 next_step(false) {
     init_debug_window();
 
     frame_buffer = (void *) ppu->get_lcd_buffer();
@@ -108,7 +110,6 @@ void Debugger::control_view() {
     ImGui::Begin("Control");
     CPU_Register cpu_regs = cpu->get_register();
 
-
     ImGui::Text("AF = %04X", cpu_regs.AF);
     ImGui::SameLine();
     ImGui::Text("DE = %04X", cpu_regs.DE);
@@ -120,7 +121,6 @@ void Debugger::control_view() {
     ImGui::SameLine();
     ImGui::Text("SP = %04X", cpu_regs.SP);
 
-
     ImGui::Separator();
 
     ImGui::Text("Z %1d", cpu->check_flag(Flag::z));
@@ -130,7 +130,8 @@ void Debugger::control_view() {
     ImGui::Text("H %1d", cpu->check_flag(Flag::h));
     ImGui::SameLine();
     ImGui::Text("C %1d", cpu->check_flag(Flag::c));
-
+    ImGui::SameLine();
+    ImGui::Text("(HL) %02X", cpu->read(cpu_regs.HL));
 
     LCD_Register lcd_regs = ppu->get_lcd_register();
 
@@ -147,7 +148,16 @@ void Debugger::control_view() {
 void Debugger::card_view() {
     ImGui::Begin("Rominfo");
 
-    ImGui::Text("asd");
+
+    ImGui::Text("%s", cardridge->rom_info.title);
+    ImGui::Separator();
+
+    ImGui::Text("CType: %s", cardridge->rom_info.CType_string());
+    ImGui::SameLine();
+    ImGui::Text("Rom Bank: %d", cardridge->get_selected_rom_bank());
+    ImGui::Text("Ram Size: %s", cardridge->rom_info.ram_size_string());
+    ImGui::SameLine();
+    ImGui::Text("| Rom Size: %s", cardridge->rom_info.rom_size_string());
 
     ImGui::End();
 }
@@ -214,11 +224,13 @@ void Debugger::cpu_view() {
         ImGui::SetScrollFromPosY(ImGui::GetCursorStartPos().y + (pc * ImGui::GetTextLineHeightWithSpacing()), 0.5f);
 
     auto iter = std::upper_bound(valid_addresses.begin(), valid_addresses.end(), clipper.DisplayStart - 1);
-    clipper.DisplayStart = *iter;
+    if (iter != valid_addresses.end())
+        clipper.DisplayStart = *iter;
 
+
+    auto addr = clipper.DisplayStart;
     for (int i = clipper.DisplayStart; i <= clipper.DisplayEnd; i++) {
-        auto inst = dis_map[*iter];
-        auto addr = *iter;
+        auto inst = cpu->get_instruction_at_addr(addr);
 
         if (addr == pc)
             ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.1f, 0.8f, 0.8f, 1.0f));
@@ -226,7 +238,7 @@ void Debugger::cpu_view() {
         char address[32];
         sprintf(address, "%04X", addr);
         if (ImGui::Selectable(address, true, ImGuiSelectableFlags_SpanAllColumns))
-            breakpoints.push_back(*(iter));
+            breakpoints.push_back(addr);
         ImGui::NextColumn();
         ImGui::Text("%s", inst.mnemonic);
         ImGui::NextColumn();
@@ -238,7 +250,7 @@ void Debugger::cpu_view() {
         ImGui::NextColumn();
         if (addr == pc)
             ImGui::PopStyleColor(1);
-        iter++;
+        addr += inst.bytes;
     }
     clipper.End();
     ImGui::EndChild();
@@ -277,14 +289,14 @@ void Debugger::reset() {
 
 void Debugger::disassemble() {
     debug_instruction debug_inst;
-    for (u16 addr = 0; addr < 0x7FFE;) {
+    for (u16 addr = 0; addr < 0x7FFF;) {
         // Nur Adressen aus dem Card Rom nicht aus dem Bootrom
         // Deswegen kriegt man beim Booten nicht die richtigen Adressen im CPU View
         debug_inst = cpu->get_instruction_at_addr(addr);
         if (debug_inst.prefixed)
             addr++;
 
-        dis_map.insert({addr, debug_inst});
+        //dis_map.insert({addr, debug_inst});
         valid_addresses.push_back(addr);
 
         addr += debug_inst.bytes;
@@ -331,9 +343,7 @@ void Debugger::update_tile_buffer() {
                     const u8 color = static_cast<u8>(check_bit(p_line_1, (position)) << 1u) |
                                      check_bit(p_line_2, (position));
 
-                    tile_buffer[index].R = ppu->Palettes[1][color].R;
-                    tile_buffer[index].G = ppu->Palettes[1][color].G;
-                    tile_buffer[index].B = ppu->Palettes[1][color].B;
+                    tile_buffer[index] = ppu->Palettes[1][color];
                 }
             }
         }

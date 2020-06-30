@@ -2,12 +2,15 @@
 #define TYPE_H_GUARD
 
 #include <vector>
+#include <ostream>
+
+#include <string>
 
 typedef unsigned char u8;
 typedef unsigned short u16;
 
-typedef signed char i8;
-typedef signed short i16;
+typedef char i8;
+typedef short i16;
 
 typedef unsigned char Register;
 
@@ -168,7 +171,6 @@ enum class CType {  // Cartridge Type
     BANDAI_TAMA5  [[maybe_unused]] = 0xFD,
     HuC3  [[maybe_unused]] = 0xFE,
     HUC1_RAM_BATTERY  [[maybe_unused]] = 0xFF
-
 };
 
 enum class ROMSize {
@@ -204,6 +206,7 @@ enum class DestCode {
 };
 
 struct Rom_Info {
+
     char title[15] = "";
     bool SGBFlag = false;
 
@@ -215,6 +218,16 @@ struct Rom_Info {
 
     int rom_banks{};
     int ram_banks{};
+
+public:
+    const char *CGBFlag_string();
+
+    const char *CType_string();
+
+    const char *rom_size_string();
+
+    const char *ram_size_string();
+
 };
 
 struct debug_instruction {
@@ -277,7 +290,6 @@ enum class LCD_Mode {
 // Bit 1 - P11 Input Left  or Button B (0=Pressed) (Read Only)
 // Bit 0 - P10 Input Right or Button A (0=Pressed) (Read Only)
 enum class GB_Key {
-
     Right = 0,
     Left = 1,
     Up = 2,
@@ -288,6 +300,9 @@ enum class GB_Key {
     Start = 7,
 
 };
+
+
+//void rom_info_CType_to_
 
 void set_bit_if(u8 &value, const u8 &bit, bool condition);
 
