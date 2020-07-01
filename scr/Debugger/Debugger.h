@@ -118,6 +118,7 @@ private:
 
     void video_view();
 
+    void memory_view();
 
     void terminate_window();
 
