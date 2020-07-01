@@ -418,12 +418,13 @@ void Debugger::memory_view() {
             u8 data = mem->read(mem_line_addr + i);
             if (data == 0x00)
                 ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.5f, 0.5f, 0.5f, 1.0f));
-
             ImGui::Text("%02X", data);
             if (data == 0x00)
                 ImGui::PopStyleColor(1);
-
+            if ((mem_line_addr + i) == 0xFEFF)
+                ImGui::Separator();
         }
+
     }
     clipper.End();
     ImGui::EndChild();
