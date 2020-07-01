@@ -69,7 +69,7 @@ void CPU::adc_a_r8(u8 *value) {
 }
 
 void CPU::add_r16_r16(u16 *reg, const u16 *value) {
-    const u16 result = *reg + *value;
+    const unsigned int result = *reg + *value;
     reset_flag(Flag::n);
     set_flag_if(Flag::h, (*reg & 0xfffu) + (*value & 0xfffu) > 0xfffu);
     set_flag_if(Flag::c, (result & 0x10000u) != 0);
@@ -286,11 +286,11 @@ u8 CPU::opcode0xC6() {  // ADD A d8
 }
 
 u8 CPU::opcode0xE8() {  // ADD SP r8
-    i8 data = read_i8_at_pc();
-
-    set_flag_if(Flag::h, ((R.SP & 0x0F) + (data & 0x0F)) > 0x0F);
-    set_flag_if(Flag::c, ((R.SP & 0xFF) + (data & 0xFF)) > 0xFF);
-    R.SP += static_cast<u16>(data);
+    u8 data = read_u8_at_pc();
+    u16 result = R.SP + data;
+    set_flag_if(Flag::h, ((result & 0xFu) < (R.SP & 0xFu)));
+    set_flag_if(Flag::c, ((result & 0xFFu) < (R.SP & 0xFFu)));
+    R.SP = result;
     return 0;
 }
 

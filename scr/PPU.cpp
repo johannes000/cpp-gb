@@ -282,7 +282,7 @@ void PPU::buffer_line(const u8 line) {
             u8 tile_id = read(tile_addr);
 
             if (!lcd_control.bg_window_tileset) // Id ist signed, wird offsettet um es wieder zu unsignen
-                tile_id = static_cast<i8>(tile_id) + 128;
+                tile_id = static_cast<i8>(tile_id) + 128u;
 
             for (tile_pixel_x++; tile_pixel_x <= TILE_WIDTH && x <= GB_LCD_SIZE_WIDTH - 1;
                  x++, tile_pixel_x++) {
@@ -346,7 +346,7 @@ void PPU::update_tile(const u16 &a) {
         const u8 color = static_cast<u8>(check_bit(p_line_1, (7 - pixel)) << 1u) |
                          check_bit(p_line_2, (7 - pixel));
         auto p = ((y * 8) + pixel);
-        tile_buffer[tile_id][p] = Palettes[current_palette][color % 3];
+        tile_buffer[tile_id][p] = Palettes[current_palette][color];
     }
 }
 

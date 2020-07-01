@@ -9,7 +9,7 @@
 CONTROLS::CONTROLS(MEMORY *m, PPU *p) : mem(m), ppu(p), joy_p1_state(0xFF) {}
 
 void CONTROLS::update_joypad() {
-    joy_p1_state = 0xEF;
+    joy_p1_state = 0x11;
     return;
     // Bit 7 - Not used
     // Bit 6 - Not used

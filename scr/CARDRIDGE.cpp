@@ -111,7 +111,7 @@ void CARDRIDGE::fill_cardridge_info() {
 
 u8 CARDRIDGE::read(const u16 &addr) {
     if (addr <= CARD_BANKS_END)
-        return rom.at(addr + selected_rom_bank * CARD_ROM_BANK_SIZE);
+        return rom.at(addr + selected_rom_bank % 1 * CARD_ROM_BANK_SIZE);
     else if (addr >= CARD_EXTERNAL_RAM && addr <= CARD_EXTERNAL_RAM_END
              && rom_info.ram_size != RAMSize::None
              && ram_enabled) {
