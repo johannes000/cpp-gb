@@ -18,7 +18,7 @@ Debugger::Debugger(CPU *c, PPU *p, MEMORY *m, CARDRIDGE *card) : cpu(c), ppu(p),
 
 
     breakpoints.push_back(0x100);
-    breakpoints.push_back(0x29A6);
+    breakpoints.push_back(0x29B0);
 }
 
 Debugger::~Debugger() {
@@ -188,6 +188,21 @@ void Debugger::imgui_demo() {
 
 void Debugger::cpu_view() {
 
+
+
+/* TODO: Hierraus einen unit Test bauen
+ * for (int j = 0; j < 0xFFFF; ++j) {
+        cpu->read(j);
+        std::cout << "cpu " << std::endl;
+        ppu->read(j);
+        std::cout << "ppu " << std::endl;
+        mem->read(j);
+        std::cout << "mem " << std::endl;
+        cardridge->read_card_rom(j);
+        std::cout << "card " << std::endl;
+        std::cout << "last addr " << std::hex << (int) j << std::endl;
+    }*/
+
     ImGui::Begin("CPU");
 
     bool goto_pc = ImGui::Button("Goto PC");
@@ -206,7 +221,7 @@ void Debugger::cpu_view() {
     // DECOMPILER
     ImGui::Separator();
     ImGui::BeginChild("##scrollingregion", ImVec2(0, 400));
-    ImGui::Columns(4, "mycolumns"); // 4-ways, with border
+    ImGui::Columns(4); // 4-ways, with border
     ImGui::Separator();
     ImGui::Text("Address");
     ImGui::NextColumn();
@@ -219,14 +234,13 @@ void Debugger::cpu_view() {
     ImGui::Separator();
 
     auto pc = cpu->get_pc();
-    ImGuiListClipper clipper(0x7FFF, ImGui::GetTextLineHeightWithSpacing());
+    ImGuiListClipper clipper(0x9000, ImGui::GetTextLineHeightWithSpacing());
     if (goto_pc)
         ImGui::SetScrollFromPosY(ImGui::GetCursorStartPos().y + (pc * ImGui::GetTextLineHeightWithSpacing()), 0.5f);
 
     auto iter = std::upper_bound(valid_addresses.begin(), valid_addresses.end(), clipper.DisplayStart - 1);
-    if (iter != valid_addresses.end())
-        clipper.DisplayStart = *iter;
-
+//    if (iter != valid_addresses.end())
+//        clipper.DisplayStart = *iter;
 
     auto addr = clipper.DisplayStart;
     for (int i = clipper.DisplayStart; i <= clipper.DisplayEnd; i++) {
@@ -244,9 +258,17 @@ void Debugger::cpu_view() {
         ImGui::NextColumn();
         ImGui::Text("%02X", inst.opcode);
         ImGui::NextColumn();
-        char intermediate[32];
-        sprintf(intermediate, "%04X", inst.intermediate);
-        ImGui::Text("%s", intermediate);
+        if (inst.bytes > 1)
+            ImGui::Text("%04X", inst.intermediate);
+        else
+            ImGui::Text("%s", "");
+        ImGui::SameLine();
+        if (inst.bytes > 2)
+            ImGui::Text("%s", what_register_is_this(inst.intermediate));
+        else if (inst.bytes > 1)
+            ImGui::Text("%s", what_register_is_this(static_cast<u16> (inst.intermediate | 0xFF00u)));
+        else
+            ImGui::Text("%s", "");
         ImGui::NextColumn();
         if (addr == pc)
             ImGui::PopStyleColor(1);
@@ -380,6 +402,92 @@ void Debugger::update_tile_buffer() {
 
 
 }*/
+const char *Debugger::what_register_is_this(const u8 &reg) {
+    return what_register_is_this(static_cast<u16>(0xFF00u | reg));
+}
+
+const char *Debugger::what_register_is_this(const u16 &reg) {
+    if ((reg & 0xFF00u) == 0xFF00u)
+        switch (reg & 0x00FFu) {
+            case 0x00:
+                return "JOYPAD";
+            case 0x04:
+                return "DIV";
+            case 0x05:
+                return "TIMA";
+            case 0x06:
+                return "TMA";
+            case 0x07:
+                return "TAC";
+            case 0x0f:
+                return "IF Interrupt Flags";
+            case 0x10:
+                return "NR10";
+            case 0x11:
+                return "NR11";
+            case 0x12:
+                return "NR12";
+            case 0x14:
+                return "NR14";
+            case 0x16:
+                return "NR21";
+            case 0x17:
+                return "NR22";
+            case 0x19:
+                return "NR24";
+            case 0x1A:
+                return "NR30";
+            case 0x1B:
+                return "NR31";
+            case 0x1C:
+                return "NR32";
+            case 0x1E:
+                return "NR33";
+            case 0x20:
+                return "NR41";
+            case 0x21:
+                return "NR42";
+            case 0x22:
+                return "NR43";
+            case 0x23:
+                return "NR30";
+            case 0x24:
+                return "NR50";
+            case 0x25:
+                return "NR51";
+            case 0x26:
+                return "NR52";
+            case 0x40:
+                return "LCD Controll";
+            case 0x44:
+                return "LY Current Scalline";
+            case 0x45:
+                return "LYC Compare";
+            case 0x41:
+                return "STAT";
+            case 0x42:
+                return "SCY";
+            case 0x43:
+                return "SCX";
+            case 0x4A:
+                return "WY";
+            case 0x4B:
+                return "WX";
+            case 0x46:
+                return "DMA";
+            case 0x47:
+                return "BG PAL";
+            case 0x48:
+                return "OBJ PAL 1";
+            case 0x49:
+                return "OBJ PAL 2";
+            case 0xFF:
+                return "IE Interrupt Enable";
+            default:
+                return " ";
+        }
+    return "";
+}
 
 
 bool Debugger::load_texture(GLuint *textureHandler, int width, int height, const void *data) {

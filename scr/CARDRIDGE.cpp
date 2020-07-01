@@ -141,5 +141,6 @@ void CARDRIDGE::write(const u16 &addr, const u8 &data) {
 
 
 u8 CARDRIDGE::read_card_rom(const u16 &addr) {
-    return rom.at(addr);
+    if (addr < rom.size())
+        return rom.at(addr);
 }

@@ -180,32 +180,37 @@ u8 CPU::opcode0xDC() {  // CALL C a16
 }
 
 u8 CPU::opcode0xDF() {  // RST 18H
-    push_r16_reg(&R.PC);
-    R.PC = 0x0000 + 0x0018;
-    return 1;
+    u16 data = R.PC + current_instruction_info.bytes;
+    push_r16_reg(&data);
+    R.PC = 0x0018;
+    return 0;
 }
 
 u8 CPU::opcode0xE7() {  // RST 20H
-    push_r16_reg(&R.PC);
-    R.PC = 0x0000 + 0x0020;
+    u16 data = R.PC + current_instruction_info.bytes;
+    push_r16_reg(&data);
+    R.PC = 0x0020;
     return 1;
 }
 
 u8 CPU::opcode0xEF() {  // RST 28H
-    push_r16_reg(&R.PC);
-    R.PC = 0x0000 + 0x0028;
+    u16 data = R.PC + current_instruction_info.bytes;
+    push_r16_reg(&data);
+    R.PC = 0x0028;
     return 1;
 }
 
 u8 CPU::opcode0xF7() {  // RST 30H
-    push_r16_reg(&R.PC);
-    R.PC = 0x0000 + 0x0030;
+    u16 data = R.PC + current_instruction_info.bytes;
+    push_r16_reg(&data);
+    R.PC = 0x0030;
     return 1;
 }
 
 u8 CPU::opcode0xFF() {  // RST 38H
-    push_r16_reg(&R.PC);
-    R.PC = 0x0000 + 0x0038;
+    u16 data = R.PC + current_instruction_info.bytes;
+    push_r16_reg(&data);
+    R.PC = 0x0038;
     return 1;
 }
 
@@ -221,20 +226,24 @@ u8 CPU::opcode0xD9() {  // RETI
 }
 
 u8 CPU::opcode0xC7() {  // RST 00H
-    push_r16_reg(&R.PC);
-    R.PC = 0x0000 + 0x0000;
+    u16 data = R.PC + current_instruction_info.bytes;
+    push_r16_reg(&data);
+    R.PC = 0x0000;
     return 1;
 }
 
 u8 CPU::opcode0xCF() {  // RST 08H
-    push_r16_reg(&R.PC);
-    R.PC = 0x0000 + 0x0008;
+
+    u16 data = R.PC + current_instruction_info.bytes;
+    push_r16_reg(&data);
+    R.PC = 0x0008;
     return 1;
 }
 
 u8 CPU::opcode0xD7() {  // RST 10H
-    push_r16_reg(&R.PC);
-    R.PC = 0x0000 + 0x0010;
+    u16 data = R.PC + current_instruction_info.bytes;
+    push_r16_reg(&data);
+    R.PC = 0x0010;
     return 1;
 }
 

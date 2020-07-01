@@ -158,7 +158,7 @@ private:
     // ARITHMETIC
     void xor_a_r8(const u8 *reg);
 
-    void and_r8_r8(u8 *reg1, const u8 *reg2);
+    void and_a_r8(const u8 *reg);
 
     void or_r8_r8(const u8 &reg);
 

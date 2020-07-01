@@ -7,10 +7,10 @@ void CPU::xor_a_r8(const u8 *reg) {
     reset_flags(Flag::n, Flag::h, Flag::c);
 }
 
-void CPU::and_r8_r8(u8 *reg1, const u8 *reg2) {
-    // AND reg 1 und reg 2 und speicher das ergebnis in data 1
-    *reg1 &= *reg2;
-    set_flag_if(Flag::z, *reg1 == 0);
+void CPU::and_a_r8(const u8 *reg) {
+    // AND A und reg 2 und speicher das ergebnis in A
+    R.A &= *reg;
+    set_flag_if(Flag::z, R.A == 0);
     reset_flags(Flag::n, Flag::c);
     set_flag(Flag::h);
 }
@@ -343,48 +343,48 @@ u8 CPU::opcode0xD6() {  // SUB d8
 
 u8 CPU::opcode0xE6() {  // AND d8
     u8 data = read_u8_at_pc();
-    and_r8_r8(&R.A, &data);
+    and_a_r8(&data);
     return 0;
 }
 
 u8 CPU::opcode0xA0() {  // AND B
-    and_r8_r8(&R.A, &R.B);
+    and_a_r8(&R.B);
     return 0;
 }
 
 u8 CPU::opcode0xA1() {  // AND C
-    and_r8_r8(&R.A, &R.C);
+    and_a_r8(&R.C);
     return 0;
 }
 
 u8 CPU::opcode0xA2() {  // AND D
-    and_r8_r8(&R.A, &R.D);
+    and_a_r8(&R.D);
     return 0;
 }
 
 u8 CPU::opcode0xA3() {  // AND E
-    and_r8_r8(&R.A, &R.E);
+    and_a_r8(&R.E);
     return 0;
 }
 
 u8 CPU::opcode0xA4() {  // AND H
-    and_r8_r8(&R.A, &R.H);
+    and_a_r8(&R.H);
     return 0;
 }
 
 u8 CPU::opcode0xA5() {  // AND L
-    and_r8_r8(&R.A, &R.L);
+    and_a_r8(&R.L);
     return 0;
 }
 
 u8 CPU::opcode0xA6() {  // AND HL
     u8 data = read(R.HL);
-    and_r8_r8(&R.A, &data);
+    and_a_r8(&data);
     return 0;
 }
 
 u8 CPU::opcode0xA7() {  // AND A
-    and_r8_r8(&R.A, &R.A);
+    and_a_r8(&R.A);
     return 0;
 }
 

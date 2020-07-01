@@ -99,6 +99,9 @@ private:
 
     void update_tile_buffer();
 
+    const char *what_register_is_this(const u8 &reg);
+
+    const char *what_register_is_this(const u16 &reg);
 
     std::map<u16, debug_instruction> dis_map;
     std::vector<u16> valid_addresses;

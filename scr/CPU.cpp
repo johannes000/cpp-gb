@@ -52,9 +52,8 @@ u8 CPU::get_next_op_code() { return read(R.PC); }
 debug_instruction CPU::get_instruction_at_addr(u16 addr) const {
     debug_instruction debug_inst;
 
-
     cpu_instruction cpu_inst;
-    u16 intermediate = 0;
+    u16 intermediate = -1;
 
     u8 inst_code = mem->read_card_rom(addr);
     cpu_inst = instructions[inst_code];
@@ -66,8 +65,8 @@ debug_instruction CPU::get_instruction_at_addr(u16 addr) const {
     }
     if (cpu_inst.bytes > 1)
         intermediate =
-                cpu_inst.bytes == 2 ? static_cast<u16>(mem->read_card_rom(addr)) :
-                u8_to_u16(mem->read_card_rom((addr) + 1), mem->read_card_rom(addr));
+                cpu_inst.bytes == 2 ? static_cast<u16>(mem->read_card_rom(addr + 1)) :
+                u8_to_u16(mem->read_card_rom((addr + 2)), mem->read_card_rom(addr + 1));
 
     return debug_inst = {
             cpu_inst.mnemonic,

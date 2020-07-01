@@ -9,6 +9,8 @@
 CONTROLS::CONTROLS(MEMORY *m, PPU *p) : mem(m), ppu(p), joy_p1_state(0xFF) {}
 
 void CONTROLS::update_joypad() {
+    joy_p1_state = 0xEF;
+    return;
     // Bit 7 - Not used
     // Bit 6 - Not used
     // Bit 5 - P15 Select Button Keys      (0=Select)
