@@ -4,6 +4,7 @@
 #include "Debugger.h"
 #include <vector>
 
+
 Debugger::Debugger(CPU *c, PPU *p, MEMORY *m, CARDRIDGE *card) : cpu(c), ppu(p), mem(m), cardridge(card),
                                                                  debug_state(Debug_State::RUN),
                                                                  next_step(false) {
@@ -206,31 +207,79 @@ void Debugger::cpu_view() {
     // DECOMPILER
     ImGui::Separator();
     ImGui::BeginChild("##scrollingregion", ImVec2(0, 400));
-    ImGui::Columns(4); // 4-ways, with border
-    ImGui::Separator();
-    ImGui::Text("Address");
-    ImGui::NextColumn();
-    ImGui::Text("Mnemonic");
-    ImGui::NextColumn();
-    ImGui::Text("Opcode");
-    ImGui::NextColumn();
-    ImGui::Text("Intermediate");
-    ImGui::NextColumn();
-    ImGui::Separator();
 
     auto pc = cpu->get_pc();
-    ImGuiListClipper clipper(0x9000, ImGui::GetTextLineHeightWithSpacing());
-    if (goto_pc)
-        ImGui::SetScrollFromPosY(ImGui::GetCursorStartPos().y + (pc * ImGui::GetTextLineHeightWithSpacing()), 0.5f);
+    ImGuiListClipper clipper(dis_vec.size(), ImGui::GetTextLineHeightWithSpacing());
 
-    auto iter = std::upper_bound(valid_addresses.begin(), valid_addresses.end(), clipper.DisplayStart - 1);
-//    if (iter != valid_addresses.end())
-//        clipper.DisplayStart = *iter;
+    if (goto_pc) {
+        ImGui::SetScrollFromPosY(
+                ImGui::GetCursorStartPos().y + (pc * ImGui::GetTextLineHeightWithSpacing()), 1.0f);
 
-    auto addr = clipper.DisplayStart;
+    }
+
+
+    //auto iter = std::upper_bound(dis_vec.begin(), dis_vec.end(), clipper.DisplayStart - 1);
+    //if (iter != dis_vec.end())
+    //clipper.DisplayStart = *iter;
+
     for (int i = clipper.DisplayStart; i <= clipper.DisplayEnd; i++) {
-        auto inst = cpu->get_instruction_at_addr(addr);
+        auto inst = dis_vec[i];
 
+
+        if (ImGui::Selectable("", true, ImGuiSelectableFlags_AllowDoubleClick))
+            breakpoints.push_back(inst.address);
+        ImGui::SameLine();
+        if (inst.address == pc) {
+            ImGui::TextColored(red, "%04X", inst.address);
+            ImGui::SameLine();
+            switch (inst.bytes) {
+                case 1:
+                    ImGui::TextColored(gray, "%02X\t\t\t", inst.opcode);
+                    break;
+                case 2:
+                    ImGui::TextColored(gray, "%02X %02X\t\t ", inst.opcode, inst.intermediate & 0xFFu);
+                    break;
+                case 3:
+                    ImGui::TextColored(gray, "%02X %02X %02X\t  ", inst.opcode, (inst.intermediate & 0xFFu) >> 4u,
+                                       inst.intermediate & 0x00FFu);
+                    break;
+            }
+            ImGui::SameLine();
+            ImGui::TextColored(red, "->%s", inst.mnemonic);
+            if (inst.bytes > 2) {
+                ImGui::SameLine();
+                ImGui::TextColored(red, "%s", what_register_is_this(inst.intermediate));
+            } else if (inst.bytes > 1) {
+                ImGui::SameLine();
+                ImGui::TextColored(red, "%s", what_register_is_this(static_cast<u16> (inst.intermediate | 0xFF00u)));
+            }
+        } else {
+            ImGui::TextColored(cyan, "%04X", inst.address);
+            ImGui::SameLine();
+            switch (inst.bytes) {
+                case 1:
+                    ImGui::TextColored(gray, "%02X\t\t\t", inst.opcode);
+                    break;
+                case 2:
+                    ImGui::TextColored(gray, "%02X %02X\t\t ", inst.opcode, inst.intermediate & 0xFFu);
+                    break;
+                case 3:
+                    ImGui::TextColored(gray, "%02X %02X %02X\t  ", inst.opcode, (inst.intermediate & 0xFFu) >> 4u,
+                                       inst.intermediate & 0x00FFu);
+                    break;
+            }
+            ImGui::SameLine();
+            ImGui::TextColored(cyan, "%s", inst.mnemonic);
+            if (inst.bytes > 2) {
+                ImGui::SameLine();
+                ImGui::TextColored(gray, "%s", what_register_is_this(inst.intermediate));
+            } else if (inst.bytes > 1) {
+                ImGui::SameLine();
+                ImGui::TextColored(gray, "%s", what_register_is_this(static_cast<u16> (inst.intermediate | 0xFF00u)));
+            }
+        }
+
+/*
         if (addr == pc)
             ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.1f, 0.8f, 0.8f, 1.0f));
 
@@ -238,11 +287,8 @@ void Debugger::cpu_view() {
         sprintf(address, "%04X", addr);
         if (ImGui::Selectable(address, true, ImGuiSelectableFlags_SpanAllColumns))
             breakpoints.push_back(addr);
-        ImGui::NextColumn();
         ImGui::Text("%s", inst.mnemonic);
-        ImGui::NextColumn();
         ImGui::Text("%02X", inst.opcode);
-        ImGui::NextColumn();
         if (inst.bytes > 1)
             ImGui::Text("%04X", inst.intermediate);
         else
@@ -254,10 +300,8 @@ void Debugger::cpu_view() {
             ImGui::Text("%s", what_register_is_this(static_cast<u16> (inst.intermediate | 0xFF00u)));
         else
             ImGui::Text("%s", "");
-        ImGui::NextColumn();
         if (addr == pc)
-            ImGui::PopStyleColor(1);
-        addr += inst.bytes;
+            ImGui::PopStyleColor(1);*/
     }
     clipper.End();
     ImGui::EndChild();
@@ -302,9 +346,7 @@ void Debugger::disassemble() {
         debug_inst = cpu->get_instruction_at_addr(addr);
         if (debug_inst.prefixed)
             addr++;
-
-        //dis_map.insert({addr, debug_inst});
-        valid_addresses.push_back(addr);
+        dis_vec.push_back(debug_inst);
 
         addr += debug_inst.bytes;
     }

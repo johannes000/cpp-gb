@@ -74,6 +74,7 @@ debug_instruction CPU::get_instruction_at_addr(u16 addr) const {
             cpu_inst.cycles,
             inst_code,
             intermediate,
+            addr,
     };
 
 }
