@@ -69,7 +69,7 @@ private:
 public:
     void render_frame();
 
-    bool is_ready_to_render() const { return ready_to_render; }
+    inline bool is_ready_to_render() const { return ready_to_render; }
 
 
     // SDL Sachen

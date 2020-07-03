@@ -8,13 +8,13 @@ void set_bit_if(u16 &value, const u16 &bit, bool condition) {
     condition ? set_bit(value, bit) : reset_bit(value, bit);
 }
 
-void set_bit(u8 &value, const u8 &bit) { value |= (1u << bit); }
+inline void set_bit(u8 &value, const u8 &bit) { value |= (1u << bit); }
 
-void set_bit(u16 &value, const u16 &bit) { value |= (1u << bit); }
+inline void set_bit(u16 &value, const u16 &bit) { value |= (1u << bit); }
 
-void reset_bit(u8 &value, const u8 &bit) { value &= ~(1u << bit); }
+inline void reset_bit(u8 &value, const u8 &bit) { value &= ~(1u << bit); }
 
-void reset_bit(u16 &value, const u16 &bit) { value &= ~(1u << bit); }
+inline void reset_bit(u16 &value, const u16 &bit) { value &= ~(1u << bit); }
 
 void toggle_bit(u8 &value, const u8 &bit) { value ^= (1u << bit); }
 

@@ -46,17 +46,20 @@ void gameboy::start_emu() {
         cycles = 0;
 
         while (SDL_PollEvent(&event)) {
-            joypad.update_joypad();
             switch (event.type) {
                 case SDL_QUIT:
                     exit(0);
                 case SDL_KEYDOWN:
+                    joypad.update_joypad();
                     switch (event.key.keysym.sym) {
                         case SDLK_ESCAPE:
                             exit(0);
                         default:
                             break;
                     }
+                    break;
+                case SDL_KEYUP:
+                    joypad.update_joypad();
                     break;
                 default:
                     break;

@@ -188,21 +188,6 @@ void Debugger::imgui_demo() {
 
 void Debugger::cpu_view() {
 
-
-
-/* TODO: Hierraus einen unit Test bauen
- * for (int j = 0; j < 0xFFFF; ++j) {
-        cpu->read(j);
-        std::cout << "cpu " << std::endl;
-        ppu->read(j);
-        std::cout << "ppu " << std::endl;
-        mem->read(j);
-        std::cout << "mem " << std::endl;
-        cardridge->read_card_rom(j);
-        std::cout << "card " << std::endl;
-        std::cout << "last addr " << std::hex << (int) j << std::endl;
-    }*/
-
     ImGui::Begin("CPU");
 
     bool goto_pc = ImGui::Button("Goto PC");
@@ -419,6 +404,9 @@ void Debugger::memory_view() {
             if (data == 0x00)
                 ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.5f, 0.5f, 0.5f, 1.0f));
             ImGui::Text("%02X", data);
+            if (i == 7) {
+                ImGui::SameLine(120.0f);
+            }
             if (data == 0x00)
                 ImGui::PopStyleColor(1);
             if ((mem_line_addr + i) == 0xFEFF)
@@ -437,7 +425,7 @@ void Debugger::memory_view() {
 bool Debugger::load_texture(GLuint *textureHandler, int width, int height, const void *data) {
     glGenTextures(1, textureHandler);
     glBindTexture(GL_TEXTURE_2D, *textureHandler);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
     glBindTexture(GL_TEXTURE_2D, 0);
