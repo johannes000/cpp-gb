@@ -255,10 +255,8 @@ bool PPU::get_lcd_state(const LCD_State &s) const {
 void PPU::buffer_line(const u8 line) {
     lcd_control.update(this);
     if (lcd_control.bg_enabled && lcd_control.lcd_power) {
-        // BG Tile Map Display Select
         const u16 bg_tilemap = lcd_control.bg_tile_map ? 0x9C00 : 0x9800;
 
-        // Festlegen wo im Vector die Pixel gesetzt werden
         const auto y = line;
 
         for (auto x = 0; x < GB_LCD_SIZE_WIDTH;) {
@@ -272,17 +270,17 @@ void PPU::buffer_line(const u8 line) {
             const auto tile_x = (bg_map_x / TILE_WIDTH);
             const auto tile_y = (bg_map_y / TILE_HEIGHT);
 
-            // Welcher Pixel im tile
             auto tile_pixel_x = (bg_map_x % TILE_WIDTH);
             const auto tile_pixel_y = bg_map_y % TILE_HEIGHT;
 
             // Adresse des Tiles im vram
             const u16 tile_addr = bg_tilemap + (tile_y * TILE_PER_LINE + tile_x);
 
-            u8 tile_id = read(tile_addr);
 
-            if (lcd_control.bg_tile_map) // Id ist signed, wird offsettet um es wieder zu unsignen
-                tile_id = static_cast<i8>(tile_id) + 128u;
+            int tile_id = read(tile_addr);
+
+            if (!lcd_control.bg_window_tileset && tile_id < 0x80)
+                tile_id += 0x100u;
 
             for (tile_pixel_x++; tile_pixel_x <= TILE_WIDTH && x <= GB_LCD_SIZE_WIDTH - 1;
                  x++, tile_pixel_x++) {
@@ -339,6 +337,9 @@ void PPU::update_tile(const u16 &a) {
     auto tile_id = static_cast<u16>(addr >> 4u) & 0x1FFu;
     auto y = (static_cast<u16>(addr >> 1u) & 7u);
 
+    if (tile_id > 0xFF) {
+
+    }
     const u8 p_line_1 = v_ram.at(addr);
     const u8 p_line_2 = v_ram.at(addr + 1);
 
