@@ -281,7 +281,7 @@ void PPU::buffer_line(const u8 line) {
 
             u8 tile_id = read(tile_addr);
 
-            if (!lcd_control.bg_window_tileset) // Id ist signed, wird offsettet um es wieder zu unsignen
+            if (lcd_control.bg_tile_map) // Id ist signed, wird offsettet um es wieder zu unsignen
                 tile_id = static_cast<i8>(tile_id) + 128u;
 
             for (tile_pixel_x++; tile_pixel_x <= TILE_WIDTH && x <= GB_LCD_SIZE_WIDTH - 1;

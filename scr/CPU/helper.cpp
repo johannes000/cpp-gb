@@ -11,7 +11,7 @@ u16 CPU::read_u16_sp() { return u8_to_u16(read(R.SP + 1), read(R.SP)); }
 
 i8 CPU::read_i8_at_pc() { return static_cast<i8>(read_u8_at_pc()); }
 
-u8 CPU::read_u8_at_pc() { return mem->read(R.PC + 1); }
+u8 CPU::read_u8_at_pc() { return static_cast<u8> (mem->read(R.PC + 1)); }
 
 void CPU::set_flag_if(const Flag &F, bool condition) {
     condition ? set_flag(F) : reset_flag(F);

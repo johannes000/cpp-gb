@@ -287,10 +287,10 @@ u8 CPU::opcode0xC6() {  // ADD A d8
 
 u8 CPU::opcode0xE8() {  // ADD SP r8
     u8 data = read_u8_at_pc();
-    u16 result = R.SP + data;
-    set_flag_if(Flag::h, ((result & 0xFu) < (R.SP & 0xFu)));
-    set_flag_if(Flag::c, ((result & 0xFFu) < (R.SP & 0xFFu)));
-    R.SP = result;
+    int result = R.SP + data;
+    set_flag_if(Flag::c, (((R.SP ^ data ^ (result & 0xFFFF)) & 0x100) == 0x100));
+    set_flag_if(Flag::h, (((R.SP ^ data ^ (result & 0xFFFF)) & 0x10) == 0x10));
+    R.SP = static_cast<u16>(result);
     return 0;
 }
 
