@@ -104,6 +104,7 @@ private:
     const char *what_register_is_this(const u16 &reg);
 
     std::vector<debug_instruction> dis_vec;
+    std::vector<u16> dis_addr_vec;
 
     std::vector<u16> breakpoints;
 
