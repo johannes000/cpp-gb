@@ -37,17 +37,28 @@ u8 CPU::parse_op_code(u8 &opcode) {
 }
 
 int CPU::update() {
+    if (IME_scheduled) {
+        IME_scheduled = false;
+        IME = true;
+    }
+
+    if (is_halted) {
+        if (interrupt_flags_register == 0x0)
+            return 1;
+        else
+            is_halted = false;
+
+    }
+    if (!is_halted) {
+        handle_interrupts();
+    }
+
+    op_code = get_next_op_code();;
     const auto jp = parse_op_code(op_code);
     if (jp == 0) inc_pc();
     cycles += current_instruction_info.cycles;
     return current_instruction_info.cycles;
 }
-
-void CPU::fetch_op_code() { op_code = get_next_op_code(); }
-
-void CPU::inc_pc() { R.PC += current_instruction_info.bytes; }
-
-u8 CPU::get_next_op_code() { return read(R.PC); }
 
 debug_instruction CPU::get_instruction_at_addr(u16 addr) const {
     debug_instruction debug_inst;
@@ -79,15 +90,12 @@ debug_instruction CPU::get_instruction_at_addr(u16 addr) const {
 
 }
 
-
-bool CPU::in_boot_r() const { return in_boot; }
-
 u8 CPU::read(const u16 &addr) {
     switch (addr) {
         case INTERRUPT_ENABLE_REG:
-            return IE_Register;
+            return interrupt_enable_register;
         case INTERRUPT_FLAGS_REG:
-            return IF_Register;
+            return interrupt_flags_register;
         case IN_BOOT_ADDRESS:
             return in_boot;
         default:
@@ -99,10 +107,10 @@ u8 CPU::read(const u16 &addr) {
 void CPU::write(const u16 &addr, const u8 &data) {
     switch (addr) {
         case INTERRUPT_ENABLE_REG:
-            IE_Register = data;
+            interrupt_enable_register = data;
             break;
         case INTERRUPT_FLAGS_REG:
-            IF_Register = data;
+            interrupt_flags_register = data;
             break;
         case IN_BOOT_ADDRESS:
             if (in_boot)
@@ -119,43 +127,22 @@ void CPU::write_u16(const u16 &addr, const u16 &data) const {
     mem->write_u16(addr, data);
 }
 
-// INTERRUPT FLAGS
+void CPU::handle_interrupts() {
 
-void CPU::handle_interrupt(u8 val) {
-    write(INTERRUPT_ENABLE_REG, val);
-    ie_flags.update(this);
-    if_flags.update(this);
-}
-
-bool CPU::interrupts() const {
-    if (!IME) {
-        return false;
+    if (DI_scheduled) {
+        DI_scheduled = false;
+        IME = false;
     }
-    return false;
-}
-
-void CPU::IE_Flags::update(CPU *cpu) {
-    const auto data = cpu->read(INTERRUPT_ENABLE_REG);
-    *this = {
-            check_bit(data, 4),
-            check_bit(data, 3),
-            check_bit(data, 2),
-            check_bit(data, 1),
-            check_bit(data, 0),
-    };
-}
-
-void CPU::IF_Flags::update(CPU *cpu) {
-    const auto data = cpu->read(INTERRUPT_FLAGS_REG);
-    *this = {check_bit(data, 4),
-             check_bit(data, 3),
-             check_bit(data, 2),
-             check_bit(data, 1),
-             check_bit(data, 0),
-    };
-
 }
 
 
+void CPU::request_interrupt(Interrupt &inter) {
+    set_bit(interrupt_flags_register, static_cast<u8>(inter));
+}
 
+bool CPU::in_boot_r() const { return in_boot; }
+
+u8 CPU::get_next_op_code() { return read(R.PC); }
+
+void CPU::inc_pc() { R.PC += current_instruction_info.bytes; }
 

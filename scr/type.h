@@ -136,6 +136,15 @@ struct CPU_Register {
     u16 PC;
 };
 
+enum class Interrupt {
+    V_Blank = 0x1,
+    LCD_Stat = 0x2,
+    Timer_overflow = 0x4,
+    Serial_link = 0x8,
+    Joypad = 0x10,
+};
+
+
 // ROM INFO
 enum class CGBFlag {
     OFF  [[maybe_unused]] = 0x80,  // - Game supports CGB functions, but works on old gameboys also.

@@ -221,7 +221,7 @@ u8 CPU::opcode0xC9() {  // RET
 
 u8 CPU::opcode0xD9() {  // RETI
     ret();
-    IME_scheduled = true;
+    IME = true;
     return 1;
 }
 

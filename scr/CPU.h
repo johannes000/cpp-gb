@@ -20,8 +20,6 @@ public:
 
     int update();
 
-    void fetch_op_code();
-
     void inc_pc();
 
     u8 get_next_op_code();
@@ -40,7 +38,6 @@ private:
     int cycles = 0;
     bool in_boot = true;
 
-private:
     // REGISTER
     CPU_Register R{};
 
@@ -54,6 +51,7 @@ public:
 
     const CPU_Register &get_register() const { return R; }
 
+private:
     // INTERRUPTS
 
     // Interrupt Master Enable Flag
@@ -62,37 +60,19 @@ public:
     bool IME = false;
     bool IME_scheduled = false;
     bool DI_scheduled = false;
+    bool is_halted = false;
+
+    // FFFF - IE - Interrupt Enable (R/W)
+    Register interrupt_enable_register = 0x00;
+    // FF0F - IF - Interrupt Flag (R/W)
+    Register interrupt_flags_register = 0x00;
+
+    void handle_interrupts();
 
 public:
-    // FFFF - IE - Interrupt Enable (R/W)
-    Register IE_Register = 0x00;
-
-    struct IE_Flags {
-        bool JIR;  // Bit 4 – Joypad Interrupt Requested(1 = Requested);
-        bool SIR;  // Bit 3 – Serial Interrupt Requested(1 = Requested)
-        bool TIR;  // Bit 2 – Timer Interrupt Requested(1 = Requested)
-        bool LIR;  // Bit 1 – LCD STAT Interrupt Requested(1 = Requested)
-        bool VIR;  // Bit 0 – Vertical Blank Interrupt Requested(1 = Requested)
-        void update(CPU *);
-    } ie_flags{};
-
-    // FF0F - IF - Interrupt Flag (R/W)
-    Register IF_Register = 0x00;
-
-    struct IF_Flags {
-        bool JIE;  // Bit 0: V - Blank  Interrupt Enable(INT 40h)  (1 = Enable)
-        bool SIE;  // Bit 1 : LCD STAT Interrupt Enable(INT 48h)  (1 = Enable)
-        bool TIE;  // Bit 2 : Timer    Interrupt Enable(INT 50h)  (1 = Enable)
-        bool LIE;  // Bit 3 : Serial   Interrupt Enable(INT 58h)  (1 = Enable)
-        bool VIE;  // Bit 4 : Joypad   Interrupt Enable(INT 60h)  (1 = Enable)
-        void update(CPU *);
-    } if_flags{};
-
-    void handle_interrupt(u8 val);
+    void request_interrupt(Interrupt &inter);
 
 private:
-    bool interrupts() const;
-
     // FLAGS
     void set_flag_if(const Flag &, bool condition);
 

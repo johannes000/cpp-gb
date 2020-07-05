@@ -8,7 +8,7 @@
 
 CONTROLS::CONTROLS(MEMORY *m, PPU *p) : mem(m), ppu(p), joy_p1_state(0xFF) {}
 
-void CONTROLS::update_joypad() {
+void CONTROLS::update_joypad(SDL_Event *event) {
     joy_p1_state = 0xF1;
     return;
     // Bit 7 - Not used

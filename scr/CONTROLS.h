@@ -28,7 +28,7 @@ private:
 
 
 public:
-    void update_joypad();
+    void update_joypad(SDL_Event *event);
 
     [[nodiscard]] u8 read(const u16 &addr) const;
 };
