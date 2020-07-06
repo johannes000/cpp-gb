@@ -30,6 +30,8 @@ public:
 
     void write_u16(const u16 &addr, const u16 &data);
 
+    void request_interrupt(Interrupt inter);
+
 private:
     CARDRIDGE *cardridge;
     PPU *ppu;

@@ -46,7 +46,7 @@ int CPU::update() {
         IME = false;
     }
     if (is_halted) {
-        if (interrupt_flags_register != 0x0)
+        if ((interrupt_flags_register & interrupt_enable_register) != 0)
             is_halted = false;
         else
             return 1;

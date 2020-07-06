@@ -155,8 +155,12 @@ void Debugger::control_view() {
     ImGui::Separator();
     ImGui::Text(" %d", lcd_regs.LCD_LY);
     ImGui::SameLine();
-    ImGui::Text("JOY %04X", cpu->read(JOY_P1_REGISTER));
-
+    ImGui::Text("JOY ");
+    u8 joy = cpu->read(JOY_P1_REGISTER);
+    for (int i = 0; i < 6; ++i) {
+        ImGui::SameLine();
+        ImGui::Text("%X", check_bit(joy, i));
+    }
     ImGui::End();
 
 }
@@ -254,7 +258,8 @@ void Debugger::cpu_view() {
                         ImGui::TextColored(gray, "%02X %02X\t\t ", inst.opcode, inst.intermediate & 0xFFu);
                         break;
                     case 3:
-                        ImGui::TextColored(gray, "%02X %02X %02X\t  ", inst.opcode, (inst.intermediate & 0xFFu) >> 4u,
+                        ImGui::TextColored(gray, "%02X %02X %02X\t  ", inst.opcode,
+                                           (inst.intermediate & 0xFFu) >> 4u,
                                            inst.intermediate & 0x00FFu);
                         break;
                 }
@@ -279,7 +284,8 @@ void Debugger::cpu_view() {
                         ImGui::TextColored(gray, "%02X %02X\t\t ", inst.opcode, inst.intermediate & 0xFFu);
                         break;
                     case 3:
-                        ImGui::TextColored(gray, "%02X %02X %02X\t  ", inst.opcode, (inst.intermediate & 0xFFu) >> 4u,
+                        ImGui::TextColored(gray, "%02X %02X %02X\t  ", inst.opcode,
+                                           (inst.intermediate & 0xFFu) >> 4u,
                                            inst.intermediate & 0x00FFu);
                         break;
                 }

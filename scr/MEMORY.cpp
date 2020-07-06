@@ -178,3 +178,7 @@ bool MEMORY::load_boot_rom() {
 u8 MEMORY::read_card_rom(const u16 &addr) {
     return cardridge->read_card_rom(addr);
 }
+
+void MEMORY::request_interrupt(Interrupt inter) {
+    cpu->request_interrupt(inter);
+}
