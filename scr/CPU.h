@@ -58,6 +58,8 @@ private:
     // 0 - Disable all Interrupts
     // 1 - Enable all Interrupts that are enabled in IE Register(FFFF)
     bool IME = false;
+
+private:
     bool IME_scheduled = false;
     bool DI_scheduled = false;
     bool is_halted = false;
@@ -70,7 +72,13 @@ private:
     void handle_interrupts();
 
 public:
-    void request_interrupt(Interrupt &inter);
+    void request_interrupt(Interrupt inter);
+
+    [[nodiscard]] std::pair<u8, u8> get_interrupt_flags() const {
+        return {interrupt_flags_register, interrupt_enable_register};
+    }
+
+    [[nodiscard]] bool is_IME() const { return IME; }
 
 private:
     // FLAGS
@@ -120,7 +128,6 @@ private:
 public:
     [[nodiscard]] debug_instruction get_instruction_at_addr(u16 addr) const;
 
-    u8 get_op_code() const { return op_code; }
 
 private:
 
@@ -448,10 +455,6 @@ private:
             {"STOP",        &CPU::opcode0x10, 1, 1},
 
     };
-public:
-    const std::vector<cpu_instruction> &getInstructions() const;
-
-    const std::vector<cpu_instruction> &getPrefixedinstructions() const;
 
 private:
 

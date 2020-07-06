@@ -137,11 +137,11 @@ struct CPU_Register {
 };
 
 enum class Interrupt {
-    V_Blank = 0x1,
-    LCD_Stat = 0x2,
-    Timer_overflow = 0x4,
-    Serial_link = 0x8,
-    Joypad = 0x10,
+    V_Blank,
+    LCD_Stat,
+    Timer_overflow,
+    Serial_link,
+    Joypad,
 };
 
 

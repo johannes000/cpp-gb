@@ -135,7 +135,22 @@ void Debugger::control_view() {
     ImGui::Text("(HL) %02X", cpu->read(cpu_regs.HL));
 
     LCD_Register lcd_regs = ppu->get_lcd_register();
+    ImGui::Separator();
 
+    auto interrupt_flags = cpu->get_interrupt_flags();
+
+    ImGui::Text("IME %X", cpu->is_IME());
+
+    ImGui::Text("Interrupt Flags");
+    for (int i = 0; i < 5; ++i) {
+        ImGui::SameLine();
+        ImGui::Text("%X", check_bit(interrupt_flags.first, i));
+    }
+    ImGui::Text("Interrupt Enable");
+    for (int i = 0; i < 5; ++i) {
+        ImGui::SameLine();
+        ImGui::Text("%X", check_bit(interrupt_flags.second, i));
+    }
 
     ImGui::Separator();
     ImGui::Text(" %d", lcd_regs.LCD_LY);
@@ -223,7 +238,6 @@ void Debugger::cpu_view() {
     while (clipper.Step()) {
         for (int i = clipper.DisplayStart; i <= clipper.DisplayEnd; i++) {
             auto inst = dis_vec[i];
-
 
             if (ImGui::Selectable("", true, ImGuiSelectableFlags_AllowDoubleClick))
                 breakpoints.push_back(inst.address);

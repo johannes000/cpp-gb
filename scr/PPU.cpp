@@ -1,6 +1,6 @@
 #include "PPU.h"
 
-PPU::PPU(MEMORY *m) : mem(m), ready_to_render(false) {
+PPU::PPU(MEMORY *m, CPU *c) : mem(m), ready_to_render(false) {
     create_window();
 
     v_ram = std::vector<u8>(VRAM_SIZE, 0xFF);
@@ -49,6 +49,7 @@ void PPU::update(const int cycles) {
                 buffer_line(lcd_register.LCD_LY);
                 // H-Blank sachen
                 if (++lcd_register.LCD_LY == GB_LCD_SIZE_HEIGHT) {
+                    cpu->request_interrupt(Interrupt::V_Blank);
                     set_lcd_mode(LCD_Mode::V_Blank);
                 } else {
                     set_lcd_mode(LCD_Mode::OAM);

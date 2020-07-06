@@ -41,18 +41,20 @@ int CPU::update() {
         IME_scheduled = false;
         IME = true;
     }
-
+    if (DI_scheduled) {
+        DI_scheduled = false;
+        IME = false;
+    }
     if (is_halted) {
-        if (interrupt_flags_register == 0x0)
-            return 1;
-        else
+        if (interrupt_flags_register != 0x0)
             is_halted = false;
+        else
+            return 1;
 
     }
-    if (!is_halted) {
+    if (IME) {
         handle_interrupts();
     }
-
     op_code = get_next_op_code();;
     const auto jp = parse_op_code(op_code);
     if (jp == 0) inc_pc();
@@ -128,21 +130,44 @@ void CPU::write_u16(const u16 &addr, const u16 &data) const {
 }
 
 void CPU::handle_interrupts() {
+    u8 interrupt = interrupt_flags_register & interrupt_enable_register;
 
-    if (DI_scheduled) {
-        DI_scheduled = false;
+    if (interrupt != 0x00) {
+        pop_r16_reg(&R.PC);
         IME = false;
+        if (check_bit(interrupt, 0)) {
+            reset_bit(interrupt_flags_register, 0);
+            R.PC = 0x40;
+        } else if (check_bit(interrupt, 1)) {
+            reset_bit(interrupt_flags_register, 1);
+            R.PC = 0x48;
+        } else if (check_bit(interrupt, 2)) {
+            reset_bit(interrupt_flags_register, 2);
+            R.PC = 0x50;
+        } else if (check_bit(interrupt, 3)) {
+            reset_bit(interrupt_flags_register, 4);
+            R.PC = 0x58;
+        } else if (check_bit(interrupt, 5)) {
+            reset_bit(interrupt_flags_register, 5);
+            R.PC = 0x60;
+        }
+
     }
+
 }
 
 
-void CPU::request_interrupt(Interrupt &inter) {
-    set_bit(interrupt_flags_register, static_cast<u8>(inter));
+void CPU::request_interrupt(Interrupt inter) {
+    if (IME)
+        set_bit(interrupt_flags_register, static_cast<u8>(inter));
 }
 
 bool CPU::in_boot_r() const { return in_boot; }
 
-u8 CPU::get_next_op_code() { return read(R.PC); }
 
 void CPU::inc_pc() { R.PC += current_instruction_info.bytes; }
+
+u8 CPU::get_next_op_code() { return read(R.PC); }
+
+// first: Interrupt Flags Register , second: Interrupt Enable Register
 

@@ -8,20 +8,13 @@
 #include <vector>
 
 #include "MEMORY.h"
+#include "CPU.h"
 #include "type.h"
 
 constexpr auto FPS_INTERVAL = 1.0;  // seconds.;
 
 constexpr u16 VRAM_SIZE = 0x2000;
 constexpr u16 OAM_SIZE = 0x0100;
-
-// Period                       GPU mode number     Time spent(clocks)
-// Scan line(accessing OAM)         2                   80
-// Scan line(accessing VRAM)        3                   172
-// Horizontal blank                 0                   204
-// One line(scan and blank)                             456
-// Vertical blank                   1                   4560 (10 lines)
-// Full frame(scans and vblank)                         70224
 
 constexpr int CLOCKS_SCANLINE_OAM = 80;
 constexpr int CLOCKS_SCANLINE_VRAM = 172;
@@ -36,10 +29,11 @@ constexpr int VERTICAL_BLANK_LINES = 154;
 
 class MEMORY;
 
-// ReSharper disable once CppInconsistentNaming
+class CPU;
+
 class PPU {
 public:
-    explicit PPU(MEMORY *m);
+    explicit PPU(MEMORY *m, CPU *c);
 
     ~PPU();
 
@@ -53,14 +47,13 @@ public:
 
 private:
     MEMORY *mem;
+    CPU *cpu;
 
     int cycles_in_mode{};
 
     bool create_window();
 
     void close_window() const;
-
-    SDL_Event event{};
 
     bool ready_to_render;
 
