@@ -19,7 +19,7 @@ Debugger::Debugger(CPU *c, PPU *p, MEMORY *m, CARDRIDGE *card) : cpu(c), ppu(p),
 
 
     breakpoints.push_back(0x100);
-    breakpoints.push_back(0x29B0);
+    breakpoints.push_back(0xE31A);
 }
 
 Debugger::~Debugger() {

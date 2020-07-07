@@ -264,6 +264,7 @@ u8 CPU::opcode0xE1() {  // POP HL
 
 u8 CPU::opcode0xF1() {  // POP AF
     pop_r16_reg(&R.AF);
+    R.F = R.F & 0xF0u;
     return 0;
 }
 
