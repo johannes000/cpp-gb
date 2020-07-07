@@ -47,6 +47,15 @@ void PPU::update(const int cycles) {
             if (cycles_in_mode >= CLOCKS_HORIZONTAL_BLANK) {  // H-Blank vorbei
                 cycles_in_mode = 0;
                 buffer_line(lcd_register.LCD_LY);
+
+                if (lcd_register.LCD_LY == lcd_register.LCD_LYC) {
+                    set_lcd_state(LCD_State::coincidence_flag);
+                    if (check_lcd_state(LCD_State::lyc))
+                        cpu->request_interrupt(Interrupt::LCD_Stat);
+                } else {
+                    reset_lcd_state(LCD_State::coincidence_flag);
+                }
+
                 // H-Blank sachen
                 if (++lcd_register.LCD_LY == GB_LCD_SIZE_HEIGHT) {
                     cpu->request_interrupt(Interrupt::V_Blank);
@@ -57,7 +66,7 @@ void PPU::update(const int cycles) {
             }
             break;
 
-            // MODE 1 : V - Blank nachdem jede linie gezeichnet wurde
+            // MODE 1 : V - Blank nachdem jede Zeile gezeichnet wurde
         case LCD_Mode::V_Blank:
             if (cycles_in_mode >= CLOCKS_SCANLINE) {
                 cycles_in_mode = 0;
@@ -184,19 +193,17 @@ void PPU::load_lcd_mode() {
     lcd_mode = static_cast<LCD_Mode>(*data & 3u);
 }
 
-void PPU::set_lcd_state(const LCD_State &s) {
+void PPU::set_lcd_state(const LCD_State s) {
     // setzt den gewünschten status im LCD Status Register
-    auto *const data = &lcd_register.LCD_STATUS;
-    set_bit(*data, static_cast<u8>(s));
+    set_bit(lcd_register.LCD_STATUS, static_cast<u8>(s));
 }
 
-void PPU::reset_lcd_state(const LCD_State &s) {
+void PPU::reset_lcd_state(const LCD_State s) {
     // setzt den gewünschten status im LCD Status Register zurück
-    auto *const data = &lcd_register.LCD_STATUS;
-    reset_bit(*data, static_cast<u8>(s));
+    reset_bit(lcd_register.LCD_STATUS, static_cast<u8>(s));
 }
 
-bool PPU::get_lcd_state(const LCD_State &s) const {
+bool PPU::check_lcd_state(const LCD_State s) const {
     return check_bit(lcd_register.LCD_STATUS, static_cast<u8>(s));
 }
 
@@ -353,7 +360,6 @@ void PPU::update_tile(const u16 &a) {
 }
 
 void PPU::LCD_Control::update(PPU *ppu) {
-
     const u8 *data = &ppu->lcd_register.LCD_CONTROL;
     *this = {
             check_bit(*data, 7),
@@ -366,3 +372,5 @@ void PPU::LCD_Control::update(PPU *ppu) {
             check_bit(*data, 0),
     };
 }
+
+

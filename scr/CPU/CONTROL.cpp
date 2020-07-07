@@ -52,12 +52,12 @@ u8 CPU::opcode0x2F() {  // CPL
 }
 
 u8 CPU::opcode0xF3() {  // DI
-    DI_scheduled = true;
+    IME = false;
     return 0;
 }
 
 u8 CPU::opcode0xFB() {  // EI
-    IME_scheduled = true;
+    IME = true;
     return 0;
 }
 

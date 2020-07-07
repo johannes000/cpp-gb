@@ -118,11 +118,11 @@ private:
 
     void load_lcd_mode();
 
-    void set_lcd_state(const LCD_State &s);
+    void set_lcd_state(const LCD_State s);
 
-    void reset_lcd_state(const LCD_State &s);
+    void reset_lcd_state(const LCD_State s);
 
-    bool get_lcd_state(const LCD_State &s) const;
+    bool check_lcd_state(const LCD_State s) const;
 
     // LCD Render Funktionen
     std::vector<Pixel> lcd_buffer;

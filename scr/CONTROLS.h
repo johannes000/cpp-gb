@@ -25,8 +25,9 @@ private:
     MEMORY *mem;
     PPU *ppu;
 
-    u8 joy_p1_state = 0x00u;
-    u8 joy_both_states = 0x00u;
+    u8 joy_p1_state = 0xFFu;
+    u8 joy_p1_state_old = 0xFFu;
+    u8 joy_both_states = 0xFFu;
 
 
 public:

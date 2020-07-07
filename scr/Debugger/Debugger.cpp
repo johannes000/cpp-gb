@@ -259,7 +259,7 @@ void Debugger::cpu_view() {
                         break;
                     case 3:
                         ImGui::TextColored(gray, "%02X %02X %02X\t  ", inst.opcode,
-                                           (inst.intermediate & 0xFFu) >> 4u,
+                                           inst.intermediate & 0xFF00u,
                                            inst.intermediate & 0x00FFu);
                         break;
                 }

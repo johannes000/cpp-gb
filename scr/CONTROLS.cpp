@@ -105,14 +105,18 @@ void CONTROLS::process_sdl_events(SDL_Event *event) {
 void CONTROLS::update_joypad() {
     u8 buttons = (joy_both_states & 0xF0u) >> 4u;
     u8 directions = joy_both_states & 0xFu;
-    joy_p1_state = 0xFF;
     joy_p1_state = buttons & directions;
 
     // Buttons
     set_bit_if(joy_p1_state, 5, (joy_both_states & 0xF0u) == 0xF0u);
     // Directions
     set_bit_if(joy_p1_state, 4, (joy_both_states & 0x0Fu) == 0x0Fu);
-    mem->request_interrupt(Interrupt::Joypad);
+    set_bit(joy_p1_state, 6);
+    set_bit(joy_p1_state, 7);
+    if (joy_p1_state != joy_p1_state_old) {
+        joy_p1_state_old = joy_p1_state;
+        mem->request_interrupt(Interrupt::Joypad);
+    }
 }
 
 
