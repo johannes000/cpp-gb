@@ -11,27 +11,33 @@ void CPU::test_n_bit_set_z(const u8 bit, const u8 *reg) {
 void CPU::rot_right_c_r8(u8 *reg) {
     // Rotate register r8 right.
     // [0] ->[7 -> 0]->C
-    const u8 b0 = *reg & 1u;
-    *reg >>= 1u;
-
-    set_flag_if(Flag::c, b0 == 1);
-    set_bit_if(*reg, 7, b0 == 1);
-    set_flag_if(Flag::z, *reg == 0);
-
-    set_flags(Flag::n, Flag::h);
+    u8 result = *reg;
+    reset_all_flags();
+    if ((result & 0x01) != 0) {
+        set_flag(Flag::c);
+        result >>= 1;
+        result |= 0x80;
+    } else {
+        result >>= 1;
+    }
+    set_flag_if(Flag::z, result == 0);
+    *reg = result;
 }
 
 void CPU::rot_left_c_r8(u8 *reg) {
     // Rotate register r8 left.
     // C < -[7 < -0] < -[7]
-    const u8 b7 = *reg & 0x80u;
-    *reg <<= 1u;
-    *reg |= static_cast<u8>(b7 >> 8u);
-    set_flag_if(Flag::c, b7 == 1);
-    set_bit_if(*reg, 0, b7 == 0x80);
-    set_flag_if(Flag::z, *reg == 0);
-
-    set_flags(Flag::n, Flag::h);
+    u8 result = *reg;
+    reset_all_flags();
+    if ((result & 0x80) != 0) {
+        set_flag(Flag::c);
+        result <<= 1;
+        result |= 0x1;
+    } else {
+        result <<= 1;
+    }
+    set_flag_if(Flag::z, result == 0);
+    *reg = result;
 }
 
 void CPU::rot_left_r8(u8 *reg) {
@@ -64,8 +70,8 @@ void CPU::shift_left_a_r8(u8 *reg) {
     // Shift Left Arithmetic register r8.
     // C < -[7 < -0] < -0
     const u8 b7 = *reg & 0x80u;
-    *reg >>= 1u;
-    set_flag_if(Flag::c, b7 == 0x80);
+    *reg <<= 1u;
+    set_flag_if(Flag::c, b7 != 0);
     set_flag_if(Flag::z, *reg == 0);
 
     reset_flags(Flag::n, Flag::h);
@@ -74,9 +80,9 @@ void CPU::shift_left_a_r8(u8 *reg) {
 void CPU::shift_right_a_r8(u8 *reg) {
     // hift Right Arithmetic register r8.
     // [7] ->[7 -> 0]->C
-    const u8 b7 = *reg & 0x80;
-    const u8 b0 = *reg & 1;
-    *reg >>= 1;
+    const u8 b7 = *reg & 0x80u;
+    const u8 b0 = *reg & 1u;
+    *reg >>= 1u;
 
     set_bit_if(*reg, 7, b7 == 0x80);
     set_flag_if(Flag::c, b0 == 1);
@@ -111,7 +117,7 @@ void CPU::swap_r8(u8 *reg) {
 // OPCODES
 
 u8 CPU::opcode0x07() {  // RLCA
-    rot_right_c_r8(&R.A);
+    rot_left_c_r8(&R.A);
     reset_flag(Flag::z);
     return 0;
 }
@@ -124,6 +130,7 @@ u8 CPU::opcode0x17() {  // RLA
 
 u8 CPU::opcode0x0F() {  // RRCA
     rot_right_c_r8(&R.A);
+    reset_flag((Flag::z));
     return 0;
 }
 

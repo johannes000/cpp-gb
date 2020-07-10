@@ -90,12 +90,15 @@ void CPU::sub_a_r8(const u8 *value) {
     set_flag_if(Flag::z, R.A == 0);
 }
 
-void CPU::sbc_a_r8(u8 *value) {
+void CPU::sbc_a_r8(const u8 *value) {
     u8 c;
     check_flag(Flag::c) ? c = 1 : c = 0;
-    *value += c;
-
-    sub_a_r8(value);
+    int result = R.A - *value - c;
+    set_flag(Flag::n);
+    set_flag_if(Flag::c, result < 0);
+    set_flag_if(Flag::h, ((R.A & 0x0F) - (*value & 0x0F) - c) < 0);
+    R.A = static_cast<u8>(result);
+    set_flag_if(Flag::z, R.A == 0);
 }
 
 u8 CPU::opcode0x3C() {  // INC A

@@ -163,7 +163,7 @@ private:
 
     void sub_a_r8(const u8 *value);
 
-    void sbc_a_r8(u8 *value);
+    void sbc_a_r8(const u8 *value);
 
     // JUMPS
     void push_r16_reg(const u16 *reg);
