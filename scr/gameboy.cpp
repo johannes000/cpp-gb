@@ -14,11 +14,13 @@ void gameboy::start_emu() {
     mem.reset();
 
     //card.load_rom("./../../testroms/tetris.gb");
+    //card.load_rom("./../../testroms/tennis.gb");
     //card.load_rom("./../../testroms/sml.gb");
-    //card.load_rom("./../../testroms/cpu_instrs/individual/07-jr,jp,call,ret,rst.gb");
     //card.load_rom("./../../testroms/cpu_instrs/individual/01-special.gb");
     //card.load_rom("./../../testroms/cpu_instrs/individual/02-interrupts.gb");
-    card.load_rom("./../../testroms/cpu_instrs/individual/03-op sp,hl.gb");
+    //card.load_rom("./../../testroms/cpu_instrs/individual/03-op sp,hl.gb");
+    //card.load_rom("./../../testroms/cpu_instrs/individual/07-jr,jp,call,ret,rst.gb");
+    card.load_rom("./../../testroms/cpu_instrs/individual/10-bit ops.gb");
     //card.load_rom("./../../testroms/cpu_instrs/individual/11-op a,(hl).gb");
     //card.load_rom("./../../testroms/cpu_instrs/cpu_instrs.gb");
     //card.load_rom("./../../testroms/opus5.gb");

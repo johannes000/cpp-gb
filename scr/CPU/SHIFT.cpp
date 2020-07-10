@@ -480,7 +480,7 @@ u8 CPU::prefixedopcode0x41() {  // BIT 0 C
 }
 
 u8 CPU::prefixedopcode0x42() {  // BIT 0 D
-    test_n_bit_set_z(0, &R.C);
+    test_n_bit_set_z(0, &R.D);
     return 0;
 }
 
