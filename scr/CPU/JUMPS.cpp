@@ -183,7 +183,7 @@ u8 CPU::opcode0xDF() {  // RST 18H
     u16 data = R.PC + current_instruction_info.bytes;
     push_r16_reg(&data);
     R.PC = static_cast<u16>(0x18);
-    return 0;
+    return 1;
 }
 
 u8 CPU::opcode0xE7() {  // RST 20H
@@ -196,21 +196,21 @@ u8 CPU::opcode0xE7() {  // RST 20H
 u8 CPU::opcode0xEF() {  // RST 28H
     u16 data = R.PC + current_instruction_info.bytes;
     push_r16_reg(&data);
-    R.PC = 0x0028;
+    R.PC = 0x28;
     return 1;
 }
 
 u8 CPU::opcode0xF7() {  // RST 30H
     u16 data = R.PC + current_instruction_info.bytes;
     push_r16_reg(&data);
-    R.PC = 0x0030;
+    R.PC = 0x30;
     return 1;
 }
 
 u8 CPU::opcode0xFF() {  // RST 38H
     u16 data = R.PC + current_instruction_info.bytes;
     push_r16_reg(&data);
-    R.PC = 0x0038;
+    R.PC = 0x38;
     return 1;
 }
 

@@ -55,7 +55,7 @@ inline u8 MEMORY::read(const u16 &addr) {
 
 inline void MEMORY::write(const u16 &addr, const u8 &data) {
     if (addr == 0xFF02 && data == 0x81)
-        std::cout << static_cast<char >(read(0xff01));
+        std::cout << static_cast<char >(read(0xff01)); // Test Roms Ausgabe durchs Seriallink
 
     if (addr <= CARD_ROM_END) {
         cardridge->write(addr, data);
