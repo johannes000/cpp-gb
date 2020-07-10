@@ -151,15 +151,13 @@ void CPU::handle_interrupts() {
             reset_bit(interrupt_flags_register, 5);
             R.PC = 0x60;
         }
-
     }
-
 }
 
 
 void CPU::request_interrupt(Interrupt inter) {
-    if (IME)
-        set_bit(interrupt_flags_register, static_cast<u8>(inter));
+    is_halted = false;
+    set_bit(interrupt_flags_register, static_cast<u8>(inter));
 }
 
 bool CPU::in_boot_r() const { return in_boot; }

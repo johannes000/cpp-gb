@@ -437,12 +437,11 @@ u8 CPU::opcode0x36() {  // LD (HL) d8
 u8 CPU::opcode0xF8() {  // LD HL SP + r8
     const i8 r8 = read_i8_at_pc();
     const u16 result = R.SP + r8;
-    const u16 check = (R.SP ^ r8 ^ ((result) & 0xFFFFu));
-    set_flag_if(Flag::c, check_bit(check, 7));
-    set_flag_if(Flag::h, check_bit(check, 3));
-
+    reset_all_flags();
+    const u16 check = R.SP ^r8 ^result;
+    set_flag_if(Flag::c, (check & 0x100u) == 0x100u);
+    set_flag_if(Flag::h, (check & 0x10u) == 0x10u);
     R.HL = result;
-    reset_flags(Flag::z, Flag::n);
     return 0;
 }
 

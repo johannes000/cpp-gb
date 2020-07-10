@@ -295,8 +295,9 @@ u8 CPU::opcode0xC6() {  // ADD A d8
 u8 CPU::opcode0xE8() {  // ADD SP r8
     u8 data = read_u8_at_pc();
     int result = R.SP + data;
-    set_flag_if(Flag::c, (((R.SP ^ data ^ (result & 0xFFFF)) & 0x100) == 0x100));
-    set_flag_if(Flag::h, (((R.SP ^ data ^ (result & 0xFFFF)) & 0x10) == 0x10));
+    reset_all_flags();
+    set_flag_if(Flag::c, (((R.SP ^ data ^ (result & 0xFFFFu)) & 0x100u) == 0x100u));
+    set_flag_if(Flag::h, (((R.SP ^ data ^ (result & 0xFFFFu)) & 0x10u) == 0x10u));
     R.SP = static_cast<u16>(result);
     return 0;
 }

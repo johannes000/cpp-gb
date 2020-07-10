@@ -182,14 +182,14 @@ u8 CPU::opcode0xDC() {  // CALL C a16
 u8 CPU::opcode0xDF() {  // RST 18H
     u16 data = R.PC + current_instruction_info.bytes;
     push_r16_reg(&data);
-    R.PC = 0x0018;
+    R.PC = static_cast<u16>(0x18);
     return 0;
 }
 
 u8 CPU::opcode0xE7() {  // RST 20H
     u16 data = R.PC + current_instruction_info.bytes;
     push_r16_reg(&data);
-    R.PC = 0x0020;
+    R.PC = 0x20;
     return 1;
 }
 

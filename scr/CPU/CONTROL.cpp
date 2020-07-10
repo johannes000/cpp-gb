@@ -10,26 +10,27 @@ u8 CPU::opcode0x10() {  // STOP
 }
 
 u8 CPU::opcode0x27() {  // DAA
-    auto a = R.A;
+    int a = R.A;
 
     if (check_flag(Flag::n)) {
-        if (check_flag(Flag::h))
-            a = (a - 6u) & 0xFFu;
-        if (check_flag(Flag::c))
-            a -= 0x60;
-    } else {
         if (check_flag(Flag::h) || ((a & 0xF) > 9))
             a += 0x06;
         if (check_flag(Flag::c) || (a > 0x9F))
             a += 0x60;
+    } else {
+        if (check_flag(Flag::h))
+            a = (a - 6) & 0xFF;
+        if (check_flag(Flag::c))
+            a -= 0x60;
     }
     reset_flag(Flag::h);
-    set_flag_if(Flag::c, (a & 0x100u) == 0x100u);
+    reset_flag(Flag::z);
+    set_flag_if(Flag::c, (a & 0x100) == 0x100);
 
-    a &= 0xFFu;
+    a &= 0xFF;
     set_flag_if(Flag::z, a == 0);
 
-    R.A = a;
+    R.A = static_cast<u8>(a);
     return 0;
 }
 
