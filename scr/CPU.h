@@ -157,7 +157,7 @@ private:
 
     void add_a_r8(const u8 *value);
 
-    void adc_a_r8(u8 *value);
+    void adc_a_r8(const u8 *value);
 
     void add_r16_r16(u16 *reg, const u16 *value);
 

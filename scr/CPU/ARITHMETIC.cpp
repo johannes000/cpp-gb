@@ -52,20 +52,24 @@ void CPU::dec_u8_reg(u8 *reg) {
 }
 
 void CPU::add_a_r8(const u8 *value) {
-    const u8 result = R.A + *value;
+    const unsigned int result = R.A + *value;
     reset_flag(Flag::n);
-    set_flag_if(Flag::h, (R.A & 0xFu) + (*value & 0xFu) > 0xFu);
-    set_flag_if(Flag::c, (result & 0x100u) != 0);
-    R.A = result;
+    set_flag_if(Flag::c, ((R.A ^ *value ^ result) & 0x100u) != 0);
+    set_flag_if(Flag::h, ((R.A ^ *value ^ result) & 0x10u) != 0);
+    R.A = static_cast<u8>(result);
     set_flag_if(Flag::z, R.A == 0);
 }
 
-void CPU::adc_a_r8(u8 *value) {
+void CPU::adc_a_r8(const u8 *value) {
     // Add n + Carry flag to A
     u8 c;
     check_flag(Flag::c) ? c = 1 : c = 0;
-    *value += c;
-    add_a_r8(value);
+    int result = R.A + *value + c;
+    reset_flag(Flag::n);
+    set_flag_if(Flag::c, result > 0xFF);
+    set_flag_if(Flag::h, ((R.A & 0x0Fu) + (*value & 0x0Fu) + c) > 0x0F);
+    R.A = static_cast<u8>(result);
+    set_flag_if(Flag::z, R.A == 0);
 }
 
 void CPU::add_r16_r16(u16 *reg, const u16 *value) {
