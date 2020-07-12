@@ -34,7 +34,7 @@ const char *Rom_Info::CGBFlag_string() {
     return nullptr;
 }
 
-const char *Rom_Info::CType_string() {
+const char *Rom_Info::CType_string() const {
     switch (this->ctype) {
         case CType::ROM_ONLY:
             return "ROM ONLY";
@@ -95,7 +95,7 @@ const char *Rom_Info::CType_string() {
     }
 }
 
-const char *Rom_Info::rom_size_string() {
+const char *Rom_Info::rom_size_string() const {
     switch (this->rom_size) {
         default:
             return "Wrong size";
@@ -126,7 +126,7 @@ const char *Rom_Info::rom_size_string() {
     }
 }
 
-const char *Rom_Info::ram_size_string() {
+const char *Rom_Info::ram_size_string() const {
     switch (this->ram_size) {
         case RAMSize::None:
             return "No Ram";

@@ -25,14 +25,12 @@ private:
     MEMORY *mem;
     PPU *ppu;
 
-    u8 joy_p1_state = 0xFFu;
-    u8 joy_p1_state_old = 0xFFu;
+    u8 joy_button_direction_selector = 0xFFu;
     u8 joy_both_states = 0xFFu;
+    u8 joy_both_states_old = 0xFFu;
 
 
 public:
-
-    void update_joypad();
 
     [[nodiscard]] u8 read(const u16 &addr) const;
 };

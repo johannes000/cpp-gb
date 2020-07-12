@@ -78,6 +78,11 @@ constexpr u16 BG_PALETTE_DATA_1 =
 // JOYPAD REGISTER
 constexpr u16 JOY_P1_REGISTER = 0xFF00;
 
+// TIMER REGISTER ADRESSEN
+constexpr u16 DIVIDER_REGISTER = 0xFF04;
+constexpr u16 TIMER_COUNTER = 0xFF05;
+constexpr u16 TIMER_MODULO = 0xFF06;
+constexpr u16 TIMER_CONTROL = 0xFF07;
 
 constexpr u16
         DMA_TRANSFER = 0xFF46;  // DMA Transfer and Start Address (R/W)
@@ -231,11 +236,11 @@ struct Rom_Info {
 public:
     const char *CGBFlag_string();
 
-    const char *CType_string();
+    const char *CType_string() const;
 
-    const char *rom_size_string();
+    const char *rom_size_string() const;
 
-    const char *ram_size_string();
+    const char *ram_size_string() const;
 
 };
 
@@ -314,24 +319,33 @@ enum class GB_Key {
 
 //void rom_info_CType_to_
 
-void set_bit_if(u8 &value, const u8 &bit, bool condition);
+void set_bit_if(u8 &data, const u8 &bit, bool condition);
 
-void set_bit_if(u16 &value, const u16 &bit, bool condition);
+void set_bit_if(u16 &data,
+                const u16 &bit,
+                bool condition
+);
 
-void set_bit(u8 &value, const u8 &bit);
+void set_bit(u8 &data, const u8 &bit);
 
-void set_bit(u16 &value, const u16 &bit);
+void set_bit(u16 &data,
+             const u16 &bit
+);
 
-void reset_bit(u8 &value, const u8 &bit);
+void reset_bit(u8 &data, const u8 &bit);
 
-void reset_bit(u16 &value, const u16 &bit);
+void reset_bit(u16 &data,
+               const u16 &bit
+);
 
-void toggle_bit(u8 &value, const u8 &bit);
+void toggle_bit(u8 &data, const u8 &bit);
 
-void toggle_bit(u16 &value, const u16 &bit);
+void toggle_bit(u16 &data,
+                const u16 &bit
+);
 
-bool check_bit(const u8 &value, const u8 &bit);
+bool check_bit(const u8 &data, const u8 &bit);
 
-bool check_bit(const u16 &value, const u16 &bit);
+bool check_bit(const u16 &data, const u16 &bit);
 
 #endif  // !TYPE_H_GUARD

@@ -14,43 +14,52 @@ inline u8 MEMORY::read(const u16 &addr) {
             return boot.at(addr);
         }
         return cardridge->read(addr);
-    } else if (addr >= GRAPHICS_RAM && addr <= GRAPHICS_RAM_END) {
+    } else if (addr <= GRAPHICS_RAM_END) {
         return ppu->read(addr);
-    } else if (addr >= CARD_EXTERNAL_RAM && addr <= CARD_EXTERNAL_RAM_END) {
+    } else if (addr <= CARD_EXTERNAL_RAM_END) {
         return cardridge->read(addr);
-    } else if (addr >= WORKING_RAM && addr <= WORKING_RAM_END) {
+    } else if (addr <= WORKING_RAM_END) {
         return memory.at(addr);
-    } else if (addr >= WORKING_RAM_SHADOW && addr <= WORKING_RAM_SHADOW_END) {
+    } else if (addr <= WORKING_RAM_SHADOW_END) {
         return memory.at(addr - WORKING_RAM_SHADOW_OFFSET);
-    } else if (addr >= SPRITE_INFORMATION && addr <= SPRITE_INFORMATION_END) {
+    } else if (addr <= SPRITE_INFORMATION_END) {
         return ppu->read(addr);
     } else if (addr >= MEMORY_MAPPED_IO && addr <= MEMORY_MAPPED_IO_END) {
-        switch (addr) {
-            case JOY_P1_REGISTER:
-                return joypad->read(addr);
-            case LCD_CONTROL:
-            case LCD_STATUS:
-            case LCD_SCY:
-            case LCD_SCX:
-            case LCD_LY:
-            case LCD_LYC:
-            case LCD_WY:
-            case LCD_WX:
-            case BG_PALETTE_DATA:
-            case BG_PALETTE_DATA_0:
-            case BG_PALETTE_DATA_1:
-                return ppu->read(addr);
-            case INTERRUPT_FLAGS_REG:
-                return cpu->read(addr);
-            default:
-                return memory.at(addr);
-        }
-    } else if (addr >= ZERO_PAGE_RAM && addr <= ZERO_PAGE_RAM_END) {
+        return handle_mapped_io_read(addr);
+    } else if (addr <= ZERO_PAGE_RAM_END) {
         return memory.at(addr);
     } else if (addr == INTERRUPT_ENABLE_REG) {
         return cpu->read(addr);
     }
     return 0x00;
+}
+
+u8 MEMORY::handle_mapped_io_read(const u16 &addr) const {
+    switch (addr) {
+        case JOY_P1_REGISTER:
+            return joypad->read(addr);
+        case LCD_CONTROL:
+        case LCD_STATUS:
+        case LCD_SCY:
+        case LCD_SCX:
+        case LCD_LY:
+        case LCD_LYC:
+        case LCD_WY:
+        case LCD_WX:
+        case BG_PALETTE_DATA:
+        case BG_PALETTE_DATA_0:
+        case BG_PALETTE_DATA_1:
+            return ppu->read(addr);
+        case INTERRUPT_FLAGS_REG:
+        case INTERRUPT_ENABLE_REG:
+        case DIVIDER_REGISTER:
+        case TIMER_CONTROL:
+        case TIMER_COUNTER:
+        case TIMER_MODULO:
+            return cpu->read(addr);
+        default:
+            return memory.at(addr);
+    }
 }
 
 inline void MEMORY::write(const u16 &addr, const u8 &data) {
@@ -70,39 +79,46 @@ inline void MEMORY::write(const u16 &addr, const u8 &data) {
     } else if (addr >= SPRITE_INFORMATION && addr <= SPRITE_INFORMATION_END) {
         ppu->write(addr, data);
     } else if (addr >= MEMORY_MAPPED_IO && addr <= MEMORY_MAPPED_IO_END) {
-        switch (addr) {
-
-            case LCD_CONTROL:
-            case LCD_STATUS:
-            case LCD_SCY:
-            case LCD_SCX:
-            case LCD_LY:
-            case LCD_LYC:
-            case LCD_WY:
-            case LCD_WX:
-            case BG_PALETTE_DATA:
-            case BG_PALETTE_DATA_0:
-            case BG_PALETTE_DATA_1:
-                ppu->write(addr, data);
-                break;
-            case DMA_TRANSFER:  // This register starts the OAM DMA transfer
-                dma_transfer(data);
-                break;
-            case INTERRUPT_FLAGS_REG:
-            case IN_BOOT_ADDRESS:
-                cpu->write(addr, data);
-                break;
-            case JOY_P1_REGISTER:
-                joypad->write(addr, data);
-                break;
-            default:
-                memory.at(addr) = data;
-                break;
-        }
+        handle_mapped_io_write(addr, data);
     } else if (addr >= ZERO_PAGE_RAM && addr <= ZERO_PAGE_RAM_END) {
         memory.at(addr) = data;
     } else if (addr == INTERRUPT_ENABLE_REG) {
         cpu->write(addr, data);
+    }
+}
+
+void MEMORY::handle_mapped_io_write(const u16 &addr, const u8 &data) {
+    switch (addr) {
+        case LCD_CONTROL:
+        case LCD_STATUS:
+        case LCD_SCY:
+        case LCD_SCX:
+        case LCD_LY:
+        case LCD_LYC:
+        case LCD_WY:
+        case LCD_WX:
+        case BG_PALETTE_DATA:
+        case BG_PALETTE_DATA_0:
+        case BG_PALETTE_DATA_1:
+            ppu->write(addr, data);
+            break;
+        case DMA_TRANSFER:  // This register starts the OAM DMA transfer
+            dma_transfer(data);
+            break;
+        case INTERRUPT_FLAGS_REG:
+        case IN_BOOT_ADDRESS:
+        case DIVIDER_REGISTER:
+        case TIMER_CONTROL:
+        case TIMER_COUNTER:
+        case TIMER_MODULO:
+            cpu->write(addr, data);
+            break;
+        case JOY_P1_REGISTER:
+            joypad->write(addr, data);
+            break;
+        default:
+            memory.at(addr) = data;
+            break;
     }
 }
 

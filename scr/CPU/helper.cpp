@@ -30,8 +30,6 @@ void CPU::set_flags(const Flag &F1, const Flag &F2, const Flag &F3) {
     set_flag(F3);
 }
 
-void CPU::set_all_flags() { R.F = 0xFF; }
-
 void CPU::reset_flag(const Flag &F) { reset_bit(R.F, static_cast<u8>(F)); }
 
 void CPU::reset_flags(const Flag &F1, const Flag &F2) {
@@ -53,20 +51,3 @@ bool CPU::check_flag(const Flag &F) const {
 
 void CPU::toggle_flag(const Flag &F) { toggle_bit(R.F, static_cast<u8>(F)); }
 
-void CPU::toggle_flags(const Flag &F1, const Flag &F2) {
-    toggle_flag(F1);
-    toggle_flag(F2);
-}
-
-void CPU::toggle_flags(const Flag &F1, const Flag &F2, const Flag &F3) {
-    toggle_flag(F1);
-    toggle_flag(F2);
-    toggle_flag(F3);
-}
-
-void CPU::toggle_all_flags() {
-    toggle_flag(Flag::c);
-    toggle_flag(Flag::z);
-    toggle_flag(Flag::n);
-    toggle_flag(Flag::h);
-}

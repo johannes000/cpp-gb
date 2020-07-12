@@ -48,6 +48,10 @@ public:
     void reset();
 
     bool load_boot_rom();
+
+    void handle_mapped_io_write(const u16 &addr, const u8 &data);
+
+    u8 handle_mapped_io_read(const u16 &addr) const;
 };
 
 #endif  // !MEMORY_H_GUARD

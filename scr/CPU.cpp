@@ -13,13 +13,14 @@ void CPU::init_register() {
     R.SP = 0xFFFE;
     R.PC = 0x0000;
 
+    interrupt_enable_register = 0x00;
+    interrupt_request_register = 0x00;
+
     op_code = 0x00;
     cycles = 0;
 
     in_boot = true;
     IME = false;
-    IME_scheduled = false;
-    DI_scheduled = false;
 }
 
 u8 CPU::parse_op_code(u8 &opcode) {
@@ -37,28 +38,17 @@ u8 CPU::parse_op_code(u8 &opcode) {
 }
 
 int CPU::update() {
-    if (IME_scheduled) {
-        IME_scheduled = false;
-        IME = true;
-    }
-    if (DI_scheduled) {
-        DI_scheduled = false;
-        IME = false;
-    }
-    if (is_halted) {
-        if ((interrupt_flags_register & interrupt_enable_register) != 0)
-            is_halted = false;
-        else
-            return 1;
-
-    }
     if (IME) {
         handle_interrupts();
+    }
+    if (is_halted) {
+        return 1;
     }
     op_code = get_next_op_code();;
     const auto jp = parse_op_code(op_code);
     if (jp == 0) inc_pc();
     cycles += current_instruction_info.cycles;
+
     return current_instruction_info.cycles;
 }
 
@@ -94,10 +84,18 @@ debug_instruction CPU::get_instruction_at_addr(u16 addr) const {
 
 u8 CPU::read(const u16 &addr) {
     switch (addr) {
+        case DIVIDER_REGISTER:
+            return divider_register;
+        case TIMER_CONTROL:
+            return timer_control;
+        case TIMER_COUNTER:
+            return timer_counter;
+        case TIMER_MODULO:
+            return timer_modulo;
         case INTERRUPT_ENABLE_REG:
             return interrupt_enable_register;
         case INTERRUPT_FLAGS_REG:
-            return interrupt_flags_register;
+            return interrupt_request_register;
         case IN_BOOT_ADDRESS:
             return in_boot;
         default:
@@ -108,11 +106,23 @@ u8 CPU::read(const u16 &addr) {
 
 void CPU::write(const u16 &addr, const u8 &data) {
     switch (addr) {
+        case DIVIDER_REGISTER:
+            divider_register = data;
+            break;
+        case TIMER_CONTROL:
+            timer_control = data;
+            break;
+        case TIMER_COUNTER:
+            timer_counter = data;
+            break;
+        case TIMER_MODULO:
+            timer_modulo = data;
+            break;
         case INTERRUPT_ENABLE_REG:
             interrupt_enable_register = data;
             break;
         case INTERRUPT_FLAGS_REG:
-            interrupt_flags_register = data;
+            interrupt_request_register = data;
             break;
         case IN_BOOT_ADDRESS:
             if (in_boot)
@@ -130,42 +140,43 @@ void CPU::write_u16(const u16 &addr, const u16 &data) const {
 }
 
 void CPU::handle_interrupts() {
-    u8 interrupt = interrupt_flags_register & interrupt_enable_register;
+    u8 interrupt = interrupt_request_register & interrupt_enable_register;
 
     if (interrupt != 0x00) {
         pop_r16_reg(&R.PC);
         IME = false;
-        if (check_bit(interrupt, 0)) {
-            reset_bit(interrupt_flags_register, 0);
+        if (check_bit(interrupt, static_cast<u8>(Interrupt::V_Blank))) {
+            reset_bit(interrupt_request_register, static_cast<u8>(Interrupt::V_Blank));
             R.PC = 0x40;
-        } else if (check_bit(interrupt, 1)) {
-            reset_bit(interrupt_flags_register, 1);
+        } else if (check_bit(interrupt, static_cast<u8>(Interrupt::LCD_Stat))) {
+            reset_bit(interrupt_request_register, static_cast<u8>(Interrupt::LCD_Stat));
             R.PC = 0x48;
-        } else if (check_bit(interrupt, 2)) {
-            reset_bit(interrupt_flags_register, 2);
+        } else if (check_bit(interrupt, static_cast<u8>(Interrupt::Timer_overflow))) {
+            reset_bit(interrupt_request_register, static_cast<u8>(Interrupt::Timer_overflow));
             R.PC = 0x50;
-        } else if (check_bit(interrupt, 3)) {
-            reset_bit(interrupt_flags_register, 4);
+        } else if (check_bit(interrupt, static_cast<u8>(Interrupt::Serial_link))) {
+            reset_bit(interrupt_request_register, static_cast<u8>(Interrupt::Serial_link));
             R.PC = 0x58;
-        } else if (check_bit(interrupt, 5)) {
-            reset_bit(interrupt_flags_register, 5);
+        } else if (check_bit(interrupt, static_cast<u8>(Interrupt::Joypad))) {
+            reset_bit(interrupt_request_register, static_cast<u8>(Interrupt::Joypad));
             R.PC = 0x60;
         }
     }
 }
 
+void CPU::handle_timer(int t_cycles) {
+
+}
+
 
 void CPU::request_interrupt(Interrupt inter) {
     is_halted = false;
-    set_bit(interrupt_flags_register, static_cast<u8>(inter));
+    set_bit(interrupt_request_register, static_cast<u8>(inter));
 }
 
 bool CPU::in_boot_r() const { return in_boot; }
 
-
 void CPU::inc_pc() { R.PC += current_instruction_info.bytes; }
 
 u8 CPU::get_next_op_code() { return read(R.PC); }
-
-// first: Interrupt Flags Register , second: Interrupt Enable Register
 

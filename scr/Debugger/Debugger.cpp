@@ -19,7 +19,6 @@ Debugger::Debugger(CPU *c, PPU *p, MEMORY *m, CARDRIDGE *card) : cpu(c), ppu(p),
 
 
     breakpoints.push_back(0x100);
-    breakpoints.push_back(0xE31A);
 }
 
 Debugger::~Debugger() {
@@ -49,8 +48,6 @@ void Debugger::handle_breakpoints() {
         }
         return;
     }
-
-    // TODO: Framelimitter einbauen
     next_step = false;
     while (!next_step) {
         update_views();
@@ -74,7 +71,7 @@ void Debugger::handle_breakpoints() {
     }
 }
 
-void Debugger::render() const {// Rendering
+void Debugger::render() const {
     ImGui::Render();
     int display_w, display_h;
     glfwGetFramebufferSize(window, &display_w, &display_h);
@@ -137,19 +134,17 @@ void Debugger::control_view() {
     LCD_Register lcd_regs = ppu->get_lcd_register();
     ImGui::Separator();
 
-    auto interrupt_flags = cpu->get_interrupt_flags();
-
     ImGui::Text("IME %X", cpu->is_IME());
 
-    ImGui::Text("Interrupt Flags");
+    ImGui::Text("Interrupt Request");
     for (int i = 0; i < 5; ++i) {
         ImGui::SameLine();
-        ImGui::Text("%X", check_bit(interrupt_flags.first, i));
+        ImGui::Text("%X", check_bit(mem->read(INTERRUPT_FLAGS_REG), i));
     }
-    ImGui::Text("Interrupt Enable");
+    ImGui::Text("Interrupt Enable ");
     for (int i = 0; i < 5; ++i) {
         ImGui::SameLine();
-        ImGui::Text("%X", check_bit(interrupt_flags.second, i));
+        ImGui::Text("%X", check_bit(mem->read(INTERRUPT_ENABLE_REG), i));
     }
 
     ImGui::Separator();

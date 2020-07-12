@@ -45,11 +45,11 @@ private:
 
     u16 old_pc = 0x00;
 public:
-    u16 get_old_pc() const { return old_pc; }
+    [[nodiscard]] u16 get_old_pc() const { return old_pc; }
 
-    u16 get_pc() const { return R.PC; }
+    [[nodiscard]] u16 get_pc() const { return R.PC; }
 
-    const CPU_Register &get_register() const { return R; }
+    [[nodiscard]] const CPU_Register &get_register() const { return R; }
 
 private:
     // INTERRUPTS
@@ -60,23 +60,17 @@ private:
     bool IME = false;
 
 private:
-    bool IME_scheduled = false;
-    bool DI_scheduled = false;
     bool is_halted = false;
 
     // FFFF - IE - Interrupt Enable (R/W)
-    Register interrupt_enable_register = 0x00;
+    u8 interrupt_enable_register = 0x00;
     // FF0F - IF - Interrupt Flag (R/W)
-    Register interrupt_flags_register = 0x00;
+    u8 interrupt_request_register = 0x00;
 
     void handle_interrupts();
 
 public:
     void request_interrupt(Interrupt inter);
-
-    [[nodiscard]] std::pair<u8, u8> get_interrupt_flags() const {
-        return {interrupt_flags_register, interrupt_enable_register};
-    }
 
     [[nodiscard]] bool is_IME() const { return IME; }
 
@@ -88,7 +82,6 @@ private:
     void set_flags(const Flag &, const Flag &);  // setze flag auf true egal was
     void set_flags(const Flag &, const Flag &,
                    const Flag &);  // setze flag auf true egal was
-    void set_all_flags();
 
     void reset_flag(const Flag &);  // setze flag auf false egal was
     void reset_flags(const Flag &F1, const Flag &F2);
@@ -98,17 +91,27 @@ private:
     void reset_all_flags();
 
     void toggle_flag(const Flag &);  // toggled die flag
-    void toggle_flags(const Flag &F1, const Flag &F2);
-
-    void toggle_flags(const Flag &F1, const Flag &F2, const Flag &F3);
-
-    void toggle_all_flags();
 
 public:
     bool check_flag(const Flag &) const;  // gibt flag status wieder
 
-    // OPCODES
+
+    // TIMER
+    void handle_timer(int t_cycles);
+
 private:
+    // FF04h – DIV – Divider Register (R/W*)
+    Register divider_register;
+    // FF05h – TIMA – Timer Counter (R/W)
+    Register timer_counter;
+    // FF06h – TMA – Timer Modulo (R/W)
+    Register timer_modulo;
+    // FF07h – TAC – Timer Control (R/W)
+    Register timer_control;
+
+    int timer_cycle_sum;
+
+    // OPCODES
     struct cpu_instruction {
         const char *mnemonic{};
 

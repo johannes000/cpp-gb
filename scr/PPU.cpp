@@ -1,6 +1,6 @@
 #include "PPU.h"
 
-PPU::PPU(MEMORY *m, CPU *c) : mem(m), ready_to_render(false) {
+PPU::PPU(MEMORY *m) : mem(m), ready_to_render(false) {
     create_window();
 
     v_ram = std::vector<u8>(VRAM_SIZE, 0xFF);
@@ -58,8 +58,8 @@ void PPU::update(const int cycles) {
 
                 // H-Blank sachen
                 if (++lcd_register.LCD_LY == GB_LCD_SIZE_HEIGHT) {
-                    cpu->request_interrupt(Interrupt::V_Blank);
                     set_lcd_mode(LCD_Mode::V_Blank);
+                    cpu->request_interrupt(Interrupt::V_Blank);
                 } else {
                     set_lcd_mode(LCD_Mode::OAM);
                 }
@@ -72,8 +72,6 @@ void PPU::update(const int cycles) {
                 cycles_in_mode = 0;
                 if (++lcd_register.LCD_LY == VERTICAL_BLANK_LINES) {
                     lcd_register.LCD_LY = 0;
-                    // alle lines für dieses Frame gebuffert,
-                    // das frame kann jetzt gerendered werden
                     ready_to_render = true;
                     set_lcd_mode(LCD_Mode::OAM);
                 }
