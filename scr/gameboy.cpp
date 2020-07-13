@@ -21,18 +21,9 @@ void gameboy::start_emu() {
     //card.load_rom("./../../testroms/cpu_instrs/individual/01-special.gb");
     //card.load_rom("./../../testroms/cpu_instrs/individual/02-interrupts.gb");
     //card.load_rom("./../../testroms/cpu_instrs/individual/03-op sp,hl.gb");
-    //card.load_rom("./../../testroms/cpu_instrs/individual/04-op r,imm.gb"); passed
-    //card.load_rom("./../../testroms/cpu_instrs/individual/05-op rp.gb");
-    //card.load_rom("./../../testroms/cpu_instrs/individual/06-ld r,r.gb"); passed
-    //card.load_rom("./../../testroms/cpu_instrs/individual/07-jr,jp,call,ret,rst.gb"); passed
-    //card.load_rom("./../../testroms/cpu_instrs/individual/08-misc instrs.gb"); passed
-    //card.load_rom("./../../testroms/cpu_instrs/individual/09-op r,r.gb"); passed
-    //card.load_rom("./../../testroms/cpu_instrs/individual/10-bit ops.gb"); passed
-    //card.load_rom("./../../testroms/cpu_instrs/individual/11-op a,(hl).gb"); passed
     //card.load_rom("./../../testroms/cpu_instrs/cpu_instrs.gb");
     card.load_rom("./../../testroms/instr_timing/instr_timing.gb");
     //card.load_rom("C:\\Users\\knaub\\source\\repos\\testroms\\mooneye\\acceptance\\call_timing.gb");
-    //card.load_rom("C:\\Users\\knaub\\source\\repos\\testroms\\instr_timing\\instr_timing.gb");
     //card.load_rom("C:\\Users\\knaub\\source\\repos\\testroms\\mooneye\\acceptance\\bits\\mem_oam.gb");
     //card.load_rom("C:\\Users\\knaub\\source\\repos\\testroms\\mooneye\\acceptance\\bits\\reg_f.gb");
     //card.load_rom("C:\\Users\\knaub\\source\\repos\\testroms\\mooneye\\acceptance\\bits\\mem_oam.gb");
@@ -46,6 +37,8 @@ void gameboy::start_emu() {
         while (!ppu.is_ready_to_render()) {
             debug.handle_breakpoints();
             last_cycle = cpu.update();
+            cpu.handle_timer(last_cycle);
+            cpu.handle_interrupts();
             cycles += last_cycle;
             ppu.update(last_cycle * 4);
         }

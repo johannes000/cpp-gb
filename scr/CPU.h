@@ -67,9 +67,10 @@ private:
     // FF0F - IF - Interrupt Flag (R/W)
     u8 interrupt_request_register = 0x00;
 
-    void handle_interrupts();
 
 public:
+    void handle_interrupts();
+
     void request_interrupt(Interrupt inter);
 
     [[nodiscard]] bool is_IME() const { return IME; }
@@ -100,6 +101,7 @@ public:
     void handle_timer(int t_cycles);
 
 private:
+
     // FF04h – DIV – Divider Register (R/W*)
     Register divider_register;
     // FF05h – TIMA – Timer Counter (R/W)
@@ -107,9 +109,16 @@ private:
     // FF06h – TMA – Timer Modulo (R/W)
     Register timer_modulo;
     // FF07h – TAC – Timer Control (R/W)
+    // Bit 2 - Timer Enable (0=Disable, 1=Enable)
+    // Bits 1-0 - Main Frequency Divider
     Register timer_control;
 
     int timer_cycle_sum;
+    int div_cycle_sum;
+
+    void handle_div_register_write();
+
+    void handle_time_control_write(const u8 &data);
 
     // OPCODES
     struct cpu_instruction {

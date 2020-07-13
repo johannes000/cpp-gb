@@ -83,6 +83,7 @@ constexpr u16 DIVIDER_REGISTER = 0xFF04;
 constexpr u16 TIMER_COUNTER = 0xFF05;
 constexpr u16 TIMER_MODULO = 0xFF06;
 constexpr u16 TIMER_CONTROL = 0xFF07;
+constexpr int OSCILLATOR_CLOCK_FREQ = 4194304;
 
 constexpr u16
         DMA_TRANSFER = 0xFF46;  // DMA Transfer and Start Address (R/W)
@@ -246,7 +247,6 @@ public:
 
 struct debug_instruction {
     const char *mnemonic{};
-
     u8 bytes{};
     u8 cycles{};
     u8 opcode{};

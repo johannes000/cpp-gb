@@ -16,6 +16,9 @@ void CPU::init_register() {
     interrupt_enable_register = 0x00;
     interrupt_request_register = 0x00;
 
+    timer_cycle_sum = 0;
+    div_cycle_sum = 0;
+
     op_code = 0x00;
     cycles = 0;
 
@@ -38,9 +41,6 @@ u8 CPU::parse_op_code(u8 &opcode) {
 }
 
 int CPU::update() {
-    if (IME) {
-        handle_interrupts();
-    }
     if (is_halted) {
         return 1;
     }
@@ -48,7 +48,6 @@ int CPU::update() {
     const auto jp = parse_op_code(op_code);
     if (jp == 0) inc_pc();
     cycles += current_instruction_info.cycles;
-
     return current_instruction_info.cycles;
 }
 
@@ -95,7 +94,7 @@ u8 CPU::read(const u16 &addr) {
         case INTERRUPT_ENABLE_REG:
             return interrupt_enable_register;
         case INTERRUPT_FLAGS_REG:
-            return interrupt_request_register;
+            return interrupt_request_register | 0xE0u;
         case IN_BOOT_ADDRESS:
             return in_boot;
         default:
@@ -107,10 +106,10 @@ u8 CPU::read(const u16 &addr) {
 void CPU::write(const u16 &addr, const u8 &data) {
     switch (addr) {
         case DIVIDER_REGISTER:
-            divider_register = data;
+            handle_div_register_write();
             break;
         case TIMER_CONTROL:
-            timer_control = data;
+            handle_time_control_write(data);
             break;
         case TIMER_COUNTER:
             timer_counter = data;
@@ -119,10 +118,10 @@ void CPU::write(const u16 &addr, const u8 &data) {
             timer_modulo = data;
             break;
         case INTERRUPT_ENABLE_REG:
-            interrupt_enable_register = data;
+            interrupt_enable_register = data & 0x1Fu;
             break;
         case INTERRUPT_FLAGS_REG:
-            interrupt_request_register = data;
+            interrupt_request_register = data & 0x1Fu;
             break;
         case IN_BOOT_ADDRESS:
             if (in_boot)
@@ -135,11 +134,21 @@ void CPU::write(const u16 &addr, const u8 &data) {
     }
 }
 
+void CPU::handle_time_control_write(const u8 &data) {
+    if ((timer_control & 3u) != (data & 3u))
+        timer_cycle_sum = 0;
+    timer_cycle_sum = data;
+}
+
+void CPU::handle_div_register_write() { divider_register = 0; }
+
 void CPU::write_u16(const u16 &addr, const u16 &data) const {
     mem->write_u16(addr, data);
 }
 
 void CPU::handle_interrupts() {
+    if (!IME)
+        return;
     u8 interrupt = interrupt_request_register & interrupt_enable_register;
 
     if (interrupt != 0x00) {
@@ -165,6 +174,42 @@ void CPU::handle_interrupts() {
 }
 
 void CPU::handle_timer(int t_cycles) {
+    div_cycle_sum += t_cycles;
+    if (div_cycle_sum >= 256) {
+        div_cycle_sum -= 256;
+        divider_register++;
+    }
+
+    if (check_bit(timer_control, 2)) {
+        timer_cycle_sum += t_cycles * 4;
+
+
+        int freq = 0;
+        switch (timer_control & 3u) {
+            case 1:
+                freq = 262144;
+                break;
+            case 2:
+                freq = 65536;
+                break;
+            case 3:
+                freq = 16384;
+                break;
+            default:
+                freq = 4096;
+                break;
+        }
+        int osci = OSCILLATOR_CLOCK_FREQ / freq;
+        while (timer_cycle_sum >= osci) {
+            timer_counter++;
+            if (timer_counter == 0) {
+                request_interrupt(Interrupt::Timer_overflow);
+                timer_counter = timer_modulo;
+            }
+            timer_cycle_sum -= osci;
+        }
+
+    }
 
 }
 

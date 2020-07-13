@@ -156,6 +156,16 @@ void Debugger::control_view() {
         ImGui::SameLine();
         ImGui::Text("%X", check_bit(joy, i));
     }
+    ImGui::Separator();
+    ImGui::Text(" TIMER ");
+    ImGui::Text("DIV  %02X", mem->read(DIVIDER_REGISTER));
+    ImGui::SameLine();
+    ImGui::Text("TIMA %02X", mem->read(TIMER_COUNTER));
+    ImGui::Text("TMA  %02X", mem->read(TIMER_MODULO));
+    ImGui::SameLine();
+    ImGui::Text("TAC  %02X", mem->read(TIMER_CONTROL));
+
+
     ImGui::End();
 
 }
