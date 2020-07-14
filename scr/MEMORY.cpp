@@ -102,9 +102,7 @@ void MEMORY::handle_mapped_io_write(const u16 &addr, const u8 &data) {
         case BG_PALETTE_DATA_1:
             ppu->write(addr, data);
             break;
-        case DMA_TRANSFER:  // This register starts the OAM DMA transfer
-            dma_transfer(data);
-            break;
+
         case INTERRUPT_FLAGS_REG:
         case IN_BOOT_ADDRESS:
         case DIVIDER_REGISTER:
@@ -168,17 +166,6 @@ void MEMORY::reset() {
     write(0xFFFF, 0x00);  // IE
 }
 
-void MEMORY::dma_transfer(const u8 &data) {
-
-    memory.at(DMA_TRANSFER) = data;
-    const u16 addr = data << 8u;
-    if (addr >= 0x8000 && addr < 0xE000) {
-        for (u8 i = 0; i < 0xA0; i++) {
-            write(0xFE00 + i, read(addr + i));
-        }
-    }
-
-}
 
 bool MEMORY::load_boot_rom() {
     std::ifstream is(boot_rom_path, std::ios::binary);
@@ -197,4 +184,9 @@ u8 MEMORY::read_card_rom(const u16 &addr) {
 
 void MEMORY::request_interrupt(Interrupt inter) {
     cpu->request_interrupt(inter);
+}
+
+void MEMORY::write_direct(const u16 &addr, const u8 &data) {
+    memory.at(addr) = data;
+
 }

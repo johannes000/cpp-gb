@@ -22,7 +22,7 @@ public:
 
     void inc_pc();
 
-    u8 get_next_op_code();
+    inline u8 get_next_op_code();
 
     bool in_boot_r() const;
 
@@ -43,9 +43,9 @@ private:
 
     void init_register();
 
-    u16 old_pc = 0x00;
+    void dma_transfer(const u8 &data);
+
 public:
-    [[nodiscard]] u16 get_old_pc() const { return old_pc; }
 
     [[nodiscard]] u16 get_pc() const { return R.PC; }
 
@@ -240,7 +240,7 @@ private:
             {"DEC E",       &CPU::opcode0x1D, 1, 1},
             {"LD E d8",     &CPU::opcode0x1E, 2, 2},
             {"RRA",         &CPU::opcode0x1F, 1, 1},
-            {"JR NZ r8",    &CPU::opcode0x20, 2, 3},
+            {"JR NZ r8",    &CPU::opcode0x20, 2, 2},
             {"LD HL d16",   &CPU::opcode0x21, 3, 3},
             {"LD (HL+) A",  &CPU::opcode0x22, 1, 2},
             {"INC HL",      &CPU::opcode0x23, 1, 2},
@@ -248,7 +248,7 @@ private:
             {"DEC H",       &CPU::opcode0x25, 1, 1},
             {"LD H d8",     &CPU::opcode0x26, 2, 2},
             {"DAA",         &CPU::opcode0x27, 1, 1},
-            {"JR Z r8",     &CPU::opcode0x28, 2, 3},
+            {"JR Z r8",     &CPU::opcode0x28, 2, 2},
             {"ADD HL HL",   &CPU::opcode0x29, 1, 2},
             {"LD A (HL+)",  &CPU::opcode0x2A, 1, 2},
             {"DEC HL",      &CPU::opcode0x2B, 1, 2},
@@ -256,7 +256,7 @@ private:
             {"DEC L",       &CPU::opcode0x2D, 1, 1},
             {"LD L d8",     &CPU::opcode0x2E, 2, 2},
             {"CPL",         &CPU::opcode0x2F, 1, 1},
-            {"JR NC r8",    &CPU::opcode0x30, 2, 3},
+            {"JR NC r8",    &CPU::opcode0x30, 2, 2},
             {"LD SP d16",   &CPU::opcode0x31, 3, 3},
             {"LD (HL-) A",  &CPU::opcode0x32, 1, 2},
             {"INC SP",      &CPU::opcode0x33, 1, 2},
@@ -264,7 +264,7 @@ private:
             {"DEC (HL)",    &CPU::opcode0x35, 1, 3},
             {"LD (HL) d8",  &CPU::opcode0x36, 2, 3},
             {"SCF",         &CPU::opcode0x37, 1, 1},
-            {"JR C r8",     &CPU::opcode0x38, 2, 3},
+            {"JR C r8",     &CPU::opcode0x38, 2, 2},
             {"ADD HL SP",   &CPU::opcode0x39, 1, 2},
             {"LD A (HL-)",  &CPU::opcode0x3A, 1, 2},
             {"DEC SP",      &CPU::opcode0x3B, 1, 2},
@@ -400,35 +400,35 @@ private:
             {"CP L",        &CPU::opcode0xBD, 1, 1},
             {"CP HL",       &CPU::opcode0xBE, 1, 2},
             {"CP A",        &CPU::opcode0xBF, 1, 1},
-            {"RET NZ",      &CPU::opcode0xC0, 1, 5},
+            {"RET NZ",      &CPU::opcode0xC0, 1, 2},
             {"POP BC",      &CPU::opcode0xC1, 1, 3},
-            {"JP NZ a16",   &CPU::opcode0xC2, 3, 4},
+            {"JP NZ a16",   &CPU::opcode0xC2, 3, 3},
             {"JP a16",      &CPU::opcode0xC3, 3, 4},
-            {"CALL NZ a16", &CPU::opcode0xC4, 3, 6},
+            {"CALL NZ a16", &CPU::opcode0xC4, 3, 3},
             {"PUSH BC",     &CPU::opcode0xC5, 1, 4},
             {"ADD A d8",    &CPU::opcode0xC6, 2, 2},
             {"RST 00H",     &CPU::opcode0xC7, 1, 4},
-            {"RET Z",       &CPU::opcode0xC8, 1, 5},
+            {"RET Z",       &CPU::opcode0xC8, 1, 2},
             {"RET",         &CPU::opcode0xC9, 1, 4},
-            {"JP Z a16",    &CPU::opcode0xCA, 3, 4},
+            {"JP Z a16",    &CPU::opcode0xCA, 3, 3},
             {"PREFIX",      &CPU::opcode0xCB, 1, 1},
-            {"CALL Z a16",  &CPU::opcode0xCC, 3, 6},
+            {"CALL Z a16",  &CPU::opcode0xCC, 3, 3},
             {"CALL a16",    &CPU::opcode0xCD, 3, 6},
             {"ADC A d8",    &CPU::opcode0xCE, 2, 2},
             {"RST 08H",     &CPU::opcode0xCF, 1, 4},
-            {"RET NC",      &CPU::opcode0xD0, 1, 5},
+            {"RET NC",      &CPU::opcode0xD0, 1, 2},
             {"POP DE",      &CPU::opcode0xD1, 1, 3},
-            {"JP NC a16",   &CPU::opcode0xD2, 3, 4},
+            {"JP NC a16",   &CPU::opcode0xD2, 3, 3},
             {"ILLEGAL_D3",  &CPU::opcode0xD3, 1, 1},
-            {"CALL NC a16", &CPU::opcode0xD4, 3, 6},
+            {"CALL NC a16", &CPU::opcode0xD4, 3, 3},
             {"PUSH DE",     &CPU::opcode0xD5, 1, 4},
             {"SUB d8",      &CPU::opcode0xD6, 2, 2},
             {"RST 10H",     &CPU::opcode0xD7, 1, 4},
-            {"RET C",       &CPU::opcode0xD8, 1, 5},
+            {"RET C",       &CPU::opcode0xD8, 1, 2},
             {"RETI",        &CPU::opcode0xD9, 1, 4},
-            {"JP C a16",    &CPU::opcode0xDA, 3, 4},
+            {"JP C a16",    &CPU::opcode0xDA, 3, 3},
             {"ILLEGAL_DB",  &CPU::opcode0xDB, 1, 1},
-            {"CALL C a16",  &CPU::opcode0xDC, 3, 6},
+            {"CALL C a16",  &CPU::opcode0xDC, 3, 3},
             {"ILLEGAL_DD",  &CPU::opcode0xDD, 1, 1},
             {"SBC A d8",    &CPU::opcode0xDE, 2, 2},
             {"RST 18H",     &CPU::opcode0xDF, 1, 4},
@@ -464,8 +464,6 @@ private:
             {"ILLEGAL_FD",  &CPU::opcode0xFD, 1, 1},
             {"CP d8",       &CPU::opcode0xFE, 2, 2},
             {"RST 38H",     &CPU::opcode0xFF, 1, 4},
-            {"STOP",        &CPU::opcode0x10, 1, 1},
-
     };
 
 private:

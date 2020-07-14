@@ -1,6 +1,6 @@
 #include "PPU.h"
 
-PPU::PPU(MEMORY *m) : mem(m), ready_to_render(false) {
+PPU::PPU(MEMORY *m, CPU *c) : mem(m), cpu(c), ready_to_render(false) {
     create_window();
 
     v_ram = std::vector<u8>(VRAM_SIZE, 0xFF);
@@ -50,8 +50,9 @@ void PPU::update(const int cycles) {
 
                 if (lcd_register.LCD_LY == lcd_register.LCD_LYC) {
                     set_lcd_state(LCD_State::coincidence_flag);
-                    if (check_lcd_state(LCD_State::lyc))
+                    if (check_lcd_state(LCD_State::lyc)) {
                         cpu->request_interrupt(Interrupt::LCD_Stat);
+                    }
                 } else {
                     reset_lcd_state(LCD_State::coincidence_flag);
                 }
@@ -337,8 +338,6 @@ bool PPU::create_window() {
 [[nodiscard]] const Pixel *PPU::get_lcd_buffer() const { return &lcd_buffer[0]; }
 
 void PPU::update_tile(const u16 &a) {
-    if (a == 0x17bf)
-        int i = 2;
     auto addr = a & 0x1FFEu;
     auto tile_id = static_cast<u16>(addr >> 4u) & 0x1FFu;
     auto y = (static_cast<u16>(addr >> 1u) & 7u);

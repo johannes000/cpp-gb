@@ -227,6 +227,10 @@ void Debugger::cpu_view() {
         next_step = true;
     }
     ImGui::SameLine();
+    if (ImGui::Button("ReDisassemble")) {
+        disassemble();
+    }
+    ImGui::SameLine();
     debug_state == Debug_State::STEP ? ImGui::Text("STEP") : ImGui::Text("RUN");
     // DECOMPILER
     ImGui::Separator();
@@ -346,6 +350,8 @@ void Debugger::reset() {
 
 void Debugger::disassemble() {
     debug_instruction debug_inst;
+    dis_vec.erase(dis_vec.begin(), dis_vec.end());
+    dis_addr_vec.erase(dis_addr_vec.begin(), dis_addr_vec.end());
     for (u16 addr = 0; addr < 0xFFFF;) {
         // Nur Adressen aus dem Card Rom nicht aus dem Bootrom
         // Deswegen kriegt man beim Booten nicht die richtigen Adressen im CPU View

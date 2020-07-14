@@ -5,32 +5,26 @@ u8 CPU::opcode0x00() {  // NOP
 }
 
 u8 CPU::opcode0x10() {  // STOP
-    std::cout << "0x10 nicht implementiert" << std::endl;
     return 0;
 }
 
 u8 CPU::opcode0x27() {  // DAA
     int a = R.A;
 
-    if (check_flag(Flag::n)) {
-        if (check_flag(Flag::h) || ((a & 0xF) > 9))
-            a += 0x06;
-        if (check_flag(Flag::c) || (a > 0x9F))
+    if (!check_flag(Flag::n)) {
+        if (check_flag(Flag::c) || (a > 0x99)) {
             a += 0x60;
+            set_flag(Flag::c);
+        }
+        if (check_flag(Flag::h) || ((a & 0x0F) > 0x09)) a += 0x06;
     } else {
-        if (check_flag(Flag::h))
-            a = (a - 6) & 0xFF;
-        if (check_flag(Flag::c))
-            a -= 0x60;
+        if (check_flag(Flag::c)) a -= 0x60;
+        if (check_flag(Flag::h)) a = a - 0x6;
     }
     reset_flag(Flag::h);
-    reset_flag(Flag::z);
-    set_flag_if(Flag::c, (a & 0x100) == 0x100);
-
-    a &= 0xFF;
-    set_flag_if(Flag::z, a == 0);
 
     R.A = static_cast<u8>(a);
+    set_flag_if(Flag::z, R.A == 0);
     return 0;
 }
 

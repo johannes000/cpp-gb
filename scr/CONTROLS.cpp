@@ -8,19 +8,26 @@
 
 CONTROLS::CONTROLS(MEMORY *m, PPU *p) : mem(m), ppu(p), joy_button_direction_selector(0xFF) {}
 
-u8 CONTROLS::read(const u16 &addr) const {
-    switch (addr) {
-        case JOY_P1_REGISTER:
-            switch (joy_button_direction_selector & 0xF0u) {
-                case 0x20:
-                    return static_cast<u8> (joy_both_states >> 4u) & 0x0Fu;
-                case 0x10:
-                    return joy_both_states & 0x0Fu;
-                default:
-                    return 0xFF;
-            }
-        default:
-            return 0xFF;
+u8 CONTROLS::read(const u16 &addr) {
+    u8 joy_p1 = 0xFF;
+    if (addr == JOY_P1_REGISTER) {
+        switch (joy_button_direction_selector & 0xF0u) {
+            case 0x10:
+                joy_p1 = joy_both_states & 0x0Fu;
+                reset_bit(joy_p1, 5);
+                set_bit(joy_p1, 4);
+                break;
+            case 0x20:
+                joy_p1 = (joy_both_states & 0xF0u) >> 4u;
+                set_bit(joy_p1, 5);
+                reset_bit(joy_p1, 4);
+                break;
+            default:
+                return 0xFF;
+        }
+        return joy_p1;
+    } else {
+        return 0xFF;
     }
 }
 

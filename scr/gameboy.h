@@ -23,7 +23,7 @@ public:
     CONTROLS joypad;
     Debugger debug;
 
-    void start_emu();
+    [[noreturn]] void start_emu();
 
 private:
     int last_cycle{};

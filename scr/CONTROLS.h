@@ -32,7 +32,7 @@ private:
 
 public:
 
-    [[nodiscard]] u8 read(const u16 &addr) const;
+    [[nodiscard]] u8 read(const u16 &addr);
 };
 
 

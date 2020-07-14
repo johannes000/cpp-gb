@@ -36,6 +36,7 @@ u8 CPU::opcode0x18() {  // JR r8
 u8 CPU::opcode0x20() {  // JR NZ r8
     if (!check_flag(Flag::z)) {
         R.PC += read_i8_at_pc();
+        current_instruction_info.cycles = 3;
         return 0;
     }
     return 0;
@@ -44,6 +45,7 @@ u8 CPU::opcode0x20() {  // JR NZ r8
 u8 CPU::opcode0x28() {  // JR Z r8
     if (check_flag(Flag::z)) {
         R.PC += read_i8_at_pc();
+        current_instruction_info.cycles = 3;
         return 0;
     }
     return 0;
@@ -52,6 +54,7 @@ u8 CPU::opcode0x28() {  // JR Z r8
 u8 CPU::opcode0x30() {  // JR NC r8
     if (!check_flag(Flag::c)) {
         R.PC += read_i8_at_pc();
+        current_instruction_info.cycles = 3;
         return 0;
     }
     return 0;
@@ -60,6 +63,7 @@ u8 CPU::opcode0x30() {  // JR NC r8
 u8 CPU::opcode0x38() {  // JR C r8
     if (check_flag(Flag::c)) {
         R.PC += read_i8_at_pc();
+        current_instruction_info.cycles = 3;
         return 0;
     }
     return 0;
@@ -68,6 +72,7 @@ u8 CPU::opcode0x38() {  // JR C r8
 u8 CPU::opcode0xC0() {  // RET NZ
     if (!check_flag(Flag::z)) {
         ret();
+        current_instruction_info.cycles = 5;
         return 1;
     }
     return 0;
@@ -76,6 +81,7 @@ u8 CPU::opcode0xC0() {  // RET NZ
 u8 CPU::opcode0xC8() {  // RET Z
     if (check_flag(Flag::z)) {
         ret();
+        current_instruction_info.cycles = 5;
         return 1;
     }
     return 0;
@@ -84,6 +90,7 @@ u8 CPU::opcode0xC8() {  // RET Z
 u8 CPU::opcode0xD0() {  // RET NC
     if (!check_flag(Flag::c)) {
         ret();
+        current_instruction_info.cycles = 5;
         return 1;
     }
     return 0;
@@ -92,6 +99,7 @@ u8 CPU::opcode0xD0() {  // RET NC
 u8 CPU::opcode0xD8() {  // RET C
     if (check_flag(Flag::c)) {
         ret();
+        current_instruction_info.cycles = 5;
         return 1;
     }
     return 0;
@@ -100,6 +108,7 @@ u8 CPU::opcode0xD8() {  // RET C
 u8 CPU::opcode0xC2() {  // JP NZ a16
     if (!check_flag(Flag::z)) {
         R.PC = read_u16_at_pc();
+        current_instruction_info.cycles = 3;
         return 1;
     }
     return 0;
@@ -113,6 +122,7 @@ u8 CPU::opcode0xC3() {  // JP a16
 u8 CPU::opcode0xCA() {  // JP Z a16
     if (check_flag(Flag::z)) {
         R.PC = read_u16_at_pc();
+        current_instruction_info.cycles = 4;
         return 1;
     }
     return 0;
@@ -121,6 +131,7 @@ u8 CPU::opcode0xCA() {  // JP Z a16
 u8 CPU::opcode0xD2() {  // JP NC a16
     if (!check_flag(Flag::c)) {
         R.PC = read_u16_at_pc();
+        current_instruction_info.cycles = 4;
         return 1;
     }
     return 0;
@@ -129,6 +140,7 @@ u8 CPU::opcode0xD2() {  // JP NC a16
 u8 CPU::opcode0xDA() {  // JP C a16
     if (check_flag(Flag::c)) {
         R.PC = read_u16_at_pc();
+        current_instruction_info.cycles = 4;
         return 1;
     }
     return 0;
@@ -142,6 +154,7 @@ u8 CPU::opcode0xE9() {  // JP HL
 u8 CPU::opcode0xC4() {  // CALL NZ a16
     if (!check_flag(Flag::z)) {
         call();
+        current_instruction_info.cycles = 6;
         return 1;
     }
     return 0;

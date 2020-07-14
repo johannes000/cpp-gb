@@ -44,9 +44,9 @@ int CPU::update() {
     if (is_halted) {
         return 1;
     }
-    op_code = get_next_op_code();;
+    op_code = get_next_op_code();
     const auto jp = parse_op_code(op_code);
-    if (jp == 0) inc_pc();
+    if (jp == 0) inc_pc(); // Wenn 1 returned wird wurde der PC schon vom OPcode verändert.
     cycles += current_instruction_info.cycles;
     return current_instruction_info.cycles;
 }
@@ -105,6 +105,9 @@ u8 CPU::read(const u16 &addr) {
 
 void CPU::write(const u16 &addr, const u8 &data) {
     switch (addr) {
+        case DMA_TRANSFER:  // This register starts the OAM DMA transfer
+            dma_transfer(data);
+            break;
         case DIVIDER_REGISTER:
             handle_div_register_write();
             break;
@@ -134,10 +137,22 @@ void CPU::write(const u16 &addr, const u8 &data) {
     }
 }
 
+void CPU::dma_transfer(const u8 &data) {
+    mem->write_direct(DMA_TRANSFER, data);
+    current_instruction_info.cycles = 160;
+    const u16 addr = data << 8u;
+    if (addr >= 0x8000 && addr < 0xE000) {
+        for (u8 i = 0; i < 0xA0; i++) {
+            write(0xFE00 + i, read(addr + i));
+        }
+    }
+
+}
+
 void CPU::handle_time_control_write(const u8 &data) {
     if ((timer_control & 3u) != (data & 3u))
         timer_cycle_sum = 0;
-    timer_cycle_sum = data;
+    timer_control = data;
 }
 
 void CPU::handle_div_register_write() { divider_register = 0; }
@@ -149,9 +164,9 @@ void CPU::write_u16(const u16 &addr, const u16 &data) const {
 void CPU::handle_interrupts() {
     if (!IME)
         return;
-    u8 interrupt = interrupt_request_register & interrupt_enable_register;
-
-    if (interrupt != 0x00) {
+    u8 interrupt = interrupt_request_register & interrupt_enable_register & 0x1Fu;
+    if (interrupt) {
+        is_halted = false;
         pop_r16_reg(&R.PC);
         IME = false;
         if (check_bit(interrupt, static_cast<u8>(Interrupt::V_Blank))) {
@@ -181,32 +196,31 @@ void CPU::handle_timer(int t_cycles) {
     }
 
     if (check_bit(timer_control, 2)) {
-        timer_cycle_sum += t_cycles * 4;
+        timer_cycle_sum += t_cycles;
 
-
-        int freq = 0;
+        int freq;
         switch (timer_control & 3u) {
             case 1:
-                freq = 262144;
+                freq = 16;
                 break;
             case 2:
-                freq = 65536;
+                freq = 64;
                 break;
             case 3:
-                freq = 16384;
+                freq = 256;
                 break;
-            default:
-                freq = 4096;
+            case 0:
+                freq = 1024;
                 break;
         }
-        int osci = OSCILLATOR_CLOCK_FREQ / freq;
-        while (timer_cycle_sum >= osci) {
-            timer_counter++;
-            if (timer_counter == 0) {
+        while (timer_cycle_sum >= freq) {
+            if (timer_counter == 0xFF) {
                 request_interrupt(Interrupt::Timer_overflow);
                 timer_counter = timer_modulo;
+            } else {
+                timer_counter++;
             }
-            timer_cycle_sum -= osci;
+            timer_cycle_sum -= freq;
         }
 
     }
@@ -215,7 +229,6 @@ void CPU::handle_timer(int t_cycles) {
 
 
 void CPU::request_interrupt(Interrupt inter) {
-    is_halted = false;
     set_bit(interrupt_request_register, static_cast<u8>(inter));
 }
 
@@ -223,5 +236,5 @@ bool CPU::in_boot_r() const { return in_boot; }
 
 void CPU::inc_pc() { R.PC += current_instruction_info.bytes; }
 
-u8 CPU::get_next_op_code() { return read(R.PC); }
+inline u8 CPU::get_next_op_code() { return read(R.PC); }
 

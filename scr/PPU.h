@@ -33,7 +33,7 @@ class CPU;
 
 class PPU {
 public:
-    explicit PPU(MEMORY *m);
+    explicit PPU(MEMORY *m, CPU *c);
 
     ~PPU();
 

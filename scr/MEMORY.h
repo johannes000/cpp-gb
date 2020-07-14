@@ -28,6 +28,8 @@ public:
 
     void write(const u16 &addr, const u8 &data);
 
+    void write_direct(const u16 &addr, const u8 &data);
+
     void write_u16(const u16 &addr, const u16 &data);
 
     void request_interrupt(Interrupt inter);
@@ -42,7 +44,6 @@ private:
     std::vector<u8> memory;
     std::vector<u8> boot;
 
-    void dma_transfer(const u8 &data);
 
 public:
     void reset();
