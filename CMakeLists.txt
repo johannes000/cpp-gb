@@ -39,7 +39,7 @@ find_package(OpenGL REQUIRED)
 include_directories(scr)
 
 add_executable(cpp-gb
-        scr/main.cpp
+        win/main.cpp
         scr/CPU/ARITHMETIC.cpp
         scr/CPU/CONTROL.cpp
         scr/CPU/helper.cpp
@@ -68,7 +68,7 @@ add_executable(cpp-gb
         external/imgui/imgui.h
         external/imgui/imstb_rectpack.h
         external/imgui/imstb_textedit.h
-        external/imgui/imstb_truetype.h scr/Debugger/Debugger_Init.cpp scr/Debugger/Debug_helper.cpp)
+        external/imgui/imstb_truetype.h scr/Debugger/Debugger_Init.cpp scr/Debugger/Debug_helper.cpp win/Renderer.cpp win/Renderer.h)
 
 target_link_libraries(cpp-gb
         -lmingw32
