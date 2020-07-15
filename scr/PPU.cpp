@@ -48,15 +48,6 @@ void PPU::update(const int cycles) {
                 cycles_in_mode = 0;
                 buffer_line(lcd_register.LCD_LY);
 
-                if (lcd_register.LCD_LY == lcd_register.LCD_LYC) {
-                    set_lcd_state(LCD_State::coincidence_flag);
-                    if (check_lcd_state(LCD_State::lyc)) {
-                        cpu->request_interrupt(Interrupt::LCD_Stat);
-                    }
-                } else {
-                    reset_lcd_state(LCD_State::coincidence_flag);
-                }
-
                 // H-Blank sachen
                 if (++lcd_register.LCD_LY == GB_LCD_SIZE_HEIGHT) {
                     set_lcd_mode(LCD_Mode::V_Blank);

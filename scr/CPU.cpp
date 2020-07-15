@@ -57,10 +57,10 @@ debug_instruction CPU::get_instruction_at_addr(u16 addr) const {
     cpu_instruction cpu_inst;
     u16 intermediate = -1;
 
-    u8 inst_code = mem->read_card_rom(addr);
+    u8 inst_code = mem->read(addr);
     cpu_inst = instructions[inst_code];
     if (inst_code == 0xCB) {
-        inst_code = mem->read_card_rom(++addr);
+        inst_code = mem->read(++addr);
         cpu_inst = prefixedinstructions[inst_code];
         cpu_inst.bytes = 1;
         debug_inst.prefixed = true;
@@ -167,8 +167,8 @@ void CPU::handle_interrupts() {
     u8 interrupt = interrupt_request_register & interrupt_enable_register & 0x1Fu;
     if (interrupt) {
         is_halted = false;
-        pop_r16_reg(&R.PC);
         IME = false;
+        pop_r16_reg(&R.PC);
         if (check_bit(interrupt, static_cast<u8>(Interrupt::V_Blank))) {
             reset_bit(interrupt_request_register, static_cast<u8>(Interrupt::V_Blank));
             R.PC = 0x40;
