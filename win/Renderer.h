@@ -6,12 +6,13 @@
 #define CPP_GB_RENDERER_H
 
 #include "type.h"
-#include "CPU.h"
 #include "SDL.h"
 
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
+
+#include <imfilebrowser.h>
 
 #include <cstdio>
 #include <cstdlib>
@@ -96,21 +97,15 @@ public:
     GLuint tiles_texture = 0;
     std::vector<Pixel> tile_buffer;
 
-    void update_views(PPU *ppu, Debugger *debug);
+    ImGui::FileBrowser fileDialog;
 
-    void imgui_demo();
+    std::string file_browser();
+
+    void update_views(PPU *ppu, Debugger *debug);
 
     void main_view(PPU *ppu);
 
-    void control_view(CPU *cpu, MEMORY *mem, PPU *ppu);
-
-    void show_fps();
-
-    void card_view(CARDRIDGE *card);
-
-    void video_view();
-
-    void memory_view();
+    void show_fps() const;
 
 };
 

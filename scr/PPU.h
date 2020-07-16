@@ -44,8 +44,8 @@ public:
     bool ready_to_render;
 
 private:
-    MEMORY *mem;
     CPU *cpu;
+    MEMORY *mem;
 
     int cycles_in_mode{};
 

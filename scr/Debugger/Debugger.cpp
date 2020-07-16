@@ -3,6 +3,7 @@
 //
 #include "Debugger.h"
 #include <vector>
+#include <algorithm>
 
 
 Debugger::Debugger(CPU *c, PPU *p, MEMORY *m, CARDRIDGE *card) : cpu(c), ppu(p), mem(m), cardridge(card),
@@ -39,7 +40,8 @@ void Debugger::update() {
 void Debugger::handle_breakpoints() {
     if (debug_state != Debug_State::STEP) {
         if (!breakpoints.empty()) {
-            auto iter = std::find(breakpoints.begin(), breakpoints.end(), cpu->get_pc());
+            u16 pc = cpu->get_pc();
+            auto iter = std::find(breakpoints.begin(), breakpoints.end(), pc);
             if (iter != breakpoints.end())
                 debug_state = Debug_State::STEP;
         }

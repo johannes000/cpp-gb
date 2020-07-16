@@ -8,7 +8,7 @@ Renderer::Renderer() {
     init_window();
 
     load_texture(&frame_texture, GB_LCD_SIZE_WIDTH, GB_LCD_SIZE_HEIGHT, frame_buffer);
-    load_texture(&tiles_texture, TILE_BUFFER_WIDTH, TILE_BUFFER_HEIGHT, &tile_buffer[0]);
+    load_texture(&tiles_texture, TILE_BUFFER_WIDTH, TILE_BUFFER_HEIGHT, &Renderer::tile_buffer[0]);
 }
 
 Renderer::~Renderer() {
@@ -143,34 +143,11 @@ void Renderer::update_views(PPU *ppu, Debugger *debug) {
     if (show_demo_window)
         ImGui::ShowDemoWindow(&show_demo_window);
 
-    imgui_demo();
+    //imgui_demo();
     main_view(ppu);
     debug->update_views();
     render();
 
-}
-
-void Renderer::imgui_demo() {
-    static float f = 0.0f;
-    static int counter = 0;
-
-    ImGui::Begin("Hello, world!");
-
-    ImGui::Text("This is some useful text.");
-    ImGui::Checkbox("Demo Window", &show_demo_window);
-    ImGui::Checkbox("Another Window", &show_another_window);
-
-    ImGui::SliderFloat("float", &f, 0.0f, 1.0f);
-    ImGui::ColorEdit3("clear color", (float *) &bg_color);
-
-    if (ImGui::Button("Button"))
-        counter++;
-    ImGui::SameLine();
-    ImGui::Text("counter = %d", counter);
-
-    ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate,
-                ImGui::GetIO().Framerate);
-    ImGui::End();
 }
 
 
@@ -205,28 +182,40 @@ void Renderer::main_view(PPU *ppu) {
     ImGui::End();
 }
 
-void Renderer::show_fps() {
+void Renderer::show_fps() const {
     ImGui::SetCursorPos(ImVec2(20.0f, 20.0f));
     ImGui::TextColored(magenta, "Frame Rate: %.2f FPS\nFrame Time: %.2f ms", ImGui::GetIO().Framerate,
                        1000.0f / ImGui::GetIO().Framerate);
 }
 
+std::string Renderer::file_browser() {
+    std::string file;
+    fileDialog.SetTitle("Rom selection");
+    fileDialog.SetTypeFilters({".gb"});
+    while (true) {
+        glfwPollEvents();
 
-void Renderer::card_view(CARDRIDGE *card) {
-    ImGui::Begin("Rominfo");
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
 
+        if (ImGui::Begin("dummy window")) {
+            // open file dialog when user clicks this button
+            if (ImGui::Button("open file dialog"))
+                fileDialog.Open();
+        }
+        ImGui::End();
 
-    ImGui::Text("%s", card->rom_info.title);
-    ImGui::Separator();
+        fileDialog.Display();
 
-    ImGui::Text("CType: %s", card->rom_info.CType_string());
-    ImGui::SameLine();
-    ImGui::Text("Rom Bank: %d", card->get_selected_rom_bank());
-    ImGui::Text("Ram Size: %s", card->rom_info.ram_size_string());
-    ImGui::SameLine();
-    ImGui::Text("| Rom Size: %s", card->rom_info.rom_size_string());
+        render();
+        if (fileDialog.HasSelected()) {
 
-    ImGui::End();
+            return fileDialog.GetSelected().string();
+        }
+    }
+
 }
+
 
 

@@ -14,10 +14,9 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
 
     Renderer renderer;
 
-
     gb.mem.reset();
-
-    gb.card.load_rom("./../../testroms/drmario.gb");
+    std::string file = renderer.file_browser();
+    gb.card.load_rom(file.c_str());
 
     while (!quit) {
         while (!gb.ppu.is_ready_to_render()) {
@@ -28,6 +27,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
         }
         renderer.update_views(&gb.ppu, &gb.debug);
         gb.joypad.process_sdl_events(&event);
+
     }
     return 0;
 }

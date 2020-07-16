@@ -1,6 +1,6 @@
 #include "PPU.h"
 
-PPU::PPU(MEMORY *m, CPU *c) : mem(m), cpu(c), ready_to_render(false) {
+PPU::PPU(MEMORY *m, CPU *c) : ready_to_render(false), cpu(c), mem(m) {
 
     v_ram = std::vector<u8>(VRAM_SIZE, 0xFF);
 
