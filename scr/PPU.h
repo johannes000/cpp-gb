@@ -35,51 +35,33 @@ class PPU {
 public:
     explicit PPU(MEMORY *m, CPU *c);
 
-    ~PPU();
-
-    void next_step();
-
     void update(const int cycles);
 
     void write(const u16 &addr, const u8 &data);
 
     u8 read(const u16 &addr) const;
 
+    bool ready_to_render;
+
 private:
-    MEMORY *mem;
     CPU *cpu;
+    MEMORY *mem;
 
     int cycles_in_mode{};
 
-    bool create_window();
-
-    void close_window() const;
-
-    bool ready_to_render;
 
     void update_tile(const u16 &addr);
 
 public:
-    void render_frame();
 
     inline bool is_ready_to_render() const { return ready_to_render; }
 
-
-    // SDL Sachen
-private:
-    const int SCREEN_WIDTH = GB_LCD_SIZE_WIDTH;
-    const int SCREEN_HEIGHT = GB_LCD_SIZE_HEIGHT;
-
-    SDL_Window *window = nullptr;
-    SDL_Renderer *renderer = nullptr;
-    SDL_Texture *texture = nullptr;
 
     // Speicher
 private:
     std::vector<u8> v_ram;
     std::vector<u8> sprite_attribute_table;
 
-private:
     // LCD Data
     LCD_Mode lcd_mode{};
 

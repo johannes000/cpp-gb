@@ -67,7 +67,6 @@ public:
 
     void disassemble();
 
-    void render() const;
 
     void handle_breakpoints();
 
@@ -81,11 +80,12 @@ private:
 public:
     void setDebugState(Debug_State debugState) { debug_state = debugState; }
 
+    void update_views();
+
 private:
     SDL_Event debug_event{};
 
     bool next_step;
-private:
 
     struct Tile {
         GLuint texture = 0;
@@ -108,19 +108,14 @@ private:
 
     std::vector<u16> breakpoints;
 
-    void init_debug_window();
 
     void card_view();
-
-    void imgui_demo();
 
     void cpu_view();
 
     void video_view();
 
     void memory_view();
-
-    void terminate_window();
 
     static void glfw_error_callback(int error, const char *description);
 
@@ -129,7 +124,6 @@ private:
     bool show_demo_window = true;
     bool show_another_window = false;
 
-    const ImVec4 bg_color = {0.8f, 0.8f, 0.8f, 1.0f};
 
     int window_height = 900;
     int window_width = 1200;
@@ -140,10 +134,7 @@ private:
     static bool load_texture(GLuint *textureHandler, int width, int height, const void *data);
 
 
-    void update_views();
-
-    void control_view();
-
+    const ImVec4 bg_color = {0.8f, 0.8f, 0.8f, 1.0f};
     ImVec4 cyan = ImVec4(0.0f, 1.0f, 1.0f, 1.0f);
     ImVec4 magenta = ImVec4(1.0f, 0.502f, 0.957f, 1.0f);
     ImVec4 yellow = ImVec4(1.0f, 1.0f, 0.0f, 1.0f);
@@ -152,6 +143,8 @@ private:
     ImVec4 white = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
     ImVec4 gray = ImVec4(0.5f, 0.5f, 0.5f, 1.0f);
     ImVec4 dark_gray = ImVec4(0.1f, 0.1f, 0.1f, 1.0f);
+
+    void control_view();
 };
 
 

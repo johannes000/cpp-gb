@@ -3,26 +3,24 @@
 //
 #include "Debugger.h"
 #include <vector>
+#include <algorithm>
 
 
 Debugger::Debugger(CPU *c, PPU *p, MEMORY *m, CARDRIDGE *card) : cpu(c), ppu(p), mem(m), cardridge(card),
                                                                  debug_state(Debug_State::RUN),
                                                                  next_step(false) {
-    init_debug_window();
 
-    frame_buffer = (void *) ppu->get_lcd_buffer();
     tile_buffer = std::vector<Pixel>(TILE_BUFFER_WIDTH * TILE_BUFFER_HEIGHT, {0xFF, 0xFF, 0xFF});
 
 
-    load_texture(&frame_texture, GB_LCD_SIZE_WIDTH, GB_LCD_SIZE_HEIGHT, frame_buffer);
-    load_texture(&tiles_texture, TILE_BUFFER_WIDTH, TILE_BUFFER_HEIGHT, &tile_buffer[0]);
+    //load_texture(&frame_texture, GB_LCD_SIZE_WIDTH, GB_LCD_SIZE_HEIGHT, nullptr);
+    //load_texture(&tiles_texture, TILE_BUFFER_WIDTH, TILE_BUFFER_HEIGHT, nullptr);
 
 
     breakpoints.push_back(0x100);
 }
 
 Debugger::~Debugger() {
-    terminate_window();
 }
 
 void Debugger::update() {
@@ -42,7 +40,8 @@ void Debugger::update() {
 void Debugger::handle_breakpoints() {
     if (debug_state != Debug_State::STEP) {
         if (!breakpoints.empty()) {
-            auto iter = std::find(breakpoints.begin(), breakpoints.end(), cpu->get_pc());
+            u16 pc = cpu->get_pc();
+            auto iter = std::find(breakpoints.begin(), breakpoints.end(), pc);
             if (iter != breakpoints.end())
                 debug_state = Debug_State::STEP;
         }
@@ -71,104 +70,15 @@ void Debugger::handle_breakpoints() {
     }
 }
 
-void Debugger::render() const {
-    ImGui::Render();
-    int display_w, display_h;
-    glfwGetFramebufferSize(window, &display_w, &display_h);
-    glViewport(0, 0, display_w, display_h);
-    glClearColor(bg_color.x, bg_color.y, bg_color.z, bg_color.w);
-    glClear(GL_COLOR_BUFFER_BIT);
-    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
-    glfwSwapBuffers(window);
-}
 
 void Debugger::update_views() {
-
-    glfwPollEvents();
-
-    ImGui_ImplOpenGL3_NewFrame();
-    ImGui_ImplGlfw_NewFrame();
-    ImGui::NewFrame();
-
-    if (show_demo_window)
-        ImGui::ShowDemoWindow(&show_demo_window);
-
-    imgui_demo();
     card_view();
     cpu_view();
-    video_view();
-    control_view();
+    //video_view();
     memory_view();
-    render();
-
+    control_view();
 }
 
-void Debugger::control_view() {
-    ImGui::Begin("Control");
-    CPU_Register cpu_regs = cpu->get_register();
-
-    ImGui::Text("AF = %04X", cpu_regs.AF);
-    ImGui::SameLine();
-    ImGui::Text("DE = %04X", cpu_regs.DE);
-    ImGui::SameLine();
-    ImGui::Text("PC = %04X", cpu_regs.PC);
-    ImGui::Text("BC = %04X", cpu_regs.BC);
-    ImGui::SameLine();
-    ImGui::Text("HL = %04X", cpu_regs.HL);
-    ImGui::SameLine();
-    ImGui::Text("SP = %04X", cpu_regs.SP);
-
-    ImGui::Separator();
-
-    ImGui::Text("Z %1d", cpu->check_flag(Flag::z));
-    ImGui::SameLine();
-    ImGui::Text("N %1d", cpu->check_flag(Flag::n));
-    ImGui::SameLine();
-    ImGui::Text("H %1d", cpu->check_flag(Flag::h));
-    ImGui::SameLine();
-    ImGui::Text("C %1d", cpu->check_flag(Flag::c));
-    ImGui::SameLine();
-    ImGui::Text("(HL) %02X", cpu->read(cpu_regs.HL));
-
-    LCD_Register lcd_regs = ppu->get_lcd_register();
-    ImGui::Separator();
-
-    ImGui::Text("IME %X", cpu->is_IME());
-
-    ImGui::Text("Interrupt Request");
-    for (int i = 0; i < 5; ++i) {
-        ImGui::SameLine();
-        ImGui::Text("%X", check_bit(mem->read(INTERRUPT_FLAGS_REG), i));
-    }
-    ImGui::Text("Interrupt Enable ");
-    for (int i = 0; i < 5; ++i) {
-        ImGui::SameLine();
-        ImGui::Text("%X", check_bit(mem->read(INTERRUPT_ENABLE_REG), i));
-    }
-
-    ImGui::Separator();
-    ImGui::Text(" %d", lcd_regs.LCD_LY);
-    ImGui::SameLine();
-    ImGui::Text("JOY ");
-    u8 joy = cpu->read(JOY_P1_REGISTER);
-    for (int i = 0; i < 6; ++i) {
-        ImGui::SameLine();
-        ImGui::Text("%X", check_bit(joy, i));
-    }
-    ImGui::Separator();
-    ImGui::Text(" TIMER ");
-    ImGui::Text("DIV  %02X", mem->read(DIVIDER_REGISTER));
-    ImGui::SameLine();
-    ImGui::Text("TIMA %02X", mem->read(TIMER_COUNTER));
-    ImGui::Text("TMA  %02X", mem->read(TIMER_MODULO));
-    ImGui::SameLine();
-    ImGui::Text("TAC  %02X", mem->read(TIMER_CONTROL));
-
-
-    ImGui::End();
-
-}
 
 void Debugger::card_view() {
     ImGui::Begin("Rominfo");
@@ -184,29 +94,6 @@ void Debugger::card_view() {
     ImGui::SameLine();
     ImGui::Text("| Rom Size: %s", cardridge->rom_info.rom_size_string());
 
-    ImGui::End();
-}
-
-void Debugger::imgui_demo() {
-    static float f = 0.0f;
-    static int counter = 0;
-
-    ImGui::Begin("Hello, world!");
-
-    ImGui::Text("This is some useful text.");
-    ImGui::Checkbox("Demo Window", &show_demo_window);
-    ImGui::Checkbox("Another Window", &show_another_window);
-
-    ImGui::SliderFloat("float", &f, 0.0f, 1.0f);
-    ImGui::ColorEdit3("clear color", (float *) &bg_color);
-
-    if (ImGui::Button("Button"))
-        counter++;
-    ImGui::SameLine();
-    ImGui::Text("counter = %d", counter);
-
-    ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate,
-                ImGui::GetIO().Framerate);
     ImGui::End();
 }
 
@@ -362,6 +249,72 @@ void Debugger::disassemble() {
         dis_addr_vec.push_back(addr);
         addr += debug_inst.bytes;
     }
+}
+
+void Debugger::control_view() {
+    ImGui::Begin("Control");
+    CPU_Register cpu_regs = cpu->get_register();
+
+    ImGui::Text("AF = %04X", cpu_regs.AF);
+    ImGui::SameLine();
+    ImGui::Text("DE = %04X", cpu_regs.DE);
+    ImGui::SameLine();
+    ImGui::Text("PC = %04X", cpu_regs.PC);
+    ImGui::Text("BC = %04X", cpu_regs.BC);
+    ImGui::SameLine();
+    ImGui::Text("HL = %04X", cpu_regs.HL);
+    ImGui::SameLine();
+    ImGui::Text("SP = %04X", cpu_regs.SP);
+
+    ImGui::Separator();
+
+    ImGui::Text("Z %1d", cpu->check_flag(Flag::z));
+    ImGui::SameLine();
+    ImGui::Text("N %1d", cpu->check_flag(Flag::n));
+    ImGui::SameLine();
+    ImGui::Text("H %1d", cpu->check_flag(Flag::h));
+    ImGui::SameLine();
+    ImGui::Text("C %1d", cpu->check_flag(Flag::c));
+    ImGui::SameLine();
+    ImGui::Text("(HL) %02X", cpu->read(cpu_regs.HL));
+
+    LCD_Register lcd_regs = ppu->get_lcd_register();
+    ImGui::Separator();
+
+    ImGui::Text("IME %X", cpu->is_IME());
+
+    ImGui::Text("Interrupt Request");
+    for (int i = 0; i < 5; ++i) {
+        ImGui::SameLine();
+        ImGui::Text("%X", check_bit(mem->read(INTERRUPT_FLAGS_REG), i));
+    }
+    ImGui::Text("Interrupt Enable ");
+    for (int i = 0; i < 5; ++i) {
+        ImGui::SameLine();
+        ImGui::Text("%X", check_bit(mem->read(INTERRUPT_ENABLE_REG), i));
+    }
+
+    ImGui::Separator();
+    ImGui::Text(" %d", lcd_regs.LCD_LY);
+    ImGui::SameLine();
+    ImGui::Text("JOY ");
+    u8 joy = cpu->read(JOY_P1_REGISTER);
+    for (int i = 0; i < 6; ++i) {
+        ImGui::SameLine();
+        ImGui::Text("%X", check_bit(joy, i));
+    }
+    ImGui::Separator();
+    ImGui::Text(" TIMER ");
+    ImGui::Text("DIV  %02X", mem->read(DIVIDER_REGISTER));
+    ImGui::SameLine();
+    ImGui::Text("TIMA %02X", mem->read(TIMER_COUNTER));
+    ImGui::Text("TMA  %02X", mem->read(TIMER_MODULO));
+    ImGui::SameLine();
+    ImGui::Text("TAC  %02X", mem->read(TIMER_CONTROL));
+
+
+    ImGui::End();
+
 }
 
 void Debugger::video_view() {

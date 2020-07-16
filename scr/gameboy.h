@@ -14,8 +14,6 @@ class gameboy {
 public:
     gameboy();
 
-    ~gameboy();
-
     CARDRIDGE card;
     MEMORY mem;
     CPU cpu;
@@ -23,12 +21,7 @@ public:
     CONTROLS joypad;
     Debugger debug;
 
-    [[noreturn]] void start_emu();
 
-private:
-    int last_cycle{};
-    int cycles{};
-    SDL_Event event{};
 };
 
 #endif  // !GAMEBOY_H_GUARD

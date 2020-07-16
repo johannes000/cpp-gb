@@ -1,7 +1,6 @@
 #include "PPU.h"
 
-PPU::PPU(MEMORY *m, CPU *c) : mem(m), cpu(c), ready_to_render(false) {
-    create_window();
+PPU::PPU(MEMORY *m, CPU *c) : ready_to_render(false), cpu(c), mem(m) {
 
     v_ram = std::vector<u8>(VRAM_SIZE, 0xFF);
 
@@ -13,12 +12,11 @@ PPU::PPU(MEMORY *m, CPU *c) : mem(m), cpu(c), ready_to_render(false) {
     tile_buffer = std::vector<std::vector<Pixel>>(0xFFF0, {(8 * 8), {0xFF, 0xFF, 0xFF}});
     lcd_control.update(this);
 
+
     set_lcd_mode(LCD_Mode::OAM);
     load_lcd_mode();
-    render_frame();
 }
 
-PPU::~PPU() { close_window(); }
 
 void PPU::update(const int cycles) {
     lcd_control.update(this);
@@ -157,14 +155,6 @@ u8 PPU::read(const u16 &addr) const {
     }
 }
 
-void PPU::close_window() const {
-    // Destroy window
-    SDL_DestroyWindow(window);
-    SDL_DestroyTexture(texture);
-    SDL_DestroyRenderer(renderer);
-    // Quit SDL subsystems
-    SDL_Quit();
-}
 
 void PPU::set_lcd_mode(LCD_Mode m) {
     // Schreibt den gewünschten mode ins LCD Status register
@@ -291,42 +281,9 @@ void PPU::buffer_line(const u8 line) {
 }
 
 
-void PPU::render_frame() {
-    // FPS Rechner
-    fps_frames++;
-    if (fps_last_time < SDL_GetTicks() - FPS_INTERVAL * 1000) {
-        fps_last_time = SDL_GetTicks();
-        fps_current = fps_frames;
-        fps_frames = 0;
-        sprintf(fps_text, "%d", fps_current);
-        SDL_SetWindowTitle(window, fps_text);
-    }
-    SDL_RenderClear(renderer);
-    SDL_UpdateTexture(texture, nullptr, &lcd_buffer[0], GB_LCD_SIZE_WIDTH * 3);
-    SDL_RenderCopy(renderer, texture, nullptr, nullptr);
-    SDL_RenderPresent(renderer);
-    ready_to_render = false;
-
+[[nodiscard]] const Pixel *PPU::get_lcd_buffer() const {
+    return &lcd_buffer[0];
 }
-
-LCD_Mode PPU::mode() const { return lcd_mode; }
-
-bool PPU::create_window() {
-    SDL_Init(SDL_INIT_EVERYTHING);
-
-    window = SDL_CreateWindow("cpp-gb", 20,
-                              40, SCREEN_WIDTH * 4,
-                              SCREEN_HEIGHT * 4, SDL_WINDOW_SHOWN);
-    // Create renderer for window
-    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-    texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGB24,
-                                SDL_TEXTUREACCESS_STREAMING, SCREEN_WIDTH,
-                                SCREEN_HEIGHT);
-
-    return true;
-}
-
-[[nodiscard]] const Pixel *PPU::get_lcd_buffer() const { return &lcd_buffer[0]; }
 
 void PPU::update_tile(const u16 &a) {
     auto addr = a & 0x1FFEu;
