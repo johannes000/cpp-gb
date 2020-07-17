@@ -143,7 +143,7 @@ struct CPU_Register {
 };
 
 enum class Interrupt {
-    V_Blank,
+    V_Blank = 0,
     LCD_Stat,
     Timer_overflow,
     Serial_link,

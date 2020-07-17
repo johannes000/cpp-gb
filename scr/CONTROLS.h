@@ -8,6 +8,7 @@
 #include "SDL.h"
 #include "type.h"
 #include "MEMORY.h"
+#include "../win/Renderer.h"
 
 class MEMORY;
 
@@ -19,7 +20,7 @@ public:
 
     void write(const u16 &addr, const u8 &data);
 
-    void process_sdl_events(SDL_Event *event);
+    void handle_glwf_inputs(int key, int action);
 
 private:
     MEMORY *mem;

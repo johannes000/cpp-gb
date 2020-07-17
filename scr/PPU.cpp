@@ -27,7 +27,7 @@ void PPU::update(const int cycles) {
         // aktuelle line, benötigten sprites zu suchen
         case LCD_Mode::OAM:
             if (cycles_in_mode >= CLOCKS_SCANLINE_OAM) {
-                cycles_in_mode = 0;
+                cycles_in_mode -= CLOCKS_SCANLINE_OAM;
                 set_lcd_mode(LCD_Mode::VRAM);
             }
             break;
@@ -35,7 +35,7 @@ void PPU::update(const int cycles) {
             // MODE 3 : VRAM Zugriff Pixel Transfer
         case LCD_Mode::VRAM:
             if (cycles_in_mode >= CLOCKS_SCANLINE_VRAM) {
-                cycles_in_mode = 0;
+                cycles_in_mode -= CLOCKS_SCANLINE_VRAM;
                 set_lcd_mode(LCD_Mode::H_Blank);
             }
             break;
@@ -43,7 +43,7 @@ void PPU::update(const int cycles) {
             // MODE 0: H - Blank (204 cycles) nach jeder line
         case LCD_Mode::H_Blank:
             if (cycles_in_mode >= CLOCKS_HORIZONTAL_BLANK) {  // H-Blank vorbei
-                cycles_in_mode = 0;
+                cycles_in_mode -= CLOCKS_HORIZONTAL_BLANK;
                 buffer_line(lcd_register.LCD_LY);
 
                 // H-Blank sachen
@@ -59,7 +59,7 @@ void PPU::update(const int cycles) {
             // MODE 1 : V - Blank nachdem jede Zeile gezeichnet wurde
         case LCD_Mode::V_Blank:
             if (cycles_in_mode >= CLOCKS_SCANLINE) {
-                cycles_in_mode = 0;
+                cycles_in_mode -= CLOCKS_SCANLINE;
                 if (++lcd_register.LCD_LY == VERTICAL_BLANK_LINES) {
                     lcd_register.LCD_LY = 0;
                     ready_to_render = true;

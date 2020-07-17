@@ -4,7 +4,6 @@
 
 #include "CONTROLS.h"
 #include <SDL.h>
-#include <iostream>
 
 CONTROLS::CONTROLS(MEMORY *m, PPU *p) : mem(m), ppu(p), joy_button_direction_selector(0xFF) {}
 
@@ -42,13 +41,29 @@ void CONTROLS::write(const u16 &addr, const u8 &data) {
     }
 }
 
-void CONTROLS::process_sdl_events(SDL_Event *event) {
-    while (SDL_PollEvent(event)) {
-        switch (event->type) {
+void CONTROLS::handle_glwf_inputs(int key, int action) {
+
+    switch (action) {
+        case GLFW_PRESS:
+            switch (key) {
+                case GLFW_KEY_UP:
+                    std::cout << "UP" << std::endl;
+                    break;
+                default: // switch key
+                    break;
+            }
+        default: // switch action
+            break;
+
+    }
+    SDL_Event event;
+    while (SDL_PollEvent(&event)) {
+        switch (event.type) {
             case SDL_KEYUP:
-                switch (event->key.keysym.sym) {
+                switch (event.key.keysym.sym) {
                     case SDLK_UP:
                         set_bit(joy_both_states, static_cast<u8>(GB_Key::Up));
+                        std::cout << "SDL" << std::endl;
                         break;
                     case SDLK_DOWN:
                         set_bit(joy_both_states, static_cast<u8>(GB_Key::Down));
@@ -76,7 +91,7 @@ void CONTROLS::process_sdl_events(SDL_Event *event) {
                 }
                 break;
             case SDL_KEYDOWN:
-                switch (event->key.keysym.sym) {
+                switch (event.key.keysym.sym) {
                     case SDLK_UP:
                         reset_bit(joy_both_states, static_cast<u8>(GB_Key::Up));
                         break;
@@ -107,17 +122,15 @@ void CONTROLS::process_sdl_events(SDL_Event *event) {
                         break;
                 }
                 break;
-            case SDL_QUIT:
-                exit(0);
             default:
                 break;
         }
     }
-    if (joy_both_states != joy_both_states_old) {
-        joy_both_states_old = joy_both_states;
-        mem->request_interrupt(Interrupt::Joypad);
-    }
 }
+
+
+
+
 
 
 

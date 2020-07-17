@@ -8,17 +8,18 @@
 
 int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
     int last_cycle;
-    bool quit = false;
-    SDL_Event event;
     gameboy gb;
 
-    Renderer renderer;
+    Renderer renderer(&gb.joypad);
 
     gb.mem.reset();
+
     std::string file = renderer.file_browser();
+    if (file.empty())
+        exit(0);
     gb.card.load_rom(file.c_str());
 
-    while (!quit) {
+    while (!glfwWindowShouldClose(renderer.window)) {
         while (!gb.ppu.is_ready_to_render()) {
             last_cycle = gb.cpu.update();
             gb.cpu.handle_interrupts();
@@ -26,8 +27,9 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
             gb.ppu.update(last_cycle * 4);
         }
         renderer.update_views(&gb.ppu, &gb.debug);
-        gb.joypad.process_sdl_events(&event);
+        glfwPollEvents();
 
     }
     return 0;
 }
+

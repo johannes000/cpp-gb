@@ -49,16 +49,18 @@ using namespace gl;
 
 #include "PPU.h"
 #include "Debugger/Debugger.h"
+#include "CONTROLS.h"
+
+class CONTROLS;
 
 class PPU;
 
 class Debugger;
 
-class Renderer {
-public:
+struct Renderer {
     GLFWwindow *window{};
 
-    Renderer();
+    explicit Renderer(CONTROLS *joypad);
 
     void init_window();
 
@@ -89,6 +91,7 @@ public:
     ImVec4 gray = ImVec4(0.5f, 0.5f, 0.5f, 1.0f);
     ImVec4 dark_gray = ImVec4(0.1f, 0.1f, 0.1f, 1.0f);
 
+
     bool show_demo_window = true;
     bool show_another_window = false;
 
@@ -107,7 +110,10 @@ public:
 
     void show_fps() const;
 
+    CONTROLS *joypad;
+
 };
 
+void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
 
 #endif //CPP_GB_RENDERER_H

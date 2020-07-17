@@ -4,8 +4,15 @@
 
 #include "Renderer.h"
 
-Renderer::Renderer() {
+
+Renderer::Renderer(CONTROLS *j) : joypad(j) {
     init_window();
+
+
+    glfwSetWindowUserPointer(window, (void *) &joypad);
+    glfwSetKeyCallback(window, key_callback);
+
+    glfwSetInputMode(window, GLFW_STICKY_KEYS, 1);
 
     load_texture(&frame_texture, GB_LCD_SIZE_WIDTH, GB_LCD_SIZE_HEIGHT, frame_buffer);
     load_texture(&tiles_texture, TILE_BUFFER_WIDTH, TILE_BUFFER_HEIGHT, &Renderer::tile_buffer[0]);
@@ -46,6 +53,7 @@ void Renderer::init_window() {
     glfwSwapInterval(0); // Enable vsync
 
     glfwSetWindowPos(window, window_xpos, window_ypos);
+
 
 
     // Initialize OpenGL loader
@@ -134,8 +142,6 @@ void Renderer::render() const {
 void Renderer::update_views(PPU *ppu, Debugger *debug) {
     ppu->ready_to_render = false; // TODO: Richtig implementieren
 
-    glfwPollEvents();
-
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
@@ -192,7 +198,7 @@ std::string Renderer::file_browser() {
     std::string file;
     fileDialog.SetTitle("Rom selection");
     fileDialog.SetTypeFilters({".gb"});
-    while (true) {
+    while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
 
         ImGui_ImplOpenGL3_NewFrame();
@@ -208,14 +214,27 @@ std::string Renderer::file_browser() {
 
         fileDialog.Display();
 
+        ImGui::Begin("ROMS");
+
+
+        ImGui::End();
+
+
         render();
         if (fileDialog.HasSelected()) {
 
             return fileDialog.GetSelected().string();
         }
     }
-
+    return file;
 }
+
+void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
+    CONTROLS *joypad;
+    joypad = (CONTROLS *) glfwGetWindowUserPointer(window);
+    joypad->handle_glwf_inputs(key, action);
+}
+
 
 
 
