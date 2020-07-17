@@ -8,7 +8,6 @@
 Renderer::Renderer(CONTROLS *j) : joypad(j) {
     init_window();
 
-
     glfwSetWindowUserPointer(window, (void *) &joypad);
     glfwSetKeyCallback(window, key_callback);
 
@@ -16,6 +15,43 @@ Renderer::Renderer(CONTROLS *j) : joypad(j) {
 
     load_texture(&frame_texture, GB_LCD_SIZE_WIDTH, GB_LCD_SIZE_HEIGHT, frame_buffer);
     load_texture(&tiles_texture, TILE_BUFFER_WIDTH, TILE_BUFFER_HEIGHT, &Renderer::tile_buffer[0]);
+
+    //card.load_rom("./../../testroms/tetris.gb");
+    //card.load_rom("./../../testroms/tennis.gb");
+    //card.load_rom("./../../testroms/sml.gb");
+    //card.load_rom("./../../testroms/opus5.gb");
+    //card.load_rom("./../../testroms/pocket.gb");
+    //card.load_rom("./../../testroms/dmg-acid2.gb");
+    //card.load_rom("./../../testroms/drmario.gb");
+    //card.load_rom("./../../testroms/cpu_instrs/individual/01-special.gb");
+    //card.load_rom("./../../testroms/cpu_instrs/individual/02-interrupts.gb");
+    //card.load_rom("./../../testroms/cpu_instrs/individual/03-op sp,hl.gb");
+    //card.load_rom("./../../testroms/cpu_instrs/cpu_instrs.gb");
+    //card.load_rom("./../../testroms/instr_timing/instr_timing.gb");
+    //card.load_rom("./../../testroms/mem_timing/individual/01-read_timing.gb");
+    //card.load_rom("./../../testroms/mem_timing/individual/02-write_timing.gb");
+    //card.load_rom("./../../testroms/interrupt_time/interrupt_time.gb");
+    //card.load_rom("C:\\Users\\knaub\\source\\repos\\testroms\\mooneye\\acceptance\\call_timing.gb");
+    //card.load_rom("C:\\Users\\knaub\\source\\repos\\testroms\\mooneye\\acceptance\\instr\\daa.gb");
+    //card.load_rom("C:\\Users\\knaub\\source\\repos\\testroms\\mooneye\\acceptance\\bits\\mem_oam.gb");
+    //card.load_rom("C:\\Users\\knaub\\source\\repos\\testroms\\mooneye\\acceptance\\bits\\reg_f.gb");
+    //card.load_rom("C:\\Users\\knaub\\source\\repos\\testroms\\mooneye\\acceptance\\bits\\mem_oam.gb");
+    //card.load_rom("C:\\Users\\knaub\\source\\repos\\testroms\\mooneye\\emulator-only\\mbc1\\bits_bank1.gb");
+
+
+    roms = {
+            {"Tennis",       "./../../testroms/tennis.gb"},
+            {"Tetris",       "./../../testroms/tetris.gb"},
+            {"Mario",        "./../../testroms/sml.gb"},
+            {"OPUS 5",       "./../../testroms/opus5.gb"},
+            {"pocket",       "./../../testroms/pocket.gb"},
+            {"drmario",      "./../../testroms/drmario.gb"},
+            {"special",      "./../../testroms/cpu_instrs/individual/01-special.gb"},
+            {"interrupts",   "./../../testroms/cpu_instrs/individual/02-interrupts.gb"},
+            {"op",           "./../../testroms/cpu_instrs/individual/03-op.gb"},
+            {"instr_timing", "./../../testroms/instr_timing/instr_timing.gb"},
+    };
+
 }
 
 Renderer::~Renderer() {
@@ -215,18 +251,23 @@ std::string Renderer::file_browser() {
         fileDialog.Display();
 
         ImGui::Begin("ROMS");
-
-
+        for (auto &rom : roms) {
+            if (ImGui::Selectable("", true, ImGuiSelectableFlags_AllowDoubleClick))
+                file = rom.second;
+            ImGui::SameLine();
+            ImGui::Text("%s", rom.first.c_str());
+        }
         ImGui::End();
-
 
         render();
         if (fileDialog.HasSelected()) {
-
             return fileDialog.GetSelected().string();
         }
+        if (!file.empty()) {
+            return file;
+        }
     }
-    return file;
+    exit(0);
 }
 
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {

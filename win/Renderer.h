@@ -110,6 +110,8 @@ struct Renderer {
 
     void show_fps() const;
 
+    std::map<std::string, std::string> roms;
+
     CONTROLS *joypad;
 
 };
