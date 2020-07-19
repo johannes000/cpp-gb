@@ -12,11 +12,9 @@
 
 class MEMORY;
 
-class PPU;
-
 class CONTROLS {
 public:
-    CONTROLS(MEMORY *m, PPU *ppu);
+    CONTROLS(MEMORY *m);
 
     void write(const u16 &addr, const u8 &data);
 
@@ -24,7 +22,6 @@ public:
 
 private:
     MEMORY *mem;
-    PPU *ppu;
 
     u8 joy_button_direction_selector = 0xFFu;
     u8 joy_both_states = 0xFFu;
@@ -34,6 +31,8 @@ private:
 public:
 
     [[nodiscard]] u8 read(const u16 &addr);
+
+    u8 get_joypad_state() const;
 };
 
 

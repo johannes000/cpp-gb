@@ -6,7 +6,6 @@
 #define CPP_GB_DEBUGGER_H
 
 #include "type.h"
-#include "CPU.h"
 #include "SDL.h"
 
 #include "imgui.h"
@@ -46,6 +45,12 @@ using namespace gl;
 #pragma comment(lib, "legacy_stdio_definitions")
 #endif
 
+#include "CPU.h"
+#include "PPU.h"
+#include "MEMORY.h"
+#include "CONTROLS.h"
+#include "CARDRIDGE.h"
+
 
 class CPU;
 
@@ -55,9 +60,11 @@ class MEMORY;
 
 class CARDRIDGE;
 
+class CONTROLS;
+
 class Debugger {
 public:
-    explicit Debugger(CPU *c, PPU *p, MEMORY *m, CARDRIDGE *card);
+    explicit Debugger(CPU *c, PPU *p, MEMORY *m, CARDRIDGE *card, CONTROLS *joypad);
 
     ~Debugger();
 
@@ -67,7 +74,6 @@ public:
 
     void disassemble();
 
-
     void handle_breakpoints();
 
 private:
@@ -75,6 +81,7 @@ private:
     PPU *ppu;
     MEMORY *mem;
     CARDRIDGE *cardridge;
+    CONTROLS *joypad;
 
     Debug_State debug_state;
 public:
@@ -117,19 +124,7 @@ private:
 
     void memory_view();
 
-    static void glfw_error_callback(int error, const char *description);
-
-
-    GLFWwindow *window{};
-    bool show_demo_window = true;
-    bool show_another_window = false;
-
-
-    int window_height = 900;
-    int window_width = 1200;
-
-    int window_xpos = 680;
-    int window_ypos = 45;
+    void control_view();
 
     static bool load_texture(GLuint *textureHandler, int width, int height, const void *data);
 
@@ -144,7 +139,6 @@ private:
     ImVec4 gray = ImVec4(0.5f, 0.5f, 0.5f, 1.0f);
     ImVec4 dark_gray = ImVec4(0.1f, 0.1f, 0.1f, 1.0f);
 
-    void control_view();
 };
 
 

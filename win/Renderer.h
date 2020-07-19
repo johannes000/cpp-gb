@@ -116,6 +116,6 @@ struct Renderer {
 
 };
 
-void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
+void key_callback(GLFWwindow *window, int key, [[maybe_unused]] int scancode, int action, [[maybe_unused]] int mods);
 
 #endif //CPP_GB_RENDERER_H

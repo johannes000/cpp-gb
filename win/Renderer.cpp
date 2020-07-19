@@ -270,7 +270,7 @@ std::string Renderer::file_browser() {
     exit(0);
 }
 
-void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
+void key_callback(GLFWwindow *window, int key, [[maybe_unused]] int scancode, int action, [[maybe_unused]] int mods) {
     CONTROLS *joypad;
     joypad = (CONTROLS *) glfwGetWindowUserPointer(window);
     joypad->handle_glwf_inputs(key, action);

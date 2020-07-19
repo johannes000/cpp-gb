@@ -73,7 +73,6 @@ add_executable(cpp-gb
         scr/CONTROLS.cpp scr/CONTROLS.h
 
         scr/Debugger/Debugger.cpp scr/Debugger/Debugger.h
-        scr/Debugger/Debugger_Init.cpp
         scr/Debugger/Debug_helper.cpp
 
         win/Renderer.cpp win/Renderer.h

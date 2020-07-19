@@ -5,7 +5,7 @@
 #include "CONTROLS.h"
 #include <SDL.h>
 
-CONTROLS::CONTROLS(MEMORY *m, PPU *p) : mem(m), ppu(p), joy_button_direction_selector(0xFF) {}
+CONTROLS::CONTROLS(MEMORY *m) : mem(m), joy_button_direction_selector(0xFF) {}
 
 u8 CONTROLS::read(const u16 &addr) {
     u8 joy_p1 = 0xFF;
@@ -42,90 +42,74 @@ void CONTROLS::write(const u16 &addr, const u8 &data) {
 }
 
 void CONTROLS::handle_glwf_inputs(int key, int action) {
-
     switch (action) {
         case GLFW_PRESS:
             switch (key) {
                 case GLFW_KEY_UP:
-                    std::cout << "UP" << std::endl;
+                    set_bit(joy_both_states, static_cast<u8>(GB_Key::Up));
                     break;
-                default: // switch key
+                case GLFW_KEY_DOWN:
+                    set_bit(joy_both_states, static_cast<u8>(GB_Key::Down));
+                    break;
+                case GLFW_KEY_LEFT:
+                    set_bit(joy_both_states, static_cast<u8>(GB_Key::Left));
+                    break;
+                case GLFW_KEY_RIGHT:
+                    set_bit(joy_both_states, static_cast<u8>(GB_Key::Right));
+                    break;
+                case GLFW_KEY_A:
+                    set_bit(joy_both_states, static_cast<u8>(GB_Key::A));
+                    break;
+                case GLFW_KEY_B:
+                    set_bit(joy_both_states, static_cast<u8>(GB_Key::B));
+                    break;
+                case GLFW_KEY_ENTER:
+                    set_bit(joy_both_states, static_cast<u8>(GB_Key::Start));
+                    break;
+                case GLFW_KEY_BACKSPACE:
+                    set_bit(joy_both_states, static_cast<u8>(GB_Key::Select));
+                    break;
+                default: // GLFW PRESS
+                    break;
+            }
+            break;
+        case GLFW_RELEASE:
+            switch (key) {
+                case GLFW_KEY_UP:
+                    reset_bit(joy_both_states, static_cast<u8>(GB_Key::Up));
+                    break;
+                case GLFW_KEY_DOWN:
+                    reset_bit(joy_both_states, static_cast<u8>(GB_Key::Down));
+                    break;
+                case GLFW_KEY_LEFT:
+                    reset_bit(joy_both_states, static_cast<u8>(GB_Key::Left));
+                    break;
+                case GLFW_KEY_RIGHT:
+                    reset_bit(joy_both_states, static_cast<u8>(GB_Key::Right));
+                    break;
+                case GLFW_KEY_A:
+                    reset_bit(joy_both_states, static_cast<u8>(GB_Key::A));
+                    break;
+                case GLFW_KEY_B:
+                    reset_bit(joy_both_states, static_cast<u8>(GB_Key::B));
+                    break;
+                case GLFW_KEY_ENTER:
+                    reset_bit(joy_both_states, static_cast<u8>(GB_Key::Start));
+                    break;
+                case GLFW_KEY_BACKSPACE:
+                    reset_bit(joy_both_states, static_cast<u8>(GB_Key::Select));
+                    break;
+                default:// GLFW RELEASE
                     break;
             }
         default: // switch action
             break;
 
     }
-    SDL_Event event;
-    while (SDL_PollEvent(&event)) {
-        switch (event.type) {
-            case SDL_KEYUP:
-                switch (event.key.keysym.sym) {
-                    case SDLK_UP:
-                        set_bit(joy_both_states, static_cast<u8>(GB_Key::Up));
-                        std::cout << "SDL" << std::endl;
-                        break;
-                    case SDLK_DOWN:
-                        set_bit(joy_both_states, static_cast<u8>(GB_Key::Down));
-                        break;
-                    case SDLK_LEFT:
-                        set_bit(joy_both_states, static_cast<u8>(GB_Key::Left));
-                        break;
-                    case SDLK_RIGHT:
-                        set_bit(joy_both_states, static_cast<u8>(GB_Key::Right));
-                        break;
-                    case SDLK_a:
-                        set_bit(joy_both_states, static_cast<u8>(GB_Key::A));
-                        break;
-                    case SDLK_s:
-                        set_bit(joy_both_states, static_cast<u8>(GB_Key::B));
-                        break;
-                    case SDLK_RETURN:
-                        set_bit(joy_both_states, static_cast<u8>(GB_Key::Start));
-                        break;
-                    case SDLK_BACKSPACE:
-                        set_bit(joy_both_states, static_cast<u8>(GB_Key::Select));
-                        break;
-                    default:
-                        break;
-                }
-                break;
-            case SDL_KEYDOWN:
-                switch (event.key.keysym.sym) {
-                    case SDLK_UP:
-                        reset_bit(joy_both_states, static_cast<u8>(GB_Key::Up));
-                        break;
-                    case SDLK_DOWN:
-                        reset_bit(joy_both_states, static_cast<u8>(GB_Key::Down));
-                        break;
-                    case SDLK_LEFT:
-                        reset_bit(joy_both_states, static_cast<u8>(GB_Key::Left));
-                        break;
-                    case SDLK_RIGHT:
-                        reset_bit(joy_both_states, static_cast<u8>(GB_Key::Right));
-                        break;
-                    case SDLK_a:
-                        reset_bit(joy_both_states, static_cast<u8>(GB_Key::A));
-                        break;
-                    case SDLK_s:
-                        reset_bit(joy_both_states, static_cast<u8>(GB_Key::B));
-                        break;
-                    case SDLK_RETURN:
-                        reset_bit(joy_both_states, static_cast<u8>(GB_Key::Start));
-                        break;
-                    case SDLK_BACKSPACE:
-                        reset_bit(joy_both_states, static_cast<u8>(GB_Key::Select));
-                        break;
-                    case SDLK_ESCAPE:
-                        exit(0);
-                    default:
-                        break;
-                }
-                break;
-            default:
-                break;
-        }
-    }
+}
+
+u8 CONTROLS::get_joypad_state() const {
+    return joy_both_states;
 }
 
 

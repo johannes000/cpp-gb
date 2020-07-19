@@ -6,16 +6,19 @@
 #include <algorithm>
 
 
-Debugger::Debugger(CPU *c, PPU *p, MEMORY *m, CARDRIDGE *card) : cpu(c), ppu(p), mem(m), cardridge(card),
-                                                                 debug_state(Debug_State::RUN),
-                                                                 next_step(false) {
+Debugger::Debugger(CPU *c, PPU *p, MEMORY *m, CARDRIDGE *card, CONTROLS *joy)
+        : cpu(c),
+          ppu(p),
+          mem(m),
+          cardridge(card),
+          joypad(joy),
+          debug_state(Debug_State::RUN),
+          next_step(false) {
 
     tile_buffer = std::vector<Pixel>(TILE_BUFFER_WIDTH * TILE_BUFFER_HEIGHT, {0xFF, 0xFF, 0xFF});
 
-
     //load_texture(&frame_texture, GB_LCD_SIZE_WIDTH, GB_LCD_SIZE_HEIGHT, nullptr);
     //load_texture(&tiles_texture, TILE_BUFFER_WIDTH, TILE_BUFFER_HEIGHT, nullptr);
-
 
     breakpoints.push_back(0x100);
 }
@@ -32,10 +35,7 @@ void Debugger::update() {
             update_views();
             break;
     }
-
-
 }
-
 
 void Debugger::handle_breakpoints() {
     if (debug_state != Debug_State::STEP) {
@@ -298,7 +298,9 @@ void Debugger::control_view() {
     ImGui::Text(" %d", lcd_regs.LCD_LY);
     ImGui::SameLine();
     ImGui::Text("JOY ");
-    u8 joy = cpu->read(JOY_P1_REGISTER);
+    u8 joy = joypad->get_joypad_state();
+    if (joy != 0xFF)
+        int a = 2;
     for (int i = 0; i < 6; ++i) {
         ImGui::SameLine();
         ImGui::Text("%X", check_bit(joy, i));
