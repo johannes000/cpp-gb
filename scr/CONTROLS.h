@@ -5,7 +5,6 @@
 #ifndef CPP_GB_CONTROLS_H
 #define CPP_GB_CONTROLS_H
 
-#include "SDL.h"
 #include "type.h"
 #include "MEMORY.h"
 #include "../win/Renderer.h"

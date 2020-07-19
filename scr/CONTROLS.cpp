@@ -3,7 +3,6 @@
 //
 
 #include "CONTROLS.h"
-#include <SDL.h>
 
 CONTROLS::CONTROLS(MEMORY *m) : mem(m), joy_button_direction_selector(0xFF) {}
 

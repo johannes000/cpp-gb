@@ -7,7 +7,6 @@
 #include "MEMORY.h"
 #include "PPU.h"
 #include "CONTROLS.h"
-#include "SDL.h"
 #include "Debugger/Debugger.h"
 
 class gameboy {

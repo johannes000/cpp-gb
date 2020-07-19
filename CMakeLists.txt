@@ -21,10 +21,6 @@ set(CMAKE_CXX_FLAGS_DEBUG "-g")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
 
-find_library(SDL SDL2 PATHS "./external/SDL2-2.0.12/x86_64-w64-mingw32/lib")
-find_library(SDLmain SDL2main PATHS "./external/SDL2-2.0.12/x86_64-w64-mingw32/lib")
-include_directories("./external/SDL2-2.0.12/x86_64-w64-mingw32/include/SDL2")
-
 find_library(GLFW glfw3 PATHS "./external/glfw-3.3.2.bin.WIN32/lib-mingw-w64")
 include_directories("./external/glfw-3.3.2.bin.WIN32/include")
 
@@ -81,11 +77,7 @@ add_executable(cpp-gb
 
 target_link_libraries(cpp-gb
         -lmingw32
-        -lSDL2main
-        -lSDL2
         imgui
-        ${SDL}
-        ${SDLmain}
         ${OPENGL_gl_LIBRARY}
         ${GLFW}
         "glad"

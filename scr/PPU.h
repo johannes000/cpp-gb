@@ -3,8 +3,6 @@
 #define PPU_H_GUARD
 
 
-#include <SDL.h>
-
 #include <vector>
 
 #include "MEMORY.h"
@@ -142,12 +140,6 @@ private:
 
     int current_palette = 0;
 
-private:
-    // Daten zum FPS berechnen
-    Uint32 fps_last_time = SDL_GetTicks();  // the last recorded time.
-    Uint32 fps_current{};                   // the current FPS.
-    Uint32 fps_frames = 0;  // frames passed since the last recorded fps.
-    char fps_text[8]{};
 
 };
 

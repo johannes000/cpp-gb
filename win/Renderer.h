@@ -6,7 +6,6 @@
 #define CPP_GB_RENDERER_H
 
 #include "type.h"
-#include "SDL.h"
 
 #include "imgui.h"
 #include "imgui_impl_glfw.h"

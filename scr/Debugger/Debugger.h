@@ -6,7 +6,6 @@
 #define CPP_GB_DEBUGGER_H
 
 #include "type.h"
-#include "SDL.h"
 
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
@@ -90,8 +89,6 @@ public:
     void update_views();
 
 private:
-    SDL_Event debug_event{};
-
     bool next_step;
 
     struct Tile {

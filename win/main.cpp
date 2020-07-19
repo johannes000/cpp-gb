@@ -5,9 +5,7 @@
 #include "Renderer.h"
 #include "gameboy.h"
 
-
 int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
-    int last_cycle;
     gameboy gb;
 
     Renderer renderer(&gb.joypad);
@@ -15,21 +13,18 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
     gb.mem.reset();
 
     std::string file = renderer.file_browser();
-    if (file.empty())
-        exit(0);
+    if (file.empty()) exit(0);
     gb.card.load_rom(file.c_str());
 
     while (!glfwWindowShouldClose(renderer.window)) {
         while (!gb.ppu.is_ready_to_render()) {
-            last_cycle = gb.cpu.update();
+            const int last_cycle = gb.cpu.update();
             gb.cpu.handle_interrupts();
             gb.cpu.handle_timer(last_cycle);
             gb.ppu.update(last_cycle * 4);
         }
         renderer.update_views(&gb.ppu, &gb.debug);
         glfwPollEvents();
-
     }
     return 0;
 }
-
