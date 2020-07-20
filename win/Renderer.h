@@ -47,7 +47,7 @@ using namespace gl;
 #endif
 
 #include "PPU.h"
-#include "Debugger/Debugger.h"
+#include "Debugger\Debugger.h"
 #include "CONTROLS.h"
 
 class CONTROLS;
@@ -57,64 +57,64 @@ class PPU;
 class Debugger;
 
 struct Renderer {
-    GLFWwindow *window{};
+	GLFWwindow* window{};
 
-    explicit Renderer(CONTROLS *joypad);
+	explicit Renderer(CONTROLS* joypad);
 
-    void init_window();
+	void init_window();
 
-    static void glfw_error_callback(int error, const char *description);
+	static void glfw_error_callback(int error, const char* description);
 
-    void terminate_window() const;
+	void terminate_window() const;
 
-    virtual ~Renderer();
+	virtual ~Renderer();
 
-    void render() const;
+	void render() const;
 
-    static bool load_texture(GLuint *textureHandler, int width, int height, const void *data);
+	static bool load_texture(GLuint* textureHandler, int width, int height, const void* data);
 
-    int window_height = 900;
-    int window_width = 1700;
+	int window_height = 900;
+	int window_width = 1700;
 
-    int window_xpos = 50;
-    int window_ypos = 45;
-
-
-    const ImVec4 bg_color = {0.8f, 0.8f, 0.8f, 1.0f};
-    ImVec4 cyan = ImVec4(0.0f, 1.0f, 1.0f, 1.0f);
-    ImVec4 magenta = ImVec4(1.0f, 0.502f, 0.957f, 1.0f);
-    ImVec4 yellow = ImVec4(1.0f, 1.0f, 0.0f, 1.0f);
-    ImVec4 red = ImVec4(1.0f, 0.149f, 0.447f, 1.0f);
-    ImVec4 green = ImVec4(0.0f, 1.0f, 0.0f, 1.0f);
-    ImVec4 white = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
-    ImVec4 gray = ImVec4(0.5f, 0.5f, 0.5f, 1.0f);
-    ImVec4 dark_gray = ImVec4(0.1f, 0.1f, 0.1f, 1.0f);
+	int window_xpos = 50;
+	int window_ypos = 45;
 
 
-    bool show_demo_window = true;
-    bool show_another_window = false;
+	const ImVec4 bg_color = { 0.8f, 0.8f, 0.8f, 1.0f };
+	ImVec4 cyan = ImVec4(0.0f, 1.0f, 1.0f, 1.0f);
+	ImVec4 magenta = ImVec4(1.0f, 0.502f, 0.957f, 1.0f);
+	ImVec4 yellow = ImVec4(1.0f, 1.0f, 0.0f, 1.0f);
+	ImVec4 red = ImVec4(1.0f, 0.149f, 0.447f, 1.0f);
+	ImVec4 green = ImVec4(0.0f, 1.0f, 0.0f, 1.0f);
+	ImVec4 white = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
+	ImVec4 gray = ImVec4(0.5f, 0.5f, 0.5f, 1.0f);
+	ImVec4 dark_gray = ImVec4(0.1f, 0.1f, 0.1f, 1.0f);
 
-    void *frame_buffer = nullptr;
-    GLuint frame_texture = 0;
-    GLuint tiles_texture = 0;
-    std::vector<Pixel> tile_buffer;
 
-    ImGui::FileBrowser fileDialog;
+	bool show_demo_window = true;
+	bool show_another_window = false;
 
-    std::string file_browser();
+	void* frame_buffer = nullptr;
+	GLuint frame_texture = 0;
+	GLuint tiles_texture = 0;
+	std::vector<Pixel> tile_buffer;
 
-    void update_views(PPU *ppu, Debugger *debug);
+	ImGui::FileBrowser fileDialog;
 
-    void main_view(PPU *ppu);
+	std::string file_browser();
 
-    void show_fps() const;
+	void update_views(PPU* ppu, Debugger* debug);
 
-    std::map<std::string, std::string> roms;
+	void main_view(PPU* ppu);
 
-    CONTROLS *joypad;
+	void show_fps() const;
+
+	std::map<std::string, std::string> roms;
+
+	CONTROLS* joypad;
 
 };
 
-void key_callback(GLFWwindow *window, int key, [[maybe_unused]] int scancode, int action, [[maybe_unused]] int mods);
+void key_callback(GLFWwindow* window, int key, [[maybe_unused]] int scancode, int action, [[maybe_unused]] int mods);
 
 #endif //CPP_GB_RENDERER_H

@@ -5,7 +5,7 @@
 #ifndef CPP_GB_DEBUGGER_H
 #define CPP_GB_DEBUGGER_H
 
-#include "type.h"
+#include "../type.h"
 
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
@@ -44,11 +44,11 @@ using namespace gl;
 #pragma comment(lib, "legacy_stdio_definitions")
 #endif
 
-#include "CPU.h"
-#include "PPU.h"
-#include "MEMORY.h"
-#include "CONTROLS.h"
-#include "CARDRIDGE.h"
+#include "../CPU.h"
+#include "../PPU.h"
+#include "../MEMORY.h"
+#include "../CONTROLS.h"
+#include "../CARDRIDGE.h"
 
 
 class CPU;
@@ -63,78 +63,78 @@ class CONTROLS;
 
 class Debugger {
 public:
-    explicit Debugger(CPU *c, PPU *p, MEMORY *m, CARDRIDGE *card, CONTROLS *joypad);
+	explicit Debugger(CPU* c, PPU* p, MEMORY* m, CARDRIDGE* card, CONTROLS* joypad);
 
-    ~Debugger();
+	~Debugger();
 
-    void update();
+	void update();
 
-    void reset();
+	void reset();
 
-    void disassemble();
+	void disassemble();
 
-    void handle_breakpoints();
+	void handle_breakpoints();
 
 private:
-    CPU *cpu;
-    PPU *ppu;
-    MEMORY *mem;
-    CARDRIDGE *cardridge;
-    CONTROLS *joypad;
+	CPU* cpu;
+	PPU* ppu;
+	MEMORY* mem;
+	CARDRIDGE* cardridge;
+	CONTROLS* joypad;
 
-    Debug_State debug_state;
+	Debug_State debug_state;
 public:
-    void setDebugState(Debug_State debugState) { debug_state = debugState; }
+	void setDebugState(Debug_State debugState) { debug_state = debugState; }
 
-    void update_views();
+	void update_views();
 
 private:
-    bool next_step;
+	bool next_step;
 
-    struct Tile {
-        GLuint texture = 0;
-        const void *buffer = nullptr;
-    };
+	struct Tile {
+		GLuint texture = 0;
+		const void* buffer = nullptr;
+	};
 
-    void *frame_buffer = nullptr;
-    GLuint frame_texture = 0;
-    GLuint tiles_texture = 0;
-    std::vector<Pixel> tile_buffer;
+	void* frame_buffer = nullptr;
+	GLuint frame_texture = 0;
+	GLuint tiles_texture = 0;
+	std::vector<Pixel> tile_buffer;
 
-    void update_tile_buffer();
+	void update_tile_buffer();
 
-    const char *what_register_is_this(const u8 &reg);
+	const char* what_register_is_this(const u8& reg);
 
-    const char *what_register_is_this(const u16 &reg);
+	const char* what_register_is_this(const u16& reg);
 
-    std::vector<debug_instruction> dis_vec;
-    std::vector<u16> dis_addr_vec;
+	std::vector<debug_instruction> dis_vec;
+	std::vector<u16> dis_addr_vec;
 
-    std::vector<u16> breakpoints;
-
-
-    void card_view();
-
-    void cpu_view();
-
-    void video_view();
-
-    void memory_view();
-
-    void control_view();
-
-    static bool load_texture(GLuint *textureHandler, int width, int height, const void *data);
+	std::vector<u16> breakpoints;
 
 
-    const ImVec4 bg_color = {0.8f, 0.8f, 0.8f, 1.0f};
-    ImVec4 cyan = ImVec4(0.0f, 1.0f, 1.0f, 1.0f);
-    ImVec4 magenta = ImVec4(1.0f, 0.502f, 0.957f, 1.0f);
-    ImVec4 yellow = ImVec4(1.0f, 1.0f, 0.0f, 1.0f);
-    ImVec4 red = ImVec4(1.0f, 0.149f, 0.447f, 1.0f);
-    ImVec4 green = ImVec4(0.0f, 1.0f, 0.0f, 1.0f);
-    ImVec4 white = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
-    ImVec4 gray = ImVec4(0.5f, 0.5f, 0.5f, 1.0f);
-    ImVec4 dark_gray = ImVec4(0.1f, 0.1f, 0.1f, 1.0f);
+	void card_view();
+
+	void cpu_view();
+
+	void video_view();
+
+	void memory_view();
+
+	void control_view();
+
+	static bool load_texture(GLuint* textureHandler, int width, int height, const void* data);
+
+
+	const ImVec4 bg_color = { 0.8f, 0.8f, 0.8f, 1.0f };
+	ImVec4 cyan = ImVec4(0.0f, 1.0f, 1.0f, 1.0f);
+	ImVec4 magenta = ImVec4(1.0f, 0.502f, 0.957f, 1.0f);
+	ImVec4 yellow = ImVec4(1.0f, 1.0f, 0.0f, 1.0f);
+	ImVec4 red = ImVec4(1.0f, 0.149f, 0.447f, 1.0f);
+	ImVec4 green = ImVec4(0.0f, 1.0f, 0.0f, 1.0f);
+	ImVec4 white = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
+	ImVec4 gray = ImVec4(0.5f, 0.5f, 0.5f, 1.0f);
+	ImVec4 dark_gray = ImVec4(0.1f, 0.1f, 0.1f, 1.0f);
 
 };
 
