@@ -213,6 +213,7 @@ void CPU::handle_timer(int t_cycles) {
                 freq = 1024;
                 break;
         }
+
         while (timer_cycle_sum >= freq) {
             if (timer_counter == 0xFF) {
                 request_interrupt(Interrupt::Timer_overflow);

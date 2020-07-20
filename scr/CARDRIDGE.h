@@ -14,13 +14,14 @@ public:
 
     bool load_rom(const char *rom_file);
 
+    Rom_Info rom_info;
+
     u8 read(const u16 &addr);
 
     u8 read_card_rom(const u16 &addr);
 
     void write(const u16 &addr, const u8 &data);
 
-    Rom_Info rom_info;
 
     [[nodiscard]] unsigned int get_selected_rom_bank() const { return selected_rom_bank; }
 

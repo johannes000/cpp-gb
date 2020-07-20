@@ -5,7 +5,9 @@
 #include <cstring>
 
 
-CARDRIDGE::CARDRIDGE() : rom_info(), ram_enabled(false) {}
+CARDRIDGE::CARDRIDGE() : ram_enabled(false) {
+    Rom_Info rom_info;
+}
 
 bool CARDRIDGE::load_rom(const char *rom_file) {
     std::ifstream is(rom_file, std::ios::binary);

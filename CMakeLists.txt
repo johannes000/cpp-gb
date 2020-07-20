@@ -3,30 +3,19 @@ project(cpp-gb)
 
 set(CMAKE_CXX_STANDARD 17)
 
-# Link this 'library' to use the warnings specified in CompilerWarnings.cmake
-add_library(project_warnings INTERFACE)
-
-
-# standard compiler warnings
-include(cmake/CompilerWarnings.cmake)
-set_project_warnings(project_warnings)
-
-
 if (NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Debug)
 endif ()
 
-if (NOT MSVC)
 set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wnon-virtual-dtor -Wcast-align -Wnull-dereference -Woverloaded-virtual  -Wformat=2")
 set(CMAKE_CXX_FLAGS_DEBUG "-g")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
-endif()
 
 if (MSVC)
-find_library(GLFW glfw3 PATHS "./external/glfw-3.3.2.bin.WIN32/lib-vc2019")
-else()
-find_library(GLFW glfw3 PATHS "./external/glfw-3.3.2.bin.WIN32/lib-mingw-w64")
-endif()
+    find_library(GLFW glfw3 PATHS "./external/glfw-3.3.2.bin.WIN32/lib-vc2019")
+else ()
+    find_library(GLFW glfw3 PATHS "./external/glfw-3.3.2.bin.WIN32/lib-mingw-w64")
+endif ()
 
 include_directories("./external/glfw-3.3.2.bin.WIN32/include")
 

@@ -13,25 +13,24 @@ class MEMORY;
 
 class CONTROLS {
 public:
-	CONTROLS(MEMORY* m);
+    CONTROLS(MEMORY *m);
 
-	void write(const u16& addr, const u8& data);
+    void write(const u16 &addr, const u8 &data);
 
-	void handle_glwf_inputs(int key, int action);
+    void handle_glwf_inputs(int key, int action);
+
+    [[nodiscard]] u8 read(const u16 &addr) const;
+
+    u8 get_joypad_state();
+
+    void c_view() const;
 
 private:
-	MEMORY* mem;
+    MEMORY *mem;
 
-	u8 joy_button_direction_selector;
-	u8 joy_both_states;
-	u8 joy_both_states_old;
-
-
-public:
-
-	[[nodiscard]] u8 read(const u16& addr);
-
-	u8 get_joypad_state() const;
+    u8 joy_button_direction_selector;
+    u8 joy_both_states;
+    u8 joy_both_states_old;
 };
 
 
