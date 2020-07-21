@@ -279,8 +279,6 @@ void Debugger::control_view() {
     ImGui::SameLine();
     ImGui::Text("JOY ");
     u8 joy = joypad->get_joypad_state();
-    if (joy != 0xFF)
-        int a = 2;
     for (int i = 0; i < 8; ++i) {
         ImGui::SameLine();
         ImGui::Text("%1d", check_bit(joy, i));

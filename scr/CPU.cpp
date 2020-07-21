@@ -230,7 +230,7 @@ void CPU::handle_timer(int t_cycles) {
 
 
 void CPU::request_interrupt(Interrupt inter) {
-    //set_bit(interrupt_request_register, static_cast<u8>(inter));
+    set_bit(interrupt_request_register, static_cast<u8>(inter));
 }
 
 bool CPU::in_boot_r() const { return in_boot; }

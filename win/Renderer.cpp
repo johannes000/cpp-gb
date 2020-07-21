@@ -163,6 +163,7 @@ void Renderer::update_views(PPU *ppu, Debugger *debug) {
         ImGui::ShowDemoWindow(&show_demo_window);
 
     //imgui_demo();
+    menu();
     main_view(ppu);
     debug->update_views();
     joypad->c_view();
@@ -202,6 +203,14 @@ void Renderer::main_view(PPU *ppu) {
     ImGui::End();
 }
 
+void Renderer::menu() {
+    ImGui::Begin("Menü");
+    if (ImGui::Button("Load Rom")) {
+    }
+
+    ImGui::End();
+}
+
 void Renderer::show_fps() const {
     ImGui::SetCursorPos(ImVec2(20.0f, 20.0f));
     ImGui::TextColored(magenta, "Frame Rate: %.2f FPS\nFrame Time: %.2f ms", ImGui::GetIO().Framerate,
@@ -227,16 +236,7 @@ std::string Renderer::file_browser() {
         ImGui::End();
 
         fileDialog.Display();
-
-        ImGui::Begin("ROMS");
-        for (auto &rom : roms) {
-            if (ImGui::Selectable("", true, ImGuiSelectableFlags_AllowDoubleClick))
-                file = rom.second;
-            ImGui::SameLine();
-            ImGui::Text("%s", rom.first.c_str());
-        }
-        ImGui::End();
-
+        file = rom_select_view();
         render();
         if (fileDialog.HasSelected()) {
             return fileDialog.GetSelected().string();
@@ -246,6 +246,19 @@ std::string Renderer::file_browser() {
         }
     }
     exit(0);
+}
+
+std::string Renderer::rom_select_view() {
+    std::string file;
+    ImGui::Begin("ROMS");
+    for (auto &rom : roms) {
+        if (ImGui::Selectable("", true, ImGuiSelectableFlags_AllowDoubleClick))
+            file = rom.second;
+        ImGui::SameLine();
+        ImGui::Text("%s", rom.first.c_str());
+    }
+    ImGui::End();
+    return file;
 }
 
 void key_callback(GLFWwindow *window, int key, [[maybe_unused]] int scancode, int action, [[maybe_unused]] int mods) {

@@ -5,16 +5,14 @@
 #include "Renderer.h"
 #include "gameboy.h"
 
+void load_rom(gameboy *gb, Renderer *renderer);
+
 int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
     gameboy gb;
 
     Renderer renderer(&gb.joypad);
 
-    gb.mem.reset();
-
-    std::string file = renderer.file_browser();
-    if (file.empty()) exit(0);
-    gb.card.load_rom(file.c_str());
+    load_rom(&gb, &renderer);
 
     while (!glfwWindowShouldClose(renderer.window)) {
         while (!gb.ppu.is_ready_to_render()) {
@@ -27,4 +25,15 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
         renderer.update_views(&gb.ppu, &gb.debug);
     }
     return 0;
+}
+
+
+void load_rom(gameboy *gb, Renderer *renderer) {
+    gb->mem.reset();
+    gb->cpu.init_register();
+    gb->ppu.reset();
+
+    std::string file = renderer->file_browser();
+    if (file.empty()) exit(0);
+    gb->card.load_rom(file.c_str());
 }

@@ -1,19 +1,7 @@
 #include "PPU.h"
 
 PPU::PPU(MEMORY *m, CPU *c) : ready_to_render(false), cpu(c), mem(m) {
-
-    v_ram = std::vector<u8>(VRAM_SIZE, 0xFF);
-
-    sprite_attribute_table = std::vector<u8>(OAM_SIZE, 0xFF);
-    // for (auto &v : sprite_attribute_table) v = rand() % 0x04;
-
-    lcd_buffer = std::vector<Pixel>(GB_LCD_SIZE_WIDTH * GB_LCD_SIZE_HEIGHT,
-                                    {0xFF, 0xFF, 0xFF});
-    tile_buffer = std::vector<std::vector<Pixel>>(0xFFF1, {(8 * 8) + 1, {0xFF, 0xFF, 0xFF}});
-    lcd_control.update(this);
-
-    set_lcd_mode(LCD_Mode::OAM);
-    load_lcd_mode();
+    reset();
 }
 
 
@@ -45,7 +33,6 @@ void PPU::update(const int cycles) {
                 cycles_in_mode -= CLOCKS_HORIZONTAL_BLANK;
                 buffer_line(lcd_register.LCD_LY);
 
-                // H-Blank sachen
                 if (++lcd_register.LCD_LY >= GB_LCD_SIZE_HEIGHT) {
                     set_lcd_mode(LCD_Mode::V_Blank);
                     cpu->request_interrupt(Interrupt::V_Blank);
@@ -154,6 +141,26 @@ u8 PPU::read(const u16 &addr) const {
     }
 }
 
+void PPU::reset() {
+    lcd_register = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+    set_lcd_mode(LCD_Mode::OAM);
+
+    v_ram = std::vector<u8>(VRAM_SIZE, 0xFF);
+
+    sprite_attribute_table = std::vector<u8>(OAM_SIZE, 0xFF);
+
+    lcd_buffer = std::vector<Pixel>(GB_LCD_SIZE_WIDTH * GB_LCD_SIZE_HEIGHT,
+                                    {0xFF, 0xFF, 0xFF});
+    tile_buffer = std::vector<std::vector<Pixel>>(0xFFF1, {(8 * 8) + 1, {0xFF, 0xFF, 0xFF}});
+    lcd_control.update(this);
+
+    cycles_in_mode = 0;
+
+    set_lcd_mode(LCD_Mode::OAM);
+    load_lcd_mode();
+
+}
+
 
 void PPU::set_lcd_mode(LCD_Mode m) {
     // Schreibt den gewünschten mode ins LCD Status register
@@ -161,8 +168,7 @@ void PPU::set_lcd_mode(LCD_Mode m) {
     if (mode > 3) return;
     lcd_mode = m;
     auto *const data = &lcd_register.LCD_STATUS;
-    mode & 1u ? set_bit(*data, 0) : reset_bit(*data, 0);
-    mode & 2u ? set_bit(*data, 1) : reset_bit(*data, 1);
+    *data = mode & 0x3u;
 }
 
 void PPU::load_lcd_mode() {

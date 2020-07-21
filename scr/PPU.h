@@ -39,6 +39,8 @@ public:
 
     u8 read(const u16 &addr) const;
 
+    void reset();
+
     bool ready_to_render;
 
 private:
@@ -114,7 +116,7 @@ public:
 
     LCD_Mode mode() const;
 
-// Paletten
+    // Paletten
     std::vector<std::vector<Pixel>> Palettes = std::vector<std::vector<Pixel >>{
             {{0xE0, 0xF8, 0xD0},
                     {0x88, 0xC0, 0x70},

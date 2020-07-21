@@ -61,7 +61,7 @@ constexpr unsigned int TILE_BUFFER_HEIGHT = 192;
 constexpr u16 LCD_CONTROL = 0xFF40;
 constexpr u16 LCD_STATUS = 0xFF41;
 
-constexpr u16 LCD_SCY = 0xFF42;  // SCY - Scroll Y (R/W)
+constexpr u16 LCD_SCY = 0xFF42;  // SCY - Scroll Y (R/W)		
 constexpr u16 LCD_SCX = 0xFF43;  // SCX - Scroll X (R/W)
 constexpr u16 LCD_LY = 0xFF44;   // LY - LCDC Y-Coordinate (R)
 constexpr u16 LCD_LYC = 0xFF45;  // LYC - LY Compare (R/W)
@@ -153,39 +153,39 @@ enum class Interrupt {
 
 // ROM INFO
 enum class CGBFlag {
-    OFF  [[maybe_unused]] = 0x80,  // - Game supports CGB functions, but works on old gameboys also.
-    ON  [[maybe_unused]] = 0xC0,   // - Game works on CGB only(physically the same as 80h).
+    OFF [[maybe_unused]] = 0x80,  // - Game supports CGB functions, but works on old gameboys also.
+    ON [[maybe_unused]] = 0xC0,   // - Game works on CGB only(physically the same as 80h).
 };
 
 enum class CType {  // Cartridge Type
     ROM_ONLY [[maybe_unused]] = 0x00,
-    MBC1  [[maybe_unused]] = 0x01,
+    MBC1 [[maybe_unused]] = 0x01,
     MBC1_RAM [[maybe_unused]] = 0x02,
     MBC1_RAM_BATTERY [[maybe_unused]] = 0x03,
-    MBC2  [[maybe_unused]] = 0x05,
-    MBC2_BATTERY  [[maybe_unused]] = 0x06,
-    ROM_RAM  [[maybe_unused]] = 0x08,
-    ROM_RAM_BATTERY  [[maybe_unused]] = 0x09,
-    MMM01  [[maybe_unused]] = 0x0B,
-    MMM01_RAM  [[maybe_unused]] = 0x0C,
-    MMM01_RAM_BATTERY  [[maybe_unused]] = 0x0D,
-    MBC3_TIMER_BATTERY  [[maybe_unused]] = 0x0F,
-    MBC3_TIMER_RAM_BATTERY  [[maybe_unused]] = 0x10,
-    MBC3  [[maybe_unused]] = 0x11,
-    MBC3_RAM  [[maybe_unused]] = 0x12,
-    MBC3_RAM_BATTERY  [[maybe_unused]] = 0x13,
-    MBC5  [[maybe_unused]] = 0x19,
-    MBC5_RAM  [[maybe_unused]] = 0x1A,
-    MBC5_RAM_BATTERY  [[maybe_unused]] = 0x1B,
-    MBC5_RUMBLE  [[maybe_unused]] = 0x1C,
-    MBC5_RUMBLE_RAM  [[maybe_unused]] = 0x1D,
-    MBC5_RUMBLE_RAM_BATTERY  [[maybe_unused]] = 0x1E,
-    MBC6  [[maybe_unused]] = 0x20,
-    MBC7_SENSOR_RUMBLE_RAM_BATTERY  [[maybe_unused]] = 022,
-    POCKET_CAMERA  [[maybe_unused]] = 0xFC,
-    BANDAI_TAMA5  [[maybe_unused]] = 0xFD,
-    HuC3  [[maybe_unused]] = 0xFE,
-    HUC1_RAM_BATTERY  [[maybe_unused]] = 0xFF
+    MBC2 [[maybe_unused]] = 0x05,
+    MBC2_BATTERY [[maybe_unused]] = 0x06,
+    ROM_RAM [[maybe_unused]] = 0x08,
+    ROM_RAM_BATTERY [[maybe_unused]] = 0x09,
+    MMM01 [[maybe_unused]] = 0x0B,
+    MMM01_RAM [[maybe_unused]] = 0x0C,
+    MMM01_RAM_BATTERY [[maybe_unused]] = 0x0D,
+    MBC3_TIMER_BATTERY [[maybe_unused]] = 0x0F,
+    MBC3_TIMER_RAM_BATTERY [[maybe_unused]] = 0x10,
+    MBC3 [[maybe_unused]] = 0x11,
+    MBC3_RAM [[maybe_unused]] = 0x12,
+    MBC3_RAM_BATTERY [[maybe_unused]] = 0x13,
+    MBC5 [[maybe_unused]] = 0x19,
+    MBC5_RAM [[maybe_unused]] = 0x1A,
+    MBC5_RAM_BATTERY [[maybe_unused]] = 0x1B,
+    MBC5_RUMBLE [[maybe_unused]] = 0x1C,
+    MBC5_RUMBLE_RAM [[maybe_unused]] = 0x1D,
+    MBC5_RUMBLE_RAM_BATTERY [[maybe_unused]] = 0x1E,
+    MBC6 [[maybe_unused]] = 0x20,
+    MBC7_SENSOR_RUMBLE_RAM_BATTERY [[maybe_unused]] = 022,
+    POCKET_CAMERA [[maybe_unused]] = 0xFC,
+    BANDAI_TAMA5 [[maybe_unused]] = 0xFD,
+    HuC3 [[maybe_unused]] = 0xFE,
+    HUC1_RAM_BATTERY [[maybe_unused]] = 0xFF
 };
 
 enum class ROMSize {
@@ -216,8 +216,8 @@ enum class RAMSize {
 };
 
 enum class DestCode {
-    JAP  [[maybe_unused]] = 0x00,
-    NON_JAP  [[maybe_unused]] = 0x01,
+    JAP [[maybe_unused]] = 0x00,
+    NON_JAP [[maybe_unused]] = 0x01,
 };
 
 struct Rom_Info {

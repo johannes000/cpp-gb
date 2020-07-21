@@ -1,4 +1,3 @@
-#pragma once
 #ifndef CPU_H_GUARD
 #define CPU_H_GUARD
 
@@ -10,7 +9,6 @@
 
 
 class MEMORY;
-
 
 class CPU {
 public:
@@ -32,6 +30,7 @@ public:
 
     void write_u16(const u16 &addr, const u16 &data) const;
 
+    void init_register();
 
 private:
     MEMORY *mem;
@@ -41,7 +40,6 @@ private:
     // REGISTER
     CPU_Register R{};
 
-    void init_register();
 
     void dma_transfer(const u8 &data);
 
@@ -103,18 +101,18 @@ public:
 private:
 
     // FF04h – DIV – Divider Register (R/W*)
-    Register divider_register;
+    Register divider_register{};
     // FF05h – TIMA – Timer Counter (R/W)
-    Register timer_counter;
+    Register timer_counter{};
     // FF06h – TMA – Timer Modulo (R/W)
-    Register timer_modulo;
+    Register timer_modulo{};
     // FF07h – TAC – Timer Control (R/W)
     // Bit 2 - Timer Enable (0=Disable, 1=Enable)
     // Bits 1-0 - Main Frequency Divider
-    Register timer_control;
+    Register timer_control{};
 
-    int timer_cycle_sum;
-    int div_cycle_sum;
+    int timer_cycle_sum{};
+    int div_cycle_sum{};
 
     void handle_div_register_write();
 
@@ -124,7 +122,7 @@ private:
     struct cpu_instruction {
         const char *mnemonic{};
 
-        u8 (CPU::*function)() = nullptr;
+        u8 (CPU::* function)() = nullptr;
 
         u8 bytes{};
         u8 cycles{};
