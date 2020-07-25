@@ -5,35 +5,30 @@
 #include "Renderer.h"
 #include "gameboy.h"
 
-void load_rom(gameboy *gb, Renderer *renderer);
+void load_rom(gameboy* gb, Renderer* renderer);
 
-int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
-    gameboy gb;
+int main([[maybe_unused]] int argc, [[maybe_unused]] char* args[]) {
+	gameboy gb;
 
-    Renderer renderer(&gb.joypad);
+	Renderer renderer(&gb.joypad);
 
-    load_rom(&gb, &renderer);
+	load_rom(&gb, &renderer);
 
-    while (!glfwWindowShouldClose(renderer.window)) {
-        while (!gb.ppu.is_ready_to_render()) {
-            const int last_cycle = gb.cpu.update();
-            gb.cpu.handle_interrupts();
-            gb.cpu.handle_timer(last_cycle);
-            gb.ppu.update(last_cycle * 4);
-        }
-        glfwPollEvents();
-        renderer.update_views(&gb.ppu, &gb.debug);
-    }
-    return 0;
+	while (!glfwWindowShouldClose(renderer.window)) {
+		gb.run_until_vblank();
+		glfwPollEvents();
+		renderer.update_views(&gb.ppu, &gb.debug);
+	}
+	return 0;
 }
 
 
-void load_rom(gameboy *gb, Renderer *renderer) {
-    gb->mem.reset();
-    gb->cpu.init_register();
-    gb->ppu.reset();
+void load_rom(gameboy* gb, Renderer* renderer) {
+	gb->mem.reset();
+	gb->cpu.init_register();
+	gb->ppu.reset();
 
-    std::string file = renderer->file_browser();
-    if (file.empty()) exit(0);
-    gb->card.load_rom(file.c_str());
+	std::string file = renderer->file_browser();
+	if (file.empty()) exit(0);
+	gb->card.load_rom(file.c_str());
 }
