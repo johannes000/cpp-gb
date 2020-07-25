@@ -9,18 +9,20 @@
 #include "CONTROLS.h"
 #include "Debugger/Debugger.h"
 
-class gameboy {
-public:
-    gameboy();
+struct gameboy {
+	gameboy();
 
-    CARDRIDGE card;
-    MEMORY mem;
-    CPU cpu;
-    PPU ppu;
-    CONTROLS joypad;
-    Debugger debug;
+	CARDRIDGE card;
+	MEMORY mem;
+	CPU cpu;
+	PPU ppu;
+	CONTROLS joypad;
+	Debugger debug;
 
+	void run_until_vblank();
+	void run_one_cycle();
 
+	bool load_rom(const char*);
 };
 
 #endif  // !GAMEBOY_H_GUARD
