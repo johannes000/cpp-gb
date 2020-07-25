@@ -165,6 +165,7 @@ void CPU::write_u16(const u16& addr, const u16& data) const {
 void CPU::handle_interrupts() {
 	if (!IME)
 		return;
+	return;
 	u8 interrupt = interrupt_request_register & interrupt_enable_register & 0x1Fu;
 	if (interrupt) {
 		is_halted = false;

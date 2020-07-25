@@ -28,7 +28,7 @@ void gameboy::run_one_cycle() {
 	const int last_cycle = cpu.update();
 	cpu.handle_interrupts();
 	cpu.handle_timer(last_cycle);
-	ppu.update(last_cycle);
+	ppu.update(last_cycle * 4);
 }
 
 

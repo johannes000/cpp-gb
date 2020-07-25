@@ -91,16 +91,6 @@ public:
 private:
 	bool next_step;
 
-	struct Tile {
-		GLuint texture = 0;
-		const void* buffer = nullptr;
-	};
-
-	void* frame_buffer = nullptr;
-	GLuint frame_texture = 0;
-	GLuint tiles_texture = 0;
-	std::vector<Pixel> tile_buffer;
-
 	void update_tile_buffer();
 
 	const char* what_register_is_this(const u8& reg);
@@ -116,8 +106,6 @@ private:
 	void card_view();
 
 	void cpu_view();
-
-	void video_view();
 
 	void memory_view();
 
