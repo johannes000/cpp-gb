@@ -1,4 +1,3 @@
-#pragma once
 #ifndef GAMEBOY_H_GUARD
 #define GAMEBOY_H_GUARD
 

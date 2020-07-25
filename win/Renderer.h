@@ -54,6 +54,7 @@ class CONTROLS;
 
 class Debugger;
 
+
 struct Renderer {
 	GLFWwindow* window{};
 
@@ -68,6 +69,8 @@ struct Renderer {
 	virtual ~Renderer();
 
 	void render() const;
+
+	void start_new_imgui_frame();
 
 	static bool load_texture(GLuint* textureHandler, int width, int height, const void* data);
 
@@ -90,7 +93,7 @@ struct Renderer {
 	ImVec4 gray = ImVec4(0.5f, 0.5f, 0.5f, 1.0f);
 	ImVec4 dark_gray = ImVec4(0.1f, 0.1f, 0.1f, 1.0f);
 
-
+	bool show_debug_views = true;
 	bool show_demo_window = true;
 	bool show_another_window = false;
 

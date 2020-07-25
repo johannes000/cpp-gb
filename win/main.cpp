@@ -10,12 +10,22 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* args[]) {
 
 	Renderer renderer(&gb.joypad);
 
-	gb.load_rom(renderer.file_browser().c_str());
+	std::string file;
+	file = renderer.file_browser();
+	gb.load_rom(file.c_str());
+	file = "";
 
 	while (!glfwWindowShouldClose(renderer.window)) {
 		gb.run_until_vblank();
 		glfwPollEvents();
+
+		renderer.start_new_imgui_frame();
 		renderer.update_views(&gb.ppu, &gb.debug);
+
+		file = renderer.rom_select_view();
+		if (!file.empty()) gb.load_rom(file.c_str());
+
+		renderer.render();
 	}
 	return 0;
 }

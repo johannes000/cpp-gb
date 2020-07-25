@@ -153,13 +153,15 @@ void Renderer::render() const {
 
 	glfwSwapBuffers(window);
 }
+void Renderer::start_new_imgui_frame() {
+	ImGui_ImplOpenGL3_NewFrame();
+	ImGui_ImplGlfw_NewFrame();
+	ImGui::NewFrame();
+}
 
 void Renderer::update_views(PPU* ppu, Debugger* debug) {
 	ppu->ready_to_render = false; // TODO: Richtig implementieren
 
-	ImGui_ImplOpenGL3_NewFrame();
-	ImGui_ImplGlfw_NewFrame();
-	ImGui::NewFrame();
 
 	if (show_demo_window)
 		ImGui::ShowDemoWindow(&show_demo_window);
@@ -167,11 +169,11 @@ void Renderer::update_views(PPU* ppu, Debugger* debug) {
 	//imgui_demo();
 	menu();
 	main_view(ppu);
-	tile_buffer_view(ppu);
-	debug->update_views();
-	joypad->c_view();
-	render();
-
+	if (show_debug_views) {
+		tile_buffer_view(ppu);
+		debug->update_views();
+		joypad->c_view();
+	}
 }
 
 void Renderer::update_tile_buffer(PPU* ppu) {
@@ -244,14 +246,15 @@ void Renderer::tile_buffer_view(PPU* ppu) {
 
 void Renderer::menu() {
 	ImGui::Begin("Menü");
-	if (ImGui::Button("Load Rom")) {
+	if (ImGui::Button("Show Debug")) {
+		show_debug_views = !show_debug_views;
 	}
 
 	ImGui::End();
 }
 
 void Renderer::show_fps() const {
-	ImGui::SetCursorPos(ImVec2(20.0f, 20.0f));
+	ImGui::SetCursorPos(ImVec2(20.0f, 30.0f));
 	ImGui::TextColored(magenta, "Frame Rate: %.2f FPS\nFrame Time: %.2f ms", ImGui::GetIO().Framerate,
 					   1000.0f / ImGui::GetIO().Framerate);
 }
