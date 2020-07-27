@@ -67,13 +67,13 @@ public:
 
 	~Debugger();
 
-	void update();
-
 	void reset();
 
 	void disassemble();
 
 	void handle_breakpoints();
+
+	bool hit_breakpoint;
 
 private:
 	CPU* cpu;
@@ -83,15 +83,17 @@ private:
 	CONTROLS* joypad;
 
 	Debug_State debug_state;
+
+	bool next_step;
 public:
 	void setDebugState(Debug_State debugState) { debug_state = debugState; }
+	const Debug_State get_debug_state() const { return debug_state; }
+
+	const bool get_next_step() const { return next_step; }
 
 	void update_views();
 
 private:
-	bool next_step;
-
-	void update_tile_buffer();
 
 	const char* what_register_is_this(const u8& reg);
 
@@ -110,9 +112,6 @@ private:
 	void memory_view();
 
 	void control_view();
-
-	static bool load_texture(GLuint* textureHandler, int width, int height, const void* data);
-
 
 	const ImVec4 bg_color = { 0.8f, 0.8f, 0.8f, 1.0f };
 	ImVec4 cyan = ImVec4(0.0f, 1.0f, 1.0f, 1.0f);

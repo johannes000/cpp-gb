@@ -69,11 +69,11 @@ constexpr u16 LCD_WY = 0xFF4A;   // WY - Window Y Position (R/W)
 constexpr u16 LCD_WX = 0xFF4B;   // WX - Window X Position minus 7 (R/W)
 
 constexpr u16 BG_PALETTE_DATA =
-        0xFF47;  // BGP - BG Palette Data (R/W) - Non CGB Mode Only
+0xFF47;  // BGP - BG Palette Data (R/W) - Non CGB Mode Only
 constexpr u16 BG_PALETTE_DATA_0 =
-        0xFF48;  // OBP0 - Object Palette 0 Data (R/W) - Non CGB Mode Only
+0xFF48;  // OBP0 - Object Palette 0 Data (R/W) - Non CGB Mode Only
 constexpr u16 BG_PALETTE_DATA_1 =
-        0xFF49;  // OBP1 - Object Palette 1 Data (R/W) - Non CGB Mode Only
+0xFF49;  // OBP1 - Object Palette 1 Data (R/W) - Non CGB Mode Only
 
 // JOYPAD REGISTER
 constexpr u16 JOY_P1_REGISTER = 0xFF00;
@@ -86,201 +86,202 @@ constexpr u16 TIMER_CONTROL = 0xFF07;
 constexpr int OSCILLATOR_CLOCK_FREQ = 4194304;
 
 constexpr u16
-        DMA_TRANSFER = 0xFF46;  // DMA Transfer and Start Address (R/W)
+DMA_TRANSFER = 0xFF46;  // DMA Transfer and Start Address (R/W)
 
 constexpr int VERTICAL_REFRESH_CYCLES = 70224;
 
 enum class Flag {
-    z = 7,  // Zero Flag
-    n = 6,  // Add/Sub-Flag
-    h = 5,  // Half Carry Flag
-    c = 4   // Carry Flag
+	z = 7,  // Zero Flag
+	n = 6,  // Add/Sub-Flag
+	h = 5,  // Half Carry Flag
+	c = 4   // Carry Flag
 };
 
 struct CPU_Register {
-    struct {
-        union {
-            struct {
-                u8 F;
-                u8 A;
-            };
-            u16 AF;
-        };
-    };
+	struct {
+		union {
+			struct {
+				u8 F;
+				u8 A;
+			};
+			u16 AF;
+		};
+	};
 
-    struct {
-        union {
-            struct {
-                u8 C;
-                u8 B;
-            };
-            u16 BC;
-        };
-    };
+	struct {
+		union {
+			struct {
+				u8 C;
+				u8 B;
+			};
+			u16 BC;
+		};
+	};
 
-    struct {
-        union {
-            struct {
-                u8 E;
-                u8 D;
-            };
-            u16 DE;
-        };
-    };
+	struct {
+		union {
+			struct {
+				u8 E;
+				u8 D;
+			};
+			u16 DE;
+		};
+	};
 
-    struct {
-        union {
-            struct {
-                u8 L;
-                u8 H;
-            };
-            u16 HL;
-        };
-    };
+	struct {
+		union {
+			struct {
+				u8 L;
+				u8 H;
+			};
+			u16 HL;
+		};
+	};
 
-    u16 SP;
-    u16 PC;
+	u16 SP;
+	u16 PC;
 };
 
 enum class Interrupt {
-    V_Blank = 0,
-    LCD_Stat,
-    Timer_overflow,
-    Serial_link,
-    Joypad,
+	V_Blank = 0,
+	LCD_Stat,
+	Timer_overflow,
+	Serial_link,
+	Joypad,
 };
 
 
 // ROM INFO
 enum class CGBFlag {
-    OFF [[maybe_unused]] = 0x80,  // - Game supports CGB functions, but works on old gameboys also.
-    ON [[maybe_unused]] = 0xC0,   // - Game works on CGB only(physically the same as 80h).
+	OFF [[maybe_unused]] = 0x80,  // - Game supports CGB functions, but works on old gameboys also.
+	ON [[maybe_unused]] = 0xC0,   // - Game works on CGB only(physically the same as 80h).
 };
 
 enum class CType {  // Cartridge Type
-    ROM_ONLY [[maybe_unused]] = 0x00,
-    MBC1 [[maybe_unused]] = 0x01,
-    MBC1_RAM [[maybe_unused]] = 0x02,
-    MBC1_RAM_BATTERY [[maybe_unused]] = 0x03,
-    MBC2 [[maybe_unused]] = 0x05,
-    MBC2_BATTERY [[maybe_unused]] = 0x06,
-    ROM_RAM [[maybe_unused]] = 0x08,
-    ROM_RAM_BATTERY [[maybe_unused]] = 0x09,
-    MMM01 [[maybe_unused]] = 0x0B,
-    MMM01_RAM [[maybe_unused]] = 0x0C,
-    MMM01_RAM_BATTERY [[maybe_unused]] = 0x0D,
-    MBC3_TIMER_BATTERY [[maybe_unused]] = 0x0F,
-    MBC3_TIMER_RAM_BATTERY [[maybe_unused]] = 0x10,
-    MBC3 [[maybe_unused]] = 0x11,
-    MBC3_RAM [[maybe_unused]] = 0x12,
-    MBC3_RAM_BATTERY [[maybe_unused]] = 0x13,
-    MBC5 [[maybe_unused]] = 0x19,
-    MBC5_RAM [[maybe_unused]] = 0x1A,
-    MBC5_RAM_BATTERY [[maybe_unused]] = 0x1B,
-    MBC5_RUMBLE [[maybe_unused]] = 0x1C,
-    MBC5_RUMBLE_RAM [[maybe_unused]] = 0x1D,
-    MBC5_RUMBLE_RAM_BATTERY [[maybe_unused]] = 0x1E,
-    MBC6 [[maybe_unused]] = 0x20,
-    MBC7_SENSOR_RUMBLE_RAM_BATTERY [[maybe_unused]] = 022,
-    POCKET_CAMERA [[maybe_unused]] = 0xFC,
-    BANDAI_TAMA5 [[maybe_unused]] = 0xFD,
-    HuC3 [[maybe_unused]] = 0xFE,
-    HUC1_RAM_BATTERY [[maybe_unused]] = 0xFF
+	ROM_ONLY [[maybe_unused]] = 0x00,
+	MBC1 [[maybe_unused]] = 0x01,
+	MBC1_RAM [[maybe_unused]] = 0x02,
+	MBC1_RAM_BATTERY [[maybe_unused]] = 0x03,
+	MBC2 [[maybe_unused]] = 0x05,
+	MBC2_BATTERY [[maybe_unused]] = 0x06,
+	ROM_RAM [[maybe_unused]] = 0x08,
+	ROM_RAM_BATTERY [[maybe_unused]] = 0x09,
+	MMM01 [[maybe_unused]] = 0x0B,
+	MMM01_RAM [[maybe_unused]] = 0x0C,
+	MMM01_RAM_BATTERY [[maybe_unused]] = 0x0D,
+	MBC3_TIMER_BATTERY [[maybe_unused]] = 0x0F,
+	MBC3_TIMER_RAM_BATTERY [[maybe_unused]] = 0x10,
+	MBC3 [[maybe_unused]] = 0x11,
+	MBC3_RAM [[maybe_unused]] = 0x12,
+	MBC3_RAM_BATTERY [[maybe_unused]] = 0x13,
+	MBC5 [[maybe_unused]] = 0x19,
+	MBC5_RAM [[maybe_unused]] = 0x1A,
+	MBC5_RAM_BATTERY [[maybe_unused]] = 0x1B,
+	MBC5_RUMBLE [[maybe_unused]] = 0x1C,
+	MBC5_RUMBLE_RAM [[maybe_unused]] = 0x1D,
+	MBC5_RUMBLE_RAM_BATTERY [[maybe_unused]] = 0x1E,
+	MBC6 [[maybe_unused]] = 0x20,
+	MBC7_SENSOR_RUMBLE_RAM_BATTERY [[maybe_unused]] = 022,
+	POCKET_CAMERA [[maybe_unused]] = 0xFC,
+	BANDAI_TAMA5 [[maybe_unused]] = 0xFD,
+	HuC3 [[maybe_unused]] = 0xFE,
+	HUC1_RAM_BATTERY [[maybe_unused]] = 0xFF
 };
 
 enum class ROMSize {
-    KB32 = 0x00,   //(no ROM banking)
-    KB64 = 0x01,   //(4 banks)
-    KB128 = 0x02,  //(8 banks)
-    KB256 = 0x03,  //(16 banks)
-    KB512 = 0x04,  //(32 banks)
-    MB1 = 0x05,    //(64 banks) - only 63 banks used by MBC1
-    MB2 = 0x06,    //(128 banks) - only 125 banks used by MBC1
-    MB4 = 0x07,    //(256 banks)
-    MB8 = 0x08,    //(512 banks)
-    MB1_1 = 0x52,  //(72 banks)
-    MB1_2 = 0x53,  //(80 banks)
-    MB1_5 = 0x54,  //(96 banks)
+	KB32 = 0x00,   //(no ROM banking)
+	KB64 = 0x01,   //(4 banks)
+	KB128 = 0x02,  //(8 banks)
+	KB256 = 0x03,  //(16 banks)
+	KB512 = 0x04,  //(32 banks)
+	MB1 = 0x05,    //(64 banks) - only 63 banks used by MBC1
+	MB2 = 0x06,    //(128 banks) - only 125 banks used by MBC1
+	MB4 = 0x07,    //(256 banks)
+	MB8 = 0x08,    //(512 banks)
+	MB1_1 = 0x52,  //(72 banks)
+	MB1_2 = 0x53,  //(80 banks)
+	MB1_5 = 0x54,  //(96 banks)
 };
 enum class Debug_State {
-    STEP,
-    RUN
+	STEP,
+	RUN,
+	BREAKPOINT
 };
 enum class RAMSize {
-    None = 0x00,
-    KB2 = 0x01,
-    KB8 = 0x02,
-    KB32 = 0x03,   //(4 banks of 8KBytes each)
-    KB128 = 0x04,  //(16 banks of 8KBytes each)
-    KB64 = 0x05,   // (8 banks of 8KBytes each)
+	None = 0x00,
+	KB2 = 0x01,
+	KB8 = 0x02,
+	KB32 = 0x03,   //(4 banks of 8KBytes each)
+	KB128 = 0x04,  //(16 banks of 8KBytes each)
+	KB64 = 0x05,   // (8 banks of 8KBytes each)
 };
 
 enum class DestCode {
-    JAP [[maybe_unused]] = 0x00,
-    NON_JAP [[maybe_unused]] = 0x01,
+	JAP [[maybe_unused]] = 0x00,
+	NON_JAP [[maybe_unused]] = 0x01,
 };
 
 struct Rom_Info {
 
-    char title[15] = "";
-    bool SGBFlag = false;
+	char title[15] = "";
+	bool SGBFlag = false;
 
-    CGBFlag cgb = CGBFlag::ON;
-    CType ctype = CType::MBC1;
+	CGBFlag cgb = CGBFlag::ON;
+	CType ctype = CType::MBC1;
 
-    ROMSize rom_size = ROMSize::KB32;
-    RAMSize ram_size = RAMSize::None;
+	ROMSize rom_size = ROMSize::KB32;
+	RAMSize ram_size = RAMSize::None;
 
-    int rom_banks{};
-    int ram_banks{};
+	int rom_banks{};
+	int ram_banks{};
 
 public:
-    const char *CGBFlag_string();
+	const char* CGBFlag_string();
 
-    const char *CType_string() const;
+	const char* CType_string() const;
 
-    const char *rom_size_string() const;
+	const char* rom_size_string() const;
 
-    const char *ram_size_string() const;
+	const char* ram_size_string() const;
 
 };
 
 struct debug_instruction {
-    const char *mnemonic{};
-    u8 bytes{};
-    u8 cycles{};
-    u8 opcode{};
-    u16 intermediate{};
-    u16 address{};
-    bool prefixed{false};
+	const char* mnemonic{};
+	u8 bytes{};
+	u8 cycles{};
+	u8 opcode{};
+	u16 intermediate{};
+	u16 address{};
+	bool prefixed{ false };
 };
 
 struct Pixel {
-    // SDL_PIXELFORMAT_RGB24
-    // Stored in memory as the bytes R, G, B
-    // (R at the lowest address, B at the highest address).
-    u8 R;
-    u8 G;
-    u8 B;
+	// SDL_PIXELFORMAT_RGB24
+	// Stored in memory as the bytes R, G, B
+	// (R at the lowest address, B at the highest address).
+	u8 R;
+	u8 G;
+	u8 B;
 };
 struct LCD_Register {
-    // u8 Werte die mit hilfe ihrer Adressen von der GB CPU beschrieben werden
-    Register LCD_CONTROL;
-    Register LCD_STATUS;
+	// u8 Werte die mit hilfe ihrer Adressen von der GB CPU beschrieben werden
+	Register LCD_CONTROL;
+	Register LCD_STATUS;
 
-    Register LCD_SCY;  // SCY - Scroll Y (R/W)
-    Register LCD_SCX;  // SCX - Scroll X (R/W)
-    Register LCD_LY;   // LY - LCDC Y-Coordinate (R)
-    Register LCD_LYC;  // LYC - LY Compare (R/W)
-    Register LCD_WY;   // WY - Window Y Position (R/W)
-    Register LCD_WX;   // WX - Window X Position minus 7 (R/W)
+	Register LCD_SCY;  // SCY - Scroll Y (R/W)
+	Register LCD_SCX;  // SCX - Scroll X (R/W)
+	Register LCD_LY;   // LY - LCDC Y-Coordinate (R)
+	Register LCD_LYC;  // LYC - LY Compare (R/W)
+	Register LCD_WY;   // WY - Window Y Position (R/W)
+	Register LCD_WX;   // WX - Window X Position minus 7 (R/W)
 
-    Register BG_PALETTE_DATA;    // BGP - BG Palette Data (R/W)
-    // - Non CGB Mode Only
-    Register BG_PALETTE_DATA_0;  // OBP0 - Object Palette 0 Data (R/W)
-    // - Non CGB Mode Only
-    Register BG_PALETTE_DATA_1;  // OBP1 - Object Palette 1 Data (R/W)
-    // - Non CGB Mode Only
+	Register BG_PALETTE_DATA;    // BGP - BG Palette Data (R/W)
+	// - Non CGB Mode Only
+	Register BG_PALETTE_DATA_0;  // OBP0 - Object Palette 0 Data (R/W)
+	// - Non CGB Mode Only
+	Register BG_PALETTE_DATA_1;  // OBP1 - Object Palette 1 Data (R/W)
+	// - Non CGB Mode Only
 
 };
 
@@ -290,10 +291,10 @@ struct LCD_Register {
 // 2 : OAM Access
 // 3 : VRAM Access
 enum class LCD_Mode {
-    H_Blank,
-    V_Blank,
-    OAM,
-    VRAM,
+	H_Blank,
+	V_Blank,
+	OAM,
+	VRAM,
 };
 
 // Bit 7 - Not used
@@ -305,47 +306,47 @@ enum class LCD_Mode {
 // Bit 1 - P11 Input Left  or Button B (0=Pressed) (Read Only)
 // Bit 0 - P10 Input Right or Button A (0=Pressed) (Read Only)
 enum class GB_Key {
-    Right = 0,
-    Left = 1,
-    Up = 2,
-    Down = 3,
-    A = 4,
-    B = 5,
-    Select = 6,
-    Start = 7,
+	Right = 0,
+	Left = 1,
+	Up = 2,
+	Down = 3,
+	A = 4,
+	B = 5,
+	Select = 6,
+	Start = 7,
 
 };
 
 
 //void rom_info_CType_to_
 
-void set_bit_if(u8 &data, const u8 &bit, bool condition);
+void set_bit_if(u8& data, const u8& bit, bool condition);
 
-void set_bit_if(u16 &data,
-                const u16 &bit,
-                bool condition
+void set_bit_if(u16& data,
+				const u16& bit,
+				bool condition
 );
 
-void set_bit(u8 &data, const u8 &bit);
+void set_bit(u8& data, const u8& bit);
 
-void set_bit(u16 &data,
-             const u16 &bit
+void set_bit(u16& data,
+			 const u16& bit
 );
 
-void reset_bit(u8 &data, const u8 &bit);
+void reset_bit(u8& data, const u8& bit);
 
-void reset_bit(u16 &data,
-               const u16 &bit
+void reset_bit(u16& data,
+			   const u16& bit
 );
 
-void toggle_bit(u8 &data, const u8 &bit);
+void toggle_bit(u8& data, const u8& bit);
 
-void toggle_bit(u16 &data,
-                const u16 &bit
+void toggle_bit(u16& data,
+				const u16& bit
 );
 
-bool check_bit(const u8 &data, const u8 &bit);
+bool check_bit(const u8& data, const u8& bit);
 
-bool check_bit(const u16 &data, const u16 &bit);
+bool check_bit(const u16& data, const u16& bit);
 
 #endif  // !TYPE_H_GUARD

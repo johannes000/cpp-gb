@@ -13,37 +13,25 @@ Debugger::Debugger(CPU* c, PPU* p, MEMORY* m, CARDRIDGE* card, CONTROLS* joy) :
 	cardridge(card),
 	joypad(joy),
 	debug_state(Debug_State::RUN),
-	next_step(false) {
+	next_step(false),
+	hit_breakpoint(false) {
 
 	breakpoints.push_back(0x100);
 }
 
 Debugger::~Debugger() {}
 
-void Debugger::update() {
-	switch (debug_state) {
-	case Debug_State::STEP:
-		handle_breakpoints();
-		break;
-	case Debug_State::RUN:
-		update_views();
-		break;
-	}
-}
-
 void Debugger::handle_breakpoints() {
+	next_step = false;
 	if (debug_state != Debug_State::STEP) {
 		if (!breakpoints.empty()) {
 			u16 pc = cpu->get_pc();
 			auto iter = std::find(breakpoints.begin(), breakpoints.end(), pc);
-			if (iter != breakpoints.end())
+			if (iter != breakpoints.end()) {
 				debug_state = Debug_State::STEP;
+			}
 		}
 		return;
-	}
-	next_step = false;
-	while (!next_step) {
-		update_views();
 	}
 }
 
@@ -85,11 +73,28 @@ void Debugger::cpu_view() {
 		next_step = true;
 	}
 	ImGui::SameLine();
+	if (ImGui::Button("Breakpoint")) {
+		debug_state = Debug_State::BREAKPOINT;
+		next_step = true;
+	}
+	ImGui::SameLine();
 	if (ImGui::Button("ReDisassemble")) {
 		disassemble();
 	}
 	ImGui::SameLine();
-	debug_state == Debug_State::STEP ? ImGui::Text("STEP") : ImGui::Text("RUN");
+
+	switch (debug_state) {
+	case Debug_State::STEP:
+		ImGui::Text("STEP");
+		break;
+	case Debug_State::RUN:
+		ImGui::Text("RUN");
+		break;
+	case Debug_State::BREAKPOINT:
+		ImGui::Text("Breakpoint");
+		break;
+	}
+
 	// DECOMPILER
 	ImGui::Separator();
 	ImGui::BeginChild("##scrollingregion", ImVec2(0, 400));

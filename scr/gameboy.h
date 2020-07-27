@@ -20,6 +20,7 @@ struct gameboy {
 
 	void run_until_vblank();
 	void run_one_cycle();
+	void run_until_breakpoint();
 
 	bool load_rom(const char*);
 };

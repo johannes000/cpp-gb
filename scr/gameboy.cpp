@@ -7,11 +7,7 @@ gameboy::gameboy() :
 	debug(&cpu, &ppu, &mem, &card, &joypad) {
 }
 
-void gameboy::run_until_vblank() {
-	while (!ppu.is_ready_to_render()) {
-		run_one_cycle();
-	}
-}
+
 
 bool gameboy::load_rom(const char* rom_file) {
 	mem.reset();
@@ -31,6 +27,17 @@ void gameboy::run_one_cycle() {
 	ppu.update(last_cycle * 4);
 }
 
+void gameboy::run_until_breakpoint() {
+	while (!ppu.is_ready_to_render() && debug.get_debug_state() == Debug_State::BREAKPOINT) {
+		run_one_cycle();
+		debug.handle_breakpoints();
+	}
+}
 
+void gameboy::run_until_vblank() {
+	while (!ppu.is_ready_to_render()) {
+		run_one_cycle();
+	}
+}
 
 

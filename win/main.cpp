@@ -16,7 +16,21 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* args[]) {
 	file = "";
 
 	while (!glfwWindowShouldClose(renderer.window)) {
-		gb.run_until_vblank();
+		switch (gb.debug.get_debug_state()) {
+		case Debug_State::RUN:
+			gb.run_until_vblank();
+			break;
+		case Debug_State::STEP:
+			if (gb.debug.get_next_step())
+				gb.run_one_cycle();
+			break;
+		case Debug_State::BREAKPOINT:
+			gb.run_until_breakpoint();
+			break;
+		}
+
+		gb.debug.handle_breakpoints();
+
 		glfwPollEvents();
 
 		renderer.start_new_imgui_frame();
@@ -24,6 +38,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* args[]) {
 
 		file = renderer.rom_select_view();
 		if (!file.empty()) gb.load_rom(file.c_str());
+
 
 		renderer.render();
 	}
