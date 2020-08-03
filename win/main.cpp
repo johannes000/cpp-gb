@@ -21,15 +21,15 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* args[]) {
 			gb.run_until_vblank();
 			break;
 		case Debug_State::STEP:
-			if (gb.debug.get_next_step())
+			if (gb.debug.get_next_step()) {
 				gb.run_one_cycle();
+				gb.debug.handle_breakpoints();
+			}
 			break;
 		case Debug_State::BREAKPOINT:
 			gb.run_until_breakpoint();
 			break;
 		}
-
-		gb.debug.handle_breakpoints();
 
 		glfwPollEvents();
 

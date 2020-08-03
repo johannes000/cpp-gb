@@ -237,16 +237,16 @@ void Debugger::control_view() {
 	ImGui::Begin("Control");
 	CPU_Register cpu_regs = cpu->get_register();
 
-	ImGui::Text("AF = %X", cpu_regs.AF);
+	ImGui::Text("AF = %04X", cpu_regs.AF);
 	ImGui::SameLine();
-	ImGui::Text("DE = %X", cpu_regs.DE);
+	ImGui::Text("DE = %04X", cpu_regs.DE);
 	ImGui::SameLine();
-	ImGui::Text("PC = %X", cpu_regs.PC);
-	ImGui::Text("BC = %X", cpu_regs.BC);
+	ImGui::Text("PC = %04X", cpu_regs.PC);
+	ImGui::Text("BC = %04X", cpu_regs.BC);
 	ImGui::SameLine();
-	ImGui::Text("HL = %X", cpu_regs.HL);
+	ImGui::Text("HL = %04X", cpu_regs.HL);
 	ImGui::SameLine();
-	ImGui::Text("SP = %X", cpu_regs.SP);
+	ImGui::Text("SP = %04X", cpu_regs.SP);
 
 	ImGui::Separator();
 

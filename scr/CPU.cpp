@@ -24,6 +24,7 @@ void CPU::init_register() {
 
 	in_boot = true;
 	IME = false;
+	is_halted = false;
 }
 
 u8 CPU::parse_op_code(u8& opcode) {

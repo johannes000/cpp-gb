@@ -149,6 +149,8 @@ void MEMORY::reset() {
 	boot.erase(boot.begin(), boot.end());
 	load_boot_rom();
 
+
+
 	write(0xFF05, 0x00);  // TIMA
 	write(0xFF06, 0x00);  // TMA
 	write(0xFF07, 0x00);  // TAC
@@ -204,5 +206,4 @@ void MEMORY::request_interrupt(Interrupt inter) {
 
 void MEMORY::write_direct(const u16& addr, const u8& data) {
 	memory.at(addr) = data;
-
 }

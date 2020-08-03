@@ -35,7 +35,7 @@ void gameboy::run_until_breakpoint() {
 }
 
 void gameboy::run_until_vblank() {
-	while (!ppu.is_ready_to_render()) {
+	while (!ppu.is_ready_to_render() && debug.get_debug_state() == Debug_State::RUN) {
 		run_one_cycle();
 	}
 }

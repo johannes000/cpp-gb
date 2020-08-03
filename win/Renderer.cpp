@@ -19,16 +19,18 @@ Renderer::Renderer(CONTROLS* j) : joypad(j) {
 	tile_buffer = { TILE_BUFFER_HEIGHT * TILE_BUFFER_HEIGHT,{0xFF,0xFF,0xFF} };
 
 	roms = {
-			{"Tennis",       "C:/Users/knaub/source/repos/testroms/tennis.gb"},
-			{"Tetris",       "C:/Users/knaub/source/repos/testroms/tetris.gb"},
-			{"Mario",        "C:/Users/knaub/source/repos/testroms/sml.gb"},
-			{"OPUS 5",       "C:/Users/knaub/source/repos/testroms/opus5.gb"},
-			{"pocket",       "C:/Users/knaub/source/repos/testroms/pocket.gb"},
-			{"drmario",      "C:/Users/knaub/source/repos/testroms/drmario.gb"},
-			{"special",      "C:/Users/knaub/source/repos/testroms/cpu_instrs/individual/01-special.gb"},
-			{"interrupts",   "C:/Users/knaub/source/repos/testroms/cpu_instrs/individual/02-interrupts.gb"},
-			{"op",           "C:/Users/knaub/source/repos/testroms/cpu_instrs/individual/03-op.gb"},
-			{"instr_timing", "C:/Users/knaub/source/repos/testroms/instr_timing/instr_timing.gb"},
+			{"Tennis",			"C:/Users/knaub/source/repos/testroms/tennis.gb"},
+			{"Tetris",			"C:/Users/knaub/source/repos/testroms/tetris.gb"},
+			{"Mario",			"C:/Users/knaub/source/repos/testroms/sml.gb"},
+			{"OPUS 5",			"C:/Users/knaub/source/repos/testroms/opus5.gb"},
+			{"pocket",			"C:/Users/knaub/source/repos/testroms/pocket.gb"},
+			{"drmario",			"C:/Users/knaub/source/repos/testroms/drmario.gb"},
+			{"special",			"C:/Users/knaub/source/repos/testroms/cpu_instrs/individual/01-special.gb"},
+			{"interrupts",		"C:/Users/knaub/source/repos/testroms/cpu_instrs/individual/02-interrupts.gb"},
+			{"op",				"C:/Users/knaub/source/repos/testroms/cpu_instrs/individual/03-op.gb"},
+			{"instr_timing",	"C:/Users/knaub/source/repos/testroms/instr_timing/instr_timing.gb"},
+			{"moon_boot_hwio",	"C:/Users/knaub/source/repos/testroms/mooneye/acceptance/boot_hwio-S.gb"},
+			{"moon_ei_sequence","C:/Users/knaub/source/repos/testroms/mooneye/acceptance/ei_sequence.gb"},
 	};
 
 }
