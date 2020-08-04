@@ -166,12 +166,11 @@ void CPU::write_u16(const u16& addr, const u16& data) const {
 void CPU::handle_interrupts() {
 	if (!IME)
 		return;
-	return;
 	u8 interrupt = interrupt_request_register & interrupt_enable_register & 0x1Fu;
 	if (interrupt) {
 		is_halted = false;
 		IME = false;
-		pop_r16_reg(&R.PC);
+		push_r16_reg(&R.PC);
 		if (check_bit(interrupt, static_cast<u8>(Interrupt::V_Blank))) {
 			reset_bit(interrupt_request_register, static_cast<u8>(Interrupt::V_Blank));
 			R.PC = 0x40;
@@ -205,7 +204,7 @@ void CPU::handle_timer(int t_cycles) {
 	if (check_bit(timer_control, 2)) {
 		timer_cycle_sum += t_cycles;
 
-		int freq;
+		int freq = 1024;
 		switch (timer_control & 3u) {
 		case 1:
 			freq = 16;
@@ -215,9 +214,6 @@ void CPU::handle_timer(int t_cycles) {
 			break;
 		case 3:
 			freq = 256;
-			break;
-		case 0:
-			freq = 1024;
 			break;
 		}
 
