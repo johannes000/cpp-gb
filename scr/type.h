@@ -257,12 +257,19 @@ struct debug_instruction {
 };
 
 struct Pixel {
-	// SDL_PIXELFORMAT_RGB24
-	// Stored in memory as the bytes R, G, B
-	// (R at the lowest address, B at the highest address).
+	// GL_RGB	
+	// Red, Green, Blue	
 	u8 R;
 	u8 G;
 	u8 B;
+};
+struct Pixel_a {
+	// GL_RGBA
+	// Red, Green, Blue, Alpha	
+	u8 R;
+	u8 G;
+	u8 B;
+	u8 A;
 };
 struct LCD_Register {
 	// u8 Werte die mit hilfe ihrer Adressen von der GB CPU beschrieben werden

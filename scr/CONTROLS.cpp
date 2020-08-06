@@ -16,12 +16,12 @@ u8 CONTROLS::read(const u16& addr) const {
 	if (addr == JOY_P1_REGISTER) {
 		switch (joy_button_direction_selector & 0xF0u) {
 		case 0x10:
-			joy_p1 = joy_both_states & 0x0Fu;
+			joy_p1 = (joy_both_states & 0xF0u) >> 4u;
 			reset_bit(joy_p1, 5);
 			set_bit(joy_p1, 4);
 			break;
 		case 0x20:
-			joy_p1 = (joy_both_states & 0xF0u) >> 4u;
+			joy_p1 = joy_both_states & 0x0Fu;
 			set_bit(joy_p1, 5);
 			reset_bit(joy_p1, 4);
 			break;

@@ -192,7 +192,7 @@ void Renderer::update_tile_buffer(PPU* ppu) {
 					int index = tileColumn + line * TILE_BUFFER_WIDTH;
 					const u8 color =
 						static_cast<u8>(check_bit(p_line_1, (position)) << 1u) |
-						check_bit(p_line_2, (position));
+						static_cast<u8>(check_bit(p_line_2, (position)));
 
 					tile_buffer[index] = ppu->Palettes[1][color];
 				}
@@ -207,14 +207,14 @@ bool Renderer::load_texture(GLuint* textureHandler, int width, int height, const
 	glBindTexture(GL_TEXTURE_2D, *textureHandler);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	return true;
 }
 void Renderer::update_texture(GLuint* textureHandler, int width, int height, const void* data) {
 	glBindTexture(GL_TEXTURE_2D, *textureHandler);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE,
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE,
 				 data);
 
 }

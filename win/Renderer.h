@@ -98,7 +98,7 @@ struct Renderer {
 	bool show_another_window = false;
 
 	void* frame_buffer = nullptr;
-	std::vector<Pixel> tile_buffer;
+	std::vector<Pixel_a> tile_buffer;
 
 	GLuint frame_texture;
 	GLuint tiles_texture;
