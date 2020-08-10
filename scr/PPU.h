@@ -49,13 +49,11 @@ private:
 
 	int cycles_in_mode{};
 
-
 	void update_tile(const u16& addr);
 
 public:
 
 	inline bool is_ready_to_render() const { return ready_to_render; }
-
 
 	// Speicher
 private:
@@ -104,19 +102,31 @@ private:
 
 	void reset_lcd_state(const LCD_State s);
 
-	bool check_lcd_state(const LCD_State s) const;
+	const bool check_lcd_state(const LCD_State s) const;
 
 	// LCD Render Funktionen
-	std::vector<Pixel_a> lcd_buffer;
+	std::vector<Pixel_a> bg_buffer;
+	std::vector<Pixel_a> sprite_buffer;
 	std::vector<std::vector<Pixel_a>> tile_buffer;
+
+	void buffer_line(const u8 line);
+	void buffer_sprite(const u8 line);
+
+	int current_palette = 0;
+
+	// Paletten
+	std::vector<Pixel_a> sprite_obj_palette_1;
+	std::vector<Pixel_a> sprite_obj_palette_0;
+	std::vector<Pixel_a> bg_palette;
+
+	void build_palette(const u16 addr, u8 data);
+
+
 public:
 	std::vector<std::vector<Pixel_a>>& get_tile_buffer() { return tile_buffer; }
 
 	Pixel_a const* get_lcd_buffer() const;
 
-	LCD_Mode mode() const;
-
-	// Paletten
 	std::vector<std::vector<Pixel_a>> Palettes = std::vector<std::vector<Pixel_a>>{
 			{{0xE0, 0xF8, 0xD0, 0xFF},
 			{0x88, 0xC0, 0x70, 0xFF},
@@ -135,12 +145,6 @@ public:
 			{96,   96,   96, 255},
 			{0x0,  0x0,  0x0, 0xFF}},  // schwarz weiss
 	};
-private:
-
-	void buffer_line(const u8 line);
-
-
-	int current_palette = 0;
 
 
 };

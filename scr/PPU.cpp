@@ -9,6 +9,7 @@ void PPU::update(const int cycles) {
 	lcd_control.update(this);
 	load_lcd_mode();
 	cycles_in_mode += cycles;
+
 	switch (lcd_mode) {
 		// MODE 2 : Searching OAM Guckt vor jeder line ins OAM um die, für die
 		// aktuelle line, benötigten sprites zu suchen
@@ -32,6 +33,7 @@ void PPU::update(const int cycles) {
 		if (cycles_in_mode >= CLOCKS_HORIZONTAL_BLANK) {  // H-Blank vorbei
 			cycles_in_mode -= CLOCKS_HORIZONTAL_BLANK;
 			buffer_line(lcd_register.LCD_LY);
+			buffer_sprite(lcd_register.LCD_LY);
 
 			if (++lcd_register.LCD_LY >= GB_LCD_SIZE_HEIGHT) {
 				set_lcd_mode(LCD_Mode::V_Blank);
@@ -93,13 +95,9 @@ void PPU::write(const u16& addr, const u8& data) {
 			lcd_register.LCD_WX = data;
 			break;
 		case BG_PALETTE_DATA:
-			lcd_register.BG_PALETTE_DATA = data;
-			break;
-		case BG_PALETTE_DATA_0:
-			lcd_register.BG_PALETTE_DATA_0 = data;
-			break;
-		case BG_PALETTE_DATA_1:
-			lcd_register.BG_PALETTE_DATA_1 = data;
+		case SPRITE_PALETTE_DATA_0:
+		case SPRITE_PALETTE_DATA_1:
+			build_palette(addr, data);
 			break;
 		default:
 			mem->write(addr, data);
@@ -136,10 +134,10 @@ u8 PPU::read(const u16& addr) const {
 			return lcd_register.LCD_WX;
 		case BG_PALETTE_DATA:
 			return lcd_register.BG_PALETTE_DATA;
-		case BG_PALETTE_DATA_0:
-			return lcd_register.BG_PALETTE_DATA_0;
-		case BG_PALETTE_DATA_1:
-			return lcd_register.BG_PALETTE_DATA_1;
+		case SPRITE_PALETTE_DATA_0:
+			return lcd_register.SPRITE_PALETTE_DATA_0;
+		case SPRITE_PALETTE_DATA_1:
+			return lcd_register.SPRITE_PALETTE_DATA_1;
 		default:
 			return mem->read(addr);
 		}
@@ -147,6 +145,10 @@ u8 PPU::read(const u16& addr) const {
 }
 
 void PPU::reset() {
+	bg_palette = Palettes[0];
+	sprite_obj_palette_0 = Palettes[0];
+	sprite_obj_palette_1 = Palettes[0];
+
 	lcd_register = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 	set_lcd_mode(LCD_Mode::OAM);
 
@@ -154,8 +156,8 @@ void PPU::reset() {
 
 	sprite_attribute_table = std::vector<u8>(OAM_SIZE, 0xFF);
 
-	lcd_buffer = std::vector<Pixel_a>(GB_LCD_SIZE_WIDTH * GB_LCD_SIZE_HEIGHT,
-									  { 0xFF, 0xFF, 0xFF,0xFF });
+	bg_buffer = std::vector<Pixel_a>(GB_LCD_SIZE_WIDTH * GB_LCD_SIZE_HEIGHT,
+									 { 0xFF, 0xFF, 0xFF,0xFF });
 	tile_buffer = std::vector<std::vector<Pixel_a>>(0xFFF1, { (8 * 8) + 1, {0xFF, 0xFF, 0xFF,0xFF} });
 	lcd_control.update(this);
 
@@ -193,62 +195,9 @@ void PPU::reset_lcd_state(const LCD_State s) {
 	reset_bit(lcd_register.LCD_STATUS, static_cast<u8>(s));
 }
 
-bool PPU::check_lcd_state(const LCD_State s) const {
+const bool PPU::check_lcd_state(const LCD_State s) const {
 	return check_bit(lcd_register.LCD_STATUS, static_cast<u8>(s));
 }
-
-/*void PPU::buffer_line(const u8 line) {
-	lcd_control.update(this);
-	if (lcd_control.bg_enabled && lcd_control.lcd_power) {
-		// BG Tile Map Display Select
-		const u16 bg_tileset = lcd_control.bg_window_tileset ? 0x8000 : 0x8800;//unsigned : signed 07cb
-		const u16 bg_tilemap = lcd_control.bg_tile_map ? 0x9C00 : 0x9800;
-
-		// Festlegen wo im Vector die Pixel gesetzt werden
-		const auto y = line;
-
-		for (auto x = 0; x < GB_LCD_SIZE_WIDTH;) {
-			const auto sc_x = (x + lcd_register.LCD_SCX);
-			const auto sc_y = (y + lcd_register.LCD_SCY);
-
-			// Welches tile in der bg_tile-map
-			const auto bg_map_x = sc_x % BG_MAP_SIZE;
-			const auto bg_map_y = sc_y % BG_MAP_SIZE;
-
-			const auto tile_x = (bg_map_x / TILE_WIDTH);
-			const auto tile_y = (bg_map_y / TILE_HEIGHT);
-
-			// Welcher Pixel im tile
-			auto tile_pixel_x = (bg_map_x % TILE_WIDTH);
-			const auto tile_pixel_y = bg_map_y % TILE_HEIGHT;
-
-			// Adresse des Tiles im vram
-			const u16 tile_addr = bg_tilemap + (tile_y * TILE_PER_LINE + tile_x);
-
-			const u8 tile_id = read(tile_addr);
-
-			const u16 tile_addr_in_tileset = lcd_control.bg_window_tileset ? tile_id * TILE_WIDTH * 2 // unsigned
-																		   : (static_cast<i8>(tile_id) + 128) *
-																			 TILE_WIDTH * 2; // signed
-			u16 tile_addr_start = (tile_pixel_y * 2) + bg_tileset + tile_addr_in_tileset;
-
-			// Schreibe das gefundene Tile in den Buffer
-			for (tile_pixel_x++; tile_pixel_x <= TILE_WIDTH && x <= GB_LCD_SIZE_WIDTH - 1;
-				 x++, tile_pixel_x++) {
-				const u8 p_line_1 = read(tile_addr_start);
-				const u8 p_line_2 = read(tile_addr_start + 1);
-
-				const u8 color = static_cast<u8>(check_bit(p_line_1, 8 - tile_pixel_x) << 1u) |
-								 check_bit(p_line_2, 8 - tile_pixel_x);
-
-				const auto index = ((GB_LCD_SIZE_WIDTH * y) + x);
-				lcd_buffer[index].R = Palettes[current_palette][color].R;
-				lcd_buffer[index].G = Palettes[current_palette][color].G;
-				lcd_buffer[index].B = Palettes[current_palette][color].B;
-			}
-		}
-	}
-}*/
 
 void PPU::buffer_line(const u8 line) {
 	if (line > GB_LCD_SIZE_HEIGHT)
@@ -263,7 +212,6 @@ void PPU::buffer_line(const u8 line) {
 			const auto sc_x = (x + lcd_register.LCD_SCX);
 			const auto sc_y = (y + lcd_register.LCD_SCY);
 
-			// Welches tile in der bg_tile-map
 			const auto bg_map_x = sc_x % BG_MAP_SIZE;
 			const auto bg_map_y = sc_y % BG_MAP_SIZE;
 
@@ -273,7 +221,6 @@ void PPU::buffer_line(const u8 line) {
 			auto tile_pixel_x = (bg_map_x % TILE_WIDTH);
 			const auto tile_pixel_y = bg_map_y % TILE_HEIGHT;
 
-			// Adresse des Tiles im vram
 			const u16 tile_addr = bg_tilemap + (tile_y * TILE_PER_LINE + tile_x);
 
 
@@ -285,16 +232,46 @@ void PPU::buffer_line(const u8 line) {
 			for (tile_pixel_x++; tile_pixel_x <= TILE_WIDTH && x <= GB_LCD_SIZE_WIDTH - 1;
 				 x++, tile_pixel_x++) {
 				const auto index = ((GB_LCD_SIZE_WIDTH * y) + x);
-				lcd_buffer[index] = tile_buffer[tile_id][(tile_pixel_y * 8) + tile_pixel_x - 1];
+				bg_buffer[index] = tile_buffer[tile_id][(tile_pixel_y * 8) + tile_pixel_x - 1];
 
 			}
 		}
 	}
 }
 
+void PPU::buffer_sprite(const u8 line) {
+	if (!lcd_control.sprites_enabled)
+		return;
+}
+
+
+void PPU::build_palette(const u16 addr, u8 data) {
+	switch (addr) {
+	case BG_PALETTE_DATA:
+		lcd_register.BG_PALETTE_DATA = data;
+		for (u8 i = 0; i < 4; i++) {
+			bg_palette[i] = Palettes[current_palette][((data >> (i * 2)) & 3u)];
+		}
+		break;
+	case SPRITE_PALETTE_DATA_0:
+		lcd_register.SPRITE_PALETTE_DATA_0 = data;
+		for (u8 i = 0; i < 4; i++) {
+			sprite_obj_palette_0[i] = Palettes[current_palette][(data >> (i * 2)) & 3u];
+		}
+		break;
+	case SPRITE_PALETTE_DATA_1:
+		lcd_register.SPRITE_PALETTE_DATA_1 = data;
+		for (u8 i = 0; i < 4; i++) {
+			sprite_obj_palette_1[i] = Palettes[current_palette][(data >> (i * 2)) & 3u];
+		}
+		break;
+	default:
+		return;
+	}
+}
 
 [[nodiscard]] const Pixel_a* PPU::get_lcd_buffer() const {
-	return &lcd_buffer[0];
+	return &bg_buffer[0];
 }
 
 void PPU::update_tile(const u16& a) {
@@ -312,7 +289,7 @@ void PPU::update_tile(const u16& a) {
 		const u8 color = static_cast<u8>(check_bit(p_line_1, (7 - pixel)) << 1u) |
 			check_bit(p_line_2, (7 - pixel));
 		auto p = ((y * 8) + pixel);
-		tile_buffer[tile_id][p] = Palettes[current_palette][color];
+		tile_buffer[tile_id][p] = bg_palette[color];
 	}
 }
 

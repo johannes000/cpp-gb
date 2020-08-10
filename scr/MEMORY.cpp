@@ -55,8 +55,8 @@ u8 MEMORY::handle_mapped_io_read(const u16& addr) const {
 	case LCD_WY:
 	case LCD_WX:
 	case BG_PALETTE_DATA:
-	case BG_PALETTE_DATA_0:
-	case BG_PALETTE_DATA_1:
+	case SPRITE_PALETTE_DATA_0:
+	case SPRITE_PALETTE_DATA_1:
 		return ppu->read(addr);
 	case INTERRUPT_FLAGS_REG:
 	case INTERRUPT_ENABLE_REG:
@@ -114,8 +114,8 @@ void MEMORY::handle_mapped_io_write(const u16& addr, const u8& data) {
 	case LCD_WY:
 	case LCD_WX:
 	case BG_PALETTE_DATA:
-	case BG_PALETTE_DATA_0:
-	case BG_PALETTE_DATA_1:
+	case SPRITE_PALETTE_DATA_0:
+	case SPRITE_PALETTE_DATA_1:
 		ppu->write(addr, data);
 		break;
 

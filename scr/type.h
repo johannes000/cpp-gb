@@ -70,9 +70,9 @@ constexpr u16 LCD_WX = 0xFF4B;   // WX - Window X Position minus 7 (R/W)
 
 constexpr u16 BG_PALETTE_DATA =
 0xFF47;  // BGP - BG Palette Data (R/W) - Non CGB Mode Only
-constexpr u16 BG_PALETTE_DATA_0 =
+constexpr u16 SPRITE_PALETTE_DATA_0 =
 0xFF48;  // OBP0 - Object Palette 0 Data (R/W) - Non CGB Mode Only
-constexpr u16 BG_PALETTE_DATA_1 =
+constexpr u16 SPRITE_PALETTE_DATA_1 =
 0xFF49;  // OBP1 - Object Palette 1 Data (R/W) - Non CGB Mode Only
 
 // JOYPAD REGISTER
@@ -285,9 +285,9 @@ struct LCD_Register {
 
 	Register BG_PALETTE_DATA;    // BGP - BG Palette Data (R/W)
 	// - Non CGB Mode Only
-	Register BG_PALETTE_DATA_0;  // OBP0 - Object Palette 0 Data (R/W)
+	Register SPRITE_PALETTE_DATA_0;  // OBP0 - Object Palette 0 Data (R/W)
 	// - Non CGB Mode Only
-	Register BG_PALETTE_DATA_1;  // OBP1 - Object Palette 1 Data (R/W)
+	Register SPRITE_PALETTE_DATA_1;  // OBP1 - Object Palette 1 Data (R/W)
 	// - Non CGB Mode Only
 
 };
