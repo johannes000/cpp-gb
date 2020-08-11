@@ -194,7 +194,7 @@ void Renderer::update_tile_buffer(PPU* ppu) {
 						static_cast<u8>(check_bit(p_line_1, (position)) << 1u) |
 						static_cast<u8>(check_bit(p_line_2, (position)));
 
-					tile_buffer[index] = ppu->Palettes[1][color];
+					tile_buffer[index] = ppu->bg_palette[color];
 				}
 			}
 		}

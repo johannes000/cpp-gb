@@ -109,17 +109,34 @@ private:
 	std::vector<Pixel_a> sprite_buffer;
 	std::vector<std::vector<Pixel_a>> tile_buffer;
 
+	std::vector<u8> palette_data_buffer;
+
 	void buffer_line(const u8 line);
 	void buffer_sprite(const u8 line);
 
-	int current_palette = 0;
+	int current_palette = 3;
 
+public:
 	// Paletten
 	std::vector<Pixel_a> sprite_obj_palette_1;
 	std::vector<Pixel_a> sprite_obj_palette_0;
 	std::vector<Pixel_a> bg_palette;
 
+private:
 	void build_palette(const u16 addr, u8 data);
+
+	// Sprites
+	struct Sprite {
+		u8 y;              // Specifies the sprites vertical position on the screen (Y - 16)
+		u8 x;              // Specifies the sprites horizontal position on the screen (X - 8)
+		u8 sprite_id;      // Specifies the sprites Tile Number (00-FF)
+		bool bg_priority;  // OBJ-to-BG Priority (0=OBJ Above BG, 1=OBJ Behind BG color 1-3)
+		bool y_flip;       // Y flip          (0=Normal, 1=Vertically mirrored)
+		bool x_flip;       // X flip          (0=Normal, 1=Horizontally mirrored)
+		bool palette;      // Palette number  **Non CGB Mode Only** (0=OBP0, 1=OBP1)
+	};
+	std::vector<Sprite> sprites;
+	void build_sprite_data(const u8 addr, const u8& data);
 
 
 public:
@@ -143,7 +160,7 @@ public:
 			{{255,  255,  255, 255},
 			{192,  192,  192, 255},
 			{96,   96,   96, 255},
-			{0x0,  0x0,  0x0, 0xFF}},  // schwarz weiss
+			{0,  0,  0, 255}},  // schwarz weiss
 	};
 
 

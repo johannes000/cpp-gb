@@ -142,6 +142,7 @@ void CPU::write(const u16& addr, const u8& data) {
 void CPU::dma_transfer(const u8& data) {
 	mem->write_direct(DMA_TRANSFER, data);
 	current_instruction_info.cycles = 160;
+
 	const u16 addr = data << 8u;
 	if (addr >= 0x8000 && addr < 0xE000) {
 		for (u8 i = 0; i < 0xA0; i++) {

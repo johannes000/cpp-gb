@@ -1,6 +1,14 @@
 #include "PPU.h"
 
-PPU::PPU(MEMORY* m, CPU* c) : ready_to_render(false), cpu(c), mem(m) {
+PPU::PPU(MEMORY* m, CPU* c) :
+	ready_to_render(false),
+	cpu(c),
+	mem(m),
+	sprites(40),
+	palette_data_buffer(GB_LCD_SIZE_HEIGHT* GB_LCD_SIZE_WIDTH),
+	bg_buffer(GB_LCD_SIZE_HEIGHT* GB_LCD_SIZE_WIDTH),
+	sprite_buffer(GB_LCD_SIZE_HEIGHT* GB_LCD_SIZE_WIDTH),
+	tile_buffer(0xFFF1) {
 	reset();
 }
 
@@ -66,6 +74,7 @@ void PPU::write(const u16& addr, const u8& data) {
 	}
 	else if (addr >= SPRITE_INFORMATION && addr <= SPRITE_INFORMATION_END) {
 		sprite_attribute_table.at(addr - SPRITE_INFORMATION) = data;
+		build_sprite_data(addr - SPRITE_INFORMATION, data);
 	}
 	else {
 		switch (addr) {
@@ -149,6 +158,8 @@ void PPU::reset() {
 	sprite_obj_palette_0 = Palettes[0];
 	sprite_obj_palette_1 = Palettes[0];
 
+	std::vector<Sprite> sprites(40);
+
 	lcd_register = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 	set_lcd_mode(LCD_Mode::OAM);
 
@@ -169,8 +180,8 @@ void PPU::reset() {
 }
 
 
+// Schreibt den gewünschten mode ins LCD Status register
 void PPU::set_lcd_mode(LCD_Mode m) {
-	// Schreibt den gewünschten mode ins LCD Status register
 	const auto mode = static_cast<u8>(m);
 	if (mode > 3) return;
 	lcd_mode = m;
@@ -178,20 +189,20 @@ void PPU::set_lcd_mode(LCD_Mode m) {
 	*data = mode & 0x3u;
 }
 
+// Liest den LCD Mode aus dem LCD Status register
+// und aktualisiert die lokale variable
 void PPU::load_lcd_mode() {
-	// Liest den LCD Mode aus dem LCD Status register
-	// und aktualisiert die lokale variable
 	auto* const data = &lcd_register.LCD_STATUS;
 	lcd_mode = static_cast<LCD_Mode>(*data & 3u);
 }
 
+// setzt den gewünschten status im LCD Status Register
 void PPU::set_lcd_state(const LCD_State s) {
-	// setzt den gewünschten status im LCD Status Register
 	set_bit(lcd_register.LCD_STATUS, static_cast<u8>(s));
 }
 
+// setzt den gewünschten status im LCD Status Register zurück
 void PPU::reset_lcd_state(const LCD_State s) {
-	// setzt den gewünschten status im LCD Status Register zurück
 	reset_bit(lcd_register.LCD_STATUS, static_cast<u8>(s));
 }
 
@@ -249,9 +260,10 @@ void PPU::build_palette(const u16 addr, u8 data) {
 	switch (addr) {
 	case BG_PALETTE_DATA:
 		lcd_register.BG_PALETTE_DATA = data;
-		for (u8 i = 0; i < 4; i++) {
-			bg_palette[i] = Palettes[current_palette][((data >> (i * 2)) & 3u)];
-		}
+		bg_palette[0] = Palettes[current_palette][(data & 3u)];
+		bg_palette[1] = Palettes[current_palette][((data >> 2) & 3u)];
+		bg_palette[2] = Palettes[current_palette][((data >> 4) & 3u)];
+		bg_palette[3] = Palettes[current_palette][((data >> 6) & 3u)];
 		break;
 	case SPRITE_PALETTE_DATA_0:
 		lcd_register.SPRITE_PALETTE_DATA_0 = data;
@@ -270,6 +282,29 @@ void PPU::build_palette(const u16 addr, u8 data) {
 	}
 }
 
+void PPU::build_sprite_data(const u8 addr, const u8& data) {
+	u8 sprite_id = addr >> 2;
+	if (sprite_id < 40) {
+		switch (addr & 3u) {
+		case 0:
+			sprites[sprite_id].y = data - 16;
+			break;
+		case 1:
+			sprites[sprite_id].x = data - 8;
+			break;
+		case 2:
+			sprites[sprite_id].sprite_id = data;
+			break;
+		case 3:
+			sprites[sprite_id].palette = check_bit(data, 4);
+			sprites[sprite_id].x_flip = check_bit(data, 5);
+			sprites[sprite_id].y_flip = check_bit(data, 6);
+			sprites[sprite_id].bg_priority = check_bit(data, 7);
+			break;
+		}
+	}
+}
+
 [[nodiscard]] const Pixel_a* PPU::get_lcd_buffer() const {
 	return &bg_buffer[0];
 }
@@ -279,15 +314,12 @@ void PPU::update_tile(const u16& a) {
 	auto tile_id = static_cast<u16>(addr >> 4u) & 0x1FFu;
 	auto y = (static_cast<u16>(addr >> 1u) & 7u);
 
-	if (tile_id > 0xFF) {
-
-	}
 	const u8 p_line_1 = v_ram.at(addr);
 	const u8 p_line_2 = v_ram.at(addr + 1);
 
 	for (int pixel = 0; pixel <= 8; ++pixel) {
-		const u8 color = static_cast<u8>(check_bit(p_line_1, (7 - pixel)) << 1u) |
-			check_bit(p_line_2, (7 - pixel));
+		const u8 color = static_cast<u8>(check_bit(p_line_1, (7u - pixel)) << 1u) |
+			check_bit(p_line_2, (7u - pixel));
 		auto p = ((y * 8) + pixel);
 		tile_buffer[tile_id][p] = bg_palette[color];
 	}
