@@ -41,7 +41,7 @@ if (NOT CMAKE_BUILD_TYPE)
 endif ()
 
 if (NOT MSVC)
-    #set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wnon-virtual-dtor -Wcast-align -Wnull-dereference -Woverloaded-virtual  -Wformat=2")
+    set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wnon-virtual-dtor -Wcast-align -Wnull-dereference -Woverloaded-virtual  -Wformat=2")
     set(CMAKE_CXX_FLAGS_DEBUG "-g")
     set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 endif ()
@@ -53,6 +53,7 @@ include_directories("./external/glad/include/")
 include_directories("./external/glfw-3.3.2.bin.WIN32/include")
 include_directories("./scr")
 include_directories("./scr/Debugger")
+include_directories("./win")
 
 add_library(cpp-gb
         scr/CPU/ARITHMETIC.cpp

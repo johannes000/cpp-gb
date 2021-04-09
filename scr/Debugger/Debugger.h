@@ -69,9 +69,9 @@ class Debugger {
 
  public:
   void setDebugState(Debug_State debugState) { debug_state = debugState; }
-  const Debug_State get_debug_state() const { return debug_state; }
+  Debug_State get_debug_state() const { return debug_state; }
 
-  const bool get_next_step() const { return next_step; }
+  bool get_next_step() const { return next_step; }
 
   void update_views();
 

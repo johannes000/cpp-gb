@@ -15,7 +15,8 @@ Renderer::Renderer(CONTROLS* j) : joypad(j) {
   load_texture(&frame_texture, GB_LCD_SIZE_WIDTH, GB_LCD_SIZE_HEIGHT, nullptr);
   load_texture(&tiles_texture, TILE_BUFFER_WIDTH, TILE_BUFFER_HEIGHT, nullptr);
 
-  tile_buffer = {TILE_BUFFER_HEIGHT * TILE_BUFFER_HEIGHT, {0xFF, 0xFF, 0xFF}};
+  tile_buffer = {TILE_BUFFER_HEIGHT * TILE_BUFFER_HEIGHT,
+                 {0xFF, 0xFF, 0xFF, 0x00}};
 
   roms = {
       {"Tennis", "C:/Users/knaub/source/repos/testroms/tennis.gb"},

@@ -109,7 +109,7 @@ class PPU {
 
   void reset_lcd_state(const LCD_State s);
 
-  const bool check_lcd_state(const LCD_State s) const;
+  bool check_lcd_state(const LCD_State s) const;
 
   // LCD Render Funktionen
   std::vector<Pixel_a> bg_buffer;
