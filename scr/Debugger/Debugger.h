@@ -16,31 +16,12 @@
 
 #include <map>
 
-#if defined(IMGUI_IMPL_OPENGL_LOADER_GL3W)
-#include <GL/gl3w.h>            // Initialize with gl3wInit()
-#elif defined(IMGUI_IMPL_OPENGL_LOADER_GLEW)
-#include <GL/glew.h>            // Initialize with glewInit()
-#elif defined(IMGUI_IMPL_OPENGL_LOADER_GLAD)
-
-#include <glad/glad.h>          // Initialize with gladLoadGL()
-
-#elif defined(IMGUI_IMPL_OPENGL_LOADER_GLBINDING2)
-#define GLFW_INCLUDE_NONE       // GLFW including OpenGL headers causes ambiguity or multiple definition errors.
-#include <glbinding/Binding.h>  // Initialize with glbinding::Binding::initialize()
-#include <glbinding/gl/gl.h>
-using namespace gl;
-#elif defined(IMGUI_IMPL_OPENGL_LOADER_GLBINDING3)
-#define GLFW_INCLUDE_NONE       // GLFW including OpenGL headers causes ambiguity or multiple definition errors.
-#include <glbinding/glbinding.h>// Initialize with glbinding::initialize()
-#include <glbinding/gl/gl.h>
-using namespace gl;
-#else
-#include IMGUI_IMPL_OPENGL_LOADER_CUSTOM
-#endif
+#include <glad/glad.h>  // Initialize with gladLoadGL()
 
 #include <GLFW/glfw3.h>
 
-#if defined(_MSC_VER) && (_MSC_VER >= 1900) && !defined(IMGUI_DISABLE_WIN32_FUNCTIONS)
+#if defined(_MSC_VER) && (_MSC_VER >= 1900) && \
+    !defined(IMGUI_DISABLE_WIN32_FUNCTIONS)
 #pragma comment(lib, "legacy_stdio_definitions")
 #endif
 
@@ -49,7 +30,6 @@ using namespace gl;
 #include "../MEMORY.h"
 #include "../CONTROLS.h"
 #include "../CARDRIDGE.h"
-
 
 class CPU;
 
@@ -62,68 +42,66 @@ class CARDRIDGE;
 class CONTROLS;
 
 class Debugger {
-public:
-	explicit Debugger(CPU* c, PPU* p, MEMORY* m, CARDRIDGE* card, CONTROLS* joypad);
+ public:
+  explicit Debugger(CPU* c, PPU* p, MEMORY* m, CARDRIDGE* card,
+                    CONTROLS* joypad);
 
-	~Debugger();
+  ~Debugger();
 
-	void reset();
+  void reset();
 
-	void disassemble();
+  void disassemble();
 
-	void handle_breakpoints();
+  void handle_breakpoints();
 
-	bool hit_breakpoint;
+  bool hit_breakpoint;
 
-private:
-	CPU* cpu;
-	PPU* ppu;
-	MEMORY* mem;
-	CARDRIDGE* cardridge;
-	CONTROLS* joypad;
+ private:
+  CPU* cpu;
+  PPU* ppu;
+  MEMORY* mem;
+  CARDRIDGE* cardridge;
+  CONTROLS* joypad;
 
-	Debug_State debug_state;
+  Debug_State debug_state;
 
-	bool next_step;
-public:
-	void setDebugState(Debug_State debugState) { debug_state = debugState; }
-	const Debug_State get_debug_state() const { return debug_state; }
+  bool next_step;
 
-	const bool get_next_step() const { return next_step; }
+ public:
+  void setDebugState(Debug_State debugState) { debug_state = debugState; }
+  const Debug_State get_debug_state() const { return debug_state; }
 
-	void update_views();
+  const bool get_next_step() const { return next_step; }
 
-private:
+  void update_views();
 
-	const char* what_register_is_this(const u8& reg);
+ private:
+  const char* what_register_is_this(const u8& reg);
 
-	const char* what_register_is_this(const u16& reg);
+  const char* what_register_is_this(const u16& reg);
 
-	std::vector<debug_instruction> dis_vec;
-	std::vector<u16> dis_addr_vec;
+  std::vector<debug_instruction> dis_vec;
+  std::vector<u16> dis_addr_vec;
 
-	std::vector<u16> breakpoints;
+  std::vector<u16> breakpoints;
 
+  void card_view();
 
-	void card_view();
+  void cpu_view();
 
-	void cpu_view();
+  void memory_view();
 
-	void memory_view();
+  void control_view();
 
-	void control_view();
-
-	const ImVec4 bg_color = { 0.8f, 0.8f, 0.8f, 1.0f };
-	ImVec4 cyan = ImVec4(0.0f, 1.0f, 1.0f, 1.0f);
-	ImVec4 magenta = ImVec4(1.0f, 0.502f, 0.957f, 1.0f);
-	ImVec4 yellow = ImVec4(1.0f, 1.0f, 0.0f, 1.0f);
-	ImVec4 red = ImVec4(1.0f, 0.149f, 0.447f, 1.0f);
-	ImVec4 green = ImVec4(0.0f, 1.0f, 0.0f, 1.0f);
-	ImVec4 white = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
-	ImVec4 gray = ImVec4(0.5f, 0.5f, 0.5f, 1.0f);
-	ImVec4 dark_gray = ImVec4(0.1f, 0.1f, 0.1f, 1.0f);
-
+  const ImVec4 bg_color = {0.8f, 0.8f, 0.8f, 1.0f};
+  ImVec4 cyan = ImVec4(0.0f, 1.0f, 1.0f, 1.0f);
+  ImVec4 magenta = ImVec4(1.0f, 0.502f, 0.957f, 1.0f);
+  ImVec4 yellow = ImVec4(1.0f, 1.0f, 0.0f, 1.0f);
+  ImVec4 red = ImVec4(1.0f, 0.149f, 0.447f, 1.0f);
+  ImVec4 green = ImVec4(0.0f, 1.0f, 0.0f, 1.0f);
+  ImVec4 white = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
+  ImVec4 gray = ImVec4(0.5f, 0.5f, 0.5f, 1.0f);
+  ImVec4 dark_gray = ImVec4(0.1f, 0.1f, 0.1f, 1.0f);
 };
 
-
-#endif //CPP_GB_DEBUGGER_H
+#endif  // CPP_GB_DEBUGGER_H

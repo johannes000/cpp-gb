@@ -19,21 +19,23 @@
 #include <map>
 
 #if defined(IMGUI_IMPL_OPENGL_LOADER_GL3W)
-#include <GL/gl3w.h>            // Initialize with gl3wInit()
+#include <GL/gl3w.h>  // Initialize with gl3wInit()
 #elif defined(IMGUI_IMPL_OPENGL_LOADER_GLEW)
-#include <GL/glew.h>            // Initialize with glewInit()
+#include <GL/glew.h>  // Initialize with glewInit()
 #elif defined(IMGUI_IMPL_OPENGL_LOADER_GLAD)
 
-#include <glad/glad.h>          // Initialize with gladLoadGL()
+#include <glad/glad.h>  // Initialize with gladLoadGL()
 
 #elif defined(IMGUI_IMPL_OPENGL_LOADER_GLBINDING2)
-#define GLFW_INCLUDE_NONE       // GLFW including OpenGL headers causes ambiguity or multiple definition errors.
+#define GLFW_INCLUDE_NONE  // GLFW including OpenGL headers causes ambiguity or
+                           // multiple definition errors.
 #include <glbinding/Binding.h>  // Initialize with glbinding::Binding::initialize()
 #include <glbinding/gl/gl.h>
 using namespace gl;
 #elif defined(IMGUI_IMPL_OPENGL_LOADER_GLBINDING3)
-#define GLFW_INCLUDE_NONE       // GLFW including OpenGL headers causes ambiguity or multiple definition errors.
-#include <glbinding/glbinding.h>// Initialize with glbinding::initialize()
+#define GLFW_INCLUDE_NONE  // GLFW including OpenGL headers causes ambiguity or
+                           // multiple definition errors.
+#include <glbinding/glbinding.h>  // Initialize with glbinding::initialize()
 #include <glbinding/gl/gl.h>
 using namespace gl;
 #else
@@ -42,90 +44,91 @@ using namespace gl;
 
 #include <GLFW/glfw3.h>
 
-#if defined(_MSC_VER) && (_MSC_VER >= 1900) && !defined(IMGUI_DISABLE_WIN32_FUNCTIONS)
+#if defined(_MSC_VER) && (_MSC_VER >= 1900) && \
+    !defined(IMGUI_DISABLE_WIN32_FUNCTIONS)
 #pragma comment(lib, "legacy_stdio_definitions")
 #endif
 
 #include "CONTROLS.h"
 #include "Debugger/Debugger.h"
 
-
 class CONTROLS;
 
 class Debugger;
 
-
 struct Renderer {
-	GLFWwindow* window{};
+  GLFWwindow* window{};
 
-	explicit Renderer(CONTROLS* joypad);
+  explicit Renderer(CONTROLS* joypad);
 
-	void init_window();
+  void init_window();
 
-	static void glfw_error_callback(int error, const char* description);
+  static void glfw_error_callback(int error, const char* description);
 
-	void terminate_window() const;
+  void terminate_window() const;
 
-	virtual ~Renderer();
+  virtual ~Renderer();
 
-	void render() const;
+  void render() const;
 
-	void start_new_imgui_frame();
+  void start_new_imgui_frame();
 
-	static bool load_texture(GLuint* textureHandler, int width, int height, const void* data);
+  static bool load_texture(GLuint* textureHandler, int width, int height,
+                           const void* data);
 
-	void update_texture(GLuint* textureHandler, int width, int height, const void* data);
+  void update_texture(GLuint* textureHandler, int width, int height,
+                      const void* data);
 
-	int window_height = 900;
-	int window_width = 1700;
+  int window_height = 900;
+  int window_width = 1700;
 
-	int window_xpos = 50;
-	int window_ypos = 45;
+  int window_xpos = 50;
+  int window_ypos = 45;
 
+  const ImVec4 bg_color = {0.8f, 0.8f, 0.8f, 1.0f};
+  ImVec4 cyan = ImVec4(0.0f, 1.0f, 1.0f, 1.0f);
+  ImVec4 magenta = ImVec4(1.0f, 0.502f, 0.957f, 1.0f);
+  ImVec4 yellow = ImVec4(1.0f, 1.0f, 0.0f, 1.0f);
+  ImVec4 red = ImVec4(1.0f, 0.149f, 0.447f, 1.0f);
+  ImVec4 green = ImVec4(0.0f, 1.0f, 0.0f, 1.0f);
+  ImVec4 white = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
+  ImVec4 gray = ImVec4(0.5f, 0.5f, 0.5f, 1.0f);
+  ImVec4 dark_gray = ImVec4(0.1f, 0.1f, 0.1f, 1.0f);
 
-	const ImVec4 bg_color = { 0.8f, 0.8f, 0.8f, 1.0f };
-	ImVec4 cyan = ImVec4(0.0f, 1.0f, 1.0f, 1.0f);
-	ImVec4 magenta = ImVec4(1.0f, 0.502f, 0.957f, 1.0f);
-	ImVec4 yellow = ImVec4(1.0f, 1.0f, 0.0f, 1.0f);
-	ImVec4 red = ImVec4(1.0f, 0.149f, 0.447f, 1.0f);
-	ImVec4 green = ImVec4(0.0f, 1.0f, 0.0f, 1.0f);
-	ImVec4 white = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
-	ImVec4 gray = ImVec4(0.5f, 0.5f, 0.5f, 1.0f);
-	ImVec4 dark_gray = ImVec4(0.1f, 0.1f, 0.1f, 1.0f);
+  bool show_debug_views = true;
+  bool show_demo_window = true;
+  bool show_another_window = false;
 
-	bool show_debug_views = true;
-	bool show_demo_window = true;
-	bool show_another_window = false;
+  void* frame_buffer = nullptr;
+  std::vector<Pixel_a> tile_buffer;
 
-	void* frame_buffer = nullptr;
-	std::vector<Pixel_a> tile_buffer;
+  GLuint frame_texture;
+  GLuint tiles_texture;
 
-	GLuint frame_texture;
-	GLuint tiles_texture;
+  ImGui::FileBrowser fileDialog;
 
-	ImGui::FileBrowser fileDialog;
+  std::string file_browser();
 
-	std::string file_browser();
+  void update_views(PPU* ppu, Debugger* debug);
 
-	void update_views(PPU* ppu, Debugger* debug);
+  void update_tile_buffer(PPU* ppu);
 
-	void update_tile_buffer(PPU* ppu);
+  void main_view(PPU* ppu);
 
-	void main_view(PPU* ppu);
+  void tile_buffer_view(PPU* ppu);
 
-	void tile_buffer_view(PPU* ppu);
+  void menu();
 
-	void menu();
+  void show_fps() const;
 
-	void show_fps() const;
+  std::map<std::string, std::string> roms;
 
-	std::map<std::string, std::string> roms;
+  CONTROLS* joypad;
 
-	CONTROLS* joypad;
-
-	std::string rom_select_view();
+  std::string rom_select_view();
 };
 
-void key_callback(GLFWwindow* window, int key, [[maybe_unused]] int scancode, int action, [[maybe_unused]] int mods);
+void key_callback(GLFWwindow* window, int key, [[maybe_unused]] int scancode,
+                  int action, [[maybe_unused]] int mods);
 
-#endif //CPP_GB_RENDERER_H
+#endif  // CPP_GB_RENDERER_H
