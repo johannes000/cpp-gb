@@ -1,27 +1,25 @@
 {
-    "configurations": [
-        {
-            "name": "Win64",
-            "includePath": [
-                "${workspaceFolder}/**",
-                "${workspaceFolder}/external/*",
-                "${workspaceFolder}/external/imgui",
-                "${workspaceFolder}/external/imgui-filebrowser",
-                "${workspaceFolder}/external/glfw-3.3.2.bin.WIN32/include/GLFW",
-                "${workspaceFolder}/external/glad/include/*",
-                "${workspaceFolder}/scr/**",
-                "${workspaceFolder}/win/**",
-                "${default}"
-            ],
-            "defines": [
-                "_DEBUG",
-                "UNICODE",
-                "_UNICODE"
-            ],
-            "windowsSdkVersion": "10.0.18362.0",
-            "intelliSenseMode": "msvc-x64",
-            "configurationProvider": "ms-vscode.cmake-tools"
-        }
-    ],
+    "configurations": [{
+        "name": "Win64",
+        "includePath": [
+            "${workspaceFolder}/**",
+            "${workspaceFolder}/external/*",
+            "${workspaceFolder}/external/imgui",
+            "${workspaceFolder}/external/imgui-filebrowser",
+            "${workspaceFolder}/external/glfwWIN32/include/GLFW",
+            "${workspaceFolder}/external/glad/include/*",
+            "${workspaceFolder}/scr/**",
+            "${workspaceFolder}/win/**",
+            "${default}"
+        ],
+        "defines": [
+            "_DEBUG",
+            "UNICODE",
+            "_UNICODE"
+        ],
+        "windowsSdkVersion": "10.0.18362.0",
+        "intelliSenseMode": "msvc-x64",
+        "configurationProvider": "ms-vscode.cmake-tools"
+    }],
     "version": 4
 }

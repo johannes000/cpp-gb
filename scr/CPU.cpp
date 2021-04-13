@@ -1,9 +1,17 @@
+/**
+ * @file CPU.cpp
+ * @author Johannes
+ * @brief 
+ * @date 22-06-2020
+ * 
+ * @copyright Copyright (c) 2021
+ */
+
 #include "CPU.h"
 
 #include <iostream>
 
-
-CPU::CPU(MEMORY* m) : mem(m) { init_register(); }
+CPU::CPU(MEMORY *m) : mem(m) { init_register(); }
 
 void CPU::init_register() {
 	R.AF = 0x01B0;
@@ -27,15 +35,14 @@ void CPU::init_register() {
 	is_halted = false;
 }
 
-u8 CPU::parse_op_code(u8& opcode) {
+u8 CPU::parse_op_code(u8 &opcode) {
 	u8 function;
 	if (prefix) {
 		prefix = false;
 		current_instruction_info = prefixedinstructions[op_code];
 		current_instruction_info.bytes -= 1;
 		function = (this->*prefixedinstructions[opcode].function)();
-	}
-	else {
+	} else {
 		current_instruction_info = instructions[op_code];
 		function = (this->*instructions[opcode].function)();
 	}
@@ -48,7 +55,8 @@ int CPU::update() {
 	}
 	op_code = get_next_op_code();
 	const auto jp = parse_op_code(op_code);
-	if (jp == 0) inc_pc(); // Wenn 1 returned wird wurde der PC schon vom OPcode verändert.
+	if (jp == 0)
+		inc_pc(); // Wenn 1 returned wird wurde der PC schon vom OPcode verändert.
 	cycles += current_instruction_info.cycles;
 	return current_instruction_info.cycles;
 }
@@ -69,21 +77,19 @@ debug_instruction CPU::get_instruction_at_addr(u16 addr) const {
 	}
 	if (cpu_inst.bytes > 1)
 		intermediate =
-		cpu_inst.bytes == 2 ? static_cast<u16>(mem->read_card_rom(addr + 1)) :
-		u8_to_u16(mem->read_card_rom((addr + 2)), mem->read_card_rom(addr + 1));
+			cpu_inst.bytes == 2 ? static_cast<u16>(mem->read_card_rom(addr + 1)) : u8_to_u16(mem->read_card_rom((addr + 2)), mem->read_card_rom(addr + 1));
 
 	return debug_inst = {
-			cpu_inst.mnemonic,
-			cpu_inst.bytes,
-			cpu_inst.cycles,
-			inst_code,
-			intermediate,
-			addr,
-	};
-
+			   cpu_inst.mnemonic,
+			   cpu_inst.bytes,
+			   cpu_inst.cycles,
+			   inst_code,
+			   intermediate,
+			   addr,
+		   };
 }
 
-u8 CPU::read(const u16& addr) {
+u8 CPU::read(const u16 &addr) {
 	switch (addr) {
 	case DIVIDER_REGISTER:
 		return divider_register;
@@ -104,10 +110,9 @@ u8 CPU::read(const u16& addr) {
 	}
 }
 
-
-void CPU::write(const u16& addr, const u8& data) {
+void CPU::write(const u16 &addr, const u8 &data) {
 	switch (addr) {
-	case DMA_TRANSFER:  // This register starts the OAM DMA transfer
+	case DMA_TRANSFER: // This register starts the OAM DMA transfer
 		dma_transfer(data);
 		break;
 	case DIVIDER_REGISTER:
@@ -138,21 +143,25 @@ void CPU::write(const u16& addr, const u8& data) {
 		break;
 	}
 }
-
-void CPU::dma_transfer(const u8& data) {
+/**
+ * @brief 
+ * 
+ * @param data 
+ */
+void CPU::dma_transfer(const u8 &data) {
 	mem->write_direct(DMA_TRANSFER, data);
 	current_instruction_info.cycles = 160;
 
 	const u16 addr = data << 8u;
 	if (addr >= 0x8000 && addr < 0xE000) {
 		for (u8 i = 0; i < 0xA0; i++) {
-			write(0xFE00 + i, read(addr + i));
+			u16 temp = 0xFE00 + i;
+			mem->write(temp, read(addr + i));
 		}
 	}
-
 }
 
-void CPU::handle_time_control_write(const u8& data) {
+void CPU::handle_time_control_write(const u8 &data) {
 	if ((timer_control & 3u) != (data & 3u))
 		timer_cycle_sum = 0;
 	timer_control = data;
@@ -160,7 +169,7 @@ void CPU::handle_time_control_write(const u8& data) {
 
 void CPU::handle_div_register_write() { divider_register = 0; }
 
-void CPU::write_u16(const u16& addr, const u16& data) const {
+void CPU::write_u16(const u16 &addr, const u16 &data) const {
 	mem->write_u16(addr, data);
 }
 
@@ -175,20 +184,16 @@ void CPU::handle_interrupts() {
 		if (check_bit(interrupt, static_cast<u8>(Interrupt::V_Blank))) {
 			reset_bit(interrupt_request_register, static_cast<u8>(Interrupt::V_Blank));
 			R.PC = 0x40;
-		}
-		else if (check_bit(interrupt, static_cast<u8>(Interrupt::LCD_Stat))) {
+		} else if (check_bit(interrupt, static_cast<u8>(Interrupt::LCD_Stat))) {
 			reset_bit(interrupt_request_register, static_cast<u8>(Interrupt::LCD_Stat));
 			R.PC = 0x48;
-		}
-		else if (check_bit(interrupt, static_cast<u8>(Interrupt::Timer_overflow))) {
+		} else if (check_bit(interrupt, static_cast<u8>(Interrupt::Timer_overflow))) {
 			reset_bit(interrupt_request_register, static_cast<u8>(Interrupt::Timer_overflow));
 			R.PC = 0x50;
-		}
-		else if (check_bit(interrupt, static_cast<u8>(Interrupt::Serial_link))) {
+		} else if (check_bit(interrupt, static_cast<u8>(Interrupt::Serial_link))) {
 			reset_bit(interrupt_request_register, static_cast<u8>(Interrupt::Serial_link));
 			R.PC = 0x58;
-		}
-		else if (check_bit(interrupt, static_cast<u8>(Interrupt::Joypad))) {
+		} else if (check_bit(interrupt, static_cast<u8>(Interrupt::Joypad))) {
 			reset_bit(interrupt_request_register, static_cast<u8>(Interrupt::Joypad));
 			R.PC = 0x60;
 		}
@@ -222,25 +227,20 @@ void CPU::handle_timer(int t_cycles) {
 			if (timer_counter == 0xFF) {
 				request_interrupt(Interrupt::Timer_overflow);
 				timer_counter = timer_modulo;
-			}
-			else {
+			} else {
 				timer_counter++;
 			}
 			timer_cycle_sum -= freq;
 		}
-
 	}
-
 }
-
 
 void CPU::request_interrupt(Interrupt inter) {
 	set_bit(interrupt_request_register, static_cast<u8>(inter));
 }
 
-bool CPU::in_boot_r() const { return in_boot; }
+bool CPU::is_in_boot() const { return in_boot; }
 
 void CPU::inc_pc() { R.PC += current_instruction_info.bytes; }
 
 inline u8 CPU::get_next_op_code() { return read(R.PC); }
-

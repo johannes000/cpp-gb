@@ -1,7 +1,6 @@
 //
 // Created by knaub on 25.06.2020.
 //
-
 #include "CONTROLS.h"
 
 CONTROLS::CONTROLS(MEMORY* m) :

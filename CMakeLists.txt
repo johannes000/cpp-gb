@@ -46,16 +46,31 @@ if (NOT MSVC)
     set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 endif ()
 
-add_subdirectory("./external")
+if (MSVC)
+    find_library(GLFW glfw3 PATHS "./external/glfwWIN64/lib-vc2019")
+else ()
+    find_library(GLFW glfw3 PATHS "./external/glfwWIN64/lib-mingw-w64")
+endif ()
+
+option(GLFW_BUILD_DOCS OFF)
+option(GLFW_BUILD_EXAMPLES OFF)
+option(GLFW_BUILD_TESTS OFF)
+option(GLFW_INSTALL OFF)
+
+include_directories("./external/glfwWIN64/include")
 include_directories("./external/imgui")
 include_directories("./external/imgui-filebrowser")
-include_directories("./external/glad/include/")
-include_directories("./external/glfw-3.3.2.bin.WIN32/include")
 include_directories("./scr")
 include_directories("./scr/Debugger")
 include_directories("./win")
 
-add_library(cpp-gb
+include_directories("./external/glad/include/")
+add_library("glad" STATIC "./external/glad/src/glad.c")
+
+find_package(OpenGL REQUIRED)
+#find_package(imgui REQUIRED)
+
+add_library(cpp-gb 
         scr/CPU/ARITHMETIC.cpp
         scr/CPU/CONTROL.cpp
         scr/CPU/helper.cpp
@@ -76,13 +91,29 @@ add_library(debugger
         scr/Debugger/Debug_helper.cpp
 )
 
-add_executable(cpp-gb-64
+add_library(imgui
+        ./external/imgui/imconfig.h
+        ./external/imgui/imgui_demo.cpp
+        ./external/imgui/imgui_draw.cpp
+        ./external/imgui/imgui_impl_glfw.cpp
+        ./external/imgui/imgui_impl_glfw.h
+        ./external/imgui/imgui_impl_opengl3.cpp
+        ./external/imgui/imgui_impl_opengl3.h
+        ./external/imgui/imgui_internal.h
+        ./external/imgui/imgui_widgets.cpp
+        ./external/imgui/imgui.cpp
+        ./external/imgui/imgui.h
+        ./external/imgui/imstb_rectpack.h
+        ./external/imgui/imstb_textedit.h
+        ./external/imgui/imstb_truetype.h
+        )
+
+add_executable(cpp-gb-w
         win/main.cpp
         win/Renderer.cpp win/Renderer.h
         external/imgui-filebrowser/imfilebrowser.h)
 
-
-target_link_libraries(cpp-gb-64 cpp-gb debugger)
-target_link_libraries(cpp-gb-64 imgui)
-target_link_libraries(cpp-gb-64 ${GLFW})
-target_link_libraries(cpp-gb-64 ${OPENGL_gl_LIBRARY} "glad")        
+target_link_libraries(cpp-gb-w cpp-gb debugger)
+target_link_libraries(cpp-gb-w imgui)
+target_link_libraries(cpp-gb-w ${GLFW})
+target_link_libraries(cpp-gb-w ${OPENGL_gl_LIBRARY} "glad")        

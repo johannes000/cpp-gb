@@ -1,0 +1,19 @@
+
+Todo:
+  ☐ Sprites @critical @started
+  ☐ Unabhängige Layer für Sprites und BG @high
+  ☐ Google Test @low 
+    ☐ Bootrom Skippen 
+    ☐ Test roms ohne Rendern durchlaufen lassen
+  ☐ Tracer für Disassambler @low
+  ☐ Timer fixen @critical
+  ☐ PPU Interrupts @high
+  ☐ Sound @low
+  ☐ Controlls Plattformunabhängig gestalten @low
+  ☐ Gameboy komplett Plattformunabhängig machen @low
+    ☐ als DLL builden
+  ☐ Paletten Richtig implementieren @low
+  ☐ Custon Palettes UI @low
+    ☐ Colorpoicker 
+  Done:
+  
