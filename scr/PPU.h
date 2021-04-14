@@ -72,10 +72,10 @@ private:
 								// 9C00h - 9FFFh)
 		bool window_enable;		// Bit 5 - Window Enable(0 = Disabled, 1 = Enabled)
 		bool bg_window_tileset; // Bit 4 - BG & Window Tileset(0 = 8800h - 97FFh, 1
-								// = 8000h - 8FFFh)
-		bool bg_tile_map;		// Bit 3 - BG Tile Map (0 = 9800h - 9BFFh, 1 = 9C00h -
-								// 9FFFh)
-		bool sprite_size;		// Bit 2 - Sprite Size(0 = 8x8, 1 = 8x16)
+		// = 8000h - 8FFFh)
+		bool bg_tile_map; // Bit 3 - BG Tile Map (0 = 9800h - 9BFFh, 1 = 9C00h -
+						  // 9FFFh)
+		bool sprite_size; // Bit 2 - Sprite Size(0 = 8x8, 1 = 8x16)
 		bool
 			sprites_enabled; // Bit 1 - Sprites Enabled (0 = Disabled, 1 = Enabled)
 		bool bg_enabled;	 // Bit 0 - BG Enabled(in DMG) (0 = Disabled, 1 = Enabled)
@@ -112,11 +112,11 @@ private:
 	bool check_lcd_state(const LCD_State s) const;
 
 	// LCD Render Funktionen
-	std::vector<Pixel_a> bg_buffer;
-	std::vector<Pixel_a> sprite_buffer;
-	std::vector<std::vector<Pixel_a>> tile_buffer;
 
 	std::vector<u8> palette_data_buffer;
+	std::vector<Pixel_a> bg_buffer;
+	std::vector<Pixel_a> sprite_buffer;
+	std::vector<Tile> tile_buffer;
 
 	void buffer_line(const u8 line);
 	void buffer_sprite(const u8 line);
@@ -133,21 +133,24 @@ private:
 	void build_palette(const u16 addr, u8 data);
 
 	// Sprites
+
 	struct Sprite {
-		u8 y;			  // Specifies the sprites vertical position on the screen (Y - 16)
-		u8 x;			  // Specifies the sprites horizontal position on the screen (X - 8)
+		int id;
+		int y_pos;		  // Specifies the sprites vertical position on the screen (Y - 16)
+		int x_pos;		  // Specifies the sprites horizontal position on the screen (X - 8)
 		u8 tile_no;		  // Specifies the sprites Tile Number (00-FF)
 		bool bg_priority; // OBJ-to-BG Priority (0=OBJ Above BG, 1=OBJ Behind BG
 						  // color 1-3)
 		bool y_flip;	  // Y flip          (0=Normal, 1=Vertically mirrored)
 		bool x_flip;	  // X flip          (0=Normal, 1=Horizontally mirrored)
 		bool palette;	  // Palette number  **Non CGB Mode Only** (0=OBP0, 1=OBP1)
+		Tile tile_data;
 	};
 	void build_sprite_data(const u16 &addr, const u8 &data);
 
 public:
 	std::vector<Sprite> sprites;
-	std::vector<std::vector<Pixel_a>> &get_tile_buffer() { return tile_buffer; }
+	std::vector<Tile> &get_tile_buffer() { return tile_buffer; }
 
 	Pixel_a const *get_lcd_buffer() const;
 

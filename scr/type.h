@@ -56,24 +56,23 @@ constexpr unsigned int BG_MAP_SIZE = 256;
 constexpr unsigned int TILE_BUFFER_WIDTH = 128;
 constexpr unsigned int TILE_BUFFER_HEIGHT = 192;
 
-
 // LCD Register Adressen
 constexpr u16 LCD_CONTROL = 0xFF40;
 constexpr u16 LCD_STATUS = 0xFF41;
 
-constexpr u16 LCD_SCY = 0xFF42;  // SCY - Scroll Y (R/W)		
-constexpr u16 LCD_SCX = 0xFF43;  // SCX - Scroll X (R/W)
-constexpr u16 LCD_LY = 0xFF44;   // LY - LCDC Y-Coordinate (R)
-constexpr u16 LCD_LYC = 0xFF45;  // LYC - LY Compare (R/W)
-constexpr u16 LCD_WY = 0xFF4A;   // WY - Window Y Position (R/W)
-constexpr u16 LCD_WX = 0xFF4B;   // WX - Window X Position minus 7 (R/W)
+constexpr u16 LCD_SCY = 0xFF42; // SCY - Scroll Y (R/W)
+constexpr u16 LCD_SCX = 0xFF43; // SCX - Scroll X (R/W)
+constexpr u16 LCD_LY = 0xFF44;	// LY - LCDC Y-Coordinate (R)
+constexpr u16 LCD_LYC = 0xFF45; // LYC - LY Compare (R/W)
+constexpr u16 LCD_WY = 0xFF4A;	// WY - Window Y Position (R/W)
+constexpr u16 LCD_WX = 0xFF4B;	// WX - Window X Position minus 7 (R/W)
 
 constexpr u16 BG_PALETTE_DATA =
-0xFF47;  // BGP - BG Palette Data (R/W) - Non CGB Mode Only
+	0xFF47; // BGP - BG Palette Data (R/W) - Non CGB Mode Only
 constexpr u16 SPRITE_PALETTE_DATA_0 =
-0xFF48;  // OBP0 - Object Palette 0 Data (R/W) - Non CGB Mode Only
+	0xFF48; // OBP0 - Object Palette 0 Data (R/W) - Non CGB Mode Only
 constexpr u16 SPRITE_PALETTE_DATA_1 =
-0xFF49;  // OBP1 - Object Palette 1 Data (R/W) - Non CGB Mode Only
+	0xFF49; // OBP1 - Object Palette 1 Data (R/W) - Non CGB Mode Only
 
 // JOYPAD REGISTER
 constexpr u16 JOY_P1_REGISTER = 0xFF00;
@@ -86,15 +85,15 @@ constexpr u16 TIMER_CONTROL = 0xFF07;
 constexpr int OSCILLATOR_CLOCK_FREQ = 4194304;
 
 constexpr u16
-DMA_TRANSFER = 0xFF46;  // DMA Transfer and Start Address (R/W)
+	DMA_TRANSFER = 0xFF46; // DMA Transfer and Start Address (R/W)
 
 constexpr int VERTICAL_REFRESH_CYCLES = 70224;
 
 enum class Flag {
-	z = 7,  // Zero Flag
-	n = 6,  // Add/Sub-Flag
-	h = 5,  // Half Carry Flag
-	c = 4   // Carry Flag
+	z = 7, // Zero Flag
+	n = 6, // Add/Sub-Flag
+	h = 5, // Half Carry Flag
+	c = 4  // Carry Flag
 };
 
 struct CPU_Register {
@@ -150,14 +149,13 @@ enum class Interrupt {
 	Joypad,
 };
 
-
 // ROM INFO
 enum class CGBFlag {
-	OFF [[maybe_unused]] = 0x80,  // - Game supports CGB functions, but works on old gameboys also.
-	ON [[maybe_unused]] = 0xC0,   // - Game works on CGB only(physically the same as 80h).
+	OFF [[maybe_unused]] = 0x80, // - Game supports CGB functions, but works on old gameboys also.
+	ON [[maybe_unused]] = 0xC0,	 // - Game works on CGB only(physically the same as 80h).
 };
 
-enum class CType {  // Cartridge Type
+enum class CType { // Cartridge Type
 	ROM_ONLY [[maybe_unused]] = 0x00,
 	MBC1 [[maybe_unused]] = 0x01,
 	MBC1_RAM [[maybe_unused]] = 0x02,
@@ -189,18 +187,18 @@ enum class CType {  // Cartridge Type
 };
 
 enum class ROMSize {
-	KB32 = 0x00,   //(no ROM banking)
-	KB64 = 0x01,   //(4 banks)
-	KB128 = 0x02,  //(8 banks)
-	KB256 = 0x03,  //(16 banks)
-	KB512 = 0x04,  //(32 banks)
-	MB1 = 0x05,    //(64 banks) - only 63 banks used by MBC1
-	MB2 = 0x06,    //(128 banks) - only 125 banks used by MBC1
-	MB4 = 0x07,    //(256 banks)
-	MB8 = 0x08,    //(512 banks)
-	MB1_1 = 0x52,  //(72 banks)
-	MB1_2 = 0x53,  //(80 banks)
-	MB1_5 = 0x54,  //(96 banks)
+	KB32 = 0x00,  //(no ROM banking)
+	KB64 = 0x01,  //(4 banks)
+	KB128 = 0x02, //(8 banks)
+	KB256 = 0x03, //(16 banks)
+	KB512 = 0x04, //(32 banks)
+	MB1 = 0x05,	  //(64 banks) - only 63 banks used by MBC1
+	MB2 = 0x06,	  //(128 banks) - only 125 banks used by MBC1
+	MB4 = 0x07,	  //(256 banks)
+	MB8 = 0x08,	  //(512 banks)
+	MB1_1 = 0x52, //(72 banks)
+	MB1_2 = 0x53, //(80 banks)
+	MB1_5 = 0x54, //(96 banks)
 };
 enum class Debug_State {
 	STEP,
@@ -211,9 +209,9 @@ enum class RAMSize {
 	None = 0x00,
 	KB2 = 0x01,
 	KB8 = 0x02,
-	KB32 = 0x03,   //(4 banks of 8KBytes each)
-	KB128 = 0x04,  //(16 banks of 8KBytes each)
-	KB64 = 0x05,   // (8 banks of 8KBytes each)
+	KB32 = 0x03,  //(4 banks of 8KBytes each)
+	KB128 = 0x04, //(16 banks of 8KBytes each)
+	KB64 = 0x05,  // (8 banks of 8KBytes each)
 };
 
 enum class DestCode {
@@ -236,62 +234,61 @@ struct Rom_Info {
 	int ram_banks{};
 
 public:
-	const char* CGBFlag_string();
+	const char *CGBFlag_string();
 
-	const char* CType_string() const;
+	const char *CType_string() const;
 
-	const char* rom_size_string() const;
+	const char *rom_size_string() const;
 
-	const char* ram_size_string() const;
-
+	const char *ram_size_string() const;
 };
 
 struct debug_instruction {
-	const char* mnemonic{};
+	const char *mnemonic{};
 	u8 bytes{};
 	u8 cycles{};
 	u8 opcode{};
 	u16 intermediate{};
 	u16 address{};
-	bool prefixed{ false };
+	bool prefixed{false};
 };
 
 struct Pixel {
-	// GL_RGB	
-	// Red, Green, Blue	
+	// GL_RGB
+	// Red, Green, Blue
 	u8 R;
 	u8 G;
 	u8 B;
 };
 struct Pixel_a {
 	// GL_RGBA
-	// Red, Green, Blue, Alpha	
+	// Red, Green, Blue, Alpha
 	u8 R;
 	u8 G;
 	u8 B;
 	u8 A;
 };
+
+typedef std::vector<Pixel_a> Tile;
 struct LCD_Register {
 	// u8 Werte die mit hilfe ihrer Adressen von der GB CPU beschrieben werden
 	Register LCD_CONTROL;
 	Register LCD_STATUS;
 
-	Register LCD_SCY;  // SCY - Scroll Y (R/W)
-	Register LCD_SCX;  // SCX - Scroll X (R/W)
-	Register LCD_LY;   // LY - LCDC Y-Coordinate (R)
-	Register LCD_LYC;  // LYC - LY Compare (R/W)
-	Register LCD_WY;   // WY - Window Y Position (R/W)
-	Register LCD_WX;   // WX - Window X Position minus 7 (R/W)
+	Register LCD_SCY; // SCY - Scroll Y (R/W)
+	Register LCD_SCX; // SCX - Scroll X (R/W)
+	Register LCD_LY;  // LY - LCDC Y-Coordinate (R)
+	Register LCD_LYC; // LYC - LY Compare (R/W)
+	Register LCD_WY;  // WY - Window Y Position (R/W)
+	Register LCD_WX;  // WX - Window X Position minus 7 (R/W)
 
-	Register BG_PALETTE_DATA;    // BGP - BG Palette Data (R/W)
+	Register BG_PALETTE_DATA; // BGP - BG Palette Data (R/W)
 	// - Non CGB Mode Only
-	Register SPRITE_PALETTE_DATA_0;  // OBP0 - Object Palette 0 Data (R/W)
+	Register SPRITE_PALETTE_DATA_0; // OBP0 - Object Palette 0 Data (R/W)
 	// - Non CGB Mode Only
-	Register SPRITE_PALETTE_DATA_1;  // OBP1 - Object Palette 1 Data (R/W)
-	// - Non CGB Mode Only
-
+	Register SPRITE_PALETTE_DATA_1; // OBP1 - Object Palette 1 Data (R/W)
+									// - Non CGB Mode Only
 };
-
 
 // 0: During H - Blank
 // 1 : During V - Blank
@@ -324,36 +321,35 @@ enum class GB_Key {
 
 };
 
-
 //void rom_info_CType_to_
 
-void set_bit_if(u8& data, const u8& bit, bool condition);
+void set_bit_if(u8 &data, const u8 &bit, bool condition);
 
-void set_bit_if(u16& data,
-				const u16& bit,
-				bool condition
-);
+void set_bit_if(u16 &data,
+				const u16 &bit,
+				bool condition);
 
-void set_bit(u8& data, const u8& bit);
+void set_bit(u8 &data, const u8 &bit);
 
-void set_bit(u16& data,
-			 const u16& bit
-);
+void set_bit(u16 &data,
+			 const u16 &bit);
 
-void reset_bit(u8& data, const u8& bit);
+void reset_bit(u8 &data, const u8 &bit);
 
-void reset_bit(u16& data,
-			   const u16& bit
-);
+void reset_bit(u16 &data,
+			   const u16 &bit);
 
-void toggle_bit(u8& data, const u8& bit);
+void toggle_bit(u8 &data, const u8 &bit);
 
-void toggle_bit(u16& data,
-				const u16& bit
-);
+void toggle_bit(u16 &data,
+				const u16 &bit);
 
-bool check_bit(const u8& data, const u8& bit);
+bool check_bit(const u8 &data, const u8 &bit);
 
-bool check_bit(const u16& data, const u16& bit);
+bool check_bit(const u16 &data, const u16 &bit);
 
-#endif  // !TYPE_H_GUARD
+// MATH
+#define MIN(a, b) (((a) < (b)) ? (a) : (b))
+#define MAX(a, b) (((a) > (b)) ? (a) : (b))
+
+#endif // !TYPE_H_GUARD

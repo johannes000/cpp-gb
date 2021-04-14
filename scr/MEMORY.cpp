@@ -33,7 +33,7 @@ inline u8 MEMORY::read(const u16 &addr) {
 	return 0x00;
 }
 
-u8 MEMORY::handle_mapped_io_read(const u16 &addr) const {
+inline u8 MEMORY::handle_mapped_io_read(const u16 &addr) const {
 	switch (addr) {
 	case JOY_P1_REGISTER:
 		return joypad->read(addr);

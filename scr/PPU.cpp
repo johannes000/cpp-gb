@@ -41,7 +41,6 @@ void PPU::update(const int cycles) {
 			cycles_in_mode -= CLOCKS_HORIZONTAL_BLANK;
 			buffer_line(lcd_register.LCD_LY);
 			buffer_sprite(lcd_register.LCD_LY);
-
 			if (++lcd_register.LCD_LY >= GB_LCD_SIZE_HEIGHT) {
 				set_lcd_mode(LCD_Mode::V_Blank);
 				cpu->request_interrupt(Interrupt::V_Blank);
@@ -151,7 +150,8 @@ void PPU::reset() {
 	sprite_obj_palette_0 = Palettes[0];
 	sprite_obj_palette_1 = Palettes[0];
 
-	std::vector<Sprite> sprites(40);
+	Tile t((8 * 8) + 1, {0xFF, 0xFF, 0xFF, 0xFF});
+	std::vector<Sprite> sprites(40, {0, 0, 0, 0, false, false, false, false, t});
 
 	lcd_register = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 					0x00, 0x00, 0x00, 0x00, 0x00};
@@ -162,7 +162,9 @@ void PPU::reset() {
 	sprite_attribute_table = std::vector<u8>(OAM_SIZE, 0xFF);
 
 	bg_buffer = std::vector<Pixel_a>(GB_LCD_SIZE_WIDTH * GB_LCD_SIZE_HEIGHT,
-									 {0xFF, 0xFF, 0xFF, 0xFF});
+									 Palettes[current_palette][0]);
+	sprite_buffer = std::vector<Pixel_a>(GB_LCD_SIZE_WIDTH * GB_LCD_SIZE_HEIGHT,
+										 Palettes[current_palette][0]);
 	tile_buffer = std::vector<std::vector<Pixel_a>>(
 		0xFFF1, {(8 * 8) + 1, {0xFF, 0xFF, 0xFF, 0xFF}});
 	lcd_control.update(this);
@@ -172,7 +174,6 @@ void PPU::reset() {
 	set_lcd_mode(LCD_Mode::OAM);
 	load_lcd_mode();
 }
-
 // Schreibt den gewünschten mode ins LCD Status register
 void PPU::set_lcd_mode(LCD_Mode m) {
 	const auto mode = static_cast<u8>(m);
@@ -245,8 +246,27 @@ void PPU::buffer_line(const u8 line) {
 }
 
 void PPU::buffer_sprite([[maybe_unused]] const u8 line) {
-	if (!lcd_control.sprites_enabled)
+	lcd_control.update(this);
+	if (line > GB_LCD_SIZE_HEIGHT || !lcd_control.sprites_enabled || !lcd_control.lcd_power)
 		return;
+	u8 sprites_count = 0;
+	int sprite_size = lcd_control.sprite_size ? 16 : 8;
+	const int y = static_cast<int>(line);
+	for (auto &spr : sprites) {
+		if (spr.y_pos != 0 && spr.y_pos < 160 && spr.x_pos != 0 && spr.x_pos < 168 && sprites_count <= 10) {
+			if (y > spr.y_pos - sprite_size && y <= spr.y_pos) {
+				sprites_count++;
+				const int pixel_y_pos = spr.y_pos - y;
+				if (pixel_y_pos >= 0) {
+					for (int pixel_x_pos = 7; pixel_x_pos >= 0; pixel_x_pos--) {
+						const int buffer_index = ((GB_LCD_SIZE_WIDTH * (y - 8)) + spr.x_pos - pixel_x_pos);
+						bg_buffer[buffer_index] = spr.tile_data[(pixel_y_pos * 8) + pixel_x_pos];
+					}
+				}
+			}
+		}
+	}
+	return;
 }
 
 void PPU::build_palette(const u16 addr, u8 data) {
@@ -282,13 +302,15 @@ void PPU::build_sprite_data(const u16 &addr, const u8 &data) {
 	if (sprite_id < 40) {
 		switch (addr & 3u) {
 		case 0:
-			sprites[sprite_id].y = data - 16;
+			sprites[sprite_id].y_pos = data;
 			break;
 		case 1:
-			sprites[sprite_id].x = data - 8;
+			sprites[sprite_id].x_pos = data;
 			break;
 		case 2:
 			sprites[sprite_id].tile_no = data;
+			sprites[sprite_id].id = sprite_id;
+			sprites[sprite_id].tile_data = tile_buffer[data];
 			break;
 		case 3:
 			sprites[sprite_id].palette = check_bit(data, 4);
@@ -301,6 +323,7 @@ void PPU::build_sprite_data(const u16 &addr, const u8 &data) {
 }
 
 [[nodiscard]] const Pixel_a *PPU::get_lcd_buffer() const {
+	// return &bg_buffer[0];
 	return &bg_buffer[0];
 }
 

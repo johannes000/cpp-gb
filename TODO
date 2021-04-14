@@ -5,10 +5,12 @@ Todo:
   ☐ Google Test @low 
     ☐ Bootrom Skippen 
     ☐ Test roms ohne Rendern durchlaufen lassen
+  ☐ Menu Bar @low
   ☐ Tracer für Disassambler @low
   ☐ Timer fixen @critical
   ☐ PPU Interrupts @high
   ☐ Sound @low
+  ☐ Banks @low
   ☐ Controlls Plattformunabhängig gestalten @low
   ☐ Gameboy komplett Plattformunabhängig machen @low
     ☐ als DLL builden

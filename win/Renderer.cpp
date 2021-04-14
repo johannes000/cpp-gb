@@ -189,7 +189,6 @@ void Renderer::update_views(PPU *ppu, Debugger *debug) {
 	if (show_debug_views) {
 		tile_buffer_view(ppu);
 		debug->update_views();
-		joypad->c_view();
 	}
 }
 
@@ -267,8 +266,8 @@ void Renderer::tile_buffer_view(PPU *ppu) {
 		for (auto sprite : ppu->sprites) {
 			if (ImGui::TreeNode(std::to_string(index).c_str())) {
 				ImGui::Text("Tile No:%i", sprite.tile_no);
-				ImGui::Text("X:      %i", sprite.x);
-				ImGui::Text("Y:      %i", sprite.y);
+				ImGui::Text("X:      %i", sprite.x_pos);
+				ImGui::Text("Y:      %i", sprite.y_pos);
 				ImGui::TreePop();
 			}
 			index++;
