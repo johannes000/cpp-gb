@@ -3,12 +3,7 @@
 PPU::PPU(MEMORY *m, CPU *c)
 	: ready_to_render(false),
 	  cpu(c),
-	  mem(m),
-	  sprites(40),
-	  palette_data_buffer(GB_LCD_SIZE_HEIGHT * GB_LCD_SIZE_WIDTH),
-	  bg_buffer(GB_LCD_SIZE_HEIGHT * GB_LCD_SIZE_WIDTH),
-	  sprite_buffer(GB_LCD_SIZE_HEIGHT * GB_LCD_SIZE_WIDTH),
-	  tile_buffer(0xFFF1) {
+	  mem(m) {
 	reset();
 }
 
@@ -146,12 +141,8 @@ u8 PPU::read(const u16 &addr) const {
 }
 
 void PPU::reset() {
-	bg_palette = Palettes[0];
-	sprite_obj_palette_0 = Palettes[0];
-	sprite_obj_palette_1 = Palettes[0];
-
-	Tile t((8 * 8) + 1, {0xFF, 0xFF, 0xFF, 0xFF});
-	std::vector<Sprite> sprites(40, {0, 0, 0, 0, false, false, false, false, t});
+	bg_palette = Palettes[current_palette];
+	sprite_obj_palette = std::vector<std::vector<Pixel_a>>(2, bg_palette);
 
 	lcd_register = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 					0x00, 0x00, 0x00, 0x00, 0x00};
@@ -161,12 +152,11 @@ void PPU::reset() {
 
 	sprite_attribute_table = std::vector<u8>(OAM_SIZE, 0xFF);
 
-	bg_buffer = std::vector<Pixel_a>(GB_LCD_SIZE_WIDTH * GB_LCD_SIZE_HEIGHT,
-									 Palettes[current_palette][0]);
-	sprite_buffer = std::vector<Pixel_a>(GB_LCD_SIZE_WIDTH * GB_LCD_SIZE_HEIGHT,
-										 Palettes[current_palette][0]);
-	tile_buffer = std::vector<std::vector<Pixel_a>>(
-		0xFFF1, {(8 * 8) + 1, {0xFF, 0xFF, 0xFF, 0xFF}});
+	bg_buffer = std::vector<Pixel_a>(GB_LCD_SIZE_WIDTH * GB_LCD_SIZE_HEIGHT, Palettes[current_palette][0]);
+	sprite_buffer = std::vector<Pixel_a>(GB_LCD_SIZE_WIDTH * GB_LCD_SIZE_HEIGHT, Palettes[current_palette][0]);
+	tile_map_data = std::vector<std::vector<u8>>(0x0FFF, std::vector<u8>((8 * 8) + 1, 0));
+	sprites = std::vector<Sprite>(40, {0, 0, 0, 0, false, false, false, false, std::vector<u8>((8 * 8) + 1, 0)});
+
 	lcd_control.update(this);
 
 	cycles_in_mode = 0;
@@ -238,8 +228,8 @@ void PPU::buffer_line(const u8 line) {
 				 tile_pixel_x <= TILE_WIDTH && x <= GB_LCD_SIZE_WIDTH - 1;
 				 x++, tile_pixel_x++) {
 				const auto index = ((GB_LCD_SIZE_WIDTH * y) + x);
-				bg_buffer[index] =
-					tile_buffer[tile_id][(tile_pixel_y * 8) + tile_pixel_x - 1];
+				const auto color = tile_map_data[tile_id][(tile_pixel_y * 8) + tile_pixel_x - 1];
+				bg_buffer[index] = bg_palette[color];
 			}
 		}
 	}
@@ -252,15 +242,33 @@ void PPU::buffer_sprite([[maybe_unused]] const u8 line) {
 	u8 sprites_count = 0;
 	int sprite_size = lcd_control.sprite_size ? 16 : 8;
 	const int y = static_cast<int>(line);
+
 	for (auto &spr : sprites) {
 		if (spr.y_pos != 0 && spr.y_pos < 160 && spr.x_pos != 0 && spr.x_pos < 168 && sprites_count <= 10) {
 			if (y > spr.y_pos - sprite_size && y <= spr.y_pos) {
+				// Sprite wird gebufferd
 				sprites_count++;
 				const int pixel_y_pos = spr.y_pos - y;
 				if (pixel_y_pos >= 0) {
-					for (int pixel_x_pos = 7; pixel_x_pos >= 0; pixel_x_pos--) {
-						const int buffer_index = ((GB_LCD_SIZE_WIDTH * (y - 8)) + spr.x_pos - pixel_x_pos);
-						bg_buffer[buffer_index] = spr.tile_data[(pixel_y_pos * 8) + pixel_x_pos];
+
+					if (spr.x_flip && !spr.y_flip) {
+						for (int pixel_x_pos = 7; pixel_x_pos >= 0; pixel_x_pos--) {
+							const int buffer_index = ((GB_LCD_SIZE_WIDTH * (y - 8)) + spr.x_pos - pixel_x_pos);
+							const auto palette_color_index = spr.tile_data[(pixel_y_pos * 8) + pixel_x_pos];
+							if (palette_color_index != 0) {
+								const auto color = sprite_obj_palette[spr.palette % 2][palette_color_index];
+								bg_buffer[buffer_index] = color;
+							}
+						}
+					} else {
+						for (int pixel_x_pos = 7; pixel_x_pos >= 0; pixel_x_pos--) {
+							const int buffer_index = ((GB_LCD_SIZE_WIDTH * (y - 8)) + spr.x_pos - pixel_x_pos);
+							const auto palette_color_index = spr.tile_data[(pixel_y_pos * 8) + pixel_x_pos];
+							if (palette_color_index != 0) {
+								const auto color = sprite_obj_palette[spr.palette % 2][palette_color_index];
+								bg_buffer[buffer_index] = color;
+							}
+						}
 					}
 				}
 			}
@@ -281,14 +289,14 @@ void PPU::build_palette(const u16 addr, u8 data) {
 	case SPRITE_PALETTE_DATA_0:
 		lcd_register.SPRITE_PALETTE_DATA_0 = data;
 		for (u8 i = 0; i < 4; i++) {
-			sprite_obj_palette_0[i] =
+			sprite_obj_palette[0][i] =
 				Palettes[current_palette][(data >> (i * 2)) & 3u];
 		}
 		break;
 	case SPRITE_PALETTE_DATA_1:
 		lcd_register.SPRITE_PALETTE_DATA_1 = data;
 		for (u8 i = 0; i < 4; i++) {
-			sprite_obj_palette_1[i] =
+			sprite_obj_palette[1][i] =
 				Palettes[current_palette][(data >> (i * 2)) & 3u];
 		}
 		break;
@@ -310,7 +318,7 @@ void PPU::build_sprite_data(const u16 &addr, const u8 &data) {
 		case 2:
 			sprites[sprite_id].tile_no = data;
 			sprites[sprite_id].id = sprite_id;
-			sprites[sprite_id].tile_data = tile_buffer[data];
+			sprites[sprite_id].tile_data = tile_map_data[data];
 			break;
 		case 3:
 			sprites[sprite_id].palette = check_bit(data, 4);
@@ -339,7 +347,7 @@ void PPU::update_tile(const u16 &a) {
 		const u8 color = static_cast<u8>(check_bit(p_line_1, (7u - pixel)) << 1u) |
 						 check_bit(p_line_2, (7u - pixel));
 		auto p = ((y * 8) + pixel);
-		tile_buffer[tile_id][p] = bg_palette[color];
+		tile_map_data[tile_id][p] = color;
 	}
 }
 

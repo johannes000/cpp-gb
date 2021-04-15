@@ -116,17 +116,16 @@ private:
 	std::vector<u8> palette_data_buffer;
 	std::vector<Pixel_a> bg_buffer;
 	std::vector<Pixel_a> sprite_buffer;
-	std::vector<Tile> tile_buffer;
+	std::vector<std::vector<u8>> tile_map_data;
 
 	void buffer_line(const u8 line);
 	void buffer_sprite(const u8 line);
 
-	int current_palette = 3;
+	int current_palette = 1;
 
 public:
 	// Paletten
-	std::vector<Pixel_a> sprite_obj_palette_1;
-	std::vector<Pixel_a> sprite_obj_palette_0;
+	std::vector<std::vector<Pixel_a>> sprite_obj_palette;
 	std::vector<Pixel_a> bg_palette;
 
 private:
@@ -144,14 +143,12 @@ private:
 		bool y_flip;	  // Y flip          (0=Normal, 1=Vertically mirrored)
 		bool x_flip;	  // X flip          (0=Normal, 1=Horizontally mirrored)
 		bool palette;	  // Palette number  **Non CGB Mode Only** (0=OBP0, 1=OBP1)
-		Tile tile_data;
+		std::vector<u8> tile_data;
 	};
 	void build_sprite_data(const u16 &addr, const u8 &data);
 
 public:
 	std::vector<Sprite> sprites;
-	std::vector<Tile> &get_tile_buffer() { return tile_buffer; }
-
 	Pixel_a const *get_lcd_buffer() const;
 
 	std::vector<std::vector<Pixel_a>> Palettes =

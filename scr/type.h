@@ -45,6 +45,8 @@ constexpr u16 ZERO_PAGE_RAM = 0xFF80;
 constexpr u16 ZERO_PAGE_RAM_END = 0xFFFE;
 constexpr u16 IN_BOOT_ADDRESS = 0xFF50;
 
+constexpr int TILES_IN_VRAM = 384;
+
 // LCD
 constexpr int GB_LCD_SIZE_WIDTH = 160;
 constexpr int GB_LCD_SIZE_HEIGHT = 144;
