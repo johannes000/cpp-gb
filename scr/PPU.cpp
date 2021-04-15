@@ -248,10 +248,12 @@ void PPU::buffer_sprite([[maybe_unused]] const u8 line) {
 			if (y > spr.y_pos - sprite_size && y <= spr.y_pos) {
 				// Sprite wird gebufferd
 				sprites_count++;
-				const int pixel_y_pos = spr.y_pos - y;
-				if (pixel_y_pos >= 0) {
+				// Y-Flip
+				const int pixel_y_pos = spr.y_flip ? spr.y_pos - y : y - spr.y_pos + sprite_size - 1;
 
-					if (spr.x_flip && !spr.y_flip) {
+				if (pixel_y_pos >= 0) {
+					// X-Flip
+					if (spr.x_flip) {
 						for (int pixel_x_pos = 7; pixel_x_pos >= 0; pixel_x_pos--) {
 							const int buffer_index = ((GB_LCD_SIZE_WIDTH * (y - 8)) + spr.x_pos - pixel_x_pos);
 							const auto palette_color_index = spr.tile_data[(pixel_y_pos * 8) + pixel_x_pos];
@@ -261,8 +263,8 @@ void PPU::buffer_sprite([[maybe_unused]] const u8 line) {
 							}
 						}
 					} else {
-						for (int pixel_x_pos = 7; pixel_x_pos >= 0; pixel_x_pos--) {
-							const int buffer_index = ((GB_LCD_SIZE_WIDTH * (y - 8)) + spr.x_pos - pixel_x_pos);
+						for (int pixel_x_pos = 0; pixel_x_pos <= 7 && (spr.x_pos + pixel_x_pos - 8) != 0; pixel_x_pos++) {
+							const int buffer_index = ((GB_LCD_SIZE_WIDTH * (y - 8)) + spr.x_pos + pixel_x_pos - 8);
 							const auto palette_color_index = spr.tile_data[(pixel_y_pos * 8) + pixel_x_pos];
 							if (palette_color_index != 0) {
 								const auto color = sprite_obj_palette[spr.palette % 2][palette_color_index];
