@@ -1,13 +1,14 @@
 
 Todo:
-  ☐ Sprites @critical @started
+  ☐ Window Layer @high
   ☐ Unabhängige Layer für Sprites und BG @high
+  ☐ Bootrom Skippen @high 
   ☐ Google Test @low 
-    ☐ Bootrom Skippen 
     ☐ Test roms ohne Rendern durchlaufen lassen
   ☐ Menu Bar @low
   ☐ Tracer für Disassambler @low
   ☐ Timer fixen @critical
+  ☐ Emu drosseln @high @started
   ☐ PPU Interrupts @high
   ☐ Sound @low
   ☐ Banks @low
@@ -17,5 +18,7 @@ Todo:
   ☐ Paletten Richtig implementieren @low
   ☐ Custon Palettes UI @low
     ☐ Colorpoicker 
-  Done:
-  
+    
+Done:
+  ✔ Sprites @done(17-04-21)
+  ✔ FPS drossel @done(18-04-21)
