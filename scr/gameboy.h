@@ -22,7 +22,7 @@ struct gameboy {
 	void run_one_cycle();
 	void run_until_breakpoint();
 
-	bool load_rom(const char*);
+	bool load_rom(const char *, bool);
 };
 
-#endif  // !GAMEBOY_H_GUARD
+#endif // !GAMEBOY_H_GUARD

@@ -7,9 +7,9 @@ gameboy::gameboy()
 	  joypad(&mem),
 	  debug(&cpu, &ppu, &mem, &card, &joypad) {}
 
-bool gameboy::load_rom(const char *rom_file) {
-	mem.reset();
-	cpu.init_register();
+bool gameboy::load_rom(const char *rom_file, bool skip_boot_rom) {
+	mem.reset(skip_boot_rom);
+	cpu.init_register(skip_boot_rom);
 	ppu.reset();
 
 	if (!*rom_file)

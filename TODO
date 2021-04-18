@@ -2,7 +2,6 @@
 Todo:
   ☐ Window Layer @high
   ☐ Unabhängige Layer für Sprites und BG @high
-  ☐ Bootrom Skippen @high 
   ☐ Google Test @low 
     ☐ Test roms ohne Rendern durchlaufen lassen
   ☐ Menu Bar @low
@@ -22,3 +21,4 @@ Todo:
 Done:
   ✔ Sprites @done(17-04-21)
   ✔ FPS drossel @done(18-04-21)
+  ✔ Bootrom Skippen @done(18-04-21)

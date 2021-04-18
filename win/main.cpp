@@ -10,20 +10,22 @@
 #include "Renderer.h"
 #include "gameboy.h"
 
-const double target_FPS = 60;
-const double target_duration = 1 / target_FPS;
-double measured_duration = 0.0;
-
-bool fps_drossel = true;
-
 int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
+	const double target_FPS = 60;
+	const double target_duration = 1 / target_FPS;
+	double measured_duration = 0.0;
+
+	bool fps_drossel = true;
+
+	bool skip_boot_rom = true;
+
 	gameboy gb;
 
 	Renderer renderer(&gb.joypad);
 
 	std::string file;
 	file = renderer.file_browser();
-	gb.load_rom(file.c_str());
+	gb.load_rom(file.c_str(), skip_boot_rom);
 	file = "";
 
 	while (!glfwWindowShouldClose(renderer.window)) {
@@ -57,7 +59,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
 
 		file = renderer.rom_select_view();
 		if (!file.empty())
-			gb.load_rom(file.c_str());
+			gb.load_rom(file.c_str(), skip_boot_rom);
 
 		renderer.render();
 	}
