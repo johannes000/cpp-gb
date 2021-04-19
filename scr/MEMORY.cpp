@@ -1,6 +1,7 @@
 #include "MEMORY.h"
 #include <iostream>
 #include <fstream>
+#include <windows.h>
 
 MEMORY::MEMORY(CPU *c, CARDRIDGE *card, PPU *p, CONTROLS *j)
 	: cardridge(card), ppu(p), cpu(c), joypad(j) {
@@ -35,29 +36,29 @@ inline u8 MEMORY::read(const u16 &addr) {
 
 inline u8 MEMORY::handle_mapped_io_read(const u16 &addr) const {
 	switch (addr) {
-	case JOY_P1_REGISTER:
-		return joypad->read(addr);
-	case LCD_CONTROL:
-	case LCD_STATUS:
-	case LCD_SCY:
-	case LCD_SCX:
-	case LCD_LY:
-	case LCD_LYC:
-	case LCD_WY:
-	case LCD_WX:
-	case BG_PALETTE_DATA:
-	case SPRITE_PALETTE_DATA_0:
-	case SPRITE_PALETTE_DATA_1:
-		return ppu->read(addr);
-	case INTERRUPT_FLAGS_REG:
-	case INTERRUPT_ENABLE_REG:
-	case DIVIDER_REGISTER:
-	case TIMER_CONTROL:
-	case TIMER_COUNTER:
-	case TIMER_MODULO:
-		return cpu->read(addr);
-	default:
-		return memory.at(addr);
+		case JOY_P1_REGISTER:
+			return joypad->read(addr);
+		case LCD_CONTROL:
+		case LCD_STATUS:
+		case LCD_SCY:
+		case LCD_SCX:
+		case LCD_LY:
+		case LCD_LYC:
+		case LCD_WY:
+		case LCD_WX:
+		case BG_PALETTE_DATA:
+		case SPRITE_PALETTE_DATA_0:
+		case SPRITE_PALETTE_DATA_1:
+			return ppu->read(addr);
+		case INTERRUPT_FLAGS_REG:
+		case INTERRUPT_ENABLE_REG:
+		case DIVIDER_REGISTER:
+		case TIMER_CONTROL:
+		case TIMER_COUNTER:
+		case TIMER_MODULO:
+			return cpu->read(addr);
+		default:
+			return memory.at(addr);
 	}
 }
 
@@ -88,36 +89,36 @@ inline void MEMORY::write(const u16 &addr, const u8 &data) {
 
 void MEMORY::handle_mapped_io_write(const u16 &addr, const u8 &data) {
 	switch (addr) {
-	case LCD_CONTROL:
-	case LCD_STATUS:
-	case LCD_SCY:
-	case LCD_SCX:
-	case LCD_LY:
-	case LCD_LYC:
-	case LCD_WY:
-	case LCD_WX:
-	case BG_PALETTE_DATA:
-	case SPRITE_PALETTE_DATA_0:
-	case SPRITE_PALETTE_DATA_1:
-		ppu->write(addr, data);
-		break;
-	case DMA_TRANSFER:
-		cpu->write(addr, data);
-		break;
-	case INTERRUPT_FLAGS_REG:
-	case IN_BOOT_ADDRESS:
-	case DIVIDER_REGISTER:
-	case TIMER_CONTROL:
-	case TIMER_COUNTER:
-	case TIMER_MODULO:
-		cpu->write(addr, data);
-		break;
-	case JOY_P1_REGISTER:
-		joypad->write(addr, data);
-		break;
-	default:
-		memory.at(addr) = data;
-		break;
+		case LCD_CONTROL:
+		case LCD_STATUS:
+		case LCD_SCY:
+		case LCD_SCX:
+		case LCD_LY:
+		case LCD_LYC:
+		case LCD_WY:
+		case LCD_WX:
+		case BG_PALETTE_DATA:
+		case SPRITE_PALETTE_DATA_0:
+		case SPRITE_PALETTE_DATA_1:
+			ppu->write(addr, data);
+			break;
+		case DMA_TRANSFER:
+			cpu->write(addr, data);
+			break;
+		case INTERRUPT_FLAGS_REG:
+		case IN_BOOT_ADDRESS:
+		case DIVIDER_REGISTER:
+		case TIMER_CONTROL:
+		case TIMER_COUNTER:
+		case TIMER_MODULO:
+			cpu->write(addr, data);
+			break;
+		case JOY_P1_REGISTER:
+			joypad->write(addr, data);
+			break;
+		default:
+			memory.at(addr) = data;
+			break;
 	}
 }
 
@@ -132,7 +133,6 @@ void MEMORY::reset(bool skip_boot_rom) {
 
 	memory = std::vector<u8>(0x10000, 0);
 	if (skip_boot_rom) {
-		boot.erase(boot.begin(), boot.end());
 
 		// Zero the memory from $8000-$9FFF (VRAM)
 		for (u16 addr = 0x8000; addr < 0xA000; addr++) {
@@ -171,14 +171,18 @@ void MEMORY::reset(bool skip_boot_rom) {
 		write(0xFF4B, 0x00); // WX
 		write(0xFFFF, 0x00); // IE
 	} else {
+		boot.erase(boot.begin(), boot.end());
 		load_boot_rom();
 	}
 }
 
 bool MEMORY::load_boot_rom() {
+	const char *boot_rom_path = "C:/Users/knaub/source/repos/testroms/dmg_boot.bin";
+
 	std::ifstream is(boot_rom_path, std::ios::binary);
 	if (!is) {
 		std::cerr << "Kann die Boot Rom nicht öffnen!" << std::endl;
+		std::cerr << boot_rom_path << std::endl;
 		std::abort();
 	}
 	const std::vector<u8> romf(std::istreambuf_iterator<char>(is), {});

@@ -5,18 +5,23 @@ gameboy::gameboy()
 	  cpu(&mem),
 	  ppu(&mem, &cpu),
 	  joypad(&mem),
-	  debug(&cpu, &ppu, &mem, &card, &joypad) {}
+	  debug(&cpu, &ppu, &mem, &card, &joypad) {
+	reset(false);
+}
 
 bool gameboy::load_rom(const char *rom_file, bool skip_boot_rom) {
-	mem.reset(skip_boot_rom);
-	cpu.init_register(skip_boot_rom);
-	ppu.reset();
+	reset(skip_boot_rom);
 
 	if (!*rom_file)
 		return false;
 	card.load_rom(rom_file);
 
 	return true;
+}
+void gameboy::reset(bool skip_boot_rom) {
+	mem.reset(skip_boot_rom);
+	cpu.init_register(skip_boot_rom);
+	ppu.reset();
 }
 
 void gameboy::run_one_cycle() {

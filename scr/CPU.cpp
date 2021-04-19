@@ -16,27 +16,28 @@ CPU::CPU(MEMORY *m) : mem(m) {}
 void CPU::init_register(bool skip_boot) {
 	in_boot = true;
 	R.PC = 0x0000;
+	IME = false;
+	is_halted = false;
+
+	interrupt_enable_register = 0x00;
+	interrupt_request_register = 0x00;
+
+	timer_cycle_sum = 0;
+	div_cycle_sum = 0;
+
+	op_code = 0x00;
+	cycles = 0;
 
 	if (skip_boot) {
+		in_boot = false;
+
 		R.AF = 0x01B0;
 		R.BC = 0x0013;
 		R.DE = 0x00D8;
 		R.HL = 0x014D;
 		R.SP = 0xFFFE;
 		R.PC = 0x0100;
-
-		interrupt_enable_register = 0x00;
-		interrupt_request_register = 0x00;
-
-		timer_cycle_sum = 0;
-		div_cycle_sum = 0;
-
-		op_code = 0x00;
-		cycles = 0;
-		in_boot = false;
 	}
-	IME = false;
-	is_halted = false;
 }
 
 u8 CPU::parse_op_code(u8 &opcode) {

@@ -11,10 +11,9 @@
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 
-#include <imfilebrowser.h>
-
 #include <cstdio>
 #include <cstdlib>
+#include <windows.h>
 
 #include <map>
 
@@ -23,7 +22,6 @@
 #elif defined(IMGUI_IMPL_OPENGL_LOADER_GLEW)
 #include <GL/glew.h> // Initialize with glewInit()
 #elif defined(IMGUI_IMPL_OPENGL_LOADER_GLAD)
-
 #include <glad/glad.h> // Initialize with gladLoadGL()
 
 #elif defined(IMGUI_IMPL_OPENGL_LOADER_GLBINDING2)
@@ -103,10 +101,6 @@ struct Renderer {
 	GLuint frame_texture;
 	GLuint tiles_texture;
 
-	ImGui::FileBrowser fileDialog;
-
-	std::string file_browser();
-
 	void update_views(PPU *ppu, Debugger *debug);
 
 	void update_tile_buffer(PPU *ppu);
@@ -119,11 +113,12 @@ struct Renderer {
 
 	void show_fps() const;
 
-	std::map<std::string, std::string> roms;
+	std::map<const char *, const char *> roms;
 
 	CONTROLS *joypad;
 
-	std::string rom_select_view();
+	char filename[MAX_PATH];
+	const char *rom_select_view();
 };
 
 void key_callback(GLFWwindow *window, int key, [[maybe_unused]] int scancode,

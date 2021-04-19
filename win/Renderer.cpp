@@ -25,22 +25,19 @@ Renderer::Renderer(CONTROLS *j) : joypad(j) {
 		{"OPUS 5", "C:/Users/knaub/source/repos/testroms/opus5.gb"},
 		{"pocket", "C:/Users/knaub/source/repos/testroms/pocket.gb"},
 		{"drmario", "C:/Users/knaub/source/repos/testroms/drmario.gb"},
-		{"special",
-		 "C:/Users/knaub/source/repos/testroms/cpu_instrs/individual/"
-		 "01-special.gb"},
-		{"interrupts",
-		 "C:/Users/knaub/source/repos/testroms/cpu_instrs/individual/"
-		 "02-interrupts.gb"},
-		{"op",
-		 "C:/Users/knaub/source/repos/testroms/cpu_instrs/individual/03-op.gb"},
-		{"instr_timing",
-		 "C:/Users/knaub/source/repos/testroms/instr_timing/instr_timing.gb"},
-		{"moon_boot_hwio",
-		 "C:/Users/knaub/source/repos/testroms/mooneye/acceptance/"
-		 "boot_hwio-S.gb"},
-		{"moon_ei_sequence",
-		 "C:/Users/knaub/source/repos/testroms/mooneye/acceptance/"
-		 "ei_sequence.gb"},
+		{"special", "C:/Users/knaub/source/repos/testroms/cpu_instrs/individual/01-special.gb"},
+		{"interrupts", "C:/Users/knaub/source/repos/testroms/cpu_instrs/individual/02-interrupts.gb"},
+		{"op", "C:/Users/knaub/source/repos/testroms/cpu_instrs/individual/03-op.gb"},
+		{"instr_timing", "C:/Users/knaub/source/repos/testroms/instr_timing/instr_timing.gb"},
+		{"moon_boot_hwio", "C:/Users/knaub/source/repos/testroms/mooneye/acceptance/boot_hwio-S.gb"},
+		{"moon_ei_sequence", "C:/Users/knaub/source/repos/testroms/mooneye/acceptance/ei_sequence.gb"},
+		{"winpos", "C:/Users/knaub/source/repos/testroms/scribbltests/winpos/winpos.gb"},
+		{"statcount", "C:/Users/knaub/source/repos/testroms/scribbltests/statcount/statcount-auto.gb"},
+		{"scxly", "C:/Users/knaub/source/repos/testroms/scribbltests/scxly/scxly.gb"},
+		{"palettely", "C:/Users/knaub/source/repos/testroms/scribbltests/palettely/palettely.gb"},
+		{"lycscy", "C:/Users/knaub/source/repos/testroms/scribbltests/lycscy/lycscy.gb"},
+		{"lycscx", "C:/Users/knaub/source/repos/testroms/scribbltests/lycscx/lycscx.gb"},
+		{"fairylake", "C:/Users/knaub/source/repos/testroms/scribbltests/fairylake/fairylake.gb"},
 	};
 }
 
@@ -294,48 +291,35 @@ void Renderer::show_fps() const {
 					   1000.0f / ImGui::GetIO().Framerate);
 }
 
-std::string Renderer::file_browser() {
-	std::string file;
-	fileDialog.SetTitle("Rom selection");
-	fileDialog.SetTypeFilters({".gb"});
-	while (!glfwWindowShouldClose(window)) {
-		glfwPollEvents();
+const char *Renderer::rom_select_view() {
+	ImGui::Begin("ROMS");
+	memset(filename, 0, sizeof(filename));
+	if (ImGui::Button("Open File")) {
 
-		ImGui_ImplOpenGL3_NewFrame();
-		ImGui_ImplGlfw_NewFrame();
-		ImGui::NewFrame();
+		OPENFILENAMEA ofn;
+		ZeroMemory(&filename, sizeof(filename));
+		ZeroMemory(&ofn, sizeof(ofn));
+		ofn.lStructSize = sizeof(ofn);
+		ofn.hwndOwner = NULL; // If you have a window to center over, put its HANDLE here
+		ofn.lpstrFilter = "Game Boy Rom\0*.gb\0";
+		ofn.lpstrFile = filename;
+		ofn.nMaxFile = MAX_PATH;
+		ofn.lpstrTitle = "Select a Rom";
+		ofn.Flags = OFN_DONTADDTORECENT | OFN_FILEMUSTEXIST;
 
-		if (ImGui::Begin("dummy window")) {
-			// open file dialog when user clicks this button
-			if (ImGui::Button("open file dialog"))
-				fileDialog.Open();
-		}
-		ImGui::End();
-
-		fileDialog.Display();
-		file = rom_select_view();
-		render();
-		if (fileDialog.HasSelected()) {
-			return fileDialog.GetSelected().string();
-		}
-		if (!file.empty()) {
-			return file;
+		if (GetOpenFileNameA(&ofn)) {
+			std::cout << "You chose the file \"" << filename << "\"\n";
 		}
 	}
-	exit(0);
-}
-
-std::string Renderer::rom_select_view() {
-	std::string file;
-	ImGui::Begin("ROMS");
+	ImGui::Separator();
 	for (auto &rom : roms) {
 		if (ImGui::Selectable("", true, ImGuiSelectableFlags_AllowDoubleClick))
-			file = rom.second;
+			strcpy(filename, rom.second);
 		ImGui::SameLine();
-		ImGui::Text("%s", rom.first.c_str());
+		ImGui::Text(rom.first);
 	}
 	ImGui::End();
-	return file;
+	return &filename[0];
 }
 
 void key_callback(GLFWwindow *window, int key, [[maybe_unused]] int scancode,

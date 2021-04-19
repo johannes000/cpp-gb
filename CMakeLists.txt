@@ -110,8 +110,7 @@ add_library(imgui
 
 add_executable(cpp-gb-w
         win/main.cpp
-        win/Renderer.cpp win/Renderer.h
-        external/imgui-filebrowser/imfilebrowser.h)
+        win/Renderer.cpp win/Renderer.h)
 
 target_link_libraries(cpp-gb-w cpp-gb debugger)
 target_link_libraries(cpp-gb-w imgui)

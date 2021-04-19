@@ -40,7 +40,6 @@ private:
 	CPU *cpu;
 	CONTROLS *joypad;
 
-	const char *boot_rom_path = "./dmg_boot.bin";
 	std::vector<u8> memory;
 	std::vector<u8> boot;
 	bool skip_boot = true;

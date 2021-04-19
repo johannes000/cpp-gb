@@ -15,17 +15,16 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
 	const double target_duration = 1 / target_FPS;
 	double measured_duration = 0.0;
 
-	bool fps_drossel = true;
+	bool fps_drossel = false;
 
-	bool skip_boot_rom = true;
+	bool skip_boot_rom = false;
 
 	gameboy gb;
 
 	Renderer renderer(&gb.joypad);
+	bool rom_loaded = false;
 
-	std::string file;
-	file = renderer.file_browser();
-	gb.load_rom(file.c_str(), skip_boot_rom);
+	const char *file;
 	file = "";
 
 	while (!glfwWindowShouldClose(renderer.window)) {
@@ -33,35 +32,37 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
 		double t_start = glfwGetTime();
 		double d_time = t_start - measured_duration;
 
-		glfwPollEvents();
-
 		if (d_time >= target_duration || !fps_drossel) {
 			measured_duration = t_start;
 
-			switch (gb.debug.get_debug_state()) {
-			case Debug_State::RUN:
-				gb.run_until_vblank();
-				break;
-			case Debug_State::STEP:
-				if (gb.debug.get_next_step()) {
-					gb.run_one_cycle();
-					gb.debug.handle_breakpoints();
+			glfwPollEvents();
+			renderer.start_new_imgui_frame();
+			if (rom_loaded) {
+				switch (gb.debug.get_debug_state()) {
+					case Debug_State::RUN:
+						gb.run_until_vblank();
+						break;
+					case Debug_State::STEP:
+						if (gb.debug.get_next_step()) {
+							gb.run_one_cycle();
+							gb.debug.handle_breakpoints();
+						}
+						break;
+					case Debug_State::BREAKPOINT:
+						gb.run_until_breakpoint();
+						break;
 				}
-				break;
-			case Debug_State::BREAKPOINT:
-				gb.run_until_breakpoint();
-				break;
+				renderer.update_views(&gb.ppu, &gb.debug);
 			}
+
+			file = renderer.rom_select_view();
+			if (file[0] != 0) {
+				gb.load_rom(file, skip_boot_rom);
+				rom_loaded = true;
+			}
+
+			renderer.render();
 		}
-
-		renderer.start_new_imgui_frame();
-		renderer.update_views(&gb.ppu, &gb.debug);
-
-		file = renderer.rom_select_view();
-		if (!file.empty())
-			gb.load_rom(file.c_str(), skip_boot_rom);
-
-		renderer.render();
 	}
 	return 0;
 }

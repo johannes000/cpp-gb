@@ -22,6 +22,8 @@ struct gameboy {
 	void run_one_cycle();
 	void run_until_breakpoint();
 
+	void reset(bool);
+
 	bool load_rom(const char *, bool);
 };
 
