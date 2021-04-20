@@ -293,11 +293,13 @@ u8 CPU::opcode0xC6() { // ADD A d8
 }
 
 u8 CPU::opcode0xE8() { // ADD SP r8
-	int data = static_cast<int>(read_u8_at_pc());
+	int data = static_cast<int>(read_i8_at_pc());
 	int result = R.SP + data;
 	reset_all_flags();
-	set_flag_if(Flag::c, (((R.SP ^ data ^ (result & 0xFFFFu)) & 0x100u) == 0x100u));
-	set_flag_if(Flag::h, (((R.SP ^ data ^ (result & 0xFFFFu)) & 0x10u) == 0x10u));
+	// set_flag_if(Flag::c, (((R.SP ^ data ^ (result & 0xFFFFu)) & 0x100u) == 0x100u));
+	// set_flag_if(Flag::h, (((R.SP ^ data ^ (result & 0xFFFFu)) & 0x10u) == 0x10u));
+	set_flag_if(Flag::c, ((result & 0xFF) < (R.SP & 0xFF)));
+	set_flag_if(Flag::h, ((result & 0xF) < (R.SP & 0xF)));
 	R.SP = static_cast<u16>(result);
 	return 0;
 }
