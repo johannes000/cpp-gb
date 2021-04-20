@@ -583,7 +583,7 @@ private:
 		{"BIT 7 E", &CPU::prefixedopcode0x7B, 2, 2},
 		{"BIT 7 H", &CPU::prefixedopcode0x7C, 2, 2},
 		{"BIT 7 L", &CPU::prefixedopcode0x7D, 2, 2},
-		{"BIT 7 HL", &CPU::prefixedopcode0x7E, 2, 3},
+		{"BIT 7 HL", &CPU::prefixedopcode0x7E, 2, 2},
 		{"BIT 7 A", &CPU::prefixedopcode0x7F, 2, 2},
 		{"RES 0 B", &CPU::prefixedopcode0x80, 2, 2},
 		{"RES 0 C", &CPU::prefixedopcode0x81, 2, 2},

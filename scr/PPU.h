@@ -31,7 +31,7 @@ class PPU {
 public:
 	explicit PPU(MEMORY *m, CPU *c);
 
-	void update(const int cycles);
+	void update(const int, bool);
 
 	void write(const u16 &addr, const u8 &data);
 
@@ -68,14 +68,11 @@ public:
 private:
 	struct LCD_Control {
 		bool lcd_power;			// Bit 7 - LCD Power(0 = Off, 1 = On)
-		bool window_tile_map;	// Bit 6 - Window Tile Map (0 = 9800h - 9BFFh, 1 =
-								// 9C00h - 9FFFh)
+		bool window_tile_map;	// Bit 6 - Window Tile Map (0 = 9800h - 9BFFh, 1 = 9C00h - 9FFFh)
 		bool window_enable;		// Bit 5 - Window Enable(0 = Disabled, 1 = Enabled)
-		bool bg_window_tileset; // Bit 4 - BG & Window Tileset(0 = 8800h - 97FFh, 1
-		// = 8000h - 8FFFh)
-		bool bg_tile_map; // Bit 3 - BG Tile Map (0 = 9800h - 9BFFh, 1 = 9C00h -
-						  // 9FFFh)
-		bool sprite_size; // Bit 2 - Sprite Size(0 = 8x8, 1 = 8x16)
+		bool bg_window_tileset; // Bit 4 - BG & Window Tileset(0 = 8800h - 97FFh, 1 = 8000h - 8FFFh)
+		bool bg_tile_map;		// Bit 3 - BG Tile Map (0 = 9800h - 9BFFh, 1 = 9C00h - 9FFFh)
+		bool sprite_size;		// Bit 2 - Sprite Size(0 = 8x8, 1 = 8x16)
 		bool
 			sprites_enabled; // Bit 1 - Sprites Enabled (0 = Disabled, 1 = Enabled)
 		bool bg_enabled;	 // Bit 0 - BG Enabled(in DMG) (0 = Disabled, 1 = Enabled)
@@ -103,7 +100,7 @@ private:
 
 	void set_lcd_mode(LCD_Mode mode);
 
-	void load_lcd_mode();
+	void update_lcd_mode();
 
 	void set_lcd_state(const LCD_State s);
 
@@ -138,8 +135,7 @@ private:
 		int y_pos;		  // Specifies the sprites vertical position on the screen (Y - 16)
 		int x_pos;		  // Specifies the sprites horizontal position on the screen (X - 8)
 		u8 tile_no;		  // Specifies the sprites Tile Number (00-FF)
-		bool bg_priority; // OBJ-to-BG Priority (0=OBJ Above BG, 1=OBJ Behind BG
-						  // color 1-3)
+		bool bg_priority; // OBJ-to-BG Priority (0=OBJ Above BG, 1=OBJ Behind BG color 1-3)
 		bool y_flip;	  // Y flip          (0=Normal, 1=Vertically mirrored)
 		bool x_flip;	  // X flip          (0=Normal, 1=Horizontally mirrored)
 		bool palette;	  // Palette number  **Non CGB Mode Only** (0=OBP0, 1=OBP1)

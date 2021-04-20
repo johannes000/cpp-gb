@@ -14,6 +14,10 @@ typedef short i16;
 
 typedef unsigned char Register;
 
+// GAMEBOY STARTER MODES
+constexpr u16 GB_SKIP_BOOTROM = 1 << 0;
+constexpr u16 GB_NO_RENDER = 1 << 1;
+
 // ADDRESSES
 constexpr u16 INTERRUPT_FLAGS_REG = 0xFF0F;
 constexpr u16 INTERRUPT_ENABLE_REG = 0xFFFF;

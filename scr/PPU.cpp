@@ -7,55 +7,59 @@ PPU::PPU(MEMORY *m, CPU *c)
 	reset();
 }
 
-void PPU::update(const int cycles) {
+void PPU::update(const int cycles, bool skip_render) {
+	if (skip_render) {
+		lcd_register.LCD_LY = 0x90;
+		return;
+	}
 	lcd_control.update(this);
-	load_lcd_mode();
+	update_lcd_mode();
 	cycles_in_mode += cycles;
 
 	switch (lcd_mode) {
-		// MODE 2 : Searching OAM Guckt vor jeder line ins OAM um die, für die
-		// aktuelle line, benötigten sprites zu suchen
-	case LCD_Mode::OAM:
-		if (cycles_in_mode >= CLOCKS_SCANLINE_OAM) {
-			cycles_in_mode -= CLOCKS_SCANLINE_OAM;
-			set_lcd_mode(LCD_Mode::VRAM);
-		}
-		break;
-
-		// MODE 3 : VRAM Zugriff Pixel Transfer
-	case LCD_Mode::VRAM:
-		if (cycles_in_mode >= CLOCKS_SCANLINE_VRAM) {
-			cycles_in_mode -= CLOCKS_SCANLINE_VRAM;
-			set_lcd_mode(LCD_Mode::H_Blank);
-		}
-		break;
-
-		// MODE 0: H - Blank (204 cycles) nach jeder line
-	case LCD_Mode::H_Blank:
-		if (cycles_in_mode >= CLOCKS_HORIZONTAL_BLANK) { // H-Blank vorbei
-			cycles_in_mode -= CLOCKS_HORIZONTAL_BLANK;
-			buffer_line(lcd_register.LCD_LY);
-			buffer_sprite(lcd_register.LCD_LY);
-			if (++lcd_register.LCD_LY >= GB_LCD_SIZE_HEIGHT) {
-				set_lcd_mode(LCD_Mode::V_Blank);
-				cpu->request_interrupt(Interrupt::V_Blank);
-			} else {
-				set_lcd_mode(LCD_Mode::OAM);
+			// MODE 2 : Searching OAM Guckt vor jeder line ins OAM um die, für die
+			// aktuelle line, benötigten sprites zu suchen
+		case LCD_Mode::OAM:
+			if (cycles_in_mode >= CLOCKS_SCANLINE_OAM) {
+				cycles_in_mode -= CLOCKS_SCANLINE_OAM;
+				set_lcd_mode(LCD_Mode::VRAM);
 			}
-		}
-		break;
+			break;
 
-		// MODE 1 : V - Blank nachdem jede Zeile gezeichnet wurde
-	case LCD_Mode::V_Blank:
-		if (cycles_in_mode >= CLOCKS_SCANLINE) {
-			cycles_in_mode -= CLOCKS_SCANLINE;
-			if (++lcd_register.LCD_LY > VERTICAL_BLANK_LINES) {
-				lcd_register.LCD_LY = 0;
-				ready_to_render = true;
-				set_lcd_mode(LCD_Mode::OAM);
+			// MODE 3 : VRAM Zugriff Pixel Transfer
+		case LCD_Mode::VRAM:
+			if (cycles_in_mode >= CLOCKS_SCANLINE_VRAM) {
+				cycles_in_mode -= CLOCKS_SCANLINE_VRAM;
+				set_lcd_mode(LCD_Mode::H_Blank);
 			}
-		}
-		break;
+			break;
+
+			// MODE 0: H - Blank (204 cycles) nach jeder line
+		case LCD_Mode::H_Blank:
+			if (cycles_in_mode >= CLOCKS_HORIZONTAL_BLANK) { // H-Blank vorbei
+				cycles_in_mode -= CLOCKS_HORIZONTAL_BLANK;
+				buffer_line(lcd_register.LCD_LY);
+				buffer_sprite(lcd_register.LCD_LY);
+				if (++lcd_register.LCD_LY >= GB_LCD_SIZE_HEIGHT) {
+					set_lcd_mode(LCD_Mode::V_Blank);
+					cpu->request_interrupt(Interrupt::V_Blank);
+				} else {
+					set_lcd_mode(LCD_Mode::OAM);
+				}
+			}
+			break;
+
+			// MODE 1 : V - Blank nachdem jede Zeile gezeichnet wurde
+		case LCD_Mode::V_Blank:
+			if (cycles_in_mode >= CLOCKS_SCANLINE) {
+				cycles_in_mode -= CLOCKS_SCANLINE;
+				if (++lcd_register.LCD_LY > VERTICAL_BLANK_LINES) {
+					lcd_register.LCD_LY = 0;
+					ready_to_render = true;
+					set_lcd_mode(LCD_Mode::OAM);
+				}
+			}
+			break;
 	}
 }
 
@@ -68,39 +72,39 @@ void PPU::write(const u16 &addr, const u8 &data) {
 		build_sprite_data(addr, data);
 	} else {
 		switch (addr) {
-		case LCD_CONTROL:
-			lcd_register.LCD_CONTROL = data;
-			break;
-		case LCD_STATUS:
-			lcd_register.LCD_STATUS = data;
-			break;
-		case LCD_SCY:
-			lcd_register.LCD_SCY = data;
-			break;
-		case LCD_SCX:
-			lcd_register.LCD_SCX = data;
-			break;
-		case LCD_LY:
-			// Writing will reset the counter.
-			lcd_register.LCD_LY = 0;
-			break;
-		case LCD_LYC:
-			lcd_register.LCD_LYC = data;
-			break;
-		case LCD_WY:
-			lcd_register.LCD_WY = data;
-			break;
-		case LCD_WX:
-			lcd_register.LCD_WX = data;
-			break;
-		case BG_PALETTE_DATA:
-		case SPRITE_PALETTE_DATA_0:
-		case SPRITE_PALETTE_DATA_1:
-			build_palette(addr, data);
-			break;
-		default:
-			mem->write(addr, data);
-			break;
+			case LCD_CONTROL:
+				lcd_register.LCD_CONTROL = data;
+				break;
+			case LCD_STATUS:
+				lcd_register.LCD_STATUS = data;
+				break;
+			case LCD_SCY:
+				lcd_register.LCD_SCY = data;
+				break;
+			case LCD_SCX:
+				lcd_register.LCD_SCX = data;
+				break;
+			case LCD_LY:
+				// Writing will reset the counter.
+				lcd_register.LCD_LY = 0;
+				break;
+			case LCD_LYC:
+				lcd_register.LCD_LYC = data;
+				break;
+			case LCD_WY:
+				lcd_register.LCD_WY = data;
+				break;
+			case LCD_WX:
+				lcd_register.LCD_WX = data;
+				break;
+			case BG_PALETTE_DATA:
+			case SPRITE_PALETTE_DATA_0:
+			case SPRITE_PALETTE_DATA_1:
+				build_palette(addr, data);
+				break;
+			default:
+				mem->write(addr, data);
+				break;
 		}
 	}
 }
@@ -112,30 +116,31 @@ u8 PPU::read(const u16 &addr) const {
 		return sprite_attribute_table.at(addr - SPRITE_INFORMATION);
 	} else {
 		switch (addr) {
-		case LCD_CONTROL:
-			return lcd_register.LCD_CONTROL;
-		case LCD_STATUS:
-			return lcd_register.LCD_STATUS;
-		case LCD_SCY:
-			return lcd_register.LCD_SCY;
-		case LCD_SCX:
-			return lcd_register.LCD_SCX;
-		case LCD_LY:
-			return lcd_register.LCD_LY;
-		case LCD_LYC:
-			return lcd_register.LCD_LYC;
-		case LCD_WY:
-			return lcd_register.LCD_WY;
-		case LCD_WX:
-			return lcd_register.LCD_WX;
-		case BG_PALETTE_DATA:
-			return lcd_register.BG_PALETTE_DATA;
-		case SPRITE_PALETTE_DATA_0:
-			return lcd_register.SPRITE_PALETTE_DATA_0;
-		case SPRITE_PALETTE_DATA_1:
-			return lcd_register.SPRITE_PALETTE_DATA_1;
-		default:
-			return mem->read(addr);
+			case LCD_CONTROL:
+				return lcd_register.LCD_CONTROL;
+			case LCD_STATUS:
+				return lcd_register.LCD_STATUS;
+			case LCD_SCY:
+				return lcd_register.LCD_SCY;
+			case LCD_SCX:
+				return lcd_register.LCD_SCX;
+			case LCD_LY:
+				return lcd_register.LCD_LY;
+			case LCD_LYC:
+				//return 0x90;
+				return lcd_register.LCD_LYC;
+			case LCD_WY:
+				return lcd_register.LCD_WY;
+			case LCD_WX:
+				return lcd_register.LCD_WX;
+			case BG_PALETTE_DATA:
+				return lcd_register.BG_PALETTE_DATA;
+			case SPRITE_PALETTE_DATA_0:
+				return lcd_register.SPRITE_PALETTE_DATA_0;
+			case SPRITE_PALETTE_DATA_1:
+				return lcd_register.SPRITE_PALETTE_DATA_1;
+			default:
+				return mem->read(addr);
 		}
 	}
 }
@@ -162,31 +167,43 @@ void PPU::reset() {
 	cycles_in_mode = 0;
 
 	set_lcd_mode(LCD_Mode::OAM);
-	load_lcd_mode();
+	update_lcd_mode();
 }
-// Schreibt den gewünschten mode ins LCD Status register
+/**
+ * @brief Schreibt den gewünschten mode ins LCD Status register
+ * 
+ * @param m 
+ */
 void PPU::set_lcd_mode(LCD_Mode m) {
-	const auto mode = static_cast<u8>(m);
+	const u8 mode = static_cast<u8>(m);
 	if (mode > 3)
 		return;
 	lcd_mode = m;
-	auto *const data = &lcd_register.LCD_STATUS;
-	*data = mode & 0x3u;
+	lcd_register.LCD_STATUS = mode & 0x3u;
 }
 
-// Liest den LCD Mode aus dem LCD Status register
-// und aktualisiert die lokale variable
-void PPU::load_lcd_mode() {
-	auto *const data = &lcd_register.LCD_STATUS;
-	lcd_mode = static_cast<LCD_Mode>(*data & 3u);
+/**
+ * @brief  Liest den LCD Mode aus dem LCD Status register und aktualisiert die lokale variable
+ * 
+ */
+void PPU::update_lcd_mode() {
+	lcd_mode = static_cast<LCD_Mode>(lcd_register.LCD_STATUS & 3u);
 }
 
-// setzt den gewünschten status im LCD Status Register
+/**
+ * @brief  setzt den gewünschten status im LCD Status Register
+ * 
+ * @param s 
+ */
 void PPU::set_lcd_state(const LCD_State s) {
 	set_bit(lcd_register.LCD_STATUS, static_cast<u8>(s));
 }
 
-// setzt den gewünschten status im LCD Status Register zurück
+/**
+ * @brief setzt den gewünschten status im LCD Status Register zurück
+ * 
+ * @param s 
+ */
 void PPU::reset_lcd_state(const LCD_State s) {
 	reset_bit(lcd_register.LCD_STATUS, static_cast<u8>(s));
 }
@@ -276,29 +293,29 @@ void PPU::buffer_sprite(const u8 line) {
 
 void PPU::build_palette(const u16 addr, u8 data) {
 	switch (addr) {
-	case BG_PALETTE_DATA:
-		lcd_register.BG_PALETTE_DATA = data;
-		bg_palette[0] = Palettes[current_palette][(data & 3u)];
-		bg_palette[1] = Palettes[current_palette][((data >> 2) & 3u)];
-		bg_palette[2] = Palettes[current_palette][((data >> 4) & 3u)];
-		bg_palette[3] = Palettes[current_palette][((data >> 6) & 3u)];
-		break;
-	case SPRITE_PALETTE_DATA_0:
-		lcd_register.SPRITE_PALETTE_DATA_0 = data;
-		for (u8 i = 0; i < 4; i++) {
-			sprite_obj_palette[0][i] =
-				Palettes[current_palette][(data >> (i * 2)) & 3u];
-		}
-		break;
-	case SPRITE_PALETTE_DATA_1:
-		lcd_register.SPRITE_PALETTE_DATA_1 = data;
-		for (u8 i = 0; i < 4; i++) {
-			sprite_obj_palette[1][i] =
-				Palettes[current_palette][(data >> (i * 2)) & 3u];
-		}
-		break;
-	default:
-		return;
+		case BG_PALETTE_DATA:
+			lcd_register.BG_PALETTE_DATA = data;
+			bg_palette[0] = Palettes[current_palette][(data & 3u)];
+			bg_palette[1] = Palettes[current_palette][((data >> 2) & 3u)];
+			bg_palette[2] = Palettes[current_palette][((data >> 4) & 3u)];
+			bg_palette[3] = Palettes[current_palette][((data >> 6) & 3u)];
+			break;
+		case SPRITE_PALETTE_DATA_0:
+			lcd_register.SPRITE_PALETTE_DATA_0 = data;
+			for (u8 i = 0; i < 4; i++) {
+				sprite_obj_palette[0][i] =
+					Palettes[current_palette][(data >> (i * 2)) & 3u];
+			}
+			break;
+		case SPRITE_PALETTE_DATA_1:
+			lcd_register.SPRITE_PALETTE_DATA_1 = data;
+			for (u8 i = 0; i < 4; i++) {
+				sprite_obj_palette[1][i] =
+					Palettes[current_palette][(data >> (i * 2)) & 3u];
+			}
+			break;
+		default:
+			return;
 	}
 }
 
@@ -306,23 +323,23 @@ void PPU::build_sprite_data(const u16 &addr, const u8 &data) {
 	u8 sprite_id = (addr - SPRITE_INFORMATION) >> 2;
 	if (sprite_id < 40) {
 		switch (addr & 3u) {
-		case 0:
-			sprites[sprite_id].y_pos = data;
-			break;
-		case 1:
-			sprites[sprite_id].x_pos = data;
-			break;
-		case 2:
-			sprites[sprite_id].tile_no = data;
-			sprites[sprite_id].id = sprite_id;
-			sprites[sprite_id].tile_data = tile_map_data[data];
-			break;
-		case 3:
-			sprites[sprite_id].palette = check_bit(data, 4);
-			sprites[sprite_id].x_flip = check_bit(data, 5);
-			sprites[sprite_id].y_flip = check_bit(data, 6);
-			sprites[sprite_id].bg_priority = check_bit(data, 7);
-			break;
+			case 0:
+				sprites[sprite_id].y_pos = data;
+				break;
+			case 1:
+				sprites[sprite_id].x_pos = data;
+				break;
+			case 2:
+				sprites[sprite_id].tile_no = data;
+				sprites[sprite_id].id = sprite_id;
+				sprites[sprite_id].tile_data = tile_map_data[data];
+				break;
+			case 3:
+				sprites[sprite_id].palette = check_bit(data, 4);
+				sprites[sprite_id].x_flip = check_bit(data, 5);
+				sprites[sprite_id].y_flip = check_bit(data, 6);
+				sprites[sprite_id].bg_priority = check_bit(data, 7);
+				break;
 		}
 	}
 }

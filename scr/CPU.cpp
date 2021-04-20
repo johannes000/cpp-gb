@@ -42,11 +42,13 @@ void CPU::init_register(bool skip_boot) {
 
 u8 CPU::parse_op_code(u8 &opcode) {
 	u8 function;
-	if (prefix) {
+	if (opcode == 0xCB) {
 		prefix = false;
-		current_instruction_info = prefixedinstructions[op_code];
-		current_instruction_info.bytes -= 1;
-		function = (this->*prefixedinstructions[opcode].function)();
+		cycles++;
+		u8 p_opcode = read(R.PC + 1);
+		current_instruction_info = prefixedinstructions[p_opcode];
+		//current_instruction_info.bytes += 1;
+		function = (this->*prefixedinstructions[p_opcode].function)();
 	} else {
 		current_instruction_info = instructions[op_code];
 		function = (this->*instructions[opcode].function)();
@@ -96,56 +98,56 @@ debug_instruction CPU::get_instruction_at_addr(u16 addr) const {
 
 u8 CPU::read(const u16 &addr) {
 	switch (addr) {
-	case DIVIDER_REGISTER:
-		return divider_register;
-	case TIMER_CONTROL:
-		return timer_control;
-	case TIMER_COUNTER:
-		return timer_counter;
-	case TIMER_MODULO:
-		return timer_modulo;
-	case INTERRUPT_ENABLE_REG:
-		return interrupt_enable_register;
-	case INTERRUPT_FLAGS_REG:
-		return interrupt_request_register | 0xE0u;
-	case IN_BOOT_ADDRESS:
-		return in_boot;
-	default:
-		return mem->read(addr);
+		case DIVIDER_REGISTER:
+			return divider_register;
+		case TIMER_CONTROL:
+			return timer_control;
+		case TIMER_COUNTER:
+			return timer_counter;
+		case TIMER_MODULO:
+			return timer_modulo;
+		case INTERRUPT_ENABLE_REG:
+			return interrupt_enable_register;
+		case INTERRUPT_FLAGS_REG:
+			return interrupt_request_register | 0xE0u;
+		case IN_BOOT_ADDRESS:
+			return in_boot;
+		default:
+			return mem->read(addr);
 	}
 }
 
 void CPU::write(const u16 &addr, const u8 &data) {
 	switch (addr) {
-	case DMA_TRANSFER: // This register starts the OAM DMA transfer
-		dma_transfer(data);
-		break;
-	case DIVIDER_REGISTER:
-		handle_div_register_write();
-		break;
-	case TIMER_CONTROL:
-		handle_time_control_write(data);
-		break;
-	case TIMER_COUNTER:
-		timer_counter = data;
-		break;
-	case TIMER_MODULO:
-		timer_modulo = data;
-		break;
-	case INTERRUPT_ENABLE_REG:
-		interrupt_enable_register = data & 0x1Fu;
-		break;
-	case INTERRUPT_FLAGS_REG:
-		interrupt_request_register = data & 0x1Fu;
-		break;
-	case IN_BOOT_ADDRESS:
-		if (in_boot)
-			std::cout << "Boot verlassen nach " << std::dec << cycles << " Cycles" << std::endl;
-		in_boot = false;
-		break;
-	default:
-		mem->write(addr, data);
-		break;
+		case DMA_TRANSFER: // This register starts the OAM DMA transfer
+			dma_transfer(data);
+			break;
+		case DIVIDER_REGISTER:
+			handle_div_register_write();
+			break;
+		case TIMER_CONTROL:
+			handle_time_control_write(data);
+			break;
+		case TIMER_COUNTER:
+			timer_counter = data;
+			break;
+		case TIMER_MODULO:
+			timer_modulo = data;
+			break;
+		case INTERRUPT_ENABLE_REG:
+			interrupt_enable_register = data & 0x1Fu;
+			break;
+		case INTERRUPT_FLAGS_REG:
+			interrupt_request_register = data & 0x1Fu;
+			break;
+		case IN_BOOT_ADDRESS:
+			if (in_boot)
+				std::cout << "Boot verlassen nach " << std::dec << cycles << " Cycles" << std::endl;
+			in_boot = false;
+			break;
+		default:
+			mem->write(addr, data);
+			break;
 	}
 }
 /**
@@ -217,15 +219,15 @@ void CPU::handle_timer(int t_cycles) {
 
 		int freq = 1024;
 		switch (timer_control & 3u) {
-		case 1:
-			freq = 16;
-			break;
-		case 2:
-			freq = 64;
-			break;
-		case 3:
-			freq = 256;
-			break;
+			case 1:
+				freq = 16;
+				break;
+			case 2:
+				freq = 64;
+				break;
+			case 3:
+				freq = 256;
+				break;
 		}
 
 		while (timer_cycle_sum >= freq) {

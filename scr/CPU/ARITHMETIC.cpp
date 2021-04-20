@@ -293,7 +293,7 @@ u8 CPU::opcode0xC6() { // ADD A d8
 }
 
 u8 CPU::opcode0xE8() { // ADD SP r8
-	u8 data = read_u8_at_pc();
+	int data = static_cast<int>(read_u8_at_pc());
 	int result = R.SP + data;
 	reset_all_flags();
 	set_flag_if(Flag::c, (((R.SP ^ data ^ (result & 0xFFFFu)) & 0x100u) == 0x100u));

@@ -19,12 +19,14 @@ struct gameboy {
 	Debugger debug;
 
 	void run_until_vblank();
-	void run_one_cycle();
+	int run_one_cycle();
 	void run_until_breakpoint();
 
 	void reset(bool);
 
 	bool load_rom(const char *, bool);
+	void log_cpu(CPU_Register);
+	void run_for_x_cycles(int);
 };
 
 #endif // !GAMEBOY_H_GUARD
