@@ -18,7 +18,6 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
 	double measured_duration = 0.0;
 
 	constexpr bool fps_drossel = false;
-	constexpr bool dont_render = true;
 	constexpr bool skip_boot_rom = true;
 
 	gameboy gb;
@@ -41,26 +40,22 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
 			glfwPollEvents();
 			renderer.start_new_imgui_frame();
 			if (rom_loaded) {
-				if (!dont_render) {
-					switch (gb.debug.get_debug_state()) {
-						case Debug_State::RUN:
-							gb.run_until_vblank();
-							break;
-						case Debug_State::STEP:
-							if (gb.debug.get_next_step()) {
-								gb.run_one_cycle();
-								gb.debug.handle_breakpoints();
-							}
-							break;
-						case Debug_State::BREAKPOINT:
-							gb.run_until_breakpoint();
-							break;
-					}
-
-					renderer.update_views(&gb.ppu, &gb.debug);
-				} else if (rom_loaded && dont_render) {
-					gb.run_for_x_cycles(10000);
+				switch (gb.debug.get_debug_state()) {
+					case Debug_State::RUN:
+						gb.run_until_vblank();
+						break;
+					case Debug_State::STEP:
+						if (gb.debug.get_next_step()) {
+							gb.run_one_cycle();
+							gb.debug.handle_breakpoints();
+						}
+						break;
+					case Debug_State::BREAKPOINT:
+						gb.run_until_breakpoint();
+						break;
 				}
+
+				renderer.update_views(&gb.ppu, &gb.debug);
 			}
 			file = renderer.rom_select_view();
 			if (file[0] != 0) {

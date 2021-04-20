@@ -47,9 +47,9 @@ if (NOT MSVC)
 endif ()
 
 if (MSVC)
-    find_library(GLFW glfw3 PATHS "./external/glfwWIN64/lib-vc2019")
+find_library(GLFW glfw3 PATHS "./external/glfwWIN64/lib-vc2019")
 else ()
-    find_library(GLFW glfw3 PATHS "./external/glfwWIN64/lib-mingw-w64")
+find_library(GLFW glfw3 PATHS "./external/glfwWIN64/lib-mingw-w64")
 endif ()
 
 option(GLFW_BUILD_DOCS OFF)
@@ -59,13 +59,24 @@ option(GLFW_INSTALL OFF)
 
 include_directories("./external/glfwWIN64/include")
 include_directories("./external/imgui")
+include_directories("./external/googletest/googletest/include")
 include_directories("./external/imgui-filebrowser")
 include_directories("./scr")
 include_directories("./scr/Debugger")
 include_directories("./win")
+include_directories("./test")
 
 include_directories("./external/glad/include/")
 add_library("glad" STATIC "./external/glad/src/glad.c")
+
+option(PACKAGE_TESTS "Build the tests" ON)
+
+if(PACKAGE_TESTS)
+        enable_testing()
+        include(GoogleTest)
+        add_subdirectory(external/googletest)
+        add_subdirectory(test)
+endif()
 
 find_package(OpenGL REQUIRED)
 #find_package(imgui REQUIRED)
@@ -85,6 +96,7 @@ add_library(cpp-gb
         scr/type.cpp scr/type.h
         scr/CONTROLS.cpp scr/CONTROLS.h
 )
+
 
 add_library(debugger
         scr/Debugger/Debugger.cpp scr/Debugger/Debugger.h
@@ -107,6 +119,7 @@ add_library(imgui
         ./external/imgui/imstb_textedit.h
         ./external/imgui/imstb_truetype.h
         )
+        
 
 add_executable(cpp-gb-w
         win/main.cpp

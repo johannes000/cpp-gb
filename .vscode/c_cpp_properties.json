@@ -4,12 +4,6 @@
         "includePath": [
             "${workspaceFolder}/**",
             "${workspaceFolder}/external/*",
-            "${workspaceFolder}/external/imgui",
-            "${workspaceFolder}/external/imgui-filebrowser",
-            "${workspaceFolder}/external/glfwWIN32/include/GLFW",
-            "${workspaceFolder}/external/glad/include/*",
-            "${workspaceFolder}/scr/**",
-            "${workspaceFolder}/win/**",
             "${default}"
         ],
         "defines": [

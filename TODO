@@ -1,9 +1,8 @@
 
 Todo:
+  ☐ Tests Bestehen @critical 
   ☐ Window Layer @high
   ☐ Unabhängige Layer für Sprites und BG @high
-  ☐ Unit Test @critical
-    ☐ Test roms ohne Rendern durchlaufen lassen
   ☐ Menu Bar @low
   ☐ Bootrom hardcoden @high
   ☐ Tracer für Disassambler @low
@@ -24,3 +23,5 @@ Done:
   ✔ FPS drossel @done(18-04-21)
   ✔ Bootrom Skippen @done(18-04-21)
   ✔ Windows File Dialog @done(19-04-21)
+  ✔ Test roms ohne Rendern durchlaufen lassen @done(20-04-21)
+  ✔ Unit Test @done(21-04-21)

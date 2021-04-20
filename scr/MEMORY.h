@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <vector>
+#include <string>
 
 #include "CARDRIDGE.h"
 #include "CPU.h"
@@ -33,6 +34,8 @@ public:
 	void write_u16(const u16 &addr, const u16 &data);
 
 	void request_interrupt(Interrupt inter);
+
+	std::string TestOutput;
 
 private:
 	CARDRIDGE *cardridge;
