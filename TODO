@@ -8,7 +8,6 @@ Todo:
   ☐ Tracer für Disassambler @low
   ☐ Timer fixen @critical
   ☐ Emu drosseln @high @started
-  ☐ PPU Interrupts @high
   ☐ Sound @low
   ☐ Banks @low
   ☐ Controlls Plattformunabhängig gestalten @low
@@ -25,3 +24,4 @@ Done:
   ✔ Windows File Dialog @done(19-04-21)
   ✔ Test roms ohne Rendern durchlaufen lassen @done(20-04-21)
   ✔ Unit Test @done(21-04-21)
+  ✔ PPU Interrupts @done(23-04-21)

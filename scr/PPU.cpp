@@ -15,7 +15,6 @@ void PPU::update(const int cycles, bool skip_render) {
 	lcd_control.update(this);
 	update_lcd_mode();
 	cycles_in_mode += cycles;
-
 	switch (lcd_mode) {
 			// MODE 2 : Searching OAM Guckt vor jeder line ins OAM um die, für die
 			// aktuelle line, benötigten sprites zu suchen
@@ -31,6 +30,8 @@ void PPU::update(const int cycles, bool skip_render) {
 			if (cycles_in_mode >= CLOCKS_SCANLINE_VRAM) {
 				cycles_in_mode -= CLOCKS_SCANLINE_VRAM;
 				set_lcd_mode(LCD_Mode::H_Blank);
+				if (lcd_state.h_blank_interrupt)
+					cpu->request_interrupt(Interrupt::LCD_Stat);
 			}
 			break;
 
@@ -38,13 +39,22 @@ void PPU::update(const int cycles, bool skip_render) {
 		case LCD_Mode::H_Blank:
 			if (cycles_in_mode >= CLOCKS_HORIZONTAL_BLANK) { // H-Blank vorbei
 				cycles_in_mode -= CLOCKS_HORIZONTAL_BLANK;
-				buffer_line(lcd_register.LCD_LY);
-				buffer_sprite(lcd_register.LCD_LY);
+				int line = lcd_register.LCD_LY;
+
+				buffer_line(line);
+				buffer_sprite_line(line);
+				buffer_window_line(line);
+
+				if (line == lcd_register.LCD_LYC && lcd_state.lyc_interrupt)
+					cpu->request_interrupt(Interrupt::LCD_Stat);
+
 				if (++lcd_register.LCD_LY >= GB_LCD_SIZE_HEIGHT) {
 					set_lcd_mode(LCD_Mode::V_Blank);
 					cpu->request_interrupt(Interrupt::V_Blank);
 				} else {
 					set_lcd_mode(LCD_Mode::OAM);
+					if (lcd_state.oam_interrupt)
+						cpu->request_interrupt(Interrupt::LCD_Stat);
 				}
 			}
 			break;
@@ -57,6 +67,8 @@ void PPU::update(const int cycles, bool skip_render) {
 					lcd_register.LCD_LY = 0;
 					ready_to_render = true;
 					set_lcd_mode(LCD_Mode::OAM);
+					if (lcd_state.oam_interrupt)
+						cpu->request_interrupt(Interrupt::LCD_Stat);
 				}
 			}
 			break;
@@ -76,7 +88,7 @@ void PPU::write(const u16 &addr, const u8 &data) {
 				lcd_register.LCD_CONTROL = data;
 				break;
 			case LCD_STATUS:
-				lcd_register.LCD_STATUS = data;
+				handle_lcd_status(data);
 				break;
 			case LCD_SCY:
 				lcd_register.LCD_SCY = data;
@@ -162,12 +174,11 @@ void PPU::reset() {
 	tile_map_data = std::vector<std::vector<u8>>(0x0FFF, std::vector<u8>((8 * 8) + 1, 0));
 	sprites = std::vector<Sprite>(40, {0, 0, 0, 0, false, false, false, false, std::vector<u8>((8 * 8) + 1, 0)});
 
-	lcd_control.update(this);
-
+	lcd_control = {};
+	lcd_state = {};
 	cycles_in_mode = 0;
 
 	set_lcd_mode(LCD_Mode::OAM);
-	update_lcd_mode();
 }
 /**
  * @brief Schreibt den gewünschten mode ins LCD Status register
@@ -195,22 +206,12 @@ void PPU::update_lcd_mode() {
  * 
  * @param s 
  */
-void PPU::set_lcd_state(const LCD_State s) {
-	set_bit(lcd_register.LCD_STATUS, static_cast<u8>(s));
-}
 
 /**
  * @brief setzt den gewünschten status im LCD Status Register zurück
  * 
  * @param s 
  */
-void PPU::reset_lcd_state(const LCD_State s) {
-	reset_bit(lcd_register.LCD_STATUS, static_cast<u8>(s));
-}
-
-bool PPU::check_lcd_state(const LCD_State s) const {
-	return check_bit(lcd_register.LCD_STATUS, static_cast<u8>(s));
-}
 
 void PPU::buffer_line(const u8 line) {
 	if (line >= GB_LCD_SIZE_HEIGHT)
@@ -256,7 +257,7 @@ void PPU::buffer_line(const u8 line) {
  * 
  * @param u8 line 
  */
-void PPU::buffer_sprite(const u8 line) {
+void PPU::buffer_sprite_line(const u8 line) {
 	lcd_control.update(this);
 	if (line >= GB_LCD_SIZE_HEIGHT + 8 || !lcd_control.sprites_enabled || !lcd_control.lcd_power)
 		return;
@@ -291,6 +292,21 @@ void PPU::buffer_sprite(const u8 line) {
 	return;
 }
 
+void PPU::buffer_window_line(const u8 line) {
+	lcd_control.update(this);
+	u16 window_y = read(LCD_WY);
+	u16 window_x = read(LCD_WX);
+	if (window_x <= 7)
+		window_x = 0;
+	else
+		window_x -= 7;
+
+	if (line - window_y < GB_LCD_SIZE_HEIGHT && line >= window_y && lcd_control.window_enable && lcd_control.lcd_power) {
+		for (int line_x_pos = window_x; line_x_pos <= 160; line_x_pos++) {
+			bg_buffer[(line * GB_LCD_SIZE_WIDTH) + line_x_pos] = {0xFF, 0xFF, 0xFF, 0xFF};
+		}
+	}
+}
 void PPU::build_palette(const u16 addr, u8 data) {
 	switch (addr) {
 		case BG_PALETTE_DATA:
@@ -366,15 +382,23 @@ void PPU::update_tile(const u16 &a) {
 }
 
 void PPU::LCD_Control::update(PPU *ppu) {
-	const u8 *data = &ppu->lcd_register.LCD_CONTROL;
+	const u8 data = ppu->lcd_register.LCD_CONTROL;
 	*this = {
-		check_bit(*data, 7),
-		check_bit(*data, 6),
-		check_bit(*data, 5),
-		check_bit(*data, 4),
-		check_bit(*data, 3),
-		check_bit(*data, 2),
-		check_bit(*data, 1),
-		check_bit(*data, 0),
+		check_bit(data, 7),
+		check_bit(data, 6),
+		check_bit(data, 5),
+		check_bit(data, 4),
+		check_bit(data, 3),
+		check_bit(data, 2),
+		check_bit(data, 1),
+		check_bit(data, 0),
 	};
+}
+
+void PPU::handle_lcd_status(const u8 &data) {
+	lcd_register.LCD_STATUS = data & 0x78;
+	lcd_state.lyc_interrupt = check_bit(data, 6);
+	lcd_state.oam_interrupt = check_bit(data, 5);
+	lcd_state.v_blank_interrupt = check_bit(data, 4);
+	lcd_state.h_blank_interrupt = check_bit(data, 3);
 }

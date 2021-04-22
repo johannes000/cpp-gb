@@ -48,9 +48,11 @@ private:
 	int cycles_in_mode{};
 
 	void update_tile(const u16 &addr);
+	void handle_lcd_status(const u8 &data);
 
 public:
-	inline bool is_ready_to_render() const { return ready_to_render; }
+	inline bool
+	is_ready_to_render() const { return ready_to_render; }
 
 	// Speicher
 private:
@@ -79,46 +81,44 @@ private:
 		void update(PPU *ppu);
 	} lcd_control{};
 
-	enum class LCD_State {
+	struct LCD_State {
 		// Bit 6 - LYC = LY Coincidence Interrupt (1 = Enable) (Read /Write)
-		lyc = 6,
+		bool lyc_interrupt;
 		// Bit 5 - Mode 2 OAM Interrupt (1 = Enable) (Read / Write)
-		oam_interrupt = 5,
+		bool oam_interrupt;
 		// Bit 4 - Mode 1 V - Blank Interrupt (1 = Enable) (Read / Write)
-		v_blank_interrupt = 4,
+		bool v_blank_interrupt;
 		// Bit 3 - Mode 0 H - Blank Interrupt (1 = Enable) (Read / Write)
-		h_blank_interrupt = 3,
+		bool h_blank_interrupt;
 		// Bit 2 - Coincidence Flag (0:LYC<>LY, 1 : LYC = LY) (Read Only)
-		coincidence_flag = 2,
+		bool coincidence_flag;
 		// Bit 1 - 0 - Mode Flag (Mode 0 - 3, see below) (Read Only)
-		mode_flag_1 = 1,
-		mode_flag_0 = 0 // 0: During H - Blank
-						// 1 : During V - Blank
-						// 2 : During Searching OAM
-						// 3 : During Transferring Data to LCD Driver
-	};
+		bool mode_flag_1; // 0: During H - Blank
+		bool mode_flag_0; // 1 : During V - Blank
+						  // 2 : During Searching OAM
+						  // 3 : During Transferring Data to LCD Driver
+
+	} lcd_state{};
 
 	void set_lcd_mode(LCD_Mode mode);
 
 	void update_lcd_mode();
-
-	void set_lcd_state(const LCD_State s);
-
-	void reset_lcd_state(const LCD_State s);
-
-	bool check_lcd_state(const LCD_State s) const;
 
 	// LCD Render Funktionen
 
 	std::vector<u8> palette_data_buffer;
 	std::vector<Pixel_a> bg_buffer;
 	std::vector<Pixel_a> sprite_buffer;
+
+public:
 	std::vector<std::vector<u8>> tile_map_data;
 
+private:
 	void buffer_line(const u8 line);
-	void buffer_sprite(const u8 line);
+	void buffer_sprite_line(const u8 line);
+	void buffer_window_line(const u8 line);
 
-	int current_palette = 1;
+	int current_palette = 0;
 
 public:
 	// Paletten

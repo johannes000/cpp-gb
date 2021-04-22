@@ -59,8 +59,8 @@ constexpr unsigned int TILE_WIDTH = 8;
 constexpr unsigned int TILE_HEIGHT = 8;
 constexpr unsigned int TILE_PER_LINE = 32;
 constexpr unsigned int BG_MAP_SIZE = 256;
-constexpr unsigned int TILE_BUFFER_WIDTH = 128;
-constexpr unsigned int TILE_BUFFER_HEIGHT = 192;
+constexpr unsigned int TILE_MAP_WIDTH = 128;
+constexpr unsigned int TILE_MAP_HEIGHT = 192;
 
 // LCD Register Adressen
 constexpr u16 LCD_CONTROL = 0xFF40;
@@ -277,8 +277,29 @@ struct Pixel_a {
 
 typedef std::vector<Pixel_a> Tile;
 struct LCD_Register {
-	// u8 Werte die mit hilfe ihrer Adressen von der GB CPU beschrieben werden
+	/*
+	Bit 7 - LCD and PPU enable	0=Off, 1=On
+	Bit 6 - Window tile map area	0=9800-9BFF, 1=9C00-9FFF
+	Bit 5 - Window enable	0=Off, 1=On
+	Bit 4 - BG and Window tile data area	0=8800-97FF, 1=8000-8FFF
+	Bit 3 - BG tile map area	0=9800-9BFF, 1=9C00-9FFF
+	Bit 2 - OBJ size	0=8x8, 1=8x16
+	Bit 1 - OBJ enable	0=Off, 1=On
+	Bit 0 - BG and Window enable/priority	0=Off, 1=On
+	*/
 	Register LCD_CONTROL;
+	/*
+	Bit 6 - LYC=LY Interrupt             (1=Enable) (Read/Write)
+	Bit 5 - Mode 2 OAM Interrupt         (1=Enable) (Read/Write)
+	Bit 4 - Mode 1 VBlank Interrupt      (1=Enable) (Read/Write)
+	Bit 3 - Mode 0 HBlank Interrupt      (1=Enable) (Read/Write)
+	Bit 2 - LYC=LY Flag      (0=Different, 1=Equal) (Read Only)
+	Bit 1-0 - Mode Flag       (Mode 0-3, see below) (Read Only)
+			0: In HBlank
+				1: In VBlank
+				2: Searching OAM
+				3: Transferring Data to LCD Controller 
+	 */
 	Register LCD_STATUS;
 
 	Register LCD_SCY; // SCY - Scroll Y (R/W)
@@ -337,22 +358,19 @@ void set_bit_if(u16 &data,
 
 void set_bit(u8 &data, const u8 &bit);
 
-void set_bit(u16 &data,
-			 const u16 &bit);
+void set_bit(u16 &data, const u16 &bit);
 
 void reset_bit(u8 &data, const u8 &bit);
 
-void reset_bit(u16 &data,
-			   const u16 &bit);
+void reset_bit(u16 &data, const u16 &bit);
 
 void toggle_bit(u8 &data, const u8 &bit);
 
-void toggle_bit(u16 &data,
-				const u16 &bit);
+void toggle_bit(u16 &data, const u16 &bit);
 
-bool check_bit(const u8 &data, const u8 &bit);
+bool check_bit(const u8 data, const u8 bit);
 
-bool check_bit(const u16 &data, const u16 &bit);
+bool check_bit(const u16 data, const u16 bit);
 
 // MATH
 #define MIN(a, b) (((a) < (b)) ? (a) : (b))

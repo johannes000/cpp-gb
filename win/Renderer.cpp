@@ -13,9 +13,9 @@ Renderer::Renderer(CONTROLS *j) : joypad(j) {
 	glfwSetInputMode(window, GLFW_STICKY_KEYS, 1);
 
 	load_texture(&frame_texture, GB_LCD_SIZE_WIDTH, GB_LCD_SIZE_HEIGHT, nullptr);
-	load_texture(&tiles_texture, TILE_BUFFER_WIDTH, TILE_BUFFER_HEIGHT, nullptr);
+	load_texture(&tiles_texture, TILE_MAP_WIDTH, TILE_MAP_HEIGHT, nullptr);
 
-	tile_buffer = {TILE_BUFFER_HEIGHT * TILE_BUFFER_HEIGHT,
+	tile_buffer = {TILE_MAP_HEIGHT * TILE_MAP_HEIGHT,
 				   {0xFF, 0xFF, 0xFF, 0x00}};
 
 	roms = {
@@ -176,17 +176,19 @@ void Renderer::update_views(PPU *ppu, Debugger *debug) {
 }
 
 void Renderer::update_tile_buffer(PPU *ppu) {
-	u16 tileData = 0x8000;
+#if 1
+	u16 tile_data_address = 0x8000;
+
 	for (int row = 0; row < 24; row++) {
 		for (int column = 0; column < 16; column++) {
-			u16 start = tileData + (16 * column);
+			u16 start = tile_data_address + (16 * column);
 			for (int line = (row * 8); line < 8 + (row * 8); line++, start += 2) {
 				u8 p_line_1 = ppu->read(start);
 				u8 p_line_2 = ppu->read(start + 1);
 
 				for (int tileColumn = (column * 8), position = 7;
 					 tileColumn < 8 + (column * 8); tileColumn++, position--) {
-					int index = tileColumn + line * TILE_BUFFER_WIDTH;
+					int index = tileColumn + line * TILE_MAP_WIDTH;
 					const u8 color =
 						static_cast<u8>(check_bit(p_line_1, (position)) << 1u) |
 						static_cast<u8>(check_bit(p_line_2, (position)));
@@ -195,8 +197,9 @@ void Renderer::update_tile_buffer(PPU *ppu) {
 				}
 			}
 		}
-		tileData += 0x100;
+		tile_data_address += 0x100;
 	}
+#endif
 }
 
 bool Renderer::load_texture(GLuint *textureHandler, int width, int height,
@@ -211,12 +214,14 @@ bool Renderer::load_texture(GLuint *textureHandler, int width, int height,
 
 	return true;
 }
+
 void Renderer::update_texture(GLuint *textureHandler, int width, int height,
 							  const void *data) {
 	glBindTexture(GL_TEXTURE_2D, *textureHandler);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA,
 				 GL_UNSIGNED_BYTE, data);
 }
+
 void Renderer::main_view(PPU *ppu) {
 	float ratio = (float)GB_LCD_SIZE_WIDTH / (float)GB_LCD_SIZE_HEIGHT;
 
@@ -239,10 +244,10 @@ void Renderer::tile_buffer_view(PPU *ppu) {
 
 	ImGui::Begin("Tile Buffer");
 
-	update_texture(&tiles_texture, TILE_BUFFER_WIDTH, TILE_BUFFER_HEIGHT,
+	update_texture(&tiles_texture, TILE_MAP_WIDTH, TILE_MAP_HEIGHT,
 				   &tile_buffer[0]);
 	ImGui::Image((ImTextureID)(intptr_t)tiles_texture,
-				 ImVec2(TILE_BUFFER_WIDTH * 2, TILE_BUFFER_HEIGHT * 2));
+				 ImVec2(TILE_MAP_WIDTH * 2, TILE_MAP_HEIGHT * 2));
 
 	if (ImGui::TreeNode("Sprites")) {
 		u8 index = 0;
