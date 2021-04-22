@@ -845,6 +845,7 @@ u8 CPU::prefixedopcode0x85() { // RES 0 L
 u8 CPU::prefixedopcode0x86() { // RES 0 HL
 	u8 data = read(R.HL);
 	reset_bit(data, 0);
+	write(R.HL, data);
 	return 0;
 }
 
@@ -886,6 +887,7 @@ u8 CPU::prefixedopcode0x8D() { // RES 1 L
 u8 CPU::prefixedopcode0x8E() { // RES 1 HL
 	u8 data = read(R.HL);
 	reset_bit(data, 1);
+	write(R.HL, data);
 	return 0;
 }
 
@@ -927,6 +929,7 @@ u8 CPU::prefixedopcode0x95() { // RES 2 L
 u8 CPU::prefixedopcode0x96() { // RES 2 HL
 	u8 data = read(R.HL);
 	reset_bit(data, 2);
+	write(R.HL, data);
 	return 0;
 }
 
@@ -968,6 +971,7 @@ u8 CPU::prefixedopcode0x9D() { // RES 3 L
 u8 CPU::prefixedopcode0x9E() { // RES 3 HL
 	u8 data = read(R.HL);
 	reset_bit(data, 3);
+	write(R.HL, data);
 	return 0;
 }
 
@@ -1009,6 +1013,7 @@ u8 CPU::prefixedopcode0xA5() { // RES 4 L
 u8 CPU::prefixedopcode0xA6() { // RES 4 HL
 	u8 data = read(R.HL);
 	reset_bit(data, 4);
+	write(R.HL, data);
 	return 0;
 }
 
@@ -1050,6 +1055,7 @@ u8 CPU::prefixedopcode0xAD() { // RES 5 L
 u8 CPU::prefixedopcode0xAE() { // RES 5 HL
 	u8 data = read(R.HL);
 	reset_bit(data, 5);
+	write(R.HL, data);
 	return 0;
 }
 
@@ -1091,6 +1097,7 @@ u8 CPU::prefixedopcode0xB5() { // RES 6 L
 u8 CPU::prefixedopcode0xB6() { // RES 6 HL
 	u8 data = read(R.HL);
 	reset_bit(data, 6);
+	write(R.HL, data);
 	return 0;
 }
 
@@ -1132,6 +1139,7 @@ u8 CPU::prefixedopcode0xBD() { // RES 7 L
 u8 CPU::prefixedopcode0xBE() { // RES 7 HL
 	u8 data = read(R.HL);
 	reset_bit(data, 7);
+	write(R.HL, data);
 	return 0;
 }
 
@@ -1173,6 +1181,7 @@ u8 CPU::prefixedopcode0xC5() { // SET 0 L
 u8 CPU::prefixedopcode0xC6() { // SET 0 HL
 	u8 data = read(R.HL);
 	set_bit(data, 0);
+	write(R.HL, data);
 	return 0;
 }
 
@@ -1214,6 +1223,7 @@ u8 CPU::prefixedopcode0xCD() { // SET 1 L
 u8 CPU::prefixedopcode0xCE() { // SET 1 HL
 	u8 data = read(R.HL);
 	set_bit(data, 1);
+	write(R.HL, data);
 	return 0;
 }
 
@@ -1255,6 +1265,7 @@ u8 CPU::prefixedopcode0xD5() { // SET 2 L
 u8 CPU::prefixedopcode0xD6() { // SET 2 HL
 	u8 data = read(R.HL);
 	set_bit(data, 2);
+	write(R.HL, data);
 	return 0;
 }
 
@@ -1297,6 +1308,7 @@ u8 CPU::prefixedopcode0xDD() { // SET 3 L
 u8 CPU::prefixedopcode0xDE() { // SET 3 HL
 	u8 data = read(R.HL);
 	set_bit(data, 3);
+	write(R.HL, data);
 	return 0;
 }
 
@@ -1338,6 +1350,7 @@ u8 CPU::prefixedopcode0xE5() { // SET 4 L
 u8 CPU::prefixedopcode0xE6() { // SET 4 HL
 	u8 data = read(R.HL);
 	set_bit(data, 4);
+	write(R.HL, data);
 	return 0;
 }
 
@@ -1379,6 +1392,7 @@ u8 CPU::prefixedopcode0xED() { // SET 5 L
 u8 CPU::prefixedopcode0xEE() { // SET 5 HL
 	u8 data = read(R.HL);
 	set_bit(data, 5);
+	write(R.HL, data);
 	return 0;
 }
 
@@ -1420,6 +1434,7 @@ u8 CPU::prefixedopcode0xF5() { // SET 6 L
 u8 CPU::prefixedopcode0xF6() { // SET 6 HL
 	u8 data = read(R.HL);
 	set_bit(data, 6);
+	write(R.HL, data);
 	return 0;
 }
 
@@ -1461,6 +1476,7 @@ u8 CPU::prefixedopcode0xFD() { // SET 7 L
 u8 CPU::prefixedopcode0xFE() { // SET 7 HL
 	u8 data = read(R.HL);
 	set_bit(data, 7);
+	write(R.HL, data);
 	return 0;
 }
 

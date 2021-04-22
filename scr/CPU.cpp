@@ -141,8 +141,6 @@ void CPU::write(const u16 &addr, const u8 &data) {
 			interrupt_request_register = data & 0x1Fu;
 			break;
 		case IN_BOOT_ADDRESS:
-			if (in_boot)
-				std::cout << "Boot verlassen nach " << std::dec << cycles << " Cycles" << std::endl;
 			in_boot = false;
 			break;
 		default:
