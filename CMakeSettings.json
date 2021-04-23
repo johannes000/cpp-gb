@@ -1,27 +1,15 @@
 ﻿{
   "configurations": [
     {
-      "name": "Debug",
+      "name": "x64-Debug (Standard)",
       "generator": "Ninja",
       "configurationType": "Debug",
-      "inheritEnvironments": [ "msvc_x86" ],
-      "buildRoot": "${projectDir}\\..\\VSBuilds\\out\\build\\${name}",
-      "installRoot": "${projectDir}\\..\\VSBuilds\\out\\install\\${name}",
+      "inheritEnvironments": [ "msvc_x64_x64" ],
+      "buildRoot": "${projectDir}\\build\\${name}",
+      "installRoot": "${projectDir}\\out\\install\\${name}",
       "cmakeCommandArgs": "",
       "buildCommandArgs": "",
       "ctestCommandArgs": "",
-      "variables": []
-    },
-    {
-      "name": "Release",
-      "generator": "Ninja",
-      "configurationType": "Release",
-      "buildRoot": "${projectDir}\\..\\VSBuilds\\out\\build\\${name}",
-      "installRoot": "${projectDir}\\..\\VSBuilds\\out\\install\\${name}",
-      "cmakeCommandArgs": "",
-      "buildCommandArgs": "",
-      "ctestCommandArgs": "",
-      "inheritEnvironments": [ "msvc_x86" ],
       "variables": []
     }
   ]

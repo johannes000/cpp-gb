@@ -1,40 +1,7 @@
 #include "gameboy.h"
 #include "gtest/gtest.h"
 #include <string>
-GTEST_TEST(WriteTest, WriteCard) {
-	gameboy gb;
-	for (u16 addr; addr != 0xFFFF; addr++)
-		gb.card.write(addr, 0xFF);
-	EXPECT_NO_THROW();
-}
-GTEST_TEST(WriteTest, WriteCPU) {
-	gameboy gb;
-	for (u16 addr; addr != 0xFFFF; addr++)
-		gb.cpu.write(addr, 0xFF);
-	EXPECT_NO_THROW();
-	EXPECT_EQ(gb.cpu.read(WORKING_RAM), 0xFF);
-}
-GTEST_TEST(WriteTest, WriteJoypad) {
-	gameboy gb;
-	for (u16 addr; addr != 0xFFFF; addr++)
-		gb.joypad.write(addr, 0xFF);
-	EXPECT_NO_THROW();
-	EXPECT_EQ(gb.joypad.read(WORKING_RAM), 0xFF);
-}
-GTEST_TEST(WriteTest, WriteMem) {
-	gameboy gb;
-	for (u16 addr; addr != 0xFFFF; addr++)
-		gb.mem.write(addr, 0xFF);
-	EXPECT_NO_THROW();
-	EXPECT_EQ(gb.mem.read(WORKING_RAM), 0xFF);
-}
-GTEST_TEST(WriteTest, WritePpu) {
-	gameboy gb;
-	for (u16 addr; addr != 0xFFFF; addr++)
-		gb.ppu.write(addr, 0xFF);
-	EXPECT_NO_THROW();
-	EXPECT_EQ(gb.ppu.read(WORKING_RAM), 0xFF);
-}
+
 GTEST_TEST(CPUTest, 01_special) {
 	gameboy gb;
 	gb.load_rom("C:/Users/knaub/source/repos/testroms/cpu_instrs/individual/01-special.gb", true);
@@ -42,7 +9,7 @@ GTEST_TEST(CPUTest, 01_special) {
 	std::string result = gb.mem.TestOutput;
 	std::string expected_result = "01-special\n\n\nPassed\n";
 
-	EXPECT_EQ(expected_result, result);
+	EXPECT_EQ(result, expected_result);
 }
 
 GTEST_TEST(CPUTest, 02_interrupts) {

@@ -122,8 +122,8 @@ private:
 
 public:
 	// Paletten
-	std::vector<std::vector<Pixel_a>> sprite_obj_palette;
 	std::vector<Pixel_a> bg_palette;
+	std::vector<std::vector<Pixel_a>> sprite_obj_palette;
 
 private:
 	void build_palette(const u16 addr, u8 data);

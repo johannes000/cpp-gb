@@ -52,6 +52,13 @@ class CONTROLS;
 
 class Debugger;
 
+struct Texture {
+	GLuint texture_handler;
+	GLuint *texture_ptr = &texture_handler;
+	int width;
+	int height;
+	Pixel_a const *data_ptr = nullptr;
+};
 struct Renderer {
 	GLFWwindow *window{};
 
@@ -69,11 +76,16 @@ struct Renderer {
 
 	void start_new_imgui_frame();
 
-	static bool load_texture(GLuint *textureHandler, int width, int height,
-							 const void *data);
+	bool load_texture(Texture);
+	static bool load_texture(GLuint *textureHandler, int width, int height, const void *data);
 
-	void update_texture(GLuint *textureHandler, int width, int height,
-						const void *data);
+	void update_texture(Texture, const void *);
+	void update_texture(GLuint *textureHandler, int width, int height, const void *data);
+
+	std::vector<Pixel_a> tile_buffer;
+	Texture frame_texture;
+	Texture tiles_texture;
+	GLuint tt;
 
 	int window_height = 900;
 	int window_width = 1700;
@@ -96,10 +108,6 @@ struct Renderer {
 	bool show_another_window = false;
 
 	void *frame_buffer = nullptr;
-	std::vector<Pixel_a> tile_buffer;
-
-	GLuint frame_texture;
-	GLuint tiles_texture;
 
 	void update_views(PPU *ppu, Debugger *debug);
 

@@ -12,11 +12,18 @@ Renderer::Renderer(CONTROLS *j) : joypad(j) {
 
 	glfwSetInputMode(window, GLFW_STICKY_KEYS, 1);
 
-	load_texture(&frame_texture, GB_LCD_SIZE_WIDTH, GB_LCD_SIZE_HEIGHT, nullptr);
-	load_texture(&tiles_texture, TILE_MAP_WIDTH, TILE_MAP_HEIGHT, nullptr);
-
 	tile_buffer = {TILE_MAP_HEIGHT * TILE_MAP_HEIGHT,
 				   {0xFF, 0xFF, 0xFF, 0x00}};
+	frame_texture.data_ptr = nullptr;
+	frame_texture.height = GB_LCD_SIZE_HEIGHT;
+	frame_texture.width = GB_LCD_SIZE_WIDTH;
+
+	tiles_texture.data_ptr = &tile_buffer[0];
+	tiles_texture.height = TILE_MAP_HEIGHT;
+	tiles_texture.width = TILE_MAP_WIDTH;
+
+	load_texture(frame_texture);
+	load_texture(tiles_texture);
 
 	roms = {
 		{"Tennis", "C:/Users/knaub/source/repos/testroms/tennis.gb"},
@@ -214,12 +221,16 @@ bool Renderer::load_texture(GLuint *textureHandler, int width, int height,
 
 	return true;
 }
+bool Renderer::load_texture(Texture texture) {
+	return load_texture(texture.texture_ptr, texture.width, texture.height, nullptr);
+}
 
-void Renderer::update_texture(GLuint *textureHandler, int width, int height,
-							  const void *data) {
+void Renderer::update_texture(GLuint *textureHandler, int width, int height, const void *data) {
 	glBindTexture(GL_TEXTURE_2D, *textureHandler);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA,
-				 GL_UNSIGNED_BYTE, data);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+}
+void Renderer::update_texture(Texture texture, const void *data) {
+	return update_texture(texture.texture_ptr, texture.width, texture.height, data);
 }
 
 void Renderer::main_view(PPU *ppu) {
@@ -230,9 +241,8 @@ void Renderer::main_view(PPU *ppu) {
 
 	ImGui::Begin("Main Window");
 
-	update_texture(&frame_texture, GB_LCD_SIZE_WIDTH, GB_LCD_SIZE_HEIGHT,
-				   ppu->get_lcd_buffer());
-	ImGui::Image((ImTextureID)(intptr_t)frame_texture, ImVec2(h * ratio, h));
+	update_texture(frame_texture, ppu->get_lcd_buffer());
+	ImGui::Image((ImTextureID)(intptr_t)frame_texture.texture_handler, ImVec2(h * ratio, h));
 
 	show_fps();
 
@@ -240,13 +250,14 @@ void Renderer::main_view(PPU *ppu) {
 }
 
 void Renderer::tile_buffer_view(PPU *ppu) {
-	update_tile_buffer(ppu);
-
+	static int counter = 0;
+	if (!(counter++ % 60)) {
+		update_tile_buffer(ppu);
+		update_texture(tiles_texture, &tile_buffer[0]);
+	}
 	ImGui::Begin("Tile Buffer");
 
-	update_texture(&tiles_texture, TILE_MAP_WIDTH, TILE_MAP_HEIGHT,
-				   &tile_buffer[0]);
-	ImGui::Image((ImTextureID)(intptr_t)tiles_texture,
+	ImGui::Image((ImTextureID)(intptr_t)tiles_texture.texture_handler,
 				 ImVec2(TILE_MAP_WIDTH * 2, TILE_MAP_HEIGHT * 2));
 
 	if (ImGui::TreeNode("Sprites")) {
@@ -305,7 +316,7 @@ const char *Renderer::rom_select_view() {
 	ImGui::Separator();
 	for (auto &rom : roms) {
 		if (ImGui::Selectable("", true, ImGuiSelectableFlags_AllowDoubleClick))
-			strcpy(filename, rom.second);
+			strcpy_s(filename, sizeof(filename), rom.second);
 		ImGui::SameLine();
 		ImGui::Text("%s", rom.first);
 	}

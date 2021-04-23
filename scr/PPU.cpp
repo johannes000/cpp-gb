@@ -45,12 +45,19 @@ void PPU::update(const int cycles, bool skip_render) {
 				buffer_sprite_line(line);
 				buffer_window_line(line);
 
-				if (line == lcd_register.LCD_LYC && lcd_state.lyc_interrupt)
-					cpu->request_interrupt(Interrupt::LCD_Stat);
+				if (line == lcd_register.LCD_LYC) {
+					if (lcd_state.lyc_interrupt)
+						cpu->request_interrupt(Interrupt::LCD_Stat);
+					lcd_state.coincidence_flag = true;
+				} else {
+					lcd_state.coincidence_flag = false;
+				}
 
 				if (++lcd_register.LCD_LY >= GB_LCD_SIZE_HEIGHT) {
 					set_lcd_mode(LCD_Mode::V_Blank);
 					cpu->request_interrupt(Interrupt::V_Blank);
+					if (lcd_state.v_blank_interrupt)
+						cpu->request_interrupt(Interrupt::LCD_Stat);
 				} else {
 					set_lcd_mode(LCD_Mode::OAM);
 					if (lcd_state.oam_interrupt)
@@ -161,9 +168,8 @@ void PPU::reset() {
 	bg_palette = Palettes[current_palette];
 	sprite_obj_palette = std::vector<std::vector<Pixel_a>>(2, bg_palette);
 
-	lcd_register = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-					0x00, 0x00, 0x00, 0x00, 0x00};
 	set_lcd_mode(LCD_Mode::OAM);
+	lcd_register = {};
 
 	v_ram = std::vector<u8>(VRAM_SIZE, 0xFF);
 
@@ -177,13 +183,11 @@ void PPU::reset() {
 	lcd_control = {};
 	lcd_state = {};
 	cycles_in_mode = 0;
-
-	set_lcd_mode(LCD_Mode::OAM);
 }
 /**
  * @brief Schreibt den gewünschten mode ins LCD Status register
- * 
- * @param m 
+ *
+ * @param m
  */
 void PPU::set_lcd_mode(LCD_Mode m) {
 	const u8 mode = static_cast<u8>(m);
@@ -195,7 +199,7 @@ void PPU::set_lcd_mode(LCD_Mode m) {
 
 /**
  * @brief  Liest den LCD Mode aus dem LCD Status register und aktualisiert die lokale variable
- * 
+ *
  */
 void PPU::update_lcd_mode() {
 	lcd_mode = static_cast<LCD_Mode>(lcd_register.LCD_STATUS & 3u);
@@ -203,16 +207,9 @@ void PPU::update_lcd_mode() {
 
 /**
  * @brief  setzt den gewünschten status im LCD Status Register
- * 
- * @param s 
+ *
+ * @param s
  */
-
-/**
- * @brief setzt den gewünschten status im LCD Status Register zurück
- * 
- * @param s 
- */
-
 void PPU::buffer_line(const u8 line) {
 	if (line >= GB_LCD_SIZE_HEIGHT)
 		return;
@@ -246,7 +243,7 @@ void PPU::buffer_line(const u8 line) {
 				 tile_pixel_x <= TILE_WIDTH && x <= GB_LCD_SIZE_WIDTH - 1;
 				 x++, tile_pixel_x++) {
 				const auto index = ((GB_LCD_SIZE_WIDTH * y) + x);
-				const auto color = tile_map_data[tile_id][(tile_pixel_y * 8) + tile_pixel_x - 1];
+				const auto color = tile_map_data[tile_id][((tile_pixel_y * 8) + tile_pixel_x - 1) % (8 * 8)];
 				bg_buffer[index] = bg_palette[color];
 			}
 		}
@@ -254,8 +251,8 @@ void PPU::buffer_line(const u8 line) {
 }
 /**
  * @brief Bufferd die Sprites für die jeweilige Bildzeile
- * 
- * @param u8 line 
+ *
+ * @param u8 line
  */
 void PPU::buffer_sprite_line(const u8 line) {
 	lcd_control.update(this);
@@ -281,7 +278,7 @@ void PPU::buffer_sprite_line(const u8 line) {
 						// Pixel im Tile
 						const auto palette_color_index = spr.tile_data[spr.x_flip ? (pixel_y_pos * 8) - pixel_x_pos + 7 : (pixel_y_pos * 8) + pixel_x_pos];
 						if (palette_color_index != 0) {
-							const auto color = sprite_obj_palette[spr.palette % 2][palette_color_index];
+							const auto color = sprite_obj_palette[spr.palette][palette_color_index];
 							bg_buffer[buffer_index] = color;
 						}
 					}
@@ -293,6 +290,8 @@ void PPU::buffer_sprite_line(const u8 line) {
 }
 
 void PPU::buffer_window_line(const u8 line) {
+	if (line >= GB_LCD_SIZE_HEIGHT)
+		return;
 	lcd_control.update(this);
 	u16 window_y = read(LCD_WY);
 	u16 window_x = read(LCD_WX);
@@ -302,11 +301,12 @@ void PPU::buffer_window_line(const u8 line) {
 		window_x -= 7;
 
 	if (line - window_y < GB_LCD_SIZE_HEIGHT && line >= window_y && lcd_control.window_enable && lcd_control.lcd_power) {
-		for (int line_x_pos = window_x; line_x_pos <= 160; line_x_pos++) {
-			bg_buffer[(line * GB_LCD_SIZE_WIDTH) + line_x_pos] = {0xFF, 0xFF, 0xFF, 0xFF};
+		for (int line_x_pos = window_x; line_x_pos < GB_LCD_SIZE_WIDTH; line_x_pos++) {
+			bg_buffer.at((line * GB_LCD_SIZE_WIDTH) + line_x_pos) = {0xFF, 0xFF, 0xFF, 0xFF};
 		}
 	}
 }
+
 void PPU::build_palette(const u16 addr, u8 data) {
 	switch (addr) {
 		case BG_PALETTE_DATA:
@@ -374,8 +374,7 @@ void PPU::update_tile(const u16 &a) {
 	const u8 p_line_2 = v_ram.at(addr + 1);
 
 	for (int pixel = 0; pixel <= 8; ++pixel) {
-		const u8 color = static_cast<u8>(check_bit(p_line_1, (7u - pixel)) << 1u) |
-						 check_bit(p_line_2, (7u - pixel));
+		const u8 color = static_cast<u8>(check_bit(p_line_1, (7u - pixel)) << 1u) | check_bit(p_line_2, (7u - pixel));
 		auto p = ((y * 8) + pixel);
 		tile_map_data[tile_id][p] = color;
 	}

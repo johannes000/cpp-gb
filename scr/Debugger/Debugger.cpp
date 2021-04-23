@@ -7,14 +7,14 @@
 #include <vector>
 
 Debugger::Debugger(CPU *c, PPU *p, MEMORY *m, CARDRIDGE *card, CONTROLS *joy)
-	: cpu(c),
+	: hit_breakpoint(false),
+	  cpu(c),
 	  ppu(p),
 	  mem(m),
 	  cardridge(card),
 	  joypad(joy),
 	  debug_state(Debug_State::RUN),
-	  next_step(false),
-	  hit_breakpoint(false) {
+	  next_step(false) {
 	// breakpoints.push_back(0x100);
 }
 
@@ -83,15 +83,15 @@ void Debugger::cpu_view() {
 	ImGui::SameLine();
 
 	switch (debug_state) {
-	case Debug_State::STEP:
-		ImGui::Text("STEP");
-		break;
-	case Debug_State::RUN:
-		ImGui::Text("RUN");
-		break;
-	case Debug_State::BREAKPOINT:
-		ImGui::Text("Breakpoint");
-		break;
+		case Debug_State::STEP:
+			ImGui::Text("STEP");
+			break;
+		case Debug_State::RUN:
+			ImGui::Text("RUN");
+			break;
+		case Debug_State::BREAKPOINT:
+			ImGui::Text("Breakpoint");
+			break;
 	}
 
 	// DECOMPILER
@@ -124,18 +124,18 @@ void Debugger::cpu_view() {
 				ImGui::TextColored(red, "%04X", inst.address);
 				ImGui::SameLine();
 				switch (inst.bytes) {
-				case 1:
-					ImGui::TextColored(gray, "%02X\t\t\t", inst.opcode);
-					break;
-				case 2:
-					ImGui::TextColored(gray, "%02X %02X\t\t ", inst.opcode,
-									   inst.intermediate & 0xFFu);
-					break;
-				case 3:
-					ImGui::TextColored(gray, "%02X %02X %02X\t  ", inst.opcode,
-									   inst.intermediate & 0xFF00u,
-									   inst.intermediate & 0x00FFu);
-					break;
+					case 1:
+						ImGui::TextColored(gray, "%02X\t\t\t", inst.opcode);
+						break;
+					case 2:
+						ImGui::TextColored(gray, "%02X %02X\t\t ", inst.opcode,
+										   inst.intermediate & 0xFFu);
+						break;
+					case 3:
+						ImGui::TextColored(gray, "%02X %02X %02X\t  ", inst.opcode,
+										   inst.intermediate & 0xFF00u,
+										   inst.intermediate & 0x00FFu);
+						break;
 				}
 				ImGui::SameLine();
 				ImGui::TextColored(red, "->%s", inst.mnemonic);
@@ -153,18 +153,18 @@ void Debugger::cpu_view() {
 				ImGui::TextColored(cyan, "%04X", inst.address);
 				ImGui::SameLine();
 				switch (inst.bytes) {
-				case 1:
-					ImGui::TextColored(gray, "%02X\t\t\t", inst.opcode);
-					break;
-				case 2:
-					ImGui::TextColored(gray, "%02X %02X\t\t ", inst.opcode,
-									   inst.intermediate & 0xFFu);
-					break;
-				case 3:
-					ImGui::TextColored(gray, "%02X %02X %02X\t  ", inst.opcode,
-									   (inst.intermediate & 0xFFu) >> 4u,
-									   inst.intermediate & 0x00FFu);
-					break;
+					case 1:
+						ImGui::TextColored(gray, "%02X\t\t\t", inst.opcode);
+						break;
+					case 2:
+						ImGui::TextColored(gray, "%02X %02X\t\t ", inst.opcode,
+										   inst.intermediate & 0xFFu);
+						break;
+					case 3:
+						ImGui::TextColored(gray, "%02X %02X %02X\t  ", inst.opcode,
+										   (inst.intermediate & 0xFFu) >> 4u,
+										   inst.intermediate & 0x00FFu);
+						break;
 				}
 				ImGui::SameLine();
 				ImGui::TextColored(cyan, "%s", inst.mnemonic);
