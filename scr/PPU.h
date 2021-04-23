@@ -41,6 +41,8 @@ public:
 
 	bool ready_to_render;
 
+	int current_palette = 0;
+
 private:
 	CPU *cpu;
 	MEMORY *mem;
@@ -114,11 +116,9 @@ public:
 	std::vector<std::vector<u8>> tile_map_data;
 
 private:
-	void buffer_line(const u8 line);
+	void buffer_bg_line(const u8 line);
 	void buffer_sprite_line(const u8 line);
 	void buffer_window_line(const u8 line);
-
-	int current_palette = 0;
 
 public:
 	// Paletten
@@ -140,6 +140,7 @@ private:
 		bool x_flip;	  // X flip          (0=Normal, 1=Horizontally mirrored)
 		bool palette;	  // Palette number  **Non CGB Mode Only** (0=OBP0, 1=OBP1)
 		std::vector<u8> tile_data;
+		u8 *tile_data_ptr = &tile_data[0];
 	};
 	void build_sprite_data(const u16 &addr, const u8 &data);
 

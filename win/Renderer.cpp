@@ -14,6 +14,7 @@ Renderer::Renderer(CONTROLS *j) : joypad(j) {
 
 	tile_buffer = {TILE_MAP_HEIGHT * TILE_MAP_HEIGHT,
 				   {0xFF, 0xFF, 0xFF, 0x00}};
+
 	frame_texture.data_ptr = nullptr;
 	frame_texture.height = GB_LCD_SIZE_HEIGHT;
 	frame_texture.width = GB_LCD_SIZE_WIDTH;
@@ -24,6 +25,14 @@ Renderer::Renderer(CONTROLS *j) : joypad(j) {
 
 	load_texture(frame_texture);
 	load_texture(tiles_texture);
+
+	for (int sprite_index = 0; sprite_index < 40; sprite_index++) {
+		Texture sprite;
+		sprite.width = TILE_WIDTH;
+		sprite.height = TILE_HEIGHT;
+		load_texture(sprite);
+		sprite_textures.push_back(sprite);
+	}
 
 	roms = {
 		{"Tennis", "C:/Users/knaub/source/repos/testroms/tennis.gb"},
@@ -217,7 +226,7 @@ bool Renderer::load_texture(GLuint *textureHandler, int width, int height,
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA,
 				 GL_UNSIGNED_BYTE, data);
-	glBindTexture(GL_TEXTURE_2D, 0);
+	//glBindTexture(GL_TEXTURE_2D, 0);
 
 	return true;
 }
@@ -261,15 +270,24 @@ void Renderer::tile_buffer_view(PPU *ppu) {
 				 ImVec2(TILE_MAP_WIDTH * 2, TILE_MAP_HEIGHT * 2));
 
 	if (ImGui::TreeNode("Sprites")) {
-		u8 index = 0;
 		for (auto sprite : ppu->sprites) {
-			if (ImGui::TreeNode(std::to_string(index).c_str())) {
+			if (ImGui::TreeNode(std::to_string(sprite.id).c_str())) {
 				ImGui::Text("Tile No:%i", sprite.tile_no);
 				ImGui::Text("X:      %i", sprite.x_pos);
 				ImGui::Text("Y:      %i", sprite.y_pos);
+#if 0
+				Texture spr = sprite_textures[sprite.id];
+				std::vector<Pixel_a> translated_sprite;
+				for (auto &pixel : ppu->tile_map_data[sprite.tile_no]) {
+					translated_sprite.push_back(ppu->Palettes[ppu->current_palette][pixel]);
+				}
+				spr.translated_texture = translated_sprite;
+
+				update_texture(spr, spr.translated_Texture_ptr);
+				ImGui::Image((ImTextureID)(intptr_t)spr.texture_handler, ImVec2(spr.height * 4, spr.width * 4));
+#endif
 				ImGui::TreePop();
 			}
-			index++;
 		}
 		ImGui::TreePop();
 	}

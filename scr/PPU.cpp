@@ -41,7 +41,7 @@ void PPU::update(const int cycles, bool skip_render) {
 				cycles_in_mode -= CLOCKS_HORIZONTAL_BLANK;
 				int line = lcd_register.LCD_LY;
 
-				buffer_line(line);
+				buffer_bg_line(line);
 				buffer_sprite_line(line);
 				buffer_window_line(line);
 
@@ -210,7 +210,7 @@ void PPU::update_lcd_mode() {
  *
  * @param s
  */
-void PPU::buffer_line(const u8 line) {
+void PPU::buffer_bg_line(const u8 line) {
 	if (line >= GB_LCD_SIZE_HEIGHT)
 		return;
 	lcd_control.update(this);
@@ -299,10 +299,28 @@ void PPU::buffer_window_line(const u8 line) {
 		window_x = 0;
 	else
 		window_x -= 7;
+	const u16 bg_tilemap = lcd_control.window_tile_map ? 0x9C00 : 0x9800;
 
 	if (line - window_y < GB_LCD_SIZE_HEIGHT && line >= window_y && lcd_control.window_enable && lcd_control.lcd_power) {
 		for (int line_x_pos = window_x; line_x_pos < GB_LCD_SIZE_WIDTH; line_x_pos++) {
-			bg_buffer.at((line * GB_LCD_SIZE_WIDTH) + line_x_pos) = {0xFF, 0xFF, 0xFF, 0xFF};
+			bg_buffer[(line * GB_LCD_SIZE_WIDTH) + line_x_pos] = {0xFF, 0xFF, 0xFF, 0xFF};
+
+			const auto tile_x = (line_x_pos - window_x) / TILE_WIDTH;
+			const auto tile_y = (line - window_y) / TILE_HEIGHT;
+
+			const auto tile_pixel_x = (line_x_pos - window_x) % TILE_WIDTH;
+			const auto tile_pixel_y = (line - window_y) % TILE_HEIGHT;
+
+			const u16 tile_addr = bg_tilemap + (tile_y * TILE_PER_LINE + tile_x);
+
+			int tile_id = read(tile_addr);
+
+			if (!lcd_control.bg_window_tileset && tile_id < 0x80)
+				tile_id += 0x100u;
+
+			const auto index = ((GB_LCD_SIZE_WIDTH * line) + line_x_pos);
+			const auto color = tile_map_data[tile_id][((tile_pixel_y * 8) + tile_pixel_x) % (8 * 8)];
+			bg_buffer[index] = bg_palette[color];
 		}
 	}
 }
@@ -401,3 +419,8 @@ void PPU::handle_lcd_status(const u8 &data) {
 	lcd_state.v_blank_interrupt = check_bit(data, 4);
 	lcd_state.h_blank_interrupt = check_bit(data, 3);
 }
+/**
+ * @brief Translated Sprite Data in RGBA Pixel data
+ * 
+ * @param sprite 
+ */

@@ -7,13 +7,11 @@ Todo:
   ☐ Bootrom hardcoden @high
   ☐ Tracer für Disassambler @low
   ☐ Timer fixen @critical
-  ☐ Emu drosseln @high @started
   ☐ Sound @low
-  ☐ Banks @low
+  ☐ Banks @high
   ☐ Controlls Plattformunabhängig gestalten @low
   ☐ Gameboy komplett Plattformunabhängig machen @low
     ☐ als DLL builden
-  ☐ Paletten Richtig implementieren @low
   ☐ Custon Palettes UI @low
     ☐ Colorpoicker 
     

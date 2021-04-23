@@ -85,8 +85,8 @@ struct Renderer {
 	std::vector<Pixel_a> tile_buffer;
 	Texture frame_texture;
 	Texture tiles_texture;
-	GLuint tt;
 
+	std::vector<Texture> sprite_textures;
 	int window_height = 900;
 	int window_width = 1700;
 
