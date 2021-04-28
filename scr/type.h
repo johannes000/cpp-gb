@@ -217,7 +217,7 @@ enum class RAMSize {
 	KB8 = 0x02,
 	KB32 = 0x03,  //(4 banks of 8KBytes each)
 	KB128 = 0x04, //(16 banks of 8KBytes each)
-	KB64 = 0x05,  // (8 banks of 8KBytes each)
+	KB64 = 0x05,  //(8 banks of 8KBytes each)
 };
 
 enum class DestCode {
@@ -277,31 +277,6 @@ struct Pixel_a {
 
 typedef std::vector<Pixel_a> Tile;
 struct LCD_Register {
-	/*
-	Bit 7 - LCD and PPU enable	0=Off, 1=On
-	Bit 6 - Window tile map area	0=9800-9BFF, 1=9C00-9FFF
-	Bit 5 - Window enable	0=Off, 1=On
-	Bit 4 - BG and Window tile data area	0=8800-97FF, 1=8000-8FFF
-	Bit 3 - BG tile map area	0=9800-9BFF, 1=9C00-9FFF
-	Bit 2 - OBJ size	0=8x8, 1=8x16
-	Bit 1 - OBJ enable	0=Off, 1=On
-	Bit 0 - BG and Window enable/priority	0=Off, 1=On
-	*/
-	Register LCD_CONTROL;
-	/*
-	Bit 6 - LYC=LY Interrupt             (1=Enable) (Read/Write)
-	Bit 5 - Mode 2 OAM Interrupt         (1=Enable) (Read/Write)
-	Bit 4 - Mode 1 VBlank Interrupt      (1=Enable) (Read/Write)
-	Bit 3 - Mode 0 HBlank Interrupt      (1=Enable) (Read/Write)
-	Bit 2 - LYC=LY Flag      (0=Different, 1=Equal) (Read Only)
-	Bit 1-0 - Mode Flag       (Mode 0-3, see below) (Read Only)
-			0: In HBlank
-				1: In VBlank
-				2: Searching OAM
-				3: Transferring Data to LCD Controller 
-	 */
-	Register LCD_STATUS;
-
 	Register LCD_SCY; // SCY - Scroll Y (R/W)
 	Register LCD_SCX; // SCX - Scroll X (R/W)
 	Register LCD_LY;  // LY - LCDC Y-Coordinate (R)
@@ -317,26 +292,22 @@ struct LCD_Register {
 									// - Non CGB Mode Only
 };
 
-// 0: During H - Blank
-// 1 : During V - Blank
-// 2 : OAM Access
-// 3 : VRAM Access
 enum class LCD_Mode {
-	H_Blank,
-	V_Blank,
-	OAM,
-	VRAM,
+	H_Blank, // 0: During H - Blank
+	V_Blank, // 1 : During V - Blank
+	OAM,	 // 2 : OAM Access
+	VRAM,	 // 3 : VRAM Access
 };
 
-// Bit 7 - Not used
-// Bit 6 - Not used
-// Bit 5 - P15 Select Button Keys      (0=Select)
-// Bit 4 - P14 Select Direction Keys   (0=Select)
-// Bit 3 - P13 Input Down  or Start    (0=Pressed) (Read Only)
-// Bit 2 - P12 Input Up    or Select   (0=Pressed) (Read Only)
-// Bit 1 - P11 Input Left  or Button B (0=Pressed) (Read Only)
-// Bit 0 - P10 Input Right or Button A (0=Pressed) (Read Only)
 enum class GB_Key {
+	// Bit 7 - Not used
+	// Bit 6 - Not used
+	// Bit 5 - P15 Select Button Keys      (0=Select)
+	// Bit 4 - P14 Select Direction Keys   (0=Select)
+	// Bit 3 - P13 Input Down  or Start    (0=Pressed) (Read Only)
+	// Bit 2 - P12 Input Up    or Select   (0=Pressed) (Read Only)
+	// Bit 1 - P11 Input Left  or Button B (0=Pressed) (Read Only)
+	// Bit 0 - P10 Input Right or Button A (0=Pressed) (Read Only)
 	Right = 0,
 	Left = 1,
 	Up = 2,

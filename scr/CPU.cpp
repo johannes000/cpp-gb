@@ -206,6 +206,7 @@ void CPU::handle_interrupts() {
 }
 
 void CPU::handle_timer(int t_cycles) {
+
 	div_cycle_sum += t_cycles;
 	if (div_cycle_sum >= 256) {
 		div_cycle_sum -= 256;

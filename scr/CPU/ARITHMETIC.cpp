@@ -3,14 +3,14 @@
 void CPU::xor_a_r8(const u8 *reg) {
 	// XOR data 1 und data 2 und speicher das ergebnis in data 1
 	R.A ^= *reg;
-	set_flag_if(Flag::z, R.A == 0);
+	set_cpu_flag_if(Flag::z, R.A == 0);
 	reset_flags(Flag::n, Flag::h, Flag::c);
 }
 
 void CPU::and_a_r8(const u8 *reg) {
 	// AND A und reg 2 und speicher das ergebnis in A
 	R.A &= *reg;
-	set_flag_if(Flag::z, R.A == 0);
+	set_cpu_flag_if(Flag::z, R.A == 0);
 	reset_flags(Flag::n, Flag::c);
 	set_flag(Flag::h);
 }
@@ -19,15 +19,15 @@ void CPU::or_r8_r8(const u8 &reg) {
 	// OR reg 1 und reg 2 und Speicher das Ergebnis in data 1
 	reset_all_flags();
 	R.A |= reg;
-	set_flag_if(Flag::z, R.A == 0);
+	set_cpu_flag_if(Flag::z, R.A == 0);
 }
 
 void CPU::cp_a_r8(const u8 *reg) {
 	//Subtract the value in data2 from data1 and set flags accordingly, but don't store the result. This is useful for ComParing values.
 	set_flag(Flag::n);
-	set_flag_if(Flag::h, ((R.A & 0xfu) < (*reg & 0xfu)));
-	set_flag_if(Flag::c, R.A < *reg);
-	set_flag_if(Flag::z, R.A == *reg);
+	set_cpu_flag_if(Flag::h, ((R.A & 0xfu) < (*reg & 0xfu)));
+	set_cpu_flag_if(Flag::c, R.A < *reg);
+	set_cpu_flag_if(Flag::z, R.A == *reg);
 }
 
 void CPU::inc_u8_reg(u8 *reg) {
@@ -36,8 +36,8 @@ void CPU::inc_u8_reg(u8 *reg) {
 
 	reset_flag(Flag::n);
 
-	set_flag_if(Flag::h, ((*reg & 0xFu) + 0x1 > 0xF));
-	set_flag_if(Flag::z, result == 0);
+	set_cpu_flag_if(Flag::h, ((*reg & 0xFu) + 0x1 > 0xF));
+	set_cpu_flag_if(Flag::z, result == 0);
 	*reg = result;
 }
 
@@ -46,18 +46,18 @@ void CPU::dec_u8_reg(u8 *reg) {
 	u8 result = *reg - 1;
 
 	set_flag(Flag::n);
-	set_flag_if(Flag::h, (static_cast<i8>((*reg & 0xFu) - 0x1) < 0));
-	set_flag_if(Flag::z, result == 0);
+	set_cpu_flag_if(Flag::h, (static_cast<i8>((*reg & 0xFu) - 0x1) < 0));
+	set_cpu_flag_if(Flag::z, result == 0);
 	*reg = result;
 }
 
 void CPU::add_a_r8(const u8 *value) {
 	const unsigned int result = R.A + *value;
 	reset_flag(Flag::n);
-	set_flag_if(Flag::c, ((R.A ^ *value ^ result) & 0x100u) != 0);
-	set_flag_if(Flag::h, ((R.A ^ *value ^ result) & 0x10u) != 0);
+	set_cpu_flag_if(Flag::c, ((R.A ^ *value ^ result) & 0x100u) != 0);
+	set_cpu_flag_if(Flag::h, ((R.A ^ *value ^ result) & 0x10u) != 0);
 	R.A = static_cast<u8>(result);
-	set_flag_if(Flag::z, R.A == 0);
+	set_cpu_flag_if(Flag::z, R.A == 0);
 }
 
 void CPU::adc_a_r8(const u8 *value) {
@@ -66,28 +66,28 @@ void CPU::adc_a_r8(const u8 *value) {
 	check_flag(Flag::c) ? c = 1 : c = 0;
 	int result = R.A + *value + c;
 	reset_flag(Flag::n);
-	set_flag_if(Flag::c, result > 0xFF);
-	set_flag_if(Flag::h, ((R.A & 0x0Fu) + (*value & 0x0Fu) + c) > 0x0F);
+	set_cpu_flag_if(Flag::c, result > 0xFF);
+	set_cpu_flag_if(Flag::h, ((R.A & 0x0Fu) + (*value & 0x0Fu) + c) > 0x0F);
 	R.A = static_cast<u8>(result);
-	set_flag_if(Flag::z, R.A == 0);
+	set_cpu_flag_if(Flag::z, R.A == 0);
 }
 
 void CPU::add_r16_r16(u16 *reg, const u16 *value) {
 	const unsigned int result = *reg + *value;
 	reset_flag(Flag::n);
-	set_flag_if(Flag::h, (*reg & 0xfffu) + (*value & 0xfffu) > 0xfffu);
-	set_flag_if(Flag::c, (result & 0x10000u) != 0);
+	set_cpu_flag_if(Flag::h, (*reg & 0xfffu) + (*value & 0xfffu) > 0xfffu);
+	set_cpu_flag_if(Flag::c, (result & 0x10000u) != 0);
 	*reg = result;
 }
 
 void CPU::sub_a_r8(const u8 *value) {
 
 	set_flag(Flag::n);
-	set_flag_if(Flag::h, (((R.A & 0x0Fu) < (*value & 0x0Fu))));
-	set_flag_if(Flag::c, (R.A & 0xFFu) < (*value & 0xFFu));
+	set_cpu_flag_if(Flag::h, (((R.A & 0x0Fu) < (*value & 0x0Fu))));
+	set_cpu_flag_if(Flag::c, (R.A & 0xFFu) < (*value & 0xFFu));
 
 	R.A -= *value;
-	set_flag_if(Flag::z, R.A == 0);
+	set_cpu_flag_if(Flag::z, R.A == 0);
 }
 
 void CPU::sbc_a_r8(const u8 *value) {
@@ -95,10 +95,10 @@ void CPU::sbc_a_r8(const u8 *value) {
 	check_flag(Flag::c) ? c = 1 : c = 0;
 	int result = R.A - *value - c;
 	set_flag(Flag::n);
-	set_flag_if(Flag::c, result < 0);
-	set_flag_if(Flag::h, ((R.A & 0x0F) - (*value & 0x0F) - c) < 0);
+	set_cpu_flag_if(Flag::c, result < 0);
+	set_cpu_flag_if(Flag::h, ((R.A & 0x0F) - (*value & 0x0F) - c) < 0);
 	R.A = static_cast<u8>(result);
-	set_flag_if(Flag::z, R.A == 0);
+	set_cpu_flag_if(Flag::z, R.A == 0);
 }
 
 u8 CPU::opcode0x3C() { // INC A
@@ -298,8 +298,8 @@ u8 CPU::opcode0xE8() { // ADD SP r8
 	reset_all_flags();
 	// set_flag_if(Flag::c, (((R.SP ^ data ^ (result & 0xFFFFu)) & 0x100u) == 0x100u));
 	// set_flag_if(Flag::h, (((R.SP ^ data ^ (result & 0xFFFFu)) & 0x10u) == 0x10u));
-	set_flag_if(Flag::c, ((result & 0xFF) < (R.SP & 0xFF)));
-	set_flag_if(Flag::h, ((result & 0xF) < (R.SP & 0xF)));
+	set_cpu_flag_if(Flag::c, ((result & 0xFF) < (R.SP & 0xFF)));
+	set_cpu_flag_if(Flag::h, ((result & 0xF) < (R.SP & 0xF)));
 	R.SP = static_cast<u16>(result);
 	return 0;
 }

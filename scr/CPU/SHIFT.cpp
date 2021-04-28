@@ -3,7 +3,7 @@
 
 void CPU::test_n_bit_set_z(const u8 bit, const u8 *reg) {
 	// wenn bit gesetzt setze Zero Flag
-	set_flag_if(Flag::z, !check_bit(*reg, bit));
+	set_cpu_flag_if(Flag::z, !check_bit(*reg, bit));
 	set_flag(Flag::h);
 	reset_flag(Flag::n);
 }
@@ -20,7 +20,7 @@ void CPU::rot_right_c_r8(u8 *reg) {
 	} else {
 		result >>= 1;
 	}
-	set_flag_if(Flag::z, result == 0);
+	set_cpu_flag_if(Flag::z, result == 0);
 	*reg = result;
 }
 
@@ -36,7 +36,7 @@ void CPU::rot_left_c_r8(u8 *reg) {
 	} else {
 		result <<= 1;
 	}
-	set_flag_if(Flag::z, result == 0);
+	set_cpu_flag_if(Flag::z, result == 0);
 	*reg = result;
 }
 
@@ -44,12 +44,12 @@ void CPU::rot_left_r8(u8 *reg) {
 	// Rotate bits in register r8 left through carry.
 	// C <-[7 < -0] <-C
 	const u8 carry = static_cast<u8>(check_flag(Flag::c));
-	set_flag_if(Flag::c, *reg & 0x80u);
+	set_cpu_flag_if(Flag::c, *reg & 0x80u);
 
 	*reg <<= 1u;
 	*reg |= carry;
 
-	set_flag_if(Flag::z, *reg == 0);
+	set_cpu_flag_if(Flag::z, *reg == 0);
 	reset_flags(Flag::n, Flag::h);
 }
 
@@ -60,8 +60,8 @@ void CPU::rot_right_r8(u8 *reg) {
 	*reg >>= 1u;
 	set_bit_if(*reg, 7, check_flag(Flag::c));
 
-	set_flag_if(Flag::c, b7 == 1);
-	set_flag_if(Flag::z, *reg == 0);
+	set_cpu_flag_if(Flag::c, b7 == 1);
+	set_cpu_flag_if(Flag::z, *reg == 0);
 
 	reset_flags(Flag::n, Flag::h);
 }
@@ -71,8 +71,8 @@ void CPU::shift_left_a_r8(u8 *reg) {
 	// C < -[7 < -0] < -0
 	const u8 b7 = *reg & 0x80u;
 	*reg <<= 1u;
-	set_flag_if(Flag::c, b7 != 0);
-	set_flag_if(Flag::z, *reg == 0);
+	set_cpu_flag_if(Flag::c, b7 != 0);
+	set_cpu_flag_if(Flag::z, *reg == 0);
 
 	reset_flags(Flag::n, Flag::h);
 }
@@ -85,8 +85,8 @@ void CPU::shift_right_a_r8(u8 *reg) {
 	*reg >>= 1u;
 
 	set_bit_if(*reg, 7, b7 == 0x80);
-	set_flag_if(Flag::c, b0 == 1);
-	set_flag_if(Flag::z, *reg == 0);
+	set_cpu_flag_if(Flag::c, b0 == 1);
+	set_cpu_flag_if(Flag::z, *reg == 0);
 
 	reset_flags(Flag::n, Flag::h);
 }
@@ -97,8 +97,8 @@ void CPU::shift_right_l_r8(u8 *reg) {
 	const u8 b0 = *reg & 1u;
 	*reg >>= 1u;
 
-	set_flag_if(Flag::c, b0 == 1);
-	set_flag_if(Flag::z, *reg == 0);
+	set_cpu_flag_if(Flag::c, b0 == 1);
+	set_cpu_flag_if(Flag::z, *reg == 0);
 
 	reset_flags(Flag::n, Flag::h);
 }
@@ -110,7 +110,7 @@ void CPU::swap_r8(u8 *reg) {
 	u8 h_bits = *reg & 0x0Fu;
 
 	*reg = (l_bits >> 4u) | (h_bits << 4u);
-	set_flag_if(Flag::z, *reg == 0);
+	set_cpu_flag_if(Flag::z, *reg == 0);
 }
 
 // OPCODES

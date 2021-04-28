@@ -12,7 +12,6 @@ void PPU::update(const int cycles, bool skip_render) {
 		lcd_register.LCD_LY = 0x90;
 		return;
 	}
-	lcd_control.update(this);
 	update_lcd_mode();
 	cycles_in_mode += cycles;
 	switch (lcd_mode) {
@@ -92,10 +91,10 @@ void PPU::write(const u16 &addr, const u8 &data) {
 	} else {
 		switch (addr) {
 			case LCD_CONTROL:
-				lcd_register.LCD_CONTROL = data;
+				lcd_control.value = data;
 				break;
 			case LCD_STATUS:
-				handle_lcd_status(data);
+				lcd_state.value = data & 0x78;
 				break;
 			case LCD_SCY:
 				lcd_register.LCD_SCY = data;
@@ -136,9 +135,9 @@ u8 PPU::read(const u16 &addr) const {
 	} else {
 		switch (addr) {
 			case LCD_CONTROL:
-				return lcd_register.LCD_CONTROL;
+				return lcd_control.value;
 			case LCD_STATUS:
-				return lcd_register.LCD_STATUS;
+				return lcd_state.value;
 			case LCD_SCY:
 				return lcd_register.LCD_SCY;
 			case LCD_SCX:
@@ -194,7 +193,7 @@ void PPU::set_lcd_mode(LCD_Mode m) {
 	if (mode > 3)
 		return;
 	lcd_mode = m;
-	lcd_register.LCD_STATUS = mode & 0x3u;
+	lcd_state.value = mode & 0x3u;
 }
 
 /**
@@ -202,7 +201,7 @@ void PPU::set_lcd_mode(LCD_Mode m) {
  *
  */
 void PPU::update_lcd_mode() {
-	lcd_mode = static_cast<LCD_Mode>(lcd_register.LCD_STATUS & 3u);
+	lcd_mode = static_cast<LCD_Mode>(lcd_state.value & 3u);
 }
 
 /**
@@ -213,7 +212,6 @@ void PPU::update_lcd_mode() {
 void PPU::buffer_bg_line(const u8 line) {
 	if (line >= GB_LCD_SIZE_HEIGHT)
 		return;
-	lcd_control.update(this);
 	if (lcd_control.bg_enabled && lcd_control.lcd_power) {
 		const u16 bg_tilemap = lcd_control.bg_tile_map ? 0x9C00 : 0x9800;
 
@@ -255,7 +253,6 @@ void PPU::buffer_bg_line(const u8 line) {
  * @param u8 line
  */
 void PPU::buffer_sprite_line(const u8 line) {
-	lcd_control.update(this);
 	if (line >= GB_LCD_SIZE_HEIGHT + 8 || !lcd_control.sprites_enabled || !lcd_control.lcd_power)
 		return;
 	u8 sprites_count = 0;
@@ -292,7 +289,6 @@ void PPU::buffer_sprite_line(const u8 line) {
 void PPU::buffer_window_line(const u8 line) {
 	if (line >= GB_LCD_SIZE_HEIGHT)
 		return;
-	lcd_control.update(this);
 	u16 window_y = read(LCD_WY);
 	u16 window_x = read(LCD_WX);
 	if (window_x <= 7)
@@ -397,30 +393,3 @@ void PPU::update_tile(const u16 &a) {
 		tile_map_data[tile_id][p] = color;
 	}
 }
-
-void PPU::LCD_Control::update(PPU *ppu) {
-	const u8 data = ppu->lcd_register.LCD_CONTROL;
-	*this = {
-		check_bit(data, 7),
-		check_bit(data, 6),
-		check_bit(data, 5),
-		check_bit(data, 4),
-		check_bit(data, 3),
-		check_bit(data, 2),
-		check_bit(data, 1),
-		check_bit(data, 0),
-	};
-}
-
-void PPU::handle_lcd_status(const u8 &data) {
-	lcd_register.LCD_STATUS = data & 0x78;
-	lcd_state.lyc_interrupt = check_bit(data, 6);
-	lcd_state.oam_interrupt = check_bit(data, 5);
-	lcd_state.v_blank_interrupt = check_bit(data, 4);
-	lcd_state.h_blank_interrupt = check_bit(data, 3);
-}
-/**
- * @brief Translated Sprite Data in RGBA Pixel data
- * 
- * @param sprite 
- */

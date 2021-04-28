@@ -50,14 +50,12 @@ private:
 	int cycles_in_mode{};
 
 	void update_tile(const u16 &addr);
-	void handle_lcd_status(const u8 &data);
 
 public:
 	inline bool
 	is_ready_to_render() const { return ready_to_render; }
 
 	// Speicher
-private:
 	std::vector<u8> v_ram;
 	std::vector<u8> sprite_attribute_table;
 
@@ -66,40 +64,35 @@ private:
 
 	LCD_Register lcd_register{};
 
-public:
 	const LCD_Register &get_lcd_register() const { return lcd_register; }
-
-private:
-	struct LCD_Control {
-		bool lcd_power;			// Bit 7 - LCD Power(0 = Off, 1 = On)
-		bool window_tile_map;	// Bit 6 - Window Tile Map (0 = 9800h - 9BFFh, 1 = 9C00h - 9FFFh)
-		bool window_enable;		// Bit 5 - Window Enable(0 = Disabled, 1 = Enabled)
-		bool bg_window_tileset; // Bit 4 - BG & Window Tileset(0 = 8800h - 97FFh, 1 = 8000h - 8FFFh)
-		bool bg_tile_map;		// Bit 3 - BG Tile Map (0 = 9800h - 9BFFh, 1 = 9C00h - 9FFFh)
-		bool sprite_size;		// Bit 2 - Sprite Size(0 = 8x8, 1 = 8x16)
-		bool
-			sprites_enabled; // Bit 1 - Sprites Enabled (0 = Disabled, 1 = Enabled)
-		bool bg_enabled;	 // Bit 0 - BG Enabled(in DMG) (0 = Disabled, 1 = Enabled)
-		void update(PPU *ppu);
+	union LCD_Control {
+		struct {
+			bool lcd_power;			// Bit 7 - LCD Power(0 = Off, 1 = On)
+			bool window_tile_map;	// Bit 6 - Window Tile Map (0 = 9800h - 9BFFh, 1 = 9C00h - 9FFFh)
+			bool window_enable;		// Bit 5 - Window Enable(0 = Disabled, 1 = Enabled)
+			bool bg_window_tileset; // Bit 4 - BG & Window Tileset(0 = 8800h - 97FFh, 1 = 8000h - 8FFFh)
+			bool bg_tile_map;		// Bit 3 - BG Tile Map (0 = 9800h - 9BFFh, 1 = 9C00h - 9FFFh)
+			bool sprite_size;		// Bit 2 - Sprite Size(0 = 8x8, 1 = 8x16)
+			bool sprites_enabled;	// Bit 1 - Sprites Enabled (0 = Disabled, 1 = Enabled)
+			bool bg_enabled;		// Bit 0 - BG Enabled(in DMG) (0 = Disabled, 1 = Enabled)
+		};
+		u8 value;
 	} lcd_control{};
-
-	struct LCD_State {
-		// Bit 6 - LYC = LY Coincidence Interrupt (1 = Enable) (Read /Write)
-		bool lyc_interrupt;
-		// Bit 5 - Mode 2 OAM Interrupt (1 = Enable) (Read / Write)
-		bool oam_interrupt;
-		// Bit 4 - Mode 1 V - Blank Interrupt (1 = Enable) (Read / Write)
-		bool v_blank_interrupt;
-		// Bit 3 - Mode 0 H - Blank Interrupt (1 = Enable) (Read / Write)
-		bool h_blank_interrupt;
-		// Bit 2 - Coincidence Flag (0:LYC<>LY, 1 : LYC = LY) (Read Only)
-		bool coincidence_flag;
-		// Bit 1 - 0 - Mode Flag (Mode 0 - 3, see below) (Read Only)
-		bool mode_flag_1; // 0: During H - Blank
-		bool mode_flag_0; // 1 : During V - Blank
-						  // 2 : During Searching OAM
-						  // 3 : During Transferring Data to LCD Driver
-
+	union LCD_State {
+		struct {
+			bool stub;				// Bit 7 stub
+			bool lyc_interrupt;		// Bit 6 - LYC = LY Coincidence Interrupt (1 = Enable) (Read /Write)
+			bool oam_interrupt;		// Bit 5 - Mode 2 OAM Interrupt (1 = Enable) (Read / Write)
+			bool v_blank_interrupt; // Bit 4 - Mode 1 V - Blank Interrupt (1 = Enable) (Read / Write)
+			bool h_blank_interrupt; // Bit 3 - Mode 0 H - Blank Interrupt (1 = Enable) (Read / Write)
+			bool coincidence_flag;	// Bit 2 - Coincidence Flag (0:LYC<>LY, 1 : LYC = LY) (Read Only)
+			bool mode_flag_1;		// Bit 1 - 0 - Mode Flag (Mode 0 - 3, see below) (Read Only)
+			bool mode_flag_0;		// 0: During H - Blank
+									// 1 : During V - Blank
+									// 2 : During Searching OAM
+									// 3 : During Transferring Data to LCD Driver
+		};
+		u8 value;
 	} lcd_state{};
 
 	void set_lcd_mode(LCD_Mode mode);
@@ -107,25 +100,20 @@ private:
 	void update_lcd_mode();
 
 	// LCD Render Funktionen
-
 	std::vector<u8> palette_data_buffer;
 	std::vector<Pixel_a> bg_buffer;
 	std::vector<Pixel_a> sprite_buffer;
 
-public:
 	std::vector<std::vector<u8>> tile_map_data;
 
-private:
 	void buffer_bg_line(const u8 line);
 	void buffer_sprite_line(const u8 line);
 	void buffer_window_line(const u8 line);
 
-public:
 	// Paletten
 	std::vector<Pixel_a> bg_palette;
 	std::vector<std::vector<Pixel_a>> sprite_obj_palette;
 
-private:
 	void build_palette(const u16 addr, u8 data);
 
 	// Sprites
@@ -144,7 +132,6 @@ private:
 	};
 	void build_sprite_data(const u16 &addr, const u8 &data);
 
-public:
 	std::vector<Sprite> sprites;
 	Pixel_a const *get_lcd_buffer() const;
 

@@ -35,6 +35,8 @@ public:
 
 	void request_interrupt(Interrupt inter);
 
+	void reset();
+
 	std::string TestOutput;
 
 private:

@@ -8,6 +8,9 @@ MEMORY::MEMORY(CPU *c, CARDRIDGE *card, PPU *p, CONTROLS *j)
 	load_boot_rom();
 }
 
+void MEMORY::reset() {
+}
+
 inline u8 MEMORY::read(const u16 &addr) {
 	if (addr <= CARD_ROM_END) {
 		if (cpu->is_in_boot() && addr <= BOOT_ROM_END) {
@@ -65,7 +68,6 @@ inline void MEMORY::write(const u16 &addr, const u8 &data) {
 	if (addr == 0xFF02 && data == 0x81) {
 		char c = static_cast<char>(read(0xff01));
 		TestOutput.push_back(c);
-		//std::cout << c;
 	}
 
 	if (addr <= CARD_ROM_END) {

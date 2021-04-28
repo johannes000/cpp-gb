@@ -24,13 +24,12 @@ public:
 
 	[[nodiscard]] unsigned int get_selected_rom_bank() const { return selected_rom_bank; }
 
-private:
-	void fill_cardridge_info();
-
 	std::vector<u8> rom;
 
 	std::vector<std::vector<u8>> ram;
 
+private:
+	void fill_cardridge_info();
 	int selected_ram_bank = 0;
 	unsigned int selected_rom_bank = 0;
 

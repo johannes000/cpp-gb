@@ -4,9 +4,7 @@
 #include <iostream>
 #include <cstring>
 
-CARDRIDGE::CARDRIDGE() {
-	ram_enabled = false;
-}
+CARDRIDGE::CARDRIDGE() {}
 
 bool CARDRIDGE::load_rom(const char *rom_file) {
 	rom.erase(rom.begin(), rom.end());
@@ -29,7 +27,7 @@ bool CARDRIDGE::load_rom(const char *rom_file) {
 	}
 	selected_ram_bank = 0;
 	selected_rom_bank = 0;
-
+	ram_enabled = false;
 	return true;
 }
 

@@ -36,17 +36,16 @@ private:
 	int cycles = 0;
 	bool in_boot = true;
 
+public:
 	// REGISTER
 	CPU_Register R{};
 
 	void dma_transfer(const u8 &data);
 
-public:
 	[[nodiscard]] u16 get_pc() const { return R.PC; }
 
 	[[nodiscard]] const CPU_Register &get_register() const { return R; }
 
-private:
 	// INTERRUPTS
 
 	// Interrupt Master Enable Flag
@@ -54,7 +53,6 @@ private:
 	// 1 - Enable all Interrupts that are enabled in IE Register(FFFF)
 	bool IME = false;
 
-private:
 	bool is_halted = false;
 
 	// FFFF - IE - Interrupt Enable (R/W)
@@ -62,16 +60,14 @@ private:
 	// FF0F - IF - Interrupt Flag (R/W)
 	u8 interrupt_request_register = 0x00;
 
-public:
 	void handle_interrupts();
 
 	void request_interrupt(Interrupt inter);
 
 	[[nodiscard]] bool is_IME() const { return IME; }
 
-private:
 	// FLAGS
-	void set_flag_if(const Flag &, bool condition);
+	void set_cpu_flag_if(const Flag &, bool condition);
 
 	// setze flag auf true
 	void set_flag(const Flag &);
@@ -87,13 +83,11 @@ private:
 
 	void toggle_flag(const Flag &); // toggled die flag
 
-public:
 	bool check_flag(const Flag &) const; // gibt flag status wieder
 
 	// TIMER
 	void handle_timer(int t_cycles);
 
-private:
 	// FF04h – DIV – Divider Register (R/W*)
 	Register divider_register{};
 	// FF05h – TIMA – Timer Counter (R/W)
@@ -128,7 +122,6 @@ private:
 
 	bool prefix = false;
 
-public:
 	[[nodiscard]] debug_instruction get_instruction_at_addr(u16 addr) const;
 
 private:

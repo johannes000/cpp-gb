@@ -1,19 +1,19 @@
 
 Todo:
   ☐ Tests Bestehen @critical 
-  ☐ Window Layer @high
-  ☐ Unabhängige Layer für Sprites und BG @high
-  ☐ Menu Bar @low
+  ☐ Unabhängige Layer für Sprites und BG @low
+  ☐ Menu Bar @high
   ☐ Bootrom hardcoden @high
   ☐ Tracer für Disassambler @low
-  ☐ Timer fixen @critical
+  ☐ Timer fixen @high
   ☐ Sound @low
-  ☐ Banks @high
+  ☐ Banks @critical
   ☐ Controlls Plattformunabhängig gestalten @low
-  ☐ Gameboy komplett Plattformunabhängig machen @low
+  ☐ Gameboy Klasse komplett Plattformunabhängig machen @low
     ☐ als DLL builden
   ☐ Custon Palettes UI @low
     ☐ Colorpoicker 
+  ☐ LCD STAT und Register als Union
     
 Done:
   ✔ Sprites @done(17-04-21)
@@ -23,3 +23,4 @@ Done:
   ✔ Test roms ohne Rendern durchlaufen lassen @done(20-04-21)
   ✔ Unit Test @done(21-04-21)
   ✔ PPU Interrupts @done(23-04-21)
+  ✔ Window Layer @done(23-04-21)
