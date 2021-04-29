@@ -30,13 +30,13 @@ void gameboy::run_one_cycle() {
 
 int gameboy::run_one_cycle(bool skip_render) {
 #if 0
-	auto aa = cpu.get_register();
+	auto aa = cpu.R;
 	log_cpu(aa);
 #endif
 	const int last_cycle = cpu.update();
 	cpu.handle_interrupts();
 	cpu.handle_timer(last_cycle);
-	ppu.update(last_cycle * 4, skip_render);
+	ppu.update(last_cycle, skip_render);
 	return last_cycle;
 }
 
@@ -68,8 +68,7 @@ void gameboy::run_for_x_cycles(int cycles) {
 	}
 }
 void gameboy::run_until_vblank() {
-	while (!ppu.is_ready_to_render() &&
-		   debug.get_debug_state() == Debug_State::RUN) {
+	while (!ppu.is_ready_to_render() && debug.get_debug_state() == Debug_State::RUN) {
 		run_one_cycle();
 	}
 }

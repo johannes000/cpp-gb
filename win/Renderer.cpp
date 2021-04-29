@@ -332,12 +332,14 @@ const char *Renderer::rom_select_view() {
 		}
 	}
 	ImGui::Separator();
+#if 0
 	for (auto &rom : roms) {
 		if (ImGui::Selectable("", true, ImGuiSelectableFlags_AllowDoubleClick))
 			strcpy_s(filename, sizeof(filename), rom.second);
 		ImGui::SameLine();
 		ImGui::Text("%s", rom.first);
 	}
+#endif
 	ImGui::End();
 	return &filename[0];
 }

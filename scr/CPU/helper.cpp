@@ -9,7 +9,7 @@ u16 CPU::read_u16_at_pc() { return u8_to_u16(read(R.PC + 2), read(R.PC + 1)); }
 
 u16 CPU::read_u16_sp() { return u8_to_u16(read(R.SP + 1), read(R.SP)); }
 
-i8 CPU::read_i8_at_pc() { return static_cast<i8>(read_u8_at_pc()); }
+int8 CPU::read_i8_at_pc() { return static_cast<int8>(read_u8_at_pc()); }
 
 u8 CPU::read_u8_at_pc() { return static_cast<u8>(mem->read(R.PC + 1)); }
 

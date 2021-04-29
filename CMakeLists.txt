@@ -42,8 +42,6 @@ endif ()
 
 if (NOT MSVC)
     set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wshadow -Wnon-virtual-dtor -Wnon-virtual-dtor -Wcast-align -Wnull-dereference -Woverloaded-virtual  -Wformat=2")
-    set(CMAKE_CXX_FLAGS_DEBUG "-g")
-    set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 else()
     set(CMAKE_CXX_FLAGS "/W4")
 endif ()
@@ -95,7 +93,6 @@ add_library(cpp-gb
         scr/gameboy.cpp scr/gameboy.h
         scr/MEMORY.cpp scr/MEMORY.h
         scr/PPU.cpp scr/PPU.h
-        scr/type.cpp scr/type.h
         scr/CONTROLS.cpp scr/CONTROLS.h
 )
 

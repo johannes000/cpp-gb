@@ -13,8 +13,7 @@ Todo:
     ☐ als DLL builden
   ☐ Custon Palettes UI @low
     ☐ Colorpoicker 
-  ☐ LCD STAT und Register als Union
-    
+  ☐ 16x8 Sprites Fixen
 Done:
   ✔ Sprites @done(17-04-21)
   ✔ FPS drossel @done(18-04-21)

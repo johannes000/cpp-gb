@@ -94,7 +94,7 @@ void PPU::write(const u16 &addr, const u8 &data) {
 				lcd_control.value = data;
 				break;
 			case LCD_STATUS:
-				lcd_state.value = data & 0x78;
+				lcd_state.value = (lcd_state.value & 0x07) | (data & 0xF8);
 				break;
 			case LCD_SCY:
 				lcd_register.LCD_SCY = data;
@@ -193,7 +193,8 @@ void PPU::set_lcd_mode(LCD_Mode m) {
 	if (mode > 3)
 		return;
 	lcd_mode = m;
-	lcd_state.value = mode & 0x3u;
+	lcd_state.mode_flag_0 = mode & 1;
+	lcd_state.mode_flag_1 = mode & 2;
 }
 
 /**
@@ -213,7 +214,7 @@ void PPU::buffer_bg_line(const u8 line) {
 	if (line >= GB_LCD_SIZE_HEIGHT)
 		return;
 	if (lcd_control.bg_enabled && lcd_control.lcd_power) {
-		const u16 bg_tilemap = lcd_control.bg_tile_map ? 0x9C00 : 0x9800;
+		const u16 bg_tilemap = lcd_control.bg_tile_map == 1 ? 0x9C00 : 0x9800;
 
 		const auto y = line;
 
@@ -256,11 +257,11 @@ void PPU::buffer_sprite_line(const u8 line) {
 	if (line >= GB_LCD_SIZE_HEIGHT + 8 || !lcd_control.sprites_enabled || !lcd_control.lcd_power)
 		return;
 	u8 sprites_count = 0;
-	int sprite_size = lcd_control.sprite_size ? 16 : 8;
+	int sprite_size = lcd_control.sprite_size == 1 ? 16 : 8;
 	const int y = static_cast<int>(line);
 
 	for (Sprite &spr : sprites) {
-		const int real_ypos = lcd_control.sprite_size ? spr.y_pos - 17 : spr.y_pos - 9;
+		const int real_ypos = lcd_control.sprite_size == 1 ? spr.y_pos - 17 : spr.y_pos - 9;
 		if (real_ypos != 0 && real_ypos < 160 && spr.x_pos != 0 && spr.x_pos < 168 && sprites_count <= 10) {
 			if (y > real_ypos - sprite_size && y <= real_ypos) {
 				// Sprite wird gebufferd

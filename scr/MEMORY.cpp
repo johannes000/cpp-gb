@@ -11,7 +11,7 @@ MEMORY::MEMORY(CPU *c, CARDRIDGE *card, PPU *p, CONTROLS *j)
 void MEMORY::reset() {
 }
 
-inline u8 MEMORY::read(const u16 &addr) {
+u8 MEMORY::read(const u16 &addr) {
 	if (addr <= CARD_ROM_END) {
 		if (cpu->is_in_boot() && addr <= BOOT_ROM_END) {
 			return boot.at(addr);
@@ -37,7 +37,7 @@ inline u8 MEMORY::read(const u16 &addr) {
 	return 0x00;
 }
 
-inline u8 MEMORY::handle_mapped_io_read(const u16 &addr) const {
+u8 MEMORY::handle_mapped_io_read(const u16 &addr) const {
 	switch (addr) {
 		case JOY_P1_REGISTER:
 			return joypad->read(addr);
@@ -64,7 +64,7 @@ inline u8 MEMORY::handle_mapped_io_read(const u16 &addr) const {
 			return memory.at(addr);
 	}
 }
-inline void MEMORY::write(const u16 &addr, const u8 &data) {
+void MEMORY::write(const u16 &addr, const u8 &data) {
 	if (addr == 0xFF02 && data == 0x81) {
 		char c = static_cast<char>(read(0xff01));
 		TestOutput.push_back(c);
