@@ -15,7 +15,7 @@ GTEST_TEST(CPUTest, 01_special) {
 GTEST_TEST(CPUTest, 02_interrupts) {
 	gameboy gb;
 	gb.load_rom("C:/Users/knaub/source/repos/testroms/cpu_instrs/individual/02-interrupts.gb", true);
-	gb.run_for_x_cycles(1000000);
+	gb.run_for_x_cycles(20000000);
 	std::string result = gb.mem.TestOutput;
 	std::string expected_result = "02-interrupts\n\n\nPassed\n";
 
@@ -51,7 +51,7 @@ GTEST_TEST(CPUTest, 05_op_rp) {
 GTEST_TEST(CPUTest, 06_ld_r_r) {
 	gameboy gb;
 	gb.load_rom("C:/Users/knaub/source/repos/testroms/cpu_instrs/individual/06-ld r,r.gb", true);
-	gb.run_for_x_cycles(2500000);
+	gb.run_for_x_cycles(5500000);
 	std::string result = gb.mem.TestOutput;
 	std::string expected_result = "06-ld r,r\n\n\nPassed\n";
 
@@ -102,12 +102,540 @@ GTEST_TEST(CPUTest, 11_op_a_hl) {
 
 	EXPECT_EQ(expected_result, result);
 }
-GTEST_TEST(DISABLED_Timing, instr_timing) {
+GTEST_TEST(Timing, instr_timing) {
 	gameboy gb;
 	gb.load_rom("C:/Users/knaub/source/repos/testroms/instr_timing/instr_timing.gb", true);
-	gb.run_for_x_cycles(15500000);
+	gb.run_for_x_cycles(5500000);
 	std::string result = gb.mem.TestOutput;
 	std::string expected_result = "instr_timing\n\n\nPassed\n";
+
+	EXPECT_EQ(expected_result, result);
+}
+
+GTEST_TEST(MooneyeMBC1, bits_bank1) {
+	gameboy gb;
+	gb.in_test_mode = true;
+	gb.load_rom("C:/Users/knaub/source/repos/testroms/mooneye/emulator-only/mbc1/bits_bank1.gb", true);
+
+	gb.run_for_x_cycles(5500000);
+
+	auto R = gb.cpu.get_register();
+	bool Result = R.B == 3 && R.C == 5 && R.D == 8 && R.E == 13 && R.H == 21 && R.L == 34;
+	EXPECT_TRUE(Result);
+}
+
+GTEST_TEST(MooneyeMBC1, bits_bank2) {
+	gameboy gb;
+	gb.in_test_mode = true;
+	gb.load_rom("C:/Users/knaub/source/repos/testroms/mooneye/emulator-only/mbc1/bits_bank2.gb", true);
+
+	gb.run_for_x_cycles(5500000);
+
+	auto R = gb.cpu.get_register();
+	bool Result = R.B == 3 && R.C == 5 && R.D == 8 && R.E == 13 && R.H == 21 && R.L == 34;
+	EXPECT_TRUE(Result);
+}
+
+GTEST_TEST(MooneyeMBC1, bits_mode) {
+	gameboy gb;
+	gb.in_test_mode = true;
+	gb.load_rom("C:/Users/knaub/source/repos/testroms/mooneye/emulator-only/mbc1/bits_mode.gb", true);
+
+	gb.run_for_x_cycles(5500000);
+
+	auto R = gb.cpu.get_register();
+	bool Result = R.B == 3 && R.C == 5 && R.D == 8 && R.E == 13 && R.H == 21 && R.L == 34;
+	EXPECT_TRUE(Result);
+}
+
+GTEST_TEST(MooneyeMBC1, bits_ramg) {
+	gameboy gb;
+	gb.in_test_mode = true;
+	gb.load_rom("C:/Users/knaub/source/repos/testroms/mooneye/emulator-only/mbc1/bits_ramg.gb", true);
+
+	gb.run_for_x_cycles(5500000);
+
+	auto R = gb.cpu.get_register();
+	bool Result = R.B == 3 && R.C == 5 && R.D == 8 && R.E == 13 && R.H == 21 && R.L == 34;
+	EXPECT_TRUE(Result);
+}
+
+GTEST_TEST(MooneyeMBC1, ram_64kb) {
+	gameboy gb;
+	gb.in_test_mode = true;
+	gb.load_rom("C:/Users/knaub/source/repos/testroms/mooneye/emulator-only/mbc1/ram_64kb.gb", true);
+
+	gb.run_for_x_cycles(5500000);
+
+	auto R = gb.cpu.get_register();
+	bool Result = R.B == 3 && R.C == 5 && R.D == 8 && R.E == 13 && R.H == 21 && R.L == 34;
+	EXPECT_TRUE(Result);
+}
+
+GTEST_TEST(MooneyeMBC1, ram_256kb) {
+	gameboy gb;
+	gb.in_test_mode = true;
+	gb.load_rom("C:/Users/knaub/source/repos/testroms/mooneye/emulator-only/mbc1/ram_256kb.gb", true);
+
+	gb.run_for_x_cycles(5500000);
+
+	auto R = gb.cpu.get_register();
+	bool Result = R.B == 3 && R.C == 5 && R.D == 8 && R.E == 13 && R.H == 21 && R.L == 34;
+	EXPECT_TRUE(Result);
+}
+
+GTEST_TEST(MooneyeMBC1, rom_1Mb) {
+	gameboy gb;
+	gb.in_test_mode = true;
+	gb.load_rom("C:/Users/knaub/source/repos/testroms/mooneye/emulator-only/mbc1/rom_1Mb.gb", true);
+
+	gb.run_for_x_cycles(5500000);
+
+	auto R = gb.cpu.get_register();
+	bool Result = R.B == 3 && R.C == 5 && R.D == 8 && R.E == 13 && R.H == 21 && R.L == 34;
+	EXPECT_TRUE(Result);
+}
+
+GTEST_TEST(MooneyeMBC1, rom_2Mb) {
+	gameboy gb;
+	gb.in_test_mode = true;
+	gb.load_rom("C:/Users/knaub/source/repos/testroms/mooneye/emulator-only/mbc1/rom_2Mb.gb", true);
+
+	gb.run_for_x_cycles(5500000);
+
+	auto R = gb.cpu.get_register();
+	bool Result = R.B == 3 && R.C == 5 && R.D == 8 && R.E == 13 && R.H == 21 && R.L == 34;
+	EXPECT_TRUE(Result);
+}
+
+GTEST_TEST(MooneyeMBC1, rom_4Mb) {
+	gameboy gb;
+	gb.in_test_mode = true;
+	gb.load_rom("C:/Users/knaub/source/repos/testroms/mooneye/emulator-only/mbc1/rom_4Mb.gb", true);
+
+	gb.run_for_x_cycles(5500000);
+
+	auto R = gb.cpu.get_register();
+	bool Result = R.B == 3 && R.C == 5 && R.D == 8 && R.E == 13 && R.H == 21 && R.L == 34;
+	EXPECT_TRUE(Result);
+}
+
+GTEST_TEST(MooneyeMBC1, rom_8Mb) {
+	gameboy gb;
+	gb.in_test_mode = true;
+	gb.load_rom("C:/Users/knaub/source/repos/testroms/mooneye/emulator-only/mbc1/rom_8Mb.gb", true);
+
+	gb.run_for_x_cycles(5500000);
+
+	auto R = gb.cpu.get_register();
+	bool Result = R.B == 3 && R.C == 5 && R.D == 8 && R.E == 13 && R.H == 21 && R.L == 34;
+	EXPECT_TRUE(Result);
+}
+
+GTEST_TEST(MooneyeMBC1, rom_16Mb) {
+	gameboy gb;
+	gb.in_test_mode = true;
+	gb.load_rom("C:/Users/knaub/source/repos/testroms/mooneye/emulator-only/mbc1/rom_16Mb.gb", true);
+
+	gb.run_for_x_cycles(5500000);
+
+	auto R = gb.cpu.get_register();
+	bool Result = R.B == 3 && R.C == 5 && R.D == 8 && R.E == 13 && R.H == 21 && R.L == 34;
+	EXPECT_TRUE(Result);
+}
+
+GTEST_TEST(MooneyeMBC1, rom_512kb) {
+	gameboy gb;
+	gb.in_test_mode = true;
+	gb.load_rom("C:/Users/knaub/source/repos/testroms/mooneye/emulator-only/mbc1/rom_512kb.gb", true);
+
+	gb.run_for_x_cycles(5500000);
+
+	auto R = gb.cpu.get_register();
+	bool Result = R.B == 3 && R.C == 5 && R.D == 8 && R.E == 13 && R.H == 21 && R.L == 34;
+	EXPECT_TRUE(Result);
+}
+
+GTEST_TEST(MooneyeBitAcceptance, mem_oam) {
+	gameboy gb;
+	gb.in_test_mode = true;
+	gb.load_rom("C:/Users/knaub/source/repos/testroms/mooneye/acceptance/bits/mem_oam.gb", true);
+
+	gb.run_for_x_cycles(5500000);
+
+	auto R = gb.cpu.get_register();
+	bool Result = R.B == 3 && R.C == 5 && R.D == 8 && R.E == 13 && R.H == 21 && R.L == 34;
+	EXPECT_TRUE(Result);
+}
+
+GTEST_TEST(MooneyeBitAcceptance, reg_f) {
+	gameboy gb;
+	gb.in_test_mode = true;
+	gb.load_rom("C:/Users/knaub/source/repos/testroms/mooneye/acceptance/bits/reg_f.gb", true);
+
+	gb.run_for_x_cycles(5500000);
+
+	auto R = gb.cpu.get_register();
+	bool Result = R.B == 3 && R.C == 5 && R.D == 8 && R.E == 13 && R.H == 21 && R.L == 34;
+	EXPECT_TRUE(Result);
+}
+
+GTEST_TEST(MooneyeBitAcceptance, unused_hwioGS) {
+	gameboy gb;
+	gb.in_test_mode = true;
+	gb.load_rom("C:/Users/knaub/source/repos/testroms/mooneye/acceptance/bits/unused_hwio-GS.gb", true);
+
+	gb.run_for_x_cycles(5500000);
+
+	auto R = gb.cpu.get_register();
+	bool Result = R.B == 3 && R.C == 5 && R.D == 8 && R.E == 13 && R.H == 21 && R.L == 34;
+	EXPECT_TRUE(Result);
+}
+
+GTEST_TEST(MooneyeDAA, daa) {
+	gameboy gb;
+	gb.in_test_mode = true;
+	gb.load_rom("C:/Users/knaub/source/repos/testroms/mooneye/acceptance/instr/daa.gb", true);
+
+	gb.run_for_x_cycles(15500000);
+
+	auto R = gb.cpu.get_register();
+	bool Result = R.B == 3 && R.C == 5 && R.D == 8 && R.E == 13 && R.H == 21 && R.L == 34;
+	EXPECT_TRUE(Result);
+}
+
+GTEST_TEST(MooneyeOAM_dma, basic) {
+	gameboy gb;
+	gb.in_test_mode = true;
+	gb.load_rom("C:/Users/knaub/source/repos/testroms/mooneye/acceptance/oam_dma/basic.gb", true);
+
+	gb.run_for_x_cycles(15500000);
+
+	auto R = gb.cpu.get_register();
+	bool Result = R.B == 3 && R.C == 5 && R.D == 8 && R.E == 13 && R.H == 21 && R.L == 34;
+	EXPECT_TRUE(Result);
+}
+
+GTEST_TEST(MooneyeOAM_dma, reg_read) {
+	gameboy gb;
+	gb.in_test_mode = true;
+	gb.load_rom("C:/Users/knaub/source/repos/testroms/mooneye/acceptance/oam_dma/reg_read.gb", true);
+
+	gb.run_for_x_cycles(15500000);
+
+	auto R = gb.cpu.get_register();
+	bool Result = R.B == 3 && R.C == 5 && R.D == 8 && R.E == 13 && R.H == 21 && R.L == 34;
+	EXPECT_TRUE(Result);
+}
+
+GTEST_TEST(MooneyeOAM_dma, sourcesGS) {
+	gameboy gb;
+	gb.in_test_mode = true;
+	gb.load_rom("C:/Users/knaub/source/repos/testroms/mooneye/acceptance/oam_dma/sources-GS.gb", true);
+
+	gb.run_for_x_cycles(15500000);
+
+	auto R = gb.cpu.get_register();
+	bool Result = R.B == 3 && R.C == 5 && R.D == 8 && R.E == 13 && R.H == 21 && R.L == 34;
+	EXPECT_TRUE(Result);
+}
+
+GTEST_TEST(MooneyeMBC2, bits_ramg) {
+	gameboy gb;
+	gb.in_test_mode = true;
+	gb.load_rom("C:/Users/knaub/source/repos/testroms/mooneye/emulator-only/mbc2/bits_ramg.gb", true);
+
+	gb.run_for_x_cycles(15500000);
+
+	auto R = gb.cpu.get_register();
+	bool Result = R.B == 3 && R.C == 5 && R.D == 8 && R.E == 13 && R.H == 21 && R.L == 34;
+	EXPECT_TRUE(Result);
+}
+
+GTEST_TEST(MooneyeMBC2, bits_romb) {
+	gameboy gb;
+	gb.in_test_mode = true;
+	gb.load_rom("C:/Users/knaub/source/repos/testroms/mooneye/emulator-only/mbc2/bits_romb.gb", true);
+
+	gb.run_for_x_cycles(15500000);
+
+	auto R = gb.cpu.get_register();
+	bool Result = R.B == 3 && R.C == 5 && R.D == 8 && R.E == 13 && R.H == 21 && R.L == 34;
+	EXPECT_TRUE(Result);
+}
+
+GTEST_TEST(MooneyeMBC2, bits_unused) {
+	gameboy gb;
+	gb.in_test_mode = true;
+	gb.load_rom("C:/Users/knaub/source/repos/testroms/mooneye/emulator-only/mbc2/bits_unused.gb", true);
+
+	gb.run_for_x_cycles(15500000);
+
+	auto R = gb.cpu.get_register();
+	bool Result = R.B == 3 && R.C == 5 && R.D == 8 && R.E == 13 && R.H == 21 && R.L == 34;
+	EXPECT_TRUE(Result);
+}
+
+GTEST_TEST(MooneyeMBC2, ram) {
+	gameboy gb;
+	gb.in_test_mode = true;
+	gb.load_rom("C:/Users/knaub/source/repos/testroms/mooneye/emulator-only/mbc2/ram.gb", true);
+
+	gb.run_for_x_cycles(15500000);
+
+	auto R = gb.cpu.get_register();
+	bool Result = R.B == 3 && R.C == 5 && R.D == 8 && R.E == 13 && R.H == 21 && R.L == 34;
+	EXPECT_TRUE(Result);
+}
+
+GTEST_TEST(MooneyeMBC2, rom_1Mb) {
+	gameboy gb;
+	gb.in_test_mode = true;
+	gb.load_rom("C:/Users/knaub/source/repos/testroms/mooneye/emulator-only/mbc2/rom_1Mb.gb", true);
+
+	gb.run_for_x_cycles(15500000);
+
+	auto R = gb.cpu.get_register();
+	bool Result = R.B == 3 && R.C == 5 && R.D == 8 && R.E == 13 && R.H == 21 && R.L == 34;
+	EXPECT_TRUE(Result);
+}
+
+GTEST_TEST(MooneyeMBC2, rom_2Mb) {
+	gameboy gb;
+	gb.in_test_mode = true;
+	gb.load_rom("C:/Users/knaub/source/repos/testroms/mooneye/emulator-only/mbc2/rom_2Mb.gb", true);
+
+	gb.run_for_x_cycles(15500000);
+
+	auto R = gb.cpu.get_register();
+	bool Result = R.B == 3 && R.C == 5 && R.D == 8 && R.E == 13 && R.H == 21 && R.L == 34;
+	EXPECT_TRUE(Result);
+}
+
+GTEST_TEST(MooneyeMBC2, rom_512kb) {
+	gameboy gb;
+	gb.in_test_mode = true;
+	gb.load_rom("C:/Users/knaub/source/repos/testroms/mooneye/emulator-only/mbc2/rom_512kb.gb", true);
+
+	gb.run_for_x_cycles(15500000);
+
+	auto R = gb.cpu.get_register();
+	bool Result = R.B == 3 && R.C == 5 && R.D == 8 && R.E == 13 && R.H == 21 && R.L == 34;
+	EXPECT_TRUE(Result);
+}
+
+GTEST_TEST(MooneyeMBC5, rom_1Mb) {
+	gameboy gb;
+	gb.in_test_mode = true;
+	gb.load_rom("C:/Users/knaub/source/repos/testroms/mooneye/emulator-only/mbc5/rom_1Mb.gb", true);
+
+	gb.run_for_x_cycles(15500000);
+
+	auto R = gb.cpu.get_register();
+	bool Result = R.B == 3 && R.C == 5 && R.D == 8 && R.E == 13 && R.H == 21 && R.L == 34;
+	EXPECT_TRUE(Result);
+}
+
+GTEST_TEST(MooneyeMBC5, rom_2Mb) {
+	gameboy gb;
+	gb.in_test_mode = true;
+	gb.load_rom("C:/Users/knaub/source/repos/testroms/mooneye/emulator-only/mbc5/rom_2Mb.gb", true);
+
+	gb.run_for_x_cycles(15500000);
+
+	auto R = gb.cpu.get_register();
+	bool Result = R.B == 3 && R.C == 5 && R.D == 8 && R.E == 13 && R.H == 21 && R.L == 34;
+	EXPECT_TRUE(Result);
+}
+
+GTEST_TEST(MooneyeMBC5, rom_4Mb) {
+	gameboy gb;
+	gb.in_test_mode = true;
+	gb.load_rom("C:/Users/knaub/source/repos/testroms/mooneye/emulator-only/mbc5/rom_4Mb.gb", true);
+
+	gb.run_for_x_cycles(15500000);
+
+	auto R = gb.cpu.get_register();
+	bool Result = R.B == 3 && R.C == 5 && R.D == 8 && R.E == 13 && R.H == 21 && R.L == 34;
+	EXPECT_TRUE(Result);
+}
+
+GTEST_TEST(MooneyeMBC5, rom_8Mb) {
+	gameboy gb;
+	gb.in_test_mode = true;
+	gb.load_rom("C:/Users/knaub/source/repos/testroms/mooneye/emulator-only/mbc5/rom_8Mb.gb", true);
+
+	gb.run_for_x_cycles(15500000);
+
+	auto R = gb.cpu.get_register();
+	bool Result = R.B == 3 && R.C == 5 && R.D == 8 && R.E == 13 && R.H == 21 && R.L == 34;
+	EXPECT_TRUE(Result);
+}
+
+GTEST_TEST(MooneyeMBC5, rom_16Mb) {
+	gameboy gb;
+	gb.in_test_mode = true;
+	gb.load_rom("C:/Users/knaub/source/repos/testroms/mooneye/emulator-only/mbc5/rom_16Mb.gb", true);
+
+	gb.run_for_x_cycles(15500000);
+
+	auto R = gb.cpu.get_register();
+	bool Result = R.B == 3 && R.C == 5 && R.D == 8 && R.E == 13 && R.H == 21 && R.L == 34;
+	EXPECT_TRUE(Result);
+}
+
+GTEST_TEST(MooneyeMBC5, rom_32Mb) {
+	gameboy gb;
+	gb.in_test_mode = true;
+	gb.load_rom("C:/Users/knaub/source/repos/testroms/mooneye/emulator-only/mbc5/rom_32Mb.gb", true);
+
+	gb.run_for_x_cycles(15500000);
+
+	auto R = gb.cpu.get_register();
+	bool Result = R.B == 3 && R.C == 5 && R.D == 8 && R.E == 13 && R.H == 21 && R.L == 34;
+	EXPECT_TRUE(Result);
+}
+
+GTEST_TEST(MooneyeMBC5, rom_64Mb) {
+	gameboy gb;
+	gb.in_test_mode = true;
+	gb.load_rom("C:/Users/knaub/source/repos/testroms/mooneye/emulator-only/mbc5/rom_64Mb.gb", true);
+
+	gb.run_for_x_cycles(15500000);
+
+	auto R = gb.cpu.get_register();
+	bool Result = R.B == 3 && R.C == 5 && R.D == 8 && R.E == 13 && R.H == 21 && R.L == 34;
+	EXPECT_TRUE(Result);
+}
+
+GTEST_TEST(MooneyeMBC5, rom_512kb) {
+	gameboy gb;
+	gb.in_test_mode = true;
+	gb.load_rom("C:/Users/knaub/source/repos/testroms/mooneye/emulator-only/mbc5/rom_512kb.gb", true);
+
+	gb.run_for_x_cycles(15500000);
+
+	auto R = gb.cpu.get_register();
+	bool Result = R.B == 3 && R.C == 5 && R.D == 8 && R.E == 13 && R.H == 21 && R.L == 34;
+	EXPECT_TRUE(Result);
+}
+
+GTEST_TEST(APUTest, DISABLED_01_registers) {
+	gameboy gb;
+	gb.load_rom("C:/Users/knaub/source/repos/testroms/dmg_sound/rom_singles/01-registers.gb", true);
+	gb.run_for_x_cycles(55500000);
+	std::string result = gb.mem.TestOutput;
+	std::string expected_result = "01-registers\n\n\nPassed\n";
+
+	EXPECT_EQ(expected_result, result);
+}
+
+GTEST_TEST(APUTest, DISABLED_02_len_ctr) {
+	gameboy gb;
+	gb.load_rom("C:/Users/knaub/source/repos/testroms/dmg_sound/rom_singles/02-len ctr.gb", true);
+	gb.run_for_x_cycles(55500000);
+	std::string result = gb.mem.TestOutput;
+	std::string expected_result = "02-len ctr\n\n\nPassed\n";
+
+	EXPECT_EQ(expected_result, result);
+}
+
+GTEST_TEST(APUTest, DISABLED_03_trigger) {
+	gameboy gb;
+	gb.load_rom("C:/Users/knaub/source/repos/testroms/dmg_sound/rom_singles/03-trigger.gb", true);
+	gb.run_for_x_cycles(55500000);
+	std::string result = gb.mem.TestOutput;
+	std::string expected_result = "03-trigger\n\n\nPassed\n";
+
+	EXPECT_EQ(expected_result, result);
+}
+
+GTEST_TEST(APUTest, DISABLED_04_sweep) {
+	gameboy gb;
+	gb.load_rom("C:/Users/knaub/source/repos/testroms/dmg_sound/rom_singles/04-sweep.gb", true);
+	gb.run_for_x_cycles(55500000);
+	std::string result = gb.mem.TestOutput;
+	std::string expected_result = "04-sweep\n\n\nPassed\n";
+
+	EXPECT_EQ(expected_result, result);
+}
+
+GTEST_TEST(APUTest, DISABLED_05_sweep_details) {
+	gameboy gb;
+	gb.load_rom("C:/Users/knaub/source/repos/testroms/dmg_sound/rom_singles/05-sweep details.gb", true);
+	gb.run_for_x_cycles(55500000);
+	std::string result = gb.mem.TestOutput;
+	std::string expected_result = "05-sweep details\n\n\nPassed\n";
+
+	EXPECT_EQ(expected_result, result);
+}
+
+GTEST_TEST(APUTest, DISABLED_06_overflow_on_trigger) {
+	gameboy gb;
+	gb.load_rom("C:/Users/knaub/source/repos/testroms/dmg_sound/rom_singles/06-overflow on trigger.gb", true);
+	gb.run_for_x_cycles(55500000);
+	std::string result = gb.mem.TestOutput;
+	std::string expected_result = "06-overflow on trigger\n\n\nPassed\n";
+
+	EXPECT_EQ(expected_result, result);
+}
+
+GTEST_TEST(APUTest, DISABLED_07_len_sweep_period_sync) {
+	gameboy gb;
+	gb.load_rom("C:/Users/knaub/source/repos/testroms/dmg_sound/rom_singles/07-len sweep period sync.gb", true);
+	gb.run_for_x_cycles(55500000);
+	std::string result = gb.mem.TestOutput;
+	std::string expected_result = "07-len sweep period sync\n\n\nPassed\n";
+
+	EXPECT_EQ(expected_result, result);
+}
+
+GTEST_TEST(APUTest, DISABLED_08_len_ctr_during_power) {
+	gameboy gb;
+	gb.load_rom("C:/Users/knaub/source/repos/testroms/dmg_sound/rom_singles/08-len ctr during power.gb", true);
+	gb.run_for_x_cycles(55500000);
+	std::string result = gb.mem.TestOutput;
+	std::string expected_result = "08-len ctr during power\n\n\nPassed\n";
+
+	EXPECT_EQ(expected_result, result);
+}
+
+GTEST_TEST(APUTest, DISABLED_09_wave_read_while_on) {
+	gameboy gb;
+	gb.load_rom("C:/Users/knaub/source/repos/testroms/dmg_sound/rom_singles/09-wave read while on.gb", true);
+	gb.run_for_x_cycles(55500000);
+	std::string result = gb.mem.TestOutput;
+	std::string expected_result = "09-wave read while on\n\n\nPassed\n";
+
+	EXPECT_EQ(expected_result, result);
+}
+
+GTEST_TEST(APUTest, DISABLED_10_wave_trigger_while_on) {
+	gameboy gb;
+	gb.load_rom("C:/Users/knaub/source/repos/testroms/dmg_sound/rom_singles/10-wave trigger while on.gb", true);
+	gb.run_for_x_cycles(55500000);
+	std::string result = gb.mem.TestOutput;
+	std::string expected_result = "10-wave trigger while on\n\n\nPassed\n";
+
+	EXPECT_EQ(expected_result, result);
+}
+
+GTEST_TEST(APUTest, DISABLED_11_regs_after_power) {
+	gameboy gb;
+	gb.load_rom("C:/Users/knaub/source/repos/testroms/dmg_sound/rom_singles/11-regs after power.gb", true);
+	gb.run_for_x_cycles(55500000);
+	std::string result = gb.mem.TestOutput;
+	std::string expected_result = "11-regs after power\n\n\nPassed\n";
+
+	EXPECT_EQ(expected_result, result);
+}
+
+GTEST_TEST(APUTest, DISABLED_12_wave_write_while_on) {
+	gameboy gb;
+	gb.load_rom("C:/Users/knaub/source/repos/testroms/dmg_sound/rom_singles/12-wave write while on.gb", true);
+	gb.run_for_x_cycles(55500000);
+	std::string result = gb.mem.TestOutput;
+	std::string expected_result = "12-wave write while on\n\n\nPassed\n";
 
 	EXPECT_EQ(expected_result, result);
 }

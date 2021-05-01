@@ -19,9 +19,9 @@ bool CARDRIDGE::load_rom(const char *rom_file) {
 	this->rom = romf;
 
 	fill_cardridge_info();
-	for (int i = 0; i < rom_info.ram_banks + 1; ++i) {
-		ram.push_back(std::vector<u8>(CARD_RAM_BANK_SIZE, 0xFF));
-	}
+
+	ram = {rom_info.ram_banks + 1, {std::vector<u8>(CARD_RAM_BANK_SIZE, 0xFF)}};
+
 	selected_ram_bank = 0;
 	selected_rom_bank = 0;
 	ram_enabled = false;
@@ -279,7 +279,7 @@ void CARDRIDGE::writeNoMBC(const u16 addr, const u8 &data) {
 	if (addr >= CARD_EXTERNAL_RAM && addr <= CARD_EXTERNAL_RAM_END && rom_info.ram_size != RAMSize::None && ram_enabled) {
 		ram[0].at(addr - CARD_EXTERNAL_RAM) = data;
 	} else {
-		std::cerr << "Hier Sollte nicht Reingeschrieben werden! Addr:" << addr << std::endl;
+		//std::cerr << "Hier Sollte nicht Reingeschrieben werden! Addr:" << addr << std::endl;
 	}
 }
 void CARDRIDGE::writeMBC1(const u16 addr, const u8 &data) {

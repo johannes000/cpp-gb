@@ -208,11 +208,14 @@ void CPU::handle_interrupts() {
 void CPU::handle_timer(int t_cycles) {
 
 	div_cycle_sum += t_cycles;
-	if (div_cycle_sum >= 256) {
-		div_cycle_sum -= 256;
+	if (div_cycle_sum >= 0xFF) {
+		div_cycle_sum -= 0xFF;
 		divider_register++;
 	}
 
+	if (timer_control > 0)
+		int a = 99;
+	// if Timer Enable
 	if (check_bit(timer_control, 2)) {
 		timer_cycle_sum += t_cycles;
 

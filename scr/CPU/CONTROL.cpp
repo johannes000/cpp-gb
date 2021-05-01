@@ -5,6 +5,7 @@ u8 CPU::opcode0x00() { // NOP
 }
 
 u8 CPU::opcode0x10() { // STOP
+	divider_register = 0x00;
 	return 0;
 }
 

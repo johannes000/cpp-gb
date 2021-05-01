@@ -332,7 +332,7 @@ const char *Renderer::rom_select_view() {
 		}
 	}
 	ImGui::Separator();
-#if 0
+#if 1
 	for (auto &rom : roms) {
 		if (ImGui::Selectable("", true, ImGuiSelectableFlags_AllowDoubleClick))
 			strcpy_s(filename, sizeof(filename), rom.second);

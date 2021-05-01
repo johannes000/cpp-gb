@@ -24,8 +24,8 @@ void gameboy::reset(bool skip_boot_rom) {
 	ppu.reset();
 }
 
-void gameboy::run_one_cycle() {
-	run_one_cycle(false);
+int gameboy::run_one_cycle() {
+	return run_one_cycle(false);
 }
 
 int gameboy::run_one_cycle(bool skip_render) {
@@ -34,6 +34,8 @@ int gameboy::run_one_cycle(bool skip_render) {
 	log_cpu(aa);
 #endif
 	const int last_cycle = cpu.update();
+	if (in_test_mode && cpu.op_code == 0x40)
+		return -1;
 	cpu.handle_interrupts();
 	cpu.handle_timer(last_cycle);
 	ppu.update(last_cycle, skip_render);
@@ -61,10 +63,16 @@ void gameboy::run_until_breakpoint() {
 	}
 }
 
-void gameboy::run_for_x_cycles(int cycles) {
+void gameboy::run_for_x_cycles(int cycles_to_run) {
 	int cycles_sum = 0;
-	while (cycles_sum < cycles) {
-		cycles_sum += run_one_cycle(true);
+	int cycles;
+	while (cycles_to_run > 0) {
+		cycles = run_one_cycle(false);
+		if (ppu.ready_to_render)
+			ppu.ready_to_render = false;
+		if (cycles == -1)
+			return;
+		cycles_to_run -= cycles;
 	}
 }
 void gameboy::run_until_vblank() {

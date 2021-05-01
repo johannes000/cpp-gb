@@ -34,7 +34,7 @@ public:
 private:
 	MEMORY *mem;
 	int cycles = 0;
-	bool in_boot = true;
+	bool in_boot = false;
 
 public:
 	// REGISTER

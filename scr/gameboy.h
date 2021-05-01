@@ -20,7 +20,7 @@ struct gameboy {
 
 	void run_until_vblank();
 	int run_one_cycle(bool skip_render);
-	void run_one_cycle();
+	int run_one_cycle();
 	void run_until_breakpoint();
 
 	void reset(bool);
@@ -28,6 +28,8 @@ struct gameboy {
 	bool load_rom(const char *, bool);
 	void log_cpu(CPU_Register);
 	void run_for_x_cycles(int);
+
+	bool in_test_mode = false;
 };
 
 #endif // !GAMEBOY_H_GUARD
