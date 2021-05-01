@@ -15,7 +15,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
 	const double target_duration = 1 / target_FPS;
 	double measured_duration = 0.0;
 
-	bool fps_drossel = true;
+	bool fps_drossel = false;
 	bool skip_boot_rom = true;
 
 	gameboy gb;

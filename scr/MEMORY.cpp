@@ -142,8 +142,8 @@ void MEMORY::reset(bool skip_boot_rom) {
 		for (u16 addr = 0x8000; addr < 0xA000; addr++) {
 			write(addr, 0x00);
 		}
-
 		write(0xFF02, 0x72);
+		write(0xFF04, 0x00); // DIV
 		write(0xFF05, 0x00); // TIMA
 		write(0xFF06, 0x00); // TMA
 		write(0xFF07, 0x00); // TAC

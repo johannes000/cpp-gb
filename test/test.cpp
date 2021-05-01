@@ -296,7 +296,6 @@ GTEST_TEST(MooneyeDAA, daa) {
 	gameboy gb;
 	gb.in_test_mode = true;
 	gb.load_rom("C:/Users/knaub/source/repos/testroms/mooneye/acceptance/instr/daa.gb", true);
-
 	gb.run_for_x_cycles(15500000);
 
 	auto R = gb.cpu.get_register();
@@ -304,7 +303,7 @@ GTEST_TEST(MooneyeDAA, daa) {
 	EXPECT_TRUE(Result);
 }
 
-GTEST_TEST(MooneyeOAM_dma, basic) {
+GTEST_TEST(MooneyeOAM_dma, DISABLED_basic) {
 	gameboy gb;
 	gb.in_test_mode = true;
 	gb.load_rom("C:/Users/knaub/source/repos/testroms/mooneye/acceptance/oam_dma/basic.gb", true);
@@ -316,7 +315,7 @@ GTEST_TEST(MooneyeOAM_dma, basic) {
 	EXPECT_TRUE(Result);
 }
 
-GTEST_TEST(MooneyeOAM_dma, reg_read) {
+GTEST_TEST(MooneyeOAM_dma, DISABLED_reg_read) {
 	gameboy gb;
 	gb.in_test_mode = true;
 	gb.load_rom("C:/Users/knaub/source/repos/testroms/mooneye/acceptance/oam_dma/reg_read.gb", true);
@@ -328,7 +327,7 @@ GTEST_TEST(MooneyeOAM_dma, reg_read) {
 	EXPECT_TRUE(Result);
 }
 
-GTEST_TEST(MooneyeOAM_dma, sourcesGS) {
+GTEST_TEST(MooneyeOAM_dma, DISABLED_sourcesGS) {
 	gameboy gb;
 	gb.in_test_mode = true;
 	gb.load_rom("C:/Users/knaub/source/repos/testroms/mooneye/acceptance/oam_dma/sources-GS.gb", true);
@@ -340,7 +339,7 @@ GTEST_TEST(MooneyeOAM_dma, sourcesGS) {
 	EXPECT_TRUE(Result);
 }
 
-GTEST_TEST(MooneyeMBC2, bits_ramg) {
+GTEST_TEST(MooneyeMBC2, DISABLED_bits_ramg) {
 	gameboy gb;
 	gb.in_test_mode = true;
 	gb.load_rom("C:/Users/knaub/source/repos/testroms/mooneye/emulator-only/mbc2/bits_ramg.gb", true);
@@ -352,7 +351,7 @@ GTEST_TEST(MooneyeMBC2, bits_ramg) {
 	EXPECT_TRUE(Result);
 }
 
-GTEST_TEST(MooneyeMBC2, bits_romb) {
+GTEST_TEST(MooneyeMBC2, DISABLED_bits_romb) {
 	gameboy gb;
 	gb.in_test_mode = true;
 	gb.load_rom("C:/Users/knaub/source/repos/testroms/mooneye/emulator-only/mbc2/bits_romb.gb", true);
@@ -364,7 +363,7 @@ GTEST_TEST(MooneyeMBC2, bits_romb) {
 	EXPECT_TRUE(Result);
 }
 
-GTEST_TEST(MooneyeMBC2, bits_unused) {
+GTEST_TEST(MooneyeMBC2, DISABLED_bits_unused) {
 	gameboy gb;
 	gb.in_test_mode = true;
 	gb.load_rom("C:/Users/knaub/source/repos/testroms/mooneye/emulator-only/mbc2/bits_unused.gb", true);
@@ -376,7 +375,7 @@ GTEST_TEST(MooneyeMBC2, bits_unused) {
 	EXPECT_TRUE(Result);
 }
 
-GTEST_TEST(MooneyeMBC2, ram) {
+GTEST_TEST(MooneyeMBC2, DISABLED_ram) {
 	gameboy gb;
 	gb.in_test_mode = true;
 	gb.load_rom("C:/Users/knaub/source/repos/testroms/mooneye/emulator-only/mbc2/ram.gb", true);
@@ -388,7 +387,7 @@ GTEST_TEST(MooneyeMBC2, ram) {
 	EXPECT_TRUE(Result);
 }
 
-GTEST_TEST(MooneyeMBC2, rom_1Mb) {
+GTEST_TEST(MooneyeMBC2, DISABLED_rom_1Mb) {
 	gameboy gb;
 	gb.in_test_mode = true;
 	gb.load_rom("C:/Users/knaub/source/repos/testroms/mooneye/emulator-only/mbc2/rom_1Mb.gb", true);
@@ -400,7 +399,7 @@ GTEST_TEST(MooneyeMBC2, rom_1Mb) {
 	EXPECT_TRUE(Result);
 }
 
-GTEST_TEST(MooneyeMBC2, rom_2Mb) {
+GTEST_TEST(MooneyeMBC2, DISABLED_rom_2Mb) {
 	gameboy gb;
 	gb.in_test_mode = true;
 	gb.load_rom("C:/Users/knaub/source/repos/testroms/mooneye/emulator-only/mbc2/rom_2Mb.gb", true);
@@ -412,7 +411,7 @@ GTEST_TEST(MooneyeMBC2, rom_2Mb) {
 	EXPECT_TRUE(Result);
 }
 
-GTEST_TEST(MooneyeMBC2, rom_512kb) {
+GTEST_TEST(MooneyeMBC2, DISABLED_rom_512kb) {
 	gameboy gb;
 	gb.in_test_mode = true;
 	gb.load_rom("C:/Users/knaub/source/repos/testroms/mooneye/emulator-only/mbc2/rom_512kb.gb", true);
@@ -424,7 +423,7 @@ GTEST_TEST(MooneyeMBC2, rom_512kb) {
 	EXPECT_TRUE(Result);
 }
 
-GTEST_TEST(MooneyeMBC5, rom_1Mb) {
+GTEST_TEST(MooneyeMBC5, DISABLED_rom_1Mb) {
 	gameboy gb;
 	gb.in_test_mode = true;
 	gb.load_rom("C:/Users/knaub/source/repos/testroms/mooneye/emulator-only/mbc5/rom_1Mb.gb", true);
@@ -436,7 +435,7 @@ GTEST_TEST(MooneyeMBC5, rom_1Mb) {
 	EXPECT_TRUE(Result);
 }
 
-GTEST_TEST(MooneyeMBC5, rom_2Mb) {
+GTEST_TEST(MooneyeMBC5, DISABLED_rom_2Mb) {
 	gameboy gb;
 	gb.in_test_mode = true;
 	gb.load_rom("C:/Users/knaub/source/repos/testroms/mooneye/emulator-only/mbc5/rom_2Mb.gb", true);
@@ -448,7 +447,7 @@ GTEST_TEST(MooneyeMBC5, rom_2Mb) {
 	EXPECT_TRUE(Result);
 }
 
-GTEST_TEST(MooneyeMBC5, rom_4Mb) {
+GTEST_TEST(MooneyeMBC5, DISABLED_rom_4Mb) {
 	gameboy gb;
 	gb.in_test_mode = true;
 	gb.load_rom("C:/Users/knaub/source/repos/testroms/mooneye/emulator-only/mbc5/rom_4Mb.gb", true);
@@ -460,7 +459,7 @@ GTEST_TEST(MooneyeMBC5, rom_4Mb) {
 	EXPECT_TRUE(Result);
 }
 
-GTEST_TEST(MooneyeMBC5, rom_8Mb) {
+GTEST_TEST(MooneyeMBC5, DISABLED_rom_8Mb) {
 	gameboy gb;
 	gb.in_test_mode = true;
 	gb.load_rom("C:/Users/knaub/source/repos/testroms/mooneye/emulator-only/mbc5/rom_8Mb.gb", true);
@@ -472,7 +471,7 @@ GTEST_TEST(MooneyeMBC5, rom_8Mb) {
 	EXPECT_TRUE(Result);
 }
 
-GTEST_TEST(MooneyeMBC5, rom_16Mb) {
+GTEST_TEST(MooneyeMBC5, DISABLED_rom_16Mb) {
 	gameboy gb;
 	gb.in_test_mode = true;
 	gb.load_rom("C:/Users/knaub/source/repos/testroms/mooneye/emulator-only/mbc5/rom_16Mb.gb", true);
@@ -484,7 +483,7 @@ GTEST_TEST(MooneyeMBC5, rom_16Mb) {
 	EXPECT_TRUE(Result);
 }
 
-GTEST_TEST(MooneyeMBC5, rom_32Mb) {
+GTEST_TEST(MooneyeMBC5, DISABLED_rom_32Mb) {
 	gameboy gb;
 	gb.in_test_mode = true;
 	gb.load_rom("C:/Users/knaub/source/repos/testroms/mooneye/emulator-only/mbc5/rom_32Mb.gb", true);
@@ -496,7 +495,7 @@ GTEST_TEST(MooneyeMBC5, rom_32Mb) {
 	EXPECT_TRUE(Result);
 }
 
-GTEST_TEST(MooneyeMBC5, rom_64Mb) {
+GTEST_TEST(MooneyeMBC5, DISABLED_rom_64Mb) {
 	gameboy gb;
 	gb.in_test_mode = true;
 	gb.load_rom("C:/Users/knaub/source/repos/testroms/mooneye/emulator-only/mbc5/rom_64Mb.gb", true);
@@ -508,7 +507,7 @@ GTEST_TEST(MooneyeMBC5, rom_64Mb) {
 	EXPECT_TRUE(Result);
 }
 
-GTEST_TEST(MooneyeMBC5, rom_512kb) {
+GTEST_TEST(MooneyeMBC5, DISABLED_rom_512kb) {
 	gameboy gb;
 	gb.in_test_mode = true;
 	gb.load_rom("C:/Users/knaub/source/repos/testroms/mooneye/emulator-only/mbc5/rom_512kb.gb", true);

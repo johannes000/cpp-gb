@@ -108,7 +108,7 @@ u8 CPU::opcode0xD8() { // RET C
 u8 CPU::opcode0xC2() { // JP NZ a16
 	if (!check_flag(Flag::z)) {
 		R.PC = read_u16_at_pc();
-		current_instruction_info.cycles = 3;
+		current_instruction_info.cycles = 4;
 		return 1;
 	}
 	return 0;

@@ -213,11 +213,9 @@ void CPU::handle_timer(int t_cycles) {
 		divider_register++;
 	}
 
-	if (timer_control > 0)
-		int a = 99;
 	// if Timer Enable
 	if (check_bit(timer_control, 2)) {
-		timer_cycle_sum += t_cycles;
+		timer_cycle_sum += t_cycles * 4;
 
 		int freq = 1024;
 		switch (timer_control & 3u) {
@@ -233,11 +231,10 @@ void CPU::handle_timer(int t_cycles) {
 		}
 
 		while (timer_cycle_sum >= freq) {
-			if (timer_counter == 0xFF) {
+			timer_counter++;
+			if (timer_counter == 0x100) {
 				request_interrupt(Interrupt::Timer_overflow);
-				timer_counter = timer_modulo;
-			} else {
-				timer_counter++;
+				timer_counter = static_cast<u16>(timer_modulo);
 			}
 			timer_cycle_sum -= freq;
 		}

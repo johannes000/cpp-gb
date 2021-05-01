@@ -36,8 +36,8 @@ int gameboy::run_one_cycle(bool skip_render) {
 	const int last_cycle = cpu.update();
 	if (in_test_mode && cpu.op_code == 0x40)
 		return -1;
-	cpu.handle_interrupts();
 	cpu.handle_timer(last_cycle);
+	cpu.handle_interrupts();
 	ppu.update(last_cycle, skip_render);
 	return last_cycle;
 }
@@ -64,7 +64,6 @@ void gameboy::run_until_breakpoint() {
 }
 
 void gameboy::run_for_x_cycles(int cycles_to_run) {
-	int cycles_sum = 0;
 	int cycles;
 	while (cycles_to_run > 0) {
 		cycles = run_one_cycle(false);
