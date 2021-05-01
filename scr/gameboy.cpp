@@ -37,8 +37,8 @@ int gameboy::run_one_cycle(bool skip_render) {
 	if (in_test_mode && cpu.op_code == 0x40)
 		return -1;
 	cpu.handle_timer(last_cycle);
-	cpu.handle_interrupts();
 	ppu.update(last_cycle, skip_render);
+	cpu.handle_interrupts();
 	return last_cycle;
 }
 

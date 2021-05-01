@@ -233,8 +233,8 @@ u8 CPU::opcode0xC9() { // RET
 }
 
 u8 CPU::opcode0xD9() { // RETI
-	ret();
 	IME = true;
+	ret();
 	return 1;
 }
 

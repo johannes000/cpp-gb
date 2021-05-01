@@ -19,6 +19,8 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
 	bool skip_boot_rom = true;
 
 	gameboy gb;
+	// gb.load_rom("C:/Users/knaub/source/repos/testroms/cpu_instrs/individual/02-interrupts.gb", true);
+	// gb.run_for_x_cycles(600000);
 
 	Renderer renderer(&gb.joypad);
 	bool rom_loaded = false;

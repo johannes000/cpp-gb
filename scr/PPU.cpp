@@ -143,6 +143,7 @@ u8 PPU::read(const u16 &addr) const {
 			case LCD_SCX:
 				return lcd_register.LCD_SCX;
 			case LCD_LY:
+				//return 0x90;
 				return lcd_register.LCD_LY;
 			case LCD_LYC:
 				//return 0x90;

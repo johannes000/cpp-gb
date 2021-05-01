@@ -109,7 +109,7 @@ u8 CPU::read(const u16 &addr) {
 		case INTERRUPT_ENABLE_REG:
 			return interrupt_enable_register;
 		case INTERRUPT_FLAGS_REG:
-			return interrupt_request_register | 0xE0u;
+			return interrupt_request_register;
 		case IN_BOOT_ADDRESS:
 			return in_boot;
 		default:
@@ -179,9 +179,12 @@ void CPU::write_u16(const u16 &addr, const u16 &data) const {
 }
 
 void CPU::handle_interrupts() {
-	if (!IME)
-		return;
 	u8 interrupt = interrupt_request_register & interrupt_enable_register & 0x1Fu;
+	if (!IME) {
+		if (is_halted && interrupt != 0)
+			is_halted = false;
+		return;
+	}
 	if (interrupt) {
 		is_halted = false;
 		IME = false;
@@ -206,7 +209,6 @@ void CPU::handle_interrupts() {
 }
 
 void CPU::handle_timer(int t_cycles) {
-
 	div_cycle_sum += t_cycles;
 	if (div_cycle_sum >= 0xFF) {
 		div_cycle_sum -= 0xFF;
