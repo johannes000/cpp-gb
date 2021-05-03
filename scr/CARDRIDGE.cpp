@@ -20,11 +20,15 @@ bool CARDRIDGE::load_rom(const char *rom_file) {
 
 	fill_cardridge_info();
 
-	ram = {rom_info.ram_banks + 1, {std::vector<u8>(CARD_RAM_BANK_SIZE, 0xFF)}};
+	ram = {static_cast<int>(0xFFF), {std::vector<u8>(CARD_RAM_BANK_SIZE, 0xFF)}};
 
 	selected_ram_bank = 0;
 	selected_rom_bank = 0;
+
+	Rom_Ram_Switch = RomRamBankSwitch::undefined;
+
 	ram_enabled = false;
+
 	return true;
 }
 
@@ -168,15 +172,13 @@ void CARDRIDGE::write(const u16 addr, const u8 &data) {
 			ram_enabled = false;
 	}
 
-	if (addr >= 0x2000 && addr <= 0x3FFF && rom_info.rom_banks > 0) {
-		selected_rom_bank = (data & 0x1F);
-	}
 	switch (rom_info.ctype) {
 		case CType::MBC1:
 		case CType::MBC1_RAM:
 		case CType::MBC1_RAM_BATTERY:
 			writeMBC1(addr, data);
 			break;
+
 		case CType::MBC2:
 		case CType::MBC2_BATTERY:
 			writeMBC2(addr, data);
@@ -232,25 +234,7 @@ u8 CARDRIDGE::readNoMBC(const u16 &addr) {
 		return 0xFF;
 	}
 }
-u8 CARDRIDGE::readMBC1(const u16 &addr) {
-	if (rom_info.rom_banks == 0) {
-		return readNoMBC(addr);
-	}
 
-	if (addr <= CARD_ROM_0_END) {
-		return rom.at(addr);
-	} else if (addr >= CARD_BANKS && addr <= CARD_BANKS_END) {
-		int32 real_bank = selected_rom_bank;
-		if (check_if_bank_special(selected_rom_bank))
-			real_bank++;
-		u32 addr_in_rom = addr + (CARD_ROM_BANK_SIZE * (real_bank - 1));
-		return rom.at(addr_in_rom);
-	} else if (addr >= CARD_EXTERNAL_RAM && addr <= CARD_EXTERNAL_RAM_END && ram_enabled) {
-		return ram[selected_ram_bank].at(addr - CARD_EXTERNAL_RAM);
-	}
-
-	return readNoMBC(addr);
-}
 u8 CARDRIDGE::readMBC2(const u16 &addr) {
 	// TODO: Implementieren
 	return readNoMBC(addr);
@@ -282,7 +266,76 @@ void CARDRIDGE::writeNoMBC(const u16 addr, const u8 &data) {
 		//std::cerr << "Hier Sollte nicht Reingeschrieben werden! Addr:" << addr << std::endl;
 	}
 }
+
+u8 CARDRIDGE::readMBC1(const u16 &addr) {
+	if (rom_info.rom_banks == 0) {
+		return readNoMBC(addr);
+	}
+
+	if (addr <= CARD_ROM_0_END) {
+		return rom.at(addr);
+
+	} else if (addr >= CARD_BANKS && addr <= CARD_BANKS_END) {
+		/*
+		4000 - 7FFF - ROM Bank 01 - 7F(Read Only)
+		This area may contain any of the further 16KByte banks of the ROM,
+		allowing to address up to 125 ROM Banks(almost 2MByte).
+		As described below, bank numbers 20h, 40h, and 60h cannot be used, resulting in the odd amount of 125 banks.
+		*/
+
+		int32 real_bank = selected_rom_bank;
+		if (Rom_Ram_Switch == RomRamBankSwitch::ROM)
+			real_bank |= ((selected_ram_bank & 3) << 4);
+		u32 offset = real_bank == 0 ? 0 : 1;
+		u32 addr_in_rom = addr + (CARD_ROM_BANK_SIZE * (real_bank - offset));
+		if (addr_in_rom > rom.size()) {
+			//std::cerr << "Liest ausserhalb der Rom!" << std::endl;
+			return readNoMBC(addr);
+		}
+		return rom.at(addr_in_rom);
+	} else if (addr >= CARD_EXTERNAL_RAM && addr <= CARD_EXTERNAL_RAM_END && ram_enabled) {
+		/*
+		A000-BFFF - RAM Bank 00-03, if any (Read/Write)
+		This area is used to address external RAM in the cartridge (if any). 
+		External RAM is often battery buffered, allowing to store game positions or high score tables, 
+		even if the gameboy is turned off, or if the cartridge is removed from the gameboy. 
+		Available RAM sizes are: 2KByte (at A000-A7FF), 8KByte (at A000-BFFF), and 32KByte (in form of four 8K banks at A000-BFFF).
+		*/
+		return ram[selected_ram_bank].at(addr - CARD_EXTERNAL_RAM);
+	}
+
+	return readNoMBC(addr);
+}
+
 void CARDRIDGE::writeMBC1(const u16 addr, const u8 &data) {
+	if (addr >= 0x2000 && addr <= 0x3FFF && rom_info.rom_banks > 0) {
+		// 2000 - 3FFF - ROM Bank Number(Write Only)
+		int rom_bank = (data & 0x1F);
+		if (check_if_bank_special(rom_bank))
+			rom_bank++;
+
+		selected_rom_bank = rom_bank;
+	}
+
+	if (addr >= 0x4000 && addr <= 0x5FFF) {
+		// 4000-5FFF - RAM Bank Number - or - Upper Bits of ROM Bank Number (Write Only)
+		if (Rom_Ram_Switch == RomRamBankSwitch::RAM)
+			selected_ram_bank = data & 3;
+	}
+	if (addr >= 0x6000 && addr <= 0x7FFF) {
+		// 6000-7FFF - ROM/RAM Mode Select (Write Only)
+		switch (data) {
+			case 0x00:
+				Rom_Ram_Switch = RomRamBankSwitch::ROM;
+				break;
+			case 0x01:
+				Rom_Ram_Switch = RomRamBankSwitch::RAM;
+				break;
+			default:
+				break;
+		}
+	}
+
 	if (addr >= CARD_EXTERNAL_RAM && addr <= CARD_EXTERNAL_RAM_END && ram_enabled) {
 		ram[selected_ram_bank].at(addr - CARD_EXTERNAL_RAM) = data;
 	}

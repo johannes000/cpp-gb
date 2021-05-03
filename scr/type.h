@@ -165,6 +165,12 @@ enum class CGBFlag {
 	OFF [[maybe_unused]] = 0x80, // - Game supports CGB functions, but works on old gameboys also.
 	ON [[maybe_unused]] = 0xC0,	 // - Game works on CGB only(physically the same as 80h).
 };
+enum class RomRamBankSwitch {
+	ROM,
+	RAM,
+	undefined
+
+};
 
 enum class CType { // Cartridge Type
 	ROM_ONLY [[maybe_unused]] = 0x00,

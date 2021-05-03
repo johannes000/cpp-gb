@@ -153,7 +153,7 @@ GTEST_TEST(MooneyeMBC1, bits_ramg) {
 	gb.in_test_mode = true;
 	gb.load_rom("C:/Users/knaub/source/repos/testroms/mooneye/emulator-only/mbc1/bits_ramg.gb", true);
 
-	gb.run_for_x_cycles(5500000);
+	gb.run_for_x_cycles(15500000);
 
 	auto R = gb.cpu.get_register();
 	bool Result = R.B == 3 && R.C == 5 && R.D == 8 && R.E == 13 && R.H == 21 && R.L == 34;

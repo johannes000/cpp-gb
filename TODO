@@ -1,11 +1,16 @@
 
 Todo:
-  ☐ Tests Bestehen @critical 
   ☐ Unabhängige Layer für Sprites und BG @low
   ☐ Menu Bar @high
   ☐ Bootrom hardcoden @high
   ☐ Timer fixen @high
   ☐ Sound @low
+  ☐ MBC1
+  ☐ MBC2
+  ☐ MBC3
+  ☐ MBC5
+  ☐ MBC6
+  ☐ MBC7
   ☐ Banks @critical
   ☐ Controlls Plattformunabhängig gestalten @low
   ☐ Gameboy Klasse komplett Plattformunabhängig machen @low
@@ -22,3 +27,5 @@ Done:
   ✔ Unit Test @done(21-04-21)
   ✔ PPU Interrupts @done(23-04-21)
   ✔ Window Layer @done(23-04-21)
+  ✔ Blarggs CPU Tests Bestehen @done(01-05-21)
+

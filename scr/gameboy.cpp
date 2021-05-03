@@ -18,6 +18,7 @@ bool gameboy::load_rom(const char *rom_file, bool skip_boot_rom) {
 
 	return true;
 }
+
 void gameboy::reset(bool skip_boot_rom) {
 	mem.reset(skip_boot_rom);
 	cpu.init_register(skip_boot_rom);
@@ -74,6 +75,7 @@ void gameboy::run_for_x_cycles(int cycles_to_run) {
 		cycles_to_run -= cycles;
 	}
 }
+
 void gameboy::run_until_vblank() {
 	while (!ppu.is_ready_to_render() && debug.get_debug_state() == Debug_State::RUN) {
 		run_one_cycle();

@@ -35,7 +35,6 @@ public:
 	void writeMBC6(const u16 addr, const u8 &data);
 	void writeMBC7(const u16 addr, const u8 &data);
 	void writeHuC1(const u16 addr, const u8 &data);
-
 	u8 read_card_rom(const u16 &addr);
 	[[nodiscard]] unsigned int get_selected_rom_bank() const { return selected_rom_bank; }
 
@@ -45,6 +44,7 @@ public:
 
 	int32 selected_ram_bank = 0;
 	int32 selected_rom_bank = 0;
+	RomRamBankSwitch Rom_Ram_Switch;
 
 private:
 	void fill_cardridge_info();
