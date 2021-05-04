@@ -25,7 +25,7 @@ bool CARDRIDGE::load_rom(const char *rom_file) {
 	selected_ram_bank = 0;
 	selected_rom_bank = 0;
 
-	Rom_Ram_Switch = 0;
+	Rom_Ram_Mode = 0;
 
 	ram_enabled = false;
 
@@ -106,6 +106,8 @@ void CARDRIDGE::fill_cardridge_info() {
 u8 CARDRIDGE::read(const u16 &addr) {
 
 	switch (rom_info.ctype) {
+		case CType::ROM_RAM:
+		case CType::ROM_RAM_BATTERY:
 		case CType::MBC1:
 		case CType::MBC1_RAM:
 		case CType::MBC1_RAM_BATTERY:
@@ -143,8 +145,6 @@ u8 CARDRIDGE::read(const u16 &addr) {
 		case CType::MMM01:
 		case CType::MMM01_RAM:
 		case CType::MMM01_RAM_BATTERY:
-		case CType::ROM_RAM:
-		case CType::ROM_RAM_BATTERY:
 		case CType::ROM_ONLY:
 		default:
 			return readNoMBC(addr);
@@ -262,7 +262,7 @@ u8 CARDRIDGE::readMBC1(const u16 &addr) {
 
 	if (addr <= CARD_ROM_0_END) {
 		u32 addr_in_rom = addr;
-		if (Rom_Ram_Switch == 1) {
+		if (Rom_Ram_Mode == 1) {
 			int32 real_bank = 0;
 			if (rom_info.rom_banks >= 0x20)
 				real_bank |= ((selected_ram_bank & 3) << 5);
@@ -283,13 +283,10 @@ u8 CARDRIDGE::readMBC1(const u16 &addr) {
 		As described below, bank numbers 20h, 40h, and 60h cannot be used, resulting in the odd amount of 125 banks.
 		*/
 		int32 real_bank = (((selected_ram_bank & 3) << 5) % rom_info.rom_banks) | selected_rom_bank;
-		if (real_bank == 0x0 || real_bank == 0x20 || real_bank == 0x40 || real_bank == 0x60)
-			real_bank += 0x01;
-
 		u32 offset = real_bank == 0 ? 0 : 1;
 		u32 addr_in_rom = addr + (CARD_ROM_BANK_SIZE * (real_bank - offset));
 		return rom.at(addr_in_rom % rom.size());
-	} else if (addr >= CARD_EXTERNAL_RAM && addr <= CARD_EXTERNAL_RAM_END && ram_enabled) {
+	} else if (addr >= CARD_EXTERNAL_RAM && addr <= CARD_EXTERNAL_RAM_END) {
 		/*
 		A000-BFFF - RAM Bank 00-03, if any (Read/Write)
 		This area is used to address external RAM in the cartridge (if any).
@@ -297,8 +294,15 @@ u8 CARDRIDGE::readMBC1(const u16 &addr) {
 		even if the gameboy is turned off, or if the cartridge is removed from the gameboy.
 		Available RAM sizes are: 2KByte (at A000-A7FF), 8KByte (at A000-BFFF), and 32KByte (in form of four 8K banks at A000-BFFF).
 		*/
-
-		return ram[selected_ram_bank].at(addr - CARD_EXTERNAL_RAM);
+		if (ram_enabled) {
+			int32 real_bank = selected_ram_bank;
+			if (!Rom_Ram_Mode) {
+				real_bank = 0;
+			}
+			return ram[real_bank].at(addr - CARD_EXTERNAL_RAM);
+		} else {
+			return 0xFF;
+		}
 	}
 
 	return readNoMBC(addr);
@@ -314,7 +318,7 @@ void CARDRIDGE::writeMBC1(const u16 addr, const u8 &data) {
 	if (addr >= 0x4000 && addr <= 0x5FFF) {
 		// 4000-5FFF - RAM Bank Number - or - Upper Bits of ROM Bank Number (Write Only)
 		selected_ram_bank = data & 3;
-		if (Rom_Ram_Switch == 1 && static_cast<int>(ram.size()) < selected_ram_bank) {
+		if (Rom_Ram_Mode == 1 && static_cast<int>(ram.size()) < selected_ram_bank) {
 			// Spiel versucht auf Ram banks zuzugreifen die eigentlich gar nicht da sind.
 			ram.insert(ram.end(), selected_ram_bank - ram.size() + 1, {std::vector<u8>(CARD_RAM_BANK_SIZE, 0xFF)});
 		}
@@ -323,10 +327,10 @@ void CARDRIDGE::writeMBC1(const u16 addr, const u8 &data) {
 		// 6000-7FFF - ROM/RAM Mode Select (Write Only)
 		switch (data) {
 			case 0x00:
-				Rom_Ram_Switch = 0;
+				Rom_Ram_Mode = 0;
 				break;
 			case 0x01:
-				Rom_Ram_Switch = 1;
+				Rom_Ram_Mode = 1;
 				break;
 			default:
 				break;
@@ -334,7 +338,7 @@ void CARDRIDGE::writeMBC1(const u16 addr, const u8 &data) {
 	}
 
 	if (addr >= CARD_EXTERNAL_RAM && addr <= CARD_EXTERNAL_RAM_END && ram_enabled) {
-		if (Rom_Ram_Switch == 1)
+		if (Rom_Ram_Mode == 1)
 			ram[selected_ram_bank].at(addr - CARD_EXTERNAL_RAM) = data;
 		else
 			ram[0].at(addr - CARD_EXTERNAL_RAM) = data;

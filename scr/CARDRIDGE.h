@@ -44,7 +44,7 @@ public:
 
 	int32 selected_ram_bank = 0;
 	int32 selected_rom_bank = 0;
-	int32 Rom_Ram_Switch;
+	int32 Rom_Ram_Mode;
 
 private:
 	void fill_cardridge_info();
