@@ -262,20 +262,27 @@ void PPU::buffer_sprite_line(const u8 line) {
 	const int y = static_cast<int>(line);
 
 	for (Sprite &spr : sprites) {
-		const int real_ypos = lcd_control.sprite_size == 1 ? spr.y_pos - 17 : spr.y_pos - 9;
+		int tile_no = spr.tile_no;
+		if (sprite_size == 16)
+			tile_no &= 0xFE;
+		const int real_ypos = lcd_control.sprite_size == 1 ? spr.y_pos : spr.y_pos - 9;
 		if (real_ypos != 0 && real_ypos < 160 && spr.x_pos != 0 && spr.x_pos < 168 && sprites_count <= 10) {
 			if (y > real_ypos - sprite_size && y <= real_ypos) {
 				// Sprite wird gebufferd
 				sprites_count++;
 				// Y-Flip
-				const int pixel_y_pos = spr.y_flip ? real_ypos - y : y - real_ypos + sprite_size - 1;
+				int pixel_y_pos = spr.y_flip ? real_ypos - y : y - real_ypos + sprite_size - 1;
 
 				if (pixel_y_pos >= 0) {
 					for (int pixel_x_pos = 0; pixel_x_pos <= 7 && (spr.x_pos + pixel_x_pos) != 0 && spr.x_pos + pixel_x_pos < 168; pixel_x_pos++) {
 						// Pixel im Buffer
 						const int buffer_index = ((GB_LCD_SIZE_WIDTH * y) + spr.x_pos + pixel_x_pos - 8);
+						if (pixel_y_pos >= 8) {
+							pixel_y_pos -= 8;
+							tile_no |= 0x01;
+						}
 						// Pixel im Tile
-						const auto palette_color_index = spr.tile_data[spr.x_flip ? (pixel_y_pos * 8) - pixel_x_pos + 7 : (pixel_y_pos * 8) + pixel_x_pos];
+						const auto palette_color_index = tile_map_data[tile_no][spr.x_flip ? (pixel_y_pos * 8) - pixel_x_pos + 7 : (pixel_y_pos * 8) + pixel_x_pos];
 						if (palette_color_index != 0) {
 							const auto color = sprite_obj_palette[spr.palette][palette_color_index];
 							bg_buffer[buffer_index] = color;

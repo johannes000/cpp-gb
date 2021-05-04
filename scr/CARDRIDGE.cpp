@@ -262,12 +262,10 @@ u8 CARDRIDGE::readMBC1(const u16 &addr) {
 
 	if (addr <= CARD_ROM_0_END) {
 		u32 addr_in_rom = addr;
-		if (Rom_Ram_Mode == 1) {
-			int32 real_bank = 0;
-			if (rom_info.rom_banks >= 0x20)
-				real_bank |= ((selected_ram_bank & 3) << 5) % rom_info.rom_banks;
-			u32 offset = real_bank == 0 ? 0 : 1;
-			addr_in_rom += CARD_ROM_BANK_SIZE * (real_bank - offset);
+		if (Rom_Ram_Mode) {
+			int32 real_bank = (((selected_ram_bank & 3) << 5) % rom_info.rom_banks);
+			offset_bank_if_special(real_bank);
+			addr_in_rom = addr + (CARD_ROM_BANK_SIZE * (real_bank - 1));
 		}
 		return rom.at(addr_in_rom % rom.size());
 
@@ -279,8 +277,10 @@ u8 CARDRIDGE::readMBC1(const u16 &addr) {
 		As described below, bank numbers 20h, 40h, and 60h cannot be used, resulting in the odd amount of 125 banks.
 		*/
 		int32 real_bank = (((selected_ram_bank & 3) << 5) % rom_info.rom_banks) | selected_rom_bank;
-		u32 offset = real_bank == 0 ? 0 : 1;
-		u32 addr_in_rom = addr + (CARD_ROM_BANK_SIZE * (real_bank - offset));
+		offset_bank_if_special(real_bank);
+
+		u32 addr_in_rom = addr + (CARD_ROM_BANK_SIZE * (real_bank - 1));
+
 		return rom.at(addr_in_rom % rom.size());
 	} else if (addr >= CARD_EXTERNAL_RAM && addr <= CARD_EXTERNAL_RAM_END) {
 		/*
@@ -363,4 +363,8 @@ void CARDRIDGE::writeMBC7(const u16 addr, const u8 &data) {
 void CARDRIDGE::writeHuC1(const u16 addr, const u8 &data) {
 	writeNoMBC(addr, data);
 	// TODO: Implementieren
+}
+void CARDRIDGE::offset_bank_if_special(int32 &data) {
+	if (data == 0x0 || data == 0x20 || data == 0x40 || data == 0x60 || data == 0x80)
+		data++;
 }

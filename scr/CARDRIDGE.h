@@ -48,6 +48,7 @@ public:
 
 private:
 	void fill_cardridge_info();
+	void offset_bank_if_special(int32 &data);
 	bool ram_enabled;
 };
 

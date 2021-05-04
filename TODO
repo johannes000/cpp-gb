@@ -5,7 +5,6 @@ Todo:
   ☐ Bootrom hardcoden @high
   ☐ Timer fixen @high
   ☐ Sound @low
-  ☐ MBC1 @high 
   ☐ MBC3 @high 
   ☐ MBC2 @low
   ☐ MBC5 @low
@@ -17,7 +16,6 @@ Todo:
     ☐ als DLL builden
   ☐ Custon Palettes UI @low
     ☐ Colorpoicker 
-  ☐ 16x8 Sprites Fixen
 Done:
   ✔ Sprites @done(17-04-21)
   ✔ FPS drossel @done(18-04-21)
@@ -28,4 +26,6 @@ Done:
   ✔ PPU Interrupts @done(23-04-21)
   ✔ Window Layer @done(23-04-21)
   ✔ Blarggs CPU Tests Bestehen @done(01-05-21)
+  ✔ MBC1 @done(04-05-21)
+  ✔ 16x8 Sprites Fixen @done(04-05-21)
 
