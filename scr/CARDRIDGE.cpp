@@ -265,15 +265,11 @@ u8 CARDRIDGE::readMBC1(const u16 &addr) {
 		if (Rom_Ram_Mode == 1) {
 			int32 real_bank = 0;
 			if (rom_info.rom_banks >= 0x20)
-				real_bank |= ((selected_ram_bank & 3) << 5);
+				real_bank |= ((selected_ram_bank & 3) << 5) % rom_info.rom_banks;
 			u32 offset = real_bank == 0 ? 0 : 1;
 			addr_in_rom += CARD_ROM_BANK_SIZE * (real_bank - offset);
 		}
-		if (addr_in_rom >= rom.size()) {
-			//std::cerr << "Liest ausserhalb der Rom!" << std::endl;
-			return readNoMBC(addr);
-		}
-		return rom.at(addr_in_rom);
+		return rom.at(addr_in_rom % rom.size());
 
 	} else if (addr >= CARD_BANKS && addr <= CARD_BANKS_END) {
 		/*
