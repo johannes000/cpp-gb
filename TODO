@@ -5,12 +5,12 @@ Todo:
   ☐ Bootrom hardcoden @high
   ☐ Timer fixen @high
   ☐ Sound @low
-  ☐ MBC1
-  ☐ MBC2
-  ☐ MBC3
-  ☐ MBC5
-  ☐ MBC6
-  ☐ MBC7
+  ☐ MBC1 @high 
+  ☐ MBC3 @high 
+  ☐ MBC2 @low
+  ☐ MBC5 @low
+  ☐ MBC6 @low
+  ☐ MBC7 @low
   ☐ Banks @critical
   ☐ Controlls Plattformunabhängig gestalten @low
   ☐ Gameboy Klasse komplett Plattformunabhängig machen @low

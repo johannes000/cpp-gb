@@ -35,6 +35,12 @@ Renderer::Renderer(CONTROLS *j) : joypad(j) {
 	}
 
 	roms = {
+		{"1MB", "C:/Users/knaub/source/repos/testroms/mooneye/emulator-only/mbc1/rom_1Mb.gb"},
+		{"2MB", "C:/Users/knaub/source/repos/testroms/mooneye/emulator-only/mbc1/rom_2Mb.gb"},
+		{"4MB", "C:/Users/knaub/source/repos/testroms/mooneye/emulator-only/mbc1/rom_4Mb.gb"},
+		{"8MB", "C:/Users/knaub/source/repos/testroms/mooneye/emulator-only/mbc1/rom_8Mb.gb"},
+		{"16MB", "C:/Users/knaub/source/repos/testroms/mooneye/emulator-only/mbc1/rom_16Mb.gb"},
+		{"1MB", "C:/Users/knaub/source/repos/testroms/mooneye/emulator-only/mbc1/rom_1Mb.gb"},
 		{"Tennis", "C:/Users/knaub/source/repos/testroms/tennis.gb"},
 		{"Tetris", "C:/Users/knaub/source/repos/testroms/tetris.gb"},
 		{"Mario", "C:/Users/knaub/source/repos/testroms/sml.gb"},

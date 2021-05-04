@@ -20,12 +20,12 @@ bool CARDRIDGE::load_rom(const char *rom_file) {
 
 	fill_cardridge_info();
 
-	ram = {static_cast<int>(0xFFF), {std::vector<u8>(CARD_RAM_BANK_SIZE, 0xFF)}};
+	ram = {static_cast<long long unsigned int>(rom_info.ram_banks), {std::vector<u8>(CARD_RAM_BANK_SIZE, 0xFF)}};
 
 	selected_ram_bank = 0;
 	selected_rom_bank = 0;
 
-	Rom_Ram_Switch = RomRamBankSwitch::undefined;
+	Rom_Ram_Switch = 0;
 
 	ram_enabled = false;
 
@@ -43,7 +43,7 @@ void CARDRIDGE::fill_cardridge_info() {
 	rom_info.rom_size = static_cast<ROMSize>(rom[0x148]);
 	switch (rom_info.rom_size) {
 		case ROMSize::KB32:
-			rom_info.rom_banks = 1;
+			rom_info.rom_banks = 2;
 			break;
 		case ROMSize::KB64:
 			rom_info.rom_banks = 4;
@@ -52,28 +52,16 @@ void CARDRIDGE::fill_cardridge_info() {
 			rom_info.rom_banks = 8;
 			break;
 		case ROMSize::KB256:
-		case ROMSize::KB512:
 			rom_info.rom_banks = 16;
 			break;
+		case ROMSize::KB512:
+			rom_info.rom_banks = 32;
+			break;
 		case ROMSize::MB1:
-			switch (rom_info.ctype) {
-				case CType::MBC1:
-					rom_info.rom_banks = 63;
-					break;
-				default:
-					rom_info.rom_banks = 64;
-					break;
-			}
+			rom_info.rom_banks = 64;
 			break;
 		case ROMSize::MB2:
-			switch (rom_info.ctype) {
-				case CType::MBC1:
-					rom_info.rom_banks = 125;
-					break;
-				default:
-					rom_info.rom_banks = 128;
-					break;
-			}
+			rom_info.rom_banks = 128;
 			break;
 		case ROMSize::MB4:
 			rom_info.rom_banks = 256;
@@ -94,12 +82,12 @@ void CARDRIDGE::fill_cardridge_info() {
 			break;
 	}
 
-	rom_info.ram_size = static_cast<RAMSize>(rom[0x149]);
+	rom_info.ram_size = static_cast<RAMSize>(rom[0x0149]);
 	switch (rom_info.ram_size) {
 		case RAMSize::None:
 		case RAMSize::KB2:
 		case RAMSize::KB8:
-			rom_info.ram_banks = 0;
+			rom_info.ram_banks = 1;
 			break;
 		case RAMSize::KB32:
 			rom_info.ram_banks = 4;
@@ -273,7 +261,19 @@ u8 CARDRIDGE::readMBC1(const u16 &addr) {
 	}
 
 	if (addr <= CARD_ROM_0_END) {
-		return rom.at(addr);
+		u32 addr_in_rom = addr;
+		if (Rom_Ram_Switch == 1) {
+			int32 real_bank = 0;
+			if (rom_info.rom_banks >= 0x20)
+				real_bank |= ((selected_ram_bank & 3) << 5);
+			u32 offset = real_bank == 0 ? 0 : 1;
+			addr_in_rom += CARD_ROM_BANK_SIZE * (real_bank - offset);
+		}
+		if (addr_in_rom >= rom.size()) {
+			//std::cerr << "Liest ausserhalb der Rom!" << std::endl;
+			return readNoMBC(addr);
+		}
+		return rom.at(addr_in_rom);
 
 	} else if (addr >= CARD_BANKS && addr <= CARD_BANKS_END) {
 		/*
@@ -282,25 +282,22 @@ u8 CARDRIDGE::readMBC1(const u16 &addr) {
 		allowing to address up to 125 ROM Banks(almost 2MByte).
 		As described below, bank numbers 20h, 40h, and 60h cannot be used, resulting in the odd amount of 125 banks.
 		*/
+		int32 real_bank = (((selected_ram_bank & 3) << 5) % rom_info.rom_banks) | selected_rom_bank;
+		if (real_bank == 0x0 || real_bank == 0x20 || real_bank == 0x40 || real_bank == 0x60)
+			real_bank += 0x01;
 
-		int32 real_bank = selected_rom_bank;
-		if (Rom_Ram_Switch == RomRamBankSwitch::ROM)
-			real_bank |= ((selected_ram_bank & 3) << 4);
 		u32 offset = real_bank == 0 ? 0 : 1;
 		u32 addr_in_rom = addr + (CARD_ROM_BANK_SIZE * (real_bank - offset));
-		if (addr_in_rom > rom.size()) {
-			//std::cerr << "Liest ausserhalb der Rom!" << std::endl;
-			return readNoMBC(addr);
-		}
-		return rom.at(addr_in_rom);
+		return rom.at(addr_in_rom % rom.size());
 	} else if (addr >= CARD_EXTERNAL_RAM && addr <= CARD_EXTERNAL_RAM_END && ram_enabled) {
 		/*
 		A000-BFFF - RAM Bank 00-03, if any (Read/Write)
-		This area is used to address external RAM in the cartridge (if any). 
-		External RAM is often battery buffered, allowing to store game positions or high score tables, 
-		even if the gameboy is turned off, or if the cartridge is removed from the gameboy. 
+		This area is used to address external RAM in the cartridge (if any).
+		External RAM is often battery buffered, allowing to store game positions or high score tables,
+		even if the gameboy is turned off, or if the cartridge is removed from the gameboy.
 		Available RAM sizes are: 2KByte (at A000-A7FF), 8KByte (at A000-BFFF), and 32KByte (in form of four 8K banks at A000-BFFF).
 		*/
+
 		return ram[selected_ram_bank].at(addr - CARD_EXTERNAL_RAM);
 	}
 
@@ -311,25 +308,25 @@ void CARDRIDGE::writeMBC1(const u16 addr, const u8 &data) {
 	if (addr >= 0x2000 && addr <= 0x3FFF && rom_info.rom_banks > 0) {
 		// 2000 - 3FFF - ROM Bank Number(Write Only)
 		int rom_bank = (data & 0x1F);
-		if (check_if_bank_special(rom_bank))
-			rom_bank++;
-
 		selected_rom_bank = rom_bank;
 	}
 
 	if (addr >= 0x4000 && addr <= 0x5FFF) {
 		// 4000-5FFF - RAM Bank Number - or - Upper Bits of ROM Bank Number (Write Only)
-		if (Rom_Ram_Switch == RomRamBankSwitch::RAM)
-			selected_ram_bank = data & 3;
+		selected_ram_bank = data & 3;
+		if (Rom_Ram_Switch == 1 && static_cast<int>(ram.size()) < selected_ram_bank) {
+			// Spiel versucht auf Ram banks zuzugreifen die eigentlich gar nicht da sind.
+			ram.insert(ram.end(), selected_ram_bank - ram.size() + 1, {std::vector<u8>(CARD_RAM_BANK_SIZE, 0xFF)});
+		}
 	}
 	if (addr >= 0x6000 && addr <= 0x7FFF) {
 		// 6000-7FFF - ROM/RAM Mode Select (Write Only)
 		switch (data) {
 			case 0x00:
-				Rom_Ram_Switch = RomRamBankSwitch::ROM;
+				Rom_Ram_Switch = 0;
 				break;
 			case 0x01:
-				Rom_Ram_Switch = RomRamBankSwitch::RAM;
+				Rom_Ram_Switch = 1;
 				break;
 			default:
 				break;
@@ -337,9 +334,11 @@ void CARDRIDGE::writeMBC1(const u16 addr, const u8 &data) {
 	}
 
 	if (addr >= CARD_EXTERNAL_RAM && addr <= CARD_EXTERNAL_RAM_END && ram_enabled) {
-		ram[selected_ram_bank].at(addr - CARD_EXTERNAL_RAM) = data;
+		if (Rom_Ram_Switch == 1)
+			ram[selected_ram_bank].at(addr - CARD_EXTERNAL_RAM) = data;
+		else
+			ram[0].at(addr - CARD_EXTERNAL_RAM) = data;
 	}
-	// TODO: Implementieren
 }
 void CARDRIDGE::writeMBC2(const u16 addr, const u8 &data) {
 	writeNoMBC(addr, data);
@@ -364,8 +363,4 @@ void CARDRIDGE::writeMBC7(const u16 addr, const u8 &data) {
 void CARDRIDGE::writeHuC1(const u16 addr, const u8 &data) {
 	writeNoMBC(addr, data);
 	// TODO: Implementieren
-}
-
-bool CARDRIDGE::check_if_bank_special(int32 bank) {
-	return (bank == 0x0 || bank == 0x20 || bank == 0x40 || bank == 0x60);
 }

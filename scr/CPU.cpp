@@ -72,7 +72,7 @@ debug_instruction CPU::get_instruction_at_addr(u16 addr) const {
 	debug_instruction debug_inst;
 
 	cpu_instruction cpu_inst;
-	u16 intermediate = -1;
+	u16 intermediate = 0xFFFF;
 
 	u8 inst_code = mem->read(addr);
 	cpu_inst = instructions[inst_code];

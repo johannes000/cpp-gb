@@ -44,11 +44,10 @@ public:
 
 	int32 selected_ram_bank = 0;
 	int32 selected_rom_bank = 0;
-	RomRamBankSwitch Rom_Ram_Switch;
+	int32 Rom_Ram_Switch;
 
 private:
 	void fill_cardridge_info();
-	bool check_if_bank_special(int32 bank);
 	bool ram_enabled;
 };
 

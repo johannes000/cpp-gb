@@ -15,7 +15,7 @@ Debugger::Debugger(CPU *c, PPU *p, MEMORY *m, CARDRIDGE *card, CONTROLS *joy)
 	  joypad(joy),
 	  debug_state(Debug_State::RUN),
 	  next_step(false) {
-	// breakpoints.push_back(0x100);
+	breakpoints.push_back(0x20A);
 }
 
 Debugger::~Debugger() {}

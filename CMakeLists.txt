@@ -43,7 +43,7 @@ endif ()
 if (NOT MSVC)
     set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wshadow -Wnon-virtual-dtor -Wnon-virtual-dtor -Wcast-align -Wnull-dereference -Woverloaded-virtual  -Wformat=2")
 else()
-    set(CMAKE_CXX_FLAGS "/W4")
+    set(CMAKE_CXX_FLAGS "/W3")
 endif ()
 
 if (MSVC)
