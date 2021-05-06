@@ -41,7 +41,7 @@ public:
 
 	bool ready_to_render;
 
-	int current_palette = 0;
+	int current_palette = 2;
 
 private:
 	CPU *cpu;

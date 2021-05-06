@@ -16,9 +16,8 @@ void PPU::update(const int cycles, bool skip_render) {
 	update_lcd_mode();
 	cycles_in_mode += cycles;
 	switch (lcd_mode) {
-			// MODE 2 : Searching OAM Guckt vor jeder line ins OAM um die, für die
-			// aktuelle line, benötigten sprites zu suchen
 		case LCD_Mode::OAM:
+			// MODE 2 : Searching OAM
 			if (cycles_in_mode >= CLOCKS_SCANLINE_OAM) {
 				cycles_in_mode -= CLOCKS_SCANLINE_OAM;
 				set_lcd_mode(LCD_Mode::VRAM);
@@ -26,8 +25,8 @@ void PPU::update(const int cycles, bool skip_render) {
 			}
 			break;
 
-			// MODE 3 : VRAM Zugriff Pixel Transfer
 		case LCD_Mode::VRAM:
+			// MODE 3 : VRAM Zugriff Pixel Transfer
 			if (cycles_in_mode >= CLOCKS_SCANLINE_VRAM) {
 				cycles_in_mode -= CLOCKS_SCANLINE_VRAM;
 				set_lcd_mode(LCD_Mode::H_Blank);
@@ -36,8 +35,8 @@ void PPU::update(const int cycles, bool skip_render) {
 			}
 			break;
 
-			// MODE 0: H - Blank (204 cycles) nach jeder line
 		case LCD_Mode::H_Blank:
+			// MODE 0: H - Blank (204 cycles) nach jeder line
 			if (cycles_in_mode >= CLOCKS_HORIZONTAL_BLANK) { // H-Blank vorbei
 				cycles_in_mode -= CLOCKS_HORIZONTAL_BLANK;
 				int line = lcd_register.LCD_LY;
@@ -60,8 +59,8 @@ void PPU::update(const int cycles, bool skip_render) {
 			}
 			break;
 
-			// MODE 1 : V - Blank nachdem jede Zeile gezeichnet wurde
 		case LCD_Mode::V_Blank:
+			// MODE 1 : V - Blank nachdem jede Zeile gezeichnet wurde
 			if (cycles_in_mode >= CLOCKS_SCANLINE) {
 				cycles_in_mode -= CLOCKS_SCANLINE;
 				if (++lcd_register.LCD_LY > VERTICAL_BLANK_LINES) {
@@ -247,11 +246,7 @@ void PPU::buffer_bg_line(const u8 line) {
 		}
 	}
 }
-/**
- * @brief Bufferd die Sprites für die jeweilige Bildzeile
- *
- * @param u8 line
- */
+
 void PPU::buffer_sprite_line(const u8 line) {
 	if (line >= GB_LCD_SIZE_HEIGHT + 8 || !lcd_control.sprites_enabled || !lcd_control.lcd_power)
 		return;
@@ -264,7 +259,7 @@ void PPU::buffer_sprite_line(const u8 line) {
 		if (sprite_size == 16)
 			tile_no &= 0xFE;
 		const int real_ypos = lcd_control.sprite_size == 1 ? spr.y_pos : spr.y_pos - 9;
-		if (real_ypos != 0 && real_ypos < 160 && spr.x_pos != 0 && spr.x_pos < 168 && sprites_count <= 10) {
+		if (real_ypos >= 0 && real_ypos < 160 && spr.x_pos != 0 && spr.x_pos < 168 && sprites_count <= 10) {
 			if (y > real_ypos - sprite_size && y <= real_ypos) {
 				// Sprite wird gebufferd
 				sprites_count++;
@@ -299,11 +294,12 @@ void PPU::buffer_sprite_line(const u8 line) {
 }
 
 void PPU::buffer_window_line(const u8 line) {
+	//TODO:	Winpos < 7 wird nicht richtig angezeigt
 	if (line >= GB_LCD_SIZE_HEIGHT)
 		return;
 	u16 window_y = read(LCD_WY);
 	u16 window_x = read(LCD_WX);
-	if (window_x <= 7)
+	if (window_x < 8)
 		window_x = 0;
 	else
 		window_x -= 7;
@@ -311,7 +307,6 @@ void PPU::buffer_window_line(const u8 line) {
 
 	if (line - window_y < GB_LCD_SIZE_HEIGHT && line >= window_y && lcd_control.window_enable && lcd_control.lcd_power) {
 		for (int line_x_pos = window_x; line_x_pos < GB_LCD_SIZE_WIDTH; line_x_pos++) {
-			bg_buffer[(line * GB_LCD_SIZE_WIDTH) + line_x_pos] = {0xFF, 0xFF, 0xFF, 0xFF};
 
 			const auto tile_x = (line_x_pos - window_x) / TILE_WIDTH;
 			const auto tile_y = (line - window_y) / TILE_HEIGHT;
@@ -387,7 +382,6 @@ void PPU::build_sprite_data(const u16 &addr, const u8 &data) {
 }
 
 [[nodiscard]] const Pixel_a *PPU::get_lcd_buffer() const {
-	// return &bg_buffer[0];
 	return &bg_buffer[0];
 }
 
