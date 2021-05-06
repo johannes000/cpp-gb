@@ -28,7 +28,7 @@ bool CARDRIDGE::load_rom(const char *rom_file) {
 	Rom_Ram_Mode = 0;
 
 	ram_enabled = false;
-
+	rom_loaded = true;
 	return true;
 }
 

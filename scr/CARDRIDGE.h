@@ -11,7 +11,7 @@ constexpr u16 CARD_RAM_BANK_SIZE = 0x4000;
 class CARDRIDGE {
 public:
 	CARDRIDGE();
-
+	bool rom_loaded = false;
 	bool load_rom(const char *rom_file);
 
 	Rom_Info rom_info;

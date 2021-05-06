@@ -179,13 +179,19 @@ void Renderer::update_views(PPU *ppu, Debugger *debug) {
 	if (show_demo_window)
 		ImGui::ShowDemoWindow(&show_demo_window);
 
-	// imgui_demo();
-	menu();
-	gameboy_lcd_window(ppu);
-	if (show_debug_views) {
+	if (in_debug_small_lcd_window)
+		gameboy_lcd_window(ppu);
+
+	if (in_debug_tile_buffer)
 		tile_buffer_view(ppu);
-		debug->update_views();
-	}
+	if (in_debug_card_view)
+		debug->card_view();
+	if (in_debug_cpu_debuger)
+		debug->cpu_view();
+	if (in_debug_memory_view)
+		debug->memory_view();
+	if (in_debug_controler_view)
+		debug->control_view();
 }
 
 void Renderer::update_tile_buffer(PPU *ppu) {
@@ -302,10 +308,12 @@ void Renderer::menu() {
 }
 
 void Renderer::show_fps() const {
-	ImGui::SetCursorPos(ImVec2(20.0f, 30.0f));
-	ImGui::TextColored(magenta, "Frame Rate: %.2f FPS\nFrame Time: %.2f ms",
-					   ImGui::GetIO().Framerate,
-					   1000.0f / ImGui::GetIO().Framerate);
+	if (in_debug_show_fps) {
+		ImGui::SetCursorPos(ImVec2(20.0f, 30.0f));
+		ImGui::TextColored(magenta, "Frame Rate: %.2f FPS\nFrame Time: %.2f ms",
+						   ImGui::GetIO().Framerate,
+						   1000.0f / ImGui::GetIO().Framerate);
+	}
 }
 
 void key_callback(GLFWwindow *window, int key, [[maybe_unused]] int scancode,
@@ -314,40 +322,67 @@ void key_callback(GLFWwindow *window, int key, [[maybe_unused]] int scancode,
 	joypad->handle_glwf_inputs(key, action);
 }
 
+void Renderer::file_menu_bar(std::string *file) {
+	if (ImGui::BeginMenu("File")) {
+		if (ImGui::MenuItem("Open Rom")) {
+			std::string path(MAX_PATH, '\0');
+			OPENFILENAME ofn;
+			ZeroMemory(&ofn, sizeof(ofn));
+			ofn.lStructSize = sizeof(ofn);
+			ofn.hwndOwner = NULL;
+			ofn.lpstrFilter = "Game Boy Rom\0*.gb\0";
+			ofn.lpstrFile = &path[0];
+			ofn.nMaxFile = MAX_PATH;
+			ofn.lpstrTitle = "Select a Rom";
+			ofn.Flags = OFN_DONTADDTORECENT | OFN_FILEMUSTEXIST;
+
+			if (GetOpenFileNameA(&ofn)) {
+				std::cout << "You chose the file \"" << path << "\"\n";
+				path.resize(strlen(path.c_str()));
+				*file = path;
+			}
+		}
+
+		ImGui::EndMenu();
+	}
+	if (ImGui::BeginMenu("ROMS")) {
+		for (auto &rom : roms) {
+			if (ImGui::MenuItem(rom.first.c_str())) {
+				*file = rom.second;
+			}
+		}
+		ImGui::EndMenu();
+	}
+}
+
+void Renderer::debug_menu_bar(CARDRIDGE *card) {
+	if (ImGui::BeginMenu("Debug")) {
+		if (ImGui::MenuItem("Show FPS", NULL, &in_debug_show_fps, card->rom_loaded)) {
+		}
+		if (ImGui::MenuItem("CPU", NULL, &in_debug_cpu_debuger, card->rom_loaded)) {
+		}
+		if (ImGui::MenuItem("Small LCD Window", NULL, &in_debug_small_lcd_window, card->rom_loaded)) {
+		}
+		if (ImGui::MenuItem("Tile Buffer", NULL, &in_debug_tile_buffer, card->rom_loaded)) {
+		}
+		if (ImGui::MenuItem("Register Info", NULL, &in_debug_card_view, card->rom_loaded)) {
+		}
+		if (ImGui::MenuItem("Memory View", NULL, &in_debug_memory_view, card->rom_loaded)) {
+		}
+		if (ImGui::MenuItem("Joypad Info", NULL, &in_debug_controler_view, card->rom_loaded)) {
+		}
+		if (ImGui::MenuItem("Demo Window", NULL, &show_demo_window, card->rom_loaded)) {
+		}
+		ImGui::EndMenu();
+	}
+}
+
 void Renderer::main_view(CPU *cpu, PPU *ppu, MEMORY *mem, CARDRIDGE *card, CONTROLS *joy, std::string *file) {
 	file->clear();
 	// IMGUI MENU BAR
 	if (ImGui::BeginMainMenuBar()) {
-		if (ImGui::BeginMenu("File")) {
-			if (ImGui::MenuItem("Open Rom")) {
-				std::string path(MAX_PATH, '\0');
-				OPENFILENAME ofn;
-				ZeroMemory(&ofn, sizeof(ofn));
-				ofn.lStructSize = sizeof(ofn);
-				ofn.hwndOwner = NULL;
-				ofn.lpstrFilter = "Game Boy Rom\0*.gb\0";
-				ofn.lpstrFile = &path[0];
-				ofn.nMaxFile = MAX_PATH;
-				ofn.lpstrTitle = "Select a Rom";
-				ofn.Flags = OFN_DONTADDTORECENT | OFN_FILEMUSTEXIST;
-
-				if (GetOpenFileNameA(&ofn)) {
-					std::cout << "You chose the file \"" << path << "\"\n";
-					path.resize(strlen(path.c_str()));
-					*file = path;
-				}
-			}
-
-			ImGui::EndMenu();
-		}
-		if (ImGui::BeginMenu("ROMS")) {
-			for (auto &rom : roms) {
-				if (ImGui::MenuItem(rom.first.c_str())) {
-					*file = rom.second;
-				}
-			}
-			ImGui::EndMenu();
-		}
+		file_menu_bar(file);
+		debug_menu_bar(card);
 	}
 	ImGui::EndMainMenuBar();
 }

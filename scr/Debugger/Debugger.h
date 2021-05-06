@@ -75,6 +75,14 @@ public:
 
 	void update_views();
 
+	void card_view();
+
+	void cpu_view();
+
+	void memory_view();
+
+	void control_view();
+
 private:
 	const char *what_register_is_this(const u8 &reg);
 
@@ -84,14 +92,6 @@ private:
 	std::vector<u16> dis_addr_vec;
 
 	std::vector<u16> breakpoints;
-
-	void card_view();
-
-	void cpu_view();
-
-	void memory_view();
-
-	void control_view();
 
 	const ImVec4 bg_color = {0.8f, 0.8f, 0.8f, 1.0f};
 	ImVec4 cyan = ImVec4(0.0f, 1.0f, 1.0f, 1.0f);

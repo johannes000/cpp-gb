@@ -104,8 +104,15 @@ struct Renderer {
 	ImVec4 dark_gray = ImVec4(0.1f, 0.1f, 0.1f, 1.0f);
 
 	bool show_debug_views = true;
-	bool show_demo_window = true;
+	bool show_demo_window = false;
 	bool show_another_window = false;
+	bool in_debug_show_fps = true;
+	bool in_debug_cpu_debuger = false;
+	bool in_debug_small_lcd_window = true;
+	bool in_debug_tile_buffer = false;
+	bool in_debug_card_view = false;
+	bool in_debug_memory_view = false;
+	bool in_debug_controler_view = false;
 
 	void *frame_buffer = nullptr;
 
@@ -126,6 +133,8 @@ struct Renderer {
 	CONTROLS *joypad;
 
 	void main_view(CPU *cpu, PPU *ppu, MEMORY *mem, CARDRIDGE *card, CONTROLS *joy, std::string *file);
+	void file_menu_bar(std::string *file);
+	void debug_menu_bar(CARDRIDGE *card);
 };
 
 void key_callback(GLFWwindow *window, int key, [[maybe_unused]] int scancode,
