@@ -35,20 +35,11 @@ Renderer::Renderer(CONTROLS *j) : joypad(j) {
 	}
 
 	roms = {
-		{"1MB", "C:/Users/knaub/source/repos/testroms/mooneye/emulator-only/mbc1/rom_1Mb.gb"},
-		{"2MB", "C:/Users/knaub/source/repos/testroms/mooneye/emulator-only/mbc1/rom_2Mb.gb"},
-		{"4MB", "C:/Users/knaub/source/repos/testroms/mooneye/emulator-only/mbc1/rom_4Mb.gb"},
-		{"8MB", "C:/Users/knaub/source/repos/testroms/mooneye/emulator-only/mbc1/rom_8Mb.gb"},
-		{"16MB", "C:/Users/knaub/source/repos/testroms/mooneye/emulator-only/mbc1/rom_16Mb.gb"},
-		{"1MB", "C:/Users/knaub/source/repos/testroms/mooneye/emulator-only/mbc1/rom_1Mb.gb"},
+		{"Acid", "C:/Users/knaub/source/repos/testroms/dmg-acid2.gb"},
+		{"Pokemon", "C:/Users/knaub/source/repos/testroms/Poke.gb"},
 		{"Tennis", "C:/Users/knaub/source/repos/testroms/tennis.gb"},
-		{"Tetris", "C:/Users/knaub/source/repos/testroms/tetris.gb"},
 		{"Mario", "C:/Users/knaub/source/repos/testroms/sml.gb"},
-		{"OPUS 5", "C:/Users/knaub/source/repos/testroms/opus5.gb"},
 		{"pocket", "C:/Users/knaub/source/repos/testroms/pocket.gb"},
-		{"drmario", "C:/Users/knaub/source/repos/testroms/drmario.gb"},
-		{"moon_boot_hwio", "C:/Users/knaub/source/repos/testroms/mooneye/acceptance/boot_hwio-S.gb"},
-		{"moon_ei_sequence", "C:/Users/knaub/source/repos/testroms/mooneye/acceptance/ei_sequence.gb"},
 		{"winpos", "C:/Users/knaub/source/repos/testroms/scribbltests/winpos/winpos.gb"},
 		{"statcount", "C:/Users/knaub/source/repos/testroms/scribbltests/statcount/statcount-auto.gb"},
 		{"scxly", "C:/Users/knaub/source/repos/testroms/scribbltests/scxly/scxly.gb"},

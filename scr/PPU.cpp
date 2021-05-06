@@ -1,4 +1,5 @@
 #include "PPU.h"
+#include <omp.h>
 
 PPU::PPU(MEMORY *m, CPU *c)
 	: ready_to_render(false),
@@ -21,6 +22,7 @@ void PPU::update(const int cycles, bool skip_render) {
 			if (cycles_in_mode >= CLOCKS_SCANLINE_OAM) {
 				cycles_in_mode -= CLOCKS_SCANLINE_OAM;
 				set_lcd_mode(LCD_Mode::VRAM);
+				compare_ly_lyc();
 			}
 			break;
 
@@ -39,26 +41,19 @@ void PPU::update(const int cycles, bool skip_render) {
 			if (cycles_in_mode >= CLOCKS_HORIZONTAL_BLANK) { // H-Blank vorbei
 				cycles_in_mode -= CLOCKS_HORIZONTAL_BLANK;
 				int line = lcd_register.LCD_LY;
-
+				// compare_ly_lyc();
 				buffer_bg_line(line);
 				buffer_sprite_line(line);
 				buffer_window_line(line);
-
-				if (line == lcd_register.LCD_LYC) {
-					if (lcd_state.lyc_interrupt)
-						cpu->request_interrupt(Interrupt::LCD_Stat);
-					lcd_state.coincidence_flag = true;
-				} else {
-					lcd_state.coincidence_flag = false;
-				}
-
 				if (++lcd_register.LCD_LY >= GB_LCD_SIZE_HEIGHT) {
 					set_lcd_mode(LCD_Mode::V_Blank);
+					compare_ly_lyc();
 					cpu->request_interrupt(Interrupt::V_Blank);
 					if (lcd_state.v_blank_interrupt)
 						cpu->request_interrupt(Interrupt::LCD_Stat);
 				} else {
 					set_lcd_mode(LCD_Mode::OAM);
+					compare_ly_lyc();
 					if (lcd_state.oam_interrupt)
 						cpu->request_interrupt(Interrupt::LCD_Stat);
 				}
@@ -73,6 +68,8 @@ void PPU::update(const int cycles, bool skip_render) {
 					lcd_register.LCD_LY = 0;
 					ready_to_render = true;
 					set_lcd_mode(LCD_Mode::OAM);
+					compare_ly_lyc();
+
 					if (lcd_state.oam_interrupt)
 						cpu->request_interrupt(Interrupt::LCD_Stat);
 				}
@@ -94,7 +91,7 @@ void PPU::write(const u16 &addr, const u8 &data) {
 				lcd_control.value = data;
 				break;
 			case LCD_STATUS:
-				lcd_state.value = (lcd_state.value & 0x07) | (data & 0xF8);
+				lcd_state.value |= (data & 0xF8);
 				break;
 			case LCD_SCY:
 				lcd_register.LCD_SCY = data;
@@ -182,6 +179,7 @@ void PPU::reset() {
 
 	lcd_control = {};
 	lcd_state = {};
+	lcd_state.stub = 1;
 	cycles_in_mode = 0;
 }
 /**
@@ -282,6 +280,11 @@ void PPU::buffer_sprite_line(const u8 line) {
 							tile_no |= 0x01;
 						}
 						// Pixel im Tile
+#if 0
+						if (!spr.bg_priority && bg_buffer[buffer_index] == bg_palette[0]) {
+							bg_buffer[buffer_index] = color;
+						}
+#endif
 						const auto palette_color_index = tile_map_data[tile_no][spr.x_flip ? (pixel_y_pos * 8) - pixel_x_pos + 7 : (pixel_y_pos * 8) + pixel_x_pos];
 						if (palette_color_index != 0) {
 							const auto color = sprite_obj_palette[spr.palette][palette_color_index];
@@ -401,4 +404,22 @@ void PPU::update_tile(const u16 &a) {
 		auto p = ((y * 8) + pixel);
 		tile_map_data[tile_id][p] = color;
 	}
+}
+
+void PPU::compare_ly_lyc() {
+#if 1
+	lcd_state.coincidence_flag = lcd_register.LCD_LY == lcd_register.LCD_LYC;
+
+	if (lcd_state.coincidence_flag && lcd_state.lyc_interrupt) {
+		cpu->request_interrupt(Interrupt::LCD_Stat);
+	}
+#else
+	if (lcd_register.LCD_LY == lcd_register.LCD_LYC) {
+		if (lcd_state.lyc_interrupt)
+			cpu->request_interrupt(Interrupt::LCD_Stat);
+		lcd_state.coincidence_flag = true;
+	} else {
+		lcd_state.coincidence_flag = false;
+	}
+#endif
 }

@@ -35,13 +35,14 @@ include(cmake/StaticAnalyzers.cmake)
 
 # include(cmake/Conan.cmake)
 # run_conan()
+find_package(OpenMP REQUIRED)
 
 if (NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Debug)
 endif ()
 
 if (NOT MSVC)
-    set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wshadow -Wnon-virtual-dtor -Wnon-virtual-dtor -Wcast-align -Wnull-dereference -Woverloaded-virtual  -Wformat=2")
+    set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wshadow -Wnon-virtual-dtor -Wnon-virtual-dtor -Wcast-align -Wnull-dereference -Woverloaded-virtual  -Wformat=2 ${OpenMP_CXX_FLAGS}")
 else()
     set(CMAKE_CXX_FLAGS "/W3")
 endif ()
@@ -56,6 +57,7 @@ option(GLFW_BUILD_DOCS OFF)
 option(GLFW_BUILD_EXAMPLES OFF)
 option(GLFW_BUILD_TESTS OFF)
 option(GLFW_INSTALL OFF)
+
 
 include_directories("./external/glfwWIN64/include")
 include_directories("./external/imgui")
@@ -124,7 +126,8 @@ add_executable(cpp-gb-w
         win/main.cpp
         win/Renderer.cpp win/Renderer.h)
 
-target_link_libraries(cpp-gb-w cpp-gb debugger)
-target_link_libraries(cpp-gb-w imgui)
-target_link_libraries(cpp-gb-w ${GLFW})
-target_link_libraries(cpp-gb-w ${OPENGL_gl_LIBRARY} "glad")        
+target_link_libraries(cpp-gb-w PUBLIC cpp-gb debugger)
+target_link_libraries(cpp-gb-w PUBLIC imgui)
+target_link_libraries(cpp-gb-w PUBLIC ${GLFW})
+target_link_libraries(cpp-gb-w PUBLIC ${OPENGL_gl_LIBRARY} "glad")        
+target_link_libraries(cpp-gb-w PUBLIC OpenMP::OpenMP_CXX)

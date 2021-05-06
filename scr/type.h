@@ -397,6 +397,9 @@ struct Pixel_a {
 	u8 G;
 	u8 B;
 	u8 A;
+	inline bool operator==(Pixel_a Comp) {
+		return (Comp.R == this->R && Comp.G == this->G && Comp.B == this->B && Comp.A == this->A);
+	}
 };
 
 typedef std::vector<Pixel_a> Tile;

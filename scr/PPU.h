@@ -98,7 +98,7 @@ public:
 	void set_lcd_mode(LCD_Mode mode);
 
 	void update_lcd_mode();
-
+	void compare_ly_lyc();
 	// LCD Render Funktionen
 	std::vector<u8> palette_data_buffer;
 	std::vector<Pixel_a> bg_buffer;

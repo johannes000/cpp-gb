@@ -308,7 +308,7 @@ private:
 		{"LD (HL) E", &CPU::opcode0x73, 1, 2},
 		{"LD (HL) H", &CPU::opcode0x74, 1, 2},
 		{"LD (HL) L", &CPU::opcode0x75, 1, 2},
-		{"HALT", &CPU::opcode0x76, 1, 4},
+		{"HALT", &CPU::opcode0x76, 1, 1},
 		{"LD (HL) A", &CPU::opcode0x77, 1, 2},
 		{"LD A B", &CPU::opcode0x78, 1, 1},
 		{"LD A C", &CPU::opcode0x79, 1, 1},

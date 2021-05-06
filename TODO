@@ -1,16 +1,15 @@
 
 Todo:
+  ☐ Acid 2 Test @high 
   ☐ Unabhängige Layer für Sprites und BG @low
   ☐ Menu Bar @high
-  ☐ Bootrom hardcoden @high
-  ☐ Timer fixen @high
+  ☐ Bootrom hardcoden @low
   ☐ Sound @low
   ☐ MBC3 @high 
   ☐ MBC2 @low
   ☐ MBC5 @low
   ☐ MBC6 @low
   ☐ MBC7 @low
-  ☐ Banks @critical
   ☐ Controlls Plattformunabhängig gestalten @low
   ☐ Gameboy Klasse komplett Plattformunabhängig machen @low
     ☐ als DLL builden
@@ -28,4 +27,5 @@ Done:
   ✔ Blarggs CPU Tests Bestehen @done(01-05-21)
   ✔ MBC1 @done(04-05-21)
   ✔ 16x8 Sprites Fixen @done(04-05-21)
+  ✔ Timer fixen @done(04-05-21)
 

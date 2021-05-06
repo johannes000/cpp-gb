@@ -57,7 +57,7 @@ u8 CPU::parse_op_code(u8 &opcode) {
 }
 
 int CPU::update() {
-	if (is_halted) {
+	if (is_halted || ((interrupt_request_register & interrupt_enable_register & 0x1Fu) && IME)) {
 		return 1;
 	}
 	op_code = get_next_op_code();
