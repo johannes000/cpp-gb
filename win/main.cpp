@@ -25,8 +25,9 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
 	Renderer renderer(&gb.joypad);
 	bool rom_loaded = false;
 
-	const char *file;
+	std::string file;
 	file = "";
+
 	gb.debug.setDebugState(Debug_State::RUN);
 
 	while (!glfwWindowShouldClose(renderer.window)) {
@@ -39,6 +40,8 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
 
 			glfwPollEvents();
 			renderer.start_new_imgui_frame();
+			renderer.main_view(&gb.cpu, &gb.ppu, &gb.mem, &gb.card, &gb.joypad, &file);
+
 			if (rom_loaded) {
 				switch (gb.debug.get_debug_state()) {
 					case Debug_State::RUN:
@@ -57,9 +60,8 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
 
 				renderer.update_views(&gb.ppu, &gb.debug);
 			}
-			file = renderer.rom_select_view();
 			if (file[0] != 0) {
-				gb.load_rom(file, skip_boot_rom);
+				gb.load_rom(file.c_str(), skip_boot_rom);
 				rom_loaded = true;
 			}
 

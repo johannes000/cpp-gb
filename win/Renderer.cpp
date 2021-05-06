@@ -181,7 +181,7 @@ void Renderer::update_views(PPU *ppu, Debugger *debug) {
 
 	// imgui_demo();
 	menu();
-	main_view(ppu);
+	gameboy_lcd_window(ppu);
 	if (show_debug_views) {
 		tile_buffer_view(ppu);
 		debug->update_views();
@@ -239,7 +239,7 @@ void Renderer::update_texture(Texture texture, const void *data) {
 	return update_texture(texture.texture_ptr, texture.width, texture.height, data);
 }
 
-void Renderer::main_view(PPU *ppu) {
+void Renderer::gameboy_lcd_window(PPU *ppu) {
 	float ratio = (float)GB_LCD_SIZE_WIDTH / (float)GB_LCD_SIZE_HEIGHT;
 
 	// int w = ImGui::GetIO().DisplaySize.x;
@@ -308,41 +308,46 @@ void Renderer::show_fps() const {
 					   1000.0f / ImGui::GetIO().Framerate);
 }
 
-const char *Renderer::rom_select_view() {
-	ImGui::Begin("ROMS");
-	memset(filename, 0, sizeof(filename));
-	if (ImGui::Button("Open File")) {
-
-		OPENFILENAMEA ofn;
-		ZeroMemory(&filename, sizeof(filename));
-		ZeroMemory(&ofn, sizeof(ofn));
-		ofn.lStructSize = sizeof(ofn);
-		ofn.hwndOwner = NULL; // If you have a window to center over, put its HANDLE here
-		ofn.lpstrFilter = "Game Boy Rom\0*.gb\0";
-		ofn.lpstrFile = filename;
-		ofn.nMaxFile = MAX_PATH;
-		ofn.lpstrTitle = "Select a Rom";
-		ofn.Flags = OFN_DONTADDTORECENT | OFN_FILEMUSTEXIST;
-
-		if (GetOpenFileNameA(&ofn)) {
-			std::cout << "You chose the file \"" << filename << "\"\n";
-		}
-	}
-	ImGui::Separator();
-#if 1
-	for (auto &rom : roms) {
-		if (ImGui::Selectable("", true, ImGuiSelectableFlags_AllowDoubleClick))
-			strcpy_s(filename, sizeof(filename), rom.second);
-		ImGui::SameLine();
-		ImGui::Text("%s", rom.first);
-	}
-#endif
-	ImGui::End();
-	return &filename[0];
-}
-
 void key_callback(GLFWwindow *window, int key, [[maybe_unused]] int scancode,
 				  int action, [[maybe_unused]] int mods) {
 	auto joypad = (CONTROLS *)glfwGetWindowUserPointer(window);
 	joypad->handle_glwf_inputs(key, action);
+}
+
+void Renderer::main_view(CPU *cpu, PPU *ppu, MEMORY *mem, CARDRIDGE *card, CONTROLS *joy, std::string *file) {
+	file->clear();
+	// IMGUI MENU BAR
+	if (ImGui::BeginMainMenuBar()) {
+		if (ImGui::BeginMenu("File")) {
+			if (ImGui::MenuItem("Open Rom")) {
+				std::string path(MAX_PATH, '\0');
+				OPENFILENAME ofn;
+				ZeroMemory(&ofn, sizeof(ofn));
+				ofn.lStructSize = sizeof(ofn);
+				ofn.hwndOwner = NULL;
+				ofn.lpstrFilter = "Game Boy Rom\0*.gb\0";
+				ofn.lpstrFile = &path[0];
+				ofn.nMaxFile = MAX_PATH;
+				ofn.lpstrTitle = "Select a Rom";
+				ofn.Flags = OFN_DONTADDTORECENT | OFN_FILEMUSTEXIST;
+
+				if (GetOpenFileNameA(&ofn)) {
+					std::cout << "You chose the file \"" << path << "\"\n";
+					path.resize(strlen(path.c_str()));
+					*file = path;
+				}
+			}
+
+			ImGui::EndMenu();
+		}
+		if (ImGui::BeginMenu("ROMS")) {
+			for (auto &rom : roms) {
+				if (ImGui::MenuItem(rom.first.c_str())) {
+					*file = rom.second;
+				}
+			}
+			ImGui::EndMenu();
+		}
+	}
+	ImGui::EndMainMenuBar();
 }

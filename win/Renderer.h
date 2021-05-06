@@ -14,6 +14,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <windows.h>
+#include <string>
 
 #include <map>
 
@@ -45,12 +46,11 @@ using namespace gl;
 #pragma comment(lib, "legacy_stdio_definitions")
 #endif
 
-#include "CONTROLS.h"
 #include "Debugger/Debugger.h"
-
-class CONTROLS;
+#include "CONTROLS.h"
 
 class Debugger;
+class CONTROLS;
 
 struct Texture {
 	GLuint texture_handler;
@@ -113,7 +113,7 @@ struct Renderer {
 
 	void update_tile_buffer(PPU *ppu);
 
-	void main_view(PPU *ppu);
+	void gameboy_lcd_window(PPU *ppu);
 
 	void tile_buffer_view(PPU *ppu);
 
@@ -121,12 +121,11 @@ struct Renderer {
 
 	void show_fps() const;
 
-	std::map<const char *, const char *> roms;
+	std::map<std::string, std::string> roms;
 
 	CONTROLS *joypad;
 
-	char filename[MAX_PATH];
-	const char *rom_select_view();
+	void main_view(CPU *cpu, PPU *ppu, MEMORY *mem, CARDRIDGE *card, CONTROLS *joy, std::string *file);
 };
 
 void key_callback(GLFWwindow *window, int key, [[maybe_unused]] int scancode,
