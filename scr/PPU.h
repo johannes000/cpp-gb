@@ -106,13 +106,13 @@ public:
 
 	std::vector<std::vector<u8>> tile_map_data;
 
-	void buffer_bg_line(const u8 line);
-	void buffer_sprite_line(const u8 line);
-	void buffer_window_line(const u8 line);
-
+	std::vector<u8> buffer_bg_line(const u8 line);
+	std::vector<u8> buffer_window_line(const u8 line);
+	std::vector<u8> buffer_sprite_line(const u8 line, std::vector<u8> *window_line);
+	void buffer_line(const u8 line);
 	// Paletten
 	std::vector<Pixel_a> bg_palette;
-	std::vector<std::vector<Pixel_a>> sprite_obj_palette;
+	std::vector<std::vector<u8>> sprite_obj_palette_data;
 
 	void build_palette(const u16 addr, u8 data);
 

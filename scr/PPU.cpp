@@ -1,5 +1,6 @@
 #include "PPU.h"
 #include <omp.h>
+#include <algorithm>
 
 PPU::PPU(MEMORY *m, CPU *c)
 	: ready_to_render(false),
@@ -41,9 +42,8 @@ void PPU::update(const int cycles, bool skip_render) {
 				cycles_in_mode -= CLOCKS_HORIZONTAL_BLANK;
 				int line = lcd_register.LCD_LY;
 				// compare_ly_lyc();
-				buffer_bg_line(line);
-				buffer_sprite_line(line);
-				buffer_window_line(line);
+				buffer_line(line);
+
 				if (++lcd_register.LCD_LY >= GB_LCD_SIZE_HEIGHT) {
 					set_lcd_mode(LCD_Mode::V_Blank);
 					compare_ly_lyc();
@@ -162,7 +162,7 @@ u8 PPU::read(const u16 &addr) const {
 
 void PPU::reset() {
 	bg_palette = Palettes[current_palette];
-	sprite_obj_palette = std::vector<std::vector<Pixel_a>>(2, bg_palette);
+	sprite_obj_palette_data = std::vector<std::vector<u8>>(2, std::vector<u8>(4, 0));
 
 	set_lcd_mode(LCD_Mode::OAM);
 	lcd_register = {};
@@ -208,9 +208,31 @@ void PPU::update_lcd_mode() {
  *
  * @param s
  */
-void PPU::buffer_bg_line(const u8 line) {
+void PPU::buffer_line(const u8 line) {
+	auto bg_line = buffer_bg_line(line);
+	auto wn_line = buffer_window_line(line);
+	auto sp_line = buffer_sprite_line(line, &bg_line);
+
+	for (u16 index = 0; index < GB_LCD_SIZE_WIDTH; index++) {
+		const u16 buffer_index = (line * GB_LCD_SIZE_WIDTH) + index;
+		const u8 sp_pixel = sp_line[index];
+		const u8 wn_pixel = wn_line[index];
+		const u8 bg_pixel = bg_line[index];
+		u8 pixel;
+		if (sp_pixel != 5)
+			pixel = sp_pixel;
+		else if (wn_pixel != 5)
+			pixel = wn_pixel;
+		else
+			pixel = bg_pixel;
+		bg_buffer[buffer_index] = Palettes[current_palette][pixel];
+	}
+}
+std::vector<u8> PPU::buffer_bg_line(const u8 line) {
+	std::vector<u8> background_line(GB_LCD_SIZE_WIDTH, 0);
+
 	if (line >= GB_LCD_SIZE_HEIGHT)
-		return;
+		return background_line;
 	if (lcd_control.bg_enabled && lcd_control.lcd_power) {
 		const u16 bg_tilemap = lcd_control.bg_tile_map == 1 ? 0x9C00 : 0x9800;
 
@@ -239,17 +261,19 @@ void PPU::buffer_bg_line(const u8 line) {
 			for (tile_pixel_x++;
 				 tile_pixel_x <= TILE_WIDTH && x <= GB_LCD_SIZE_WIDTH - 1;
 				 x++, tile_pixel_x++) {
-				const auto index = ((GB_LCD_SIZE_WIDTH * y) + x);
 				const auto color = tile_map_data[tile_id][((tile_pixel_y * 8) + tile_pixel_x - 1) % (8 * 8)];
-				bg_buffer[index] = bg_palette[color];
+				background_line[x] = color;
 			}
 		}
 	}
+	return background_line;
 }
 
-void PPU::buffer_sprite_line(const u8 line) {
+std::vector<u8> PPU::buffer_sprite_line(const u8 line, std::vector<u8> *bg_line) {
+	std::vector<u8> sprite_line = std::vector<u8>(GB_LCD_SIZE_WIDTH, 5);
+
 	if (line >= GB_LCD_SIZE_HEIGHT + 8 || !lcd_control.sprites_enabled || !lcd_control.lcd_power)
-		return;
+		return sprite_line;
 	u8 sprites_count = 0;
 	int sprite_size = lcd_control.sprite_size == 1 ? 16 : 8;
 	const int y = static_cast<int>(line);
@@ -269,34 +293,35 @@ void PPU::buffer_sprite_line(const u8 line) {
 				if (pixel_y_pos >= 0) {
 					for (int pixel_x_pos = 0; pixel_x_pos <= 7 && (spr.x_pos + pixel_x_pos) != 0 && spr.x_pos + pixel_x_pos < 168; pixel_x_pos++) {
 						// Pixel im Buffer
-						const int buffer_index = ((GB_LCD_SIZE_WIDTH * y) + spr.x_pos + pixel_x_pos - 8);
+
+						const int buffer_index = (std::max)(0, spr.x_pos + pixel_x_pos - 8);
 						if (pixel_y_pos >= 8) {
 							pixel_y_pos -= 8;
 							tile_no |= 0x01;
 						}
 						// Pixel im Tile
-#if 0
-						if (!spr.bg_priority && bg_buffer[buffer_index] == bg_palette[0]) {
-							bg_buffer[buffer_index] = color;
-						}
-#endif
+						//if (true) {
 						const auto palette_color_index = tile_map_data[tile_no][spr.x_flip ? (pixel_y_pos * 8) - pixel_x_pos + 7 : (pixel_y_pos * 8) + pixel_x_pos];
 						if (palette_color_index != 0) {
-							const auto color = sprite_obj_palette[spr.palette][palette_color_index];
-							bg_buffer[buffer_index] = color;
+							const auto color = sprite_obj_palette_data[spr.palette][palette_color_index];
+							sprite_line[buffer_index] = color;
+						} else {
+							sprite_line[buffer_index] = 5;
 						}
 					}
 				}
 			}
 		}
 	}
-	return;
+	return sprite_line;
 }
 
-void PPU::buffer_window_line(const u8 line) {
+std::vector<u8> PPU::buffer_window_line(const u8 line) {
 	//TODO:	Winpos < 7 wird nicht richtig angezeigt
+	std::vector<u8> window_line = std::vector<u8>(GB_LCD_SIZE_WIDTH, 5);
+
 	if (line >= GB_LCD_SIZE_HEIGHT)
-		return;
+		return window_line;
 	u16 window_y = read(LCD_WY);
 	u16 window_x = read(LCD_WX);
 	if (window_x < 8)
@@ -321,11 +346,11 @@ void PPU::buffer_window_line(const u8 line) {
 			if (!lcd_control.bg_window_tileset && tile_id < 0x80)
 				tile_id += 0x100u;
 
-			const auto index = ((GB_LCD_SIZE_WIDTH * line) + line_x_pos);
 			const auto color = tile_map_data[tile_id][((tile_pixel_y * 8) + tile_pixel_x) % (8 * 8)];
-			bg_buffer[index] = bg_palette[color];
+			window_line[line_x_pos] = color;
 		}
 	}
+	return window_line;
 }
 
 void PPU::build_palette(const u16 addr, u8 data) {
@@ -340,15 +365,13 @@ void PPU::build_palette(const u16 addr, u8 data) {
 		case SPRITE_PALETTE_DATA_0:
 			lcd_register.SPRITE_PALETTE_DATA_0 = data;
 			for (u8 i = 0; i < 4; i++) {
-				sprite_obj_palette[0][i] =
-					Palettes[current_palette][(data >> (i * 2)) & 3u];
+				sprite_obj_palette_data[0][i] = (data >> (i * 2)) & 3u;
 			}
 			break;
 		case SPRITE_PALETTE_DATA_1:
 			lcd_register.SPRITE_PALETTE_DATA_1 = data;
 			for (u8 i = 0; i < 4; i++) {
-				sprite_obj_palette[1][i] =
-					Palettes[current_palette][(data >> (i * 2)) & 3u];
+				sprite_obj_palette_data[1][i] = (data >> (i * 2)) & 3u;
 			}
 			break;
 		default:

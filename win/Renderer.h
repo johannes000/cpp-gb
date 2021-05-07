@@ -140,6 +140,7 @@ struct Renderer {
 	void main_view(CPU *cpu, PPU *ppu, MEMORY *mem, CARDRIDGE *card, CONTROLS *joy, std::string *file);
 	void file_menu_bar(std::string *file);
 	void debug_menu_bar(CARDRIDGE *card);
+	void palette_menu_bar(PPU *ppu);
 };
 
 void key_callback(GLFWwindow *window, int key, [[maybe_unused]] int scancode,

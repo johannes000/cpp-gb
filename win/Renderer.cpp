@@ -3,6 +3,7 @@
 //
 
 #include "Renderer.h"
+#include <charconv>
 
 Renderer::Renderer(CONTROLS *j) : joypad(j) {
 	init_window();
@@ -397,15 +398,33 @@ void Renderer::debug_menu_bar(CARDRIDGE *card) {
 		ImGui::EndMenu();
 	}
 }
+void Renderer::palette_menu_bar(PPU *ppu) {
+	if (ImGui::BeginMenu("Palettes")) {
+		char address[32];
+		for (s32 index = 0; index < ppu->Palettes.size(); index++) {
+			sprintf_s(address, "%i", index, sizeof(address));
+			if (ImGui::MenuItem(address)) {
+				ppu->current_palette = index;
+			}
+		}
+		ImGui::EndMenu();
+	}
+}
 
 void Renderer::main_view([[maybe_unused]] CPU *cpu, [[maybe_unused]] PPU *ppu, [[maybe_unused]] MEMORY *mem, [[maybe_unused]] CARDRIDGE *card, [[maybe_unused]] CONTROLS *joy, std::string *file) {
 	file->clear();
+	glfwGetFramebufferSize(window, &window_width, &window_height);
 	// IMGUI MENU BAR
 	if (ImGui::BeginMainMenuBar()) {
 		file_menu_bar(file);
 		debug_menu_bar(card);
+		palette_menu_bar(ppu);
 	}
-	menu_bar_height = ImGui::GetWindowHeight();
+	ImGui::SetCursorPos(ImVec2(window_width - 350.0f, 0.0f));
+	ImGui::TextColored(magenta, "Frame Rate: %.2f FPS | Frame Time: %.2f ms",
+					   ImGui::GetIO().Framerate,
+					   1000.0f / ImGui::GetIO().Framerate);
 
+	menu_bar_height = ImGui::GetWindowHeight();
 	ImGui::EndMainMenuBar();
 }

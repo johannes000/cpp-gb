@@ -182,6 +182,7 @@ void MEMORY::reset(bool skip_boot_rom) {
 }
 
 bool MEMORY::load_boot_rom() {
+	return true;
 	const char *boot_rom_path = "C:/Users/knaub/source/repos/testroms/DMG_ROM.bin";
 
 	std::ifstream is(boot_rom_path, std::ios::binary);
