@@ -132,7 +132,7 @@ private:
 
 	u16 read_u16_sp();
 
-	int8 read_i8_at_pc();
+	s8 read_i8_at_pc();
 
 	static u16 u8_to_u16(const u8 &data_lb, const u8 &data_hb);
 

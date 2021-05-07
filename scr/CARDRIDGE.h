@@ -42,13 +42,13 @@ public:
 
 	std::vector<std::vector<u8>> ram;
 
-	int32 selected_ram_bank = 0;
-	int32 selected_rom_bank = 0;
-	int32 Rom_Ram_Mode;
+	s32 selected_ram_bank = 0;
+	s32 selected_rom_bank = 0;
+	s32 Rom_Ram_Mode;
 
 private:
 	void fill_cardridge_info();
-	void offset_bank_if_special(int32 &data);
+	void offset_bank_if_special(s32 &data);
 	bool ram_enabled;
 };
 

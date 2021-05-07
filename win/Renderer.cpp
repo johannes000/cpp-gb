@@ -26,6 +26,9 @@ Renderer::Renderer(CONTROLS *j) : joypad(j) {
 	load_texture(frame_texture);
 	load_texture(tiles_texture);
 
+	bind_framebuffer(&frame_buffer_id, &frame_texture.texture_handler);
+	frame_buffer_ratio = static_cast<f32>(frame_texture.width) / static_cast<f32>(frame_texture.height);
+
 	for (int sprite_index = 0; sprite_index < 40; sprite_index++) {
 		Texture sprite;
 		sprite.width = TILE_WIDTH;
@@ -155,14 +158,34 @@ void Renderer::terminate_window() const {
 	glfwDestroyWindow(window);
 	glfwTerminate();
 }
+void Renderer::bind_framebuffer(GLuint *frame_buffer_handle, GLuint *texture_handle) {
 
+	glGenFramebuffers(1, frame_buffer_handle);
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, *frame_buffer_handle);
+	glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+						   GL_TEXTURE_2D, *texture_handle, 0);
+}
 void Renderer::render() const {
 	ImGui::Render();
+
 	int display_w, display_h;
 	glfwGetFramebufferSize(window, &display_w, &display_h);
+
 	glViewport(0, 0, display_w, display_h);
 	glClearColor(bg_color.x, bg_color.y, bg_color.z, bg_color.w);
 	glClear(GL_COLOR_BUFFER_BIT);
+	if (!in_debug_small_lcd_window) {
+		// TODO: Echte Position Berechnen
+		int real_display_h = display_h - menu_bar_height;
+		int dstX0 = ((real_display_h * frame_buffer_ratio) / 2) - 160;
+		int dstY0 = 0;
+		int dstX1 = dstX0 + real_display_h * frame_buffer_ratio;
+		int dstY1 = real_display_h;
+
+		glBlitFramebuffer(0, frame_texture.height, frame_texture.width, 0,
+						  dstX0, dstY0, dstX1, dstY1,
+						  GL_COLOR_BUFFER_BIT, GL_NEAREST);
+	}
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
 	glfwSwapBuffers(window);
@@ -176,11 +199,13 @@ void Renderer::start_new_imgui_frame() {
 void Renderer::update_views(PPU *ppu, Debugger *debug) {
 	ppu->ready_to_render = false; // TODO: Richtig implementieren
 
+	update_texture(frame_texture, ppu->get_lcd_buffer());
+
 	if (show_demo_window)
 		ImGui::ShowDemoWindow(&show_demo_window);
 
 	if (in_debug_small_lcd_window)
-		gameboy_lcd_window(ppu);
+		gameboy_lcd_window();
 
 	if (in_debug_tile_buffer)
 		tile_buffer_view(ppu);
@@ -245,15 +270,14 @@ void Renderer::update_texture(Texture texture, const void *data) {
 	return update_texture(texture.texture_ptr, texture.width, texture.height, data);
 }
 
-void Renderer::gameboy_lcd_window(PPU *ppu) {
-	float ratio = (float)GB_LCD_SIZE_WIDTH / (float)GB_LCD_SIZE_HEIGHT;
+void Renderer::gameboy_lcd_window() {
+	f32 ratio = static_cast<f32>(GB_LCD_SIZE_WIDTH) / static_cast<f32>(GB_LCD_SIZE_HEIGHT);
 
 	// int w = ImGui::GetIO().DisplaySize.x;
 	int h = ImGui::GetIO().DisplaySize.y / 2;
 
 	ImGui::Begin("Main Window");
 
-	update_texture(frame_texture, ppu->get_lcd_buffer());
 	ImGui::Image((ImTextureID)(intptr_t)frame_texture.texture_handler, ImVec2(h * ratio, h));
 
 	show_fps();
@@ -293,15 +317,6 @@ void Renderer::tile_buffer_view(PPU *ppu) {
 			}
 		}
 		ImGui::TreePop();
-	}
-
-	ImGui::End();
-}
-
-void Renderer::menu() {
-	ImGui::Begin("Menü");
-	if (ImGui::Button("Show Debug")) {
-		show_debug_views = !show_debug_views;
 	}
 
 	ImGui::End();
@@ -360,29 +375,37 @@ void Renderer::debug_menu_bar(CARDRIDGE *card) {
 		if (ImGui::MenuItem("Show FPS", NULL, &in_debug_show_fps, card->rom_loaded)) {
 		}
 		if (ImGui::MenuItem("CPU", NULL, &in_debug_cpu_debuger, card->rom_loaded)) {
+			in_debug_small_lcd_window = true;
 		}
 		if (ImGui::MenuItem("Small LCD Window", NULL, &in_debug_small_lcd_window, card->rom_loaded)) {
 		}
 		if (ImGui::MenuItem("Tile Buffer", NULL, &in_debug_tile_buffer, card->rom_loaded)) {
+			in_debug_small_lcd_window = true;
 		}
 		if (ImGui::MenuItem("Register Info", NULL, &in_debug_card_view, card->rom_loaded)) {
+			in_debug_small_lcd_window = true;
 		}
 		if (ImGui::MenuItem("Memory View", NULL, &in_debug_memory_view, card->rom_loaded)) {
+			in_debug_small_lcd_window = true;
 		}
 		if (ImGui::MenuItem("Joypad Info", NULL, &in_debug_controler_view, card->rom_loaded)) {
+			in_debug_small_lcd_window = true;
 		}
+
 		if (ImGui::MenuItem("Demo Window", NULL, &show_demo_window, card->rom_loaded)) {
 		}
 		ImGui::EndMenu();
 	}
 }
 
-void Renderer::main_view(CPU *cpu, PPU *ppu, MEMORY *mem, CARDRIDGE *card, CONTROLS *joy, std::string *file) {
+void Renderer::main_view([[maybe_unused]] CPU *cpu, [[maybe_unused]] PPU *ppu, [[maybe_unused]] MEMORY *mem, [[maybe_unused]] CARDRIDGE *card, [[maybe_unused]] CONTROLS *joy, std::string *file) {
 	file->clear();
 	// IMGUI MENU BAR
 	if (ImGui::BeginMainMenuBar()) {
 		file_menu_bar(file);
 		debug_menu_bar(card);
 	}
+	menu_bar_height = ImGui::GetWindowHeight();
+
 	ImGui::EndMainMenuBar();
 }

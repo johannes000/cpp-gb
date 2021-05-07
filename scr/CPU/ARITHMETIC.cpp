@@ -46,7 +46,7 @@ void CPU::dec_u8_reg(u8 *reg) {
 	u8 result = *reg - 1;
 
 	set_flag(Flag::n);
-	set_cpu_flag_if(Flag::h, (static_cast<int8>((*reg & 0xFu) - 0x1) < 0));
+	set_cpu_flag_if(Flag::h, (static_cast<s8>((*reg & 0xFu) - 0x1) < 0));
 	set_cpu_flag_if(Flag::z, result == 0);
 	*reg = result;
 }

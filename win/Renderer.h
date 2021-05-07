@@ -75,7 +75,7 @@ struct Renderer {
 	void render() const;
 
 	void start_new_imgui_frame();
-
+	void bind_framebuffer(GLuint *frame_buffer_handle, GLuint *texture_handle);
 	bool load_texture(Texture);
 	static bool load_texture(GLuint *textureHandler, int width, int height, const void *data);
 
@@ -84,14 +84,18 @@ struct Renderer {
 
 	std::vector<Pixel_a> tile_buffer;
 	Texture frame_texture;
+	f32 frame_buffer_ratio = 1.0;
+
 	Texture tiles_texture;
 
 	std::vector<Texture> sprite_textures;
-	int window_height = 900;
-	int window_width = 1700;
+	s32 window_height = 900;
+	s32 window_width = 1700;
 
-	int window_xpos = 50;
-	int window_ypos = 45;
+	s32 window_xpos = 50;
+	s32 window_ypos = 45;
+
+	s32 menu_bar_height = {};
 
 	const ImVec4 bg_color = {0.8f, 0.8f, 0.8f, 1.0f};
 	ImVec4 cyan = ImVec4(0.0f, 1.0f, 1.0f, 1.0f);
@@ -108,19 +112,20 @@ struct Renderer {
 	bool show_another_window = false;
 	bool in_debug_show_fps = true;
 	bool in_debug_cpu_debuger = false;
-	bool in_debug_small_lcd_window = true;
+	bool in_debug_small_lcd_window = false;
 	bool in_debug_tile_buffer = false;
 	bool in_debug_card_view = false;
 	bool in_debug_memory_view = false;
 	bool in_debug_controler_view = false;
 
 	void *frame_buffer = nullptr;
+	GLuint frame_buffer_id = 0;
 
 	void update_views(PPU *ppu, Debugger *debug);
 
 	void update_tile_buffer(PPU *ppu);
 
-	void gameboy_lcd_window(PPU *ppu);
+	void gameboy_lcd_window();
 
 	void tile_buffer_view(PPU *ppu);
 

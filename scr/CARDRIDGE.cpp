@@ -263,7 +263,7 @@ u8 CARDRIDGE::readMBC1(const u16 &addr) {
 	if (addr <= CARD_ROM_0_END) {
 		u32 addr_in_rom = addr;
 		if (Rom_Ram_Mode) {
-			int32 real_bank = (((selected_ram_bank & 3) << 5) % rom_info.rom_banks);
+			s32 real_bank = (((selected_ram_bank & 3) << 5) % rom_info.rom_banks);
 			offset_bank_if_special(real_bank);
 			addr_in_rom = addr + (CARD_ROM_BANK_SIZE * (real_bank - 1));
 		}
@@ -276,7 +276,7 @@ u8 CARDRIDGE::readMBC1(const u16 &addr) {
 		allowing to address up to 125 ROM Banks(almost 2MByte).
 		As described below, bank numbers 20h, 40h, and 60h cannot be used, resulting in the odd amount of 125 banks.
 		*/
-		int32 real_bank = (((selected_ram_bank & 3) << 5) % rom_info.rom_banks) | selected_rom_bank;
+		s32 real_bank = (((selected_ram_bank & 3) << 5) % rom_info.rom_banks) | selected_rom_bank;
 		offset_bank_if_special(real_bank);
 
 		u32 addr_in_rom = addr + (CARD_ROM_BANK_SIZE * (real_bank - 1));
@@ -291,7 +291,7 @@ u8 CARDRIDGE::readMBC1(const u16 &addr) {
 		Available RAM sizes are: 2KByte (at A000-A7FF), 8KByte (at A000-BFFF), and 32KByte (in form of four 8K banks at A000-BFFF).
 		*/
 		if (ram_enabled) {
-			int32 real_bank = selected_ram_bank;
+			s32 real_bank = selected_ram_bank;
 			if (!Rom_Ram_Mode) {
 				real_bank = 0;
 			}
@@ -364,7 +364,7 @@ void CARDRIDGE::writeHuC1(const u16 addr, const u8 &data) {
 	writeNoMBC(addr, data);
 	// TODO: Implementieren
 }
-void CARDRIDGE::offset_bank_if_special(int32 &data) {
+void CARDRIDGE::offset_bank_if_special(s32 &data) {
 	if (data == 0x0 || data == 0x20 || data == 0x40 || data == 0x60 || data == 0x80)
 		data++;
 }
