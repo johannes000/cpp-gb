@@ -12,11 +12,12 @@ class CARDRIDGE {
 public:
 	CARDRIDGE();
 	bool rom_loaded = false;
-	bool load_rom(const char *rom_file);
+	bool load_rom(const char *rom_file, bool skip_boot);
 
 	Rom_Info rom_info;
 
 	u8 read(const u16 &addr);
+	u8 readBoot(const u16 &addr);
 	u8 readNoMBC(const u16 &addr);
 	u8 readMBC1(const u16 &addr);
 	u8 readMBC2(const u16 &addr);
@@ -39,7 +40,7 @@ public:
 	[[nodiscard]] unsigned int get_selected_rom_bank() const { return selected_rom_bank; }
 
 	std::vector<u8> rom;
-
+	std::vector<u8> boot;
 	std::vector<std::vector<u8>> ram;
 
 	s32 selected_ram_bank = 0;
@@ -49,6 +50,7 @@ public:
 private:
 	void fill_cardridge_info();
 	void offset_bank_if_special(s32 &data);
+	bool load_boot_rom();
 	bool ram_enabled;
 };
 

@@ -6,9 +6,13 @@
 
 CARDRIDGE::CARDRIDGE() {}
 
-bool CARDRIDGE::load_rom(const char *rom_file) {
+bool CARDRIDGE::load_rom(const char *rom_file, bool skip_boot) {
 	rom.clear();
 	ram.clear();
+	boot.clear();
+
+	if (!skip_boot)
+		load_boot_rom();
 
 	std::ifstream is(rom_file, std::ios::binary);
 	if (!is) {
@@ -30,6 +34,10 @@ bool CARDRIDGE::load_rom(const char *rom_file) {
 	ram_enabled = false;
 	rom_loaded = true;
 	return true;
+}
+
+u8 CARDRIDGE::readBoot(const u16 &addr) {
+	return boot.at(addr);
 }
 
 void CARDRIDGE::fill_cardridge_info() {
@@ -367,4 +375,22 @@ void CARDRIDGE::writeHuC1(const u16 addr, const u8 &data) {
 void CARDRIDGE::offset_bank_if_special(s32 &data) {
 	if (data == 0x0 || data == 0x20 || data == 0x40 || data == 0x60 || data == 0x80)
 		data++;
+}
+
+bool CARDRIDGE::load_boot_rom() {
+	boot.clear();
+
+	const char *boot_rom_path = "C:/Users/knaub/source/repos/testroms/DMG_ROM.bin";
+	//const char *boot_rom_path = "C:/Users/knaub/source/repos/testroms/gbc_bios.bin";
+	std::ifstream is(boot_rom_path, std::ios::binary);
+	if (!is) {
+		std::cerr << "Kann die Boot Rom nicht öffnen!" << std::endl;
+		std::cerr << boot_rom_path << std::endl;
+		abort();
+	} else {
+		const std::vector<u8> romf(std::istreambuf_iterator<char>(is), {});
+		boot = romf;
+		return true;
+	}
+	return false;
 }

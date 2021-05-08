@@ -5,7 +5,6 @@
 
 MEMORY::MEMORY(CPU *c, CARDRIDGE *card, PPU *p, CONTROLS *j)
 	: cardridge(card), ppu(p), cpu(c), joypad(j) {
-	load_boot_rom();
 }
 
 void MEMORY::reset() {
@@ -14,7 +13,7 @@ void MEMORY::reset() {
 u8 MEMORY::read(const u16 &addr) {
 	if (addr <= CARD_ROM_END) {
 		if (cpu->is_in_boot() && addr <= BOOT_ROM_END) {
-			return boot.at(addr);
+			return cardridge->readBoot(addr);
 		}
 		return cardridge->read(addr);
 	} else if (addr <= GRAPHICS_RAM_END) {
@@ -34,7 +33,7 @@ u8 MEMORY::read(const u16 &addr) {
 	} else if (addr == INTERRUPT_ENABLE_REG) {
 		return cpu->read(addr);
 	}
-	return 0x00;
+	return 0xFF;
 }
 
 u8 MEMORY::handle_mapped_io_read(const u16 &addr) const {
@@ -134,7 +133,7 @@ void MEMORY::write_u16(const u16 &addr, const u16 &data) {
 }
 
 void MEMORY::reset(bool skip_boot_rom) {
-
+	this->skip_boot = skip_boot_rom;
 	memory = std::vector<u8>(0x10000, 0);
 	if (skip_boot_rom) {
 
@@ -175,25 +174,7 @@ void MEMORY::reset(bool skip_boot_rom) {
 		write(0xFF4A, 0x00); // WY
 		write(0xFF4B, 0x00); // WX
 		write(0xFFFF, 0x00); // IE
-	} else {
-		boot.erase(boot.begin(), boot.end());
-		load_boot_rom();
 	}
-}
-
-bool MEMORY::load_boot_rom() {
-	return true;
-	const char *boot_rom_path = "C:/Users/knaub/source/repos/testroms/DMG_ROM.bin";
-
-	std::ifstream is(boot_rom_path, std::ios::binary);
-	if (!is) {
-		std::cerr << "Kann die Boot Rom nicht öffnen!" << std::endl;
-		std::cerr << boot_rom_path << std::endl;
-		std::abort();
-	}
-	const std::vector<u8> romf(std::istreambuf_iterator<char>(is), {});
-	this->boot = romf;
-	return true;
 }
 
 u8 MEMORY::read_card_rom(const u16 &addr) {

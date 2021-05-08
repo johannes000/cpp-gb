@@ -46,13 +46,10 @@ private:
 	CONTROLS *joypad;
 
 	std::vector<u8> memory;
-	std::vector<u8> boot;
-	bool skip_boot = true;
+	bool skip_boot = false;
 
 public:
 	void reset(bool);
-
-	bool load_boot_rom();
 
 	void handle_mapped_io_write(const u16 &addr, const u8 &data);
 

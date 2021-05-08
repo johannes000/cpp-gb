@@ -14,7 +14,7 @@ bool gameboy::load_rom(const char *rom_file, bool skip_boot_rom) {
 
 	if (!*rom_file)
 		return false;
-	card.load_rom(rom_file);
+	card.load_rom(rom_file, skip_boot_rom);
 
 	return true;
 }

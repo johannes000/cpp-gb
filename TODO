@@ -1,8 +1,6 @@
 
 Todo:
   ☐ Acid 2 Test @high 
-  ☐ Unabhängige Layer für Sprites und BG @low
-  ☐ Menu Bar @high
   ☐ Bootrom hardcoden @low
   ☐ Sound @low
   ☐ MBC3 @high 
@@ -10,22 +8,22 @@ Todo:
   ☐ MBC5 @low
   ☐ MBC6 @low
   ☐ MBC7 @low
-  ☐ Controlls Plattformunabhängig gestalten @low
-  ☐ Gameboy Klasse komplett Plattformunabhängig machen @low
-    ☐ als DLL builden
-  ☐ Custon Palettes UI @low
-    ☐ Colorpoicker 
-Done:
-  ✔ Sprites @done(17-04-21)
-  ✔ FPS drossel @done(18-04-21)
-  ✔ Bootrom Skippen @done(18-04-21)
-  ✔ Windows File Dialog @done(19-04-21)
-  ✔ Test roms ohne Rendern durchlaufen lassen @done(20-04-21)
-  ✔ Unit Test @done(21-04-21)
-  ✔ PPU Interrupts @done(23-04-21)
-  ✔ Window Layer @done(23-04-21)
-  ✔ Blarggs CPU Tests Bestehen @done(01-05-21)
-  ✔ MBC1 @done(04-05-21)
-  ✔ 16x8 Sprites Fixen @done(04-05-21)
-  ✔ Timer fixen @done(04-05-21)
+  ☐ GameBoy Color
+  ☐ .Sav Dateien für MBC1
+
+  
+  Done:
+    ✔ Sprites @done(17-04-21)
+    ✔ FPS drossel @done(18-04-21)
+    ✔ Bootrom Skippen @done(18-04-21)
+    ✔ Windows File Dialog @done(19-04-21)
+    ✔ Test roms ohne Rendern durchlaufen lassen @done(20-04-21)
+    ✔ Unit Test @done(21-04-21)
+    ✔ PPU Interrupts @done(23-04-21)
+    ✔ Window Layer @done(23-04-21)
+    ✔ Blarggs CPU Tests Bestehen @done(01-05-21)
+    ✔ MBC1 @done(04-05-21)
+    ✔ 16x8 Sprites Fixen @done(04-05-21)
+    ✔ Timer fixen @done(04-05-21)
+    ✔ Menu Bar @done(08-05-21)
 
