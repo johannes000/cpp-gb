@@ -77,7 +77,13 @@ void gameboy::run_for_x_cycles(int cycles_to_run) {
 }
 
 void gameboy::run_until_vblank() {
-	while (!ppu.is_ready_to_render() && debug.get_debug_state() == Debug_State::RUN) {
-		run_one_cycle();
+	bool vblank = false;
+	s32 cycles_sum = 0;
+	while (!vblank && debug.get_debug_state() == Debug_State::RUN && cycles_sum <= 702240) {
+		const int last_cycle = cpu.update();
+		vblank = ppu.update(last_cycle, false);
+		cpu.handle_timer(last_cycle);
+		cpu.handle_interrupts();
+		cycles_sum += last_cycle;
 	}
 }

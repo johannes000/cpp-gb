@@ -31,7 +31,7 @@ class PPU {
 public:
 	explicit PPU(MEMORY *m, CPU *c);
 
-	void update(const int, bool);
+	bool update(const int, bool);
 
 	void write(const u16 &addr, const u8 &data);
 
@@ -108,11 +108,11 @@ public:
 
 	std::vector<u8> buffer_bg_line(const u8 line);
 	std::vector<u8> buffer_window_line(const u8 line);
-	std::vector<u8> buffer_sprite_line(const u8 line, std::vector<u8> *window_line);
+	void buffer_sprite_line(const u8 line, std::vector<u8> *window_line);
 	void buffer_line(const u8 line);
 	// Paletten
 	std::vector<Pixel_a> bg_palette;
-	std::vector<std::vector<u8>> sprite_obj_palette_data;
+	std::vector<std::vector<Pixel_a>> sprite_palette;
 
 	void build_palette(const u16 addr, u8 data);
 

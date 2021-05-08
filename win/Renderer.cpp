@@ -198,7 +198,6 @@ void Renderer::start_new_imgui_frame() {
 }
 
 void Renderer::update_views(PPU *ppu, Debugger *debug) {
-	ppu->ready_to_render = false; // TODO: Richtig implementieren
 
 	update_texture(frame_texture, ppu->get_lcd_buffer());
 
