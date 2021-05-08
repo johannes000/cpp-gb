@@ -40,6 +40,13 @@ Renderer::Renderer(CONTROLS *j) : joypad(j) {
 
 	roms = {
 		{"Acid", "C:/Users/knaub/source/repos/testroms/dmg-acid2.gb"},
+		{"1MB", "C:/Users/knaub/source/repos/testroms/mooneye/emulator-only/mbc5/rom_1Mb.gb"},
+		{"2MB", "C:/Users/knaub/source/repos/testroms/mooneye/emulator-only/mbc5/rom_2Mb.gb"},
+		{"4MB", "C:/Users/knaub/source/repos/testroms/mooneye/emulator-only/mbc5/rom_4Mb.gb"},
+		{"8MB", "C:/Users/knaub/source/repos/testroms/mooneye/emulator-only/mbc5/rom_8Mb.gb"},
+		{"16MB", "C:/Users/knaub/source/repos/testroms/mooneye/emulator-only/mbc5/rom_16Mb.gb"},
+		{"32MB", "C:/Users/knaub/source/repos/testroms/mooneye/emulator-only/mbc5/rom_32Mb.gb"},
+		{"rom_512kb", "C:/Users/knaub/source/repos/testroms/mooneye/emulator-only/mbc5/rom_512kb.gb"},
 		{"Pokemon", "C:/Users/knaub/source/repos/testroms/Poke.gb"},
 		{"Tennis", "C:/Users/knaub/source/repos/testroms/tennis.gb"},
 		{"Mario", "C:/Users/knaub/source/repos/testroms/sml.gb"},
@@ -345,7 +352,7 @@ void Renderer::file_menu_bar(std::string *file) {
 			ZeroMemory(&ofn, sizeof(ofn));
 			ofn.lStructSize = sizeof(ofn);
 			ofn.hwndOwner = NULL;
-			ofn.lpstrFilter = "Game Boy Rom\0*.gb\0";
+			ofn.lpstrFilter = "Game Boy Rom\0*.gb\0Game Boy Color Rom\0*.gbc\0";
 			ofn.lpstrFile = &path[0];
 			ofn.nMaxFile = MAX_PATH;
 			ofn.lpstrTitle = "Select a Rom";

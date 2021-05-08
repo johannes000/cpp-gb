@@ -16,7 +16,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
 	double measured_duration = 0.0;
 
 	bool fps_drossel = true;
-	bool skip_boot_rom = false;
+	bool skip_boot_rom = true;
 
 	gameboy gb;
 	// gb.load_rom("C:/Users/knaub/source/repos/testroms/cpu_instrs/individual/02-interrupts.gb", true);

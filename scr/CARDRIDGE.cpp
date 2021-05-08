@@ -26,10 +26,13 @@ bool CARDRIDGE::load_rom(const char *rom_file, bool skip_boot) {
 
 	ram = {static_cast<long long unsigned int>(rom_info.ram_banks), {std::vector<u8>(CARD_RAM_BANK_SIZE, 0xFF)}};
 
-	selected_ram_bank = 0;
-	selected_rom_bank = 0;
+	mbc1_Rom_Ram_Mode = 0;
+	mbc1_selected_ram_bank = 0;
+	mbc1_selected_rom_bank = 0;
 
-	Rom_Ram_Mode = 0;
+	mbc5_selected_ram_bank = 0;
+	mbc5_selected_rom_bank = 1;
+	mbc5_selected_rom_bank_hi = 0;
 
 	ram_enabled = false;
 	rom_loaded = true;
@@ -87,6 +90,7 @@ void CARDRIDGE::fill_cardridge_info() {
 			rom_info.rom_banks = 96;
 			break;
 		default:
+			rom_info.rom_banks = 512 * 4;
 			break;
 	}
 
@@ -239,10 +243,7 @@ u8 CARDRIDGE::readMBC3(const u16 &addr) {
 	// TODO: Implementieren
 	return readNoMBC(addr);
 }
-u8 CARDRIDGE::readMBC5(const u16 &addr) {
-	// TODO: Implementieren
-	return readNoMBC(addr);
-}
+
 u8 CARDRIDGE::readMBC6(const u16 &addr) {
 	// TODO: Implementieren
 	return readNoMBC(addr);
@@ -270,8 +271,8 @@ u8 CARDRIDGE::readMBC1(const u16 &addr) {
 
 	if (addr <= CARD_ROM_0_END) {
 		u32 addr_in_rom = addr;
-		if (Rom_Ram_Mode) {
-			s32 real_bank = (((selected_ram_bank & 3) << 5) % rom_info.rom_banks);
+		if (mbc1_Rom_Ram_Mode) {
+			u32 real_bank = (((mbc1_selected_ram_bank & 3) << 5) % rom_info.rom_banks);
 			offset_bank_if_special(real_bank);
 			addr_in_rom = addr + (CARD_ROM_BANK_SIZE * (real_bank - 1));
 		}
@@ -284,7 +285,7 @@ u8 CARDRIDGE::readMBC1(const u16 &addr) {
 		allowing to address up to 125 ROM Banks(almost 2MByte).
 		As described below, bank numbers 20h, 40h, and 60h cannot be used, resulting in the odd amount of 125 banks.
 		*/
-		s32 real_bank = (((selected_ram_bank & 3) << 5) % rom_info.rom_banks) | selected_rom_bank;
+		u32 real_bank = (((mbc1_selected_ram_bank & 3) << 5) % rom_info.rom_banks) | mbc1_selected_rom_bank;
 		offset_bank_if_special(real_bank);
 
 		u32 addr_in_rom = addr + (CARD_ROM_BANK_SIZE * (real_bank - 1));
@@ -299,8 +300,8 @@ u8 CARDRIDGE::readMBC1(const u16 &addr) {
 		Available RAM sizes are: 2KByte (at A000-A7FF), 8KByte (at A000-BFFF), and 32KByte (in form of four 8K banks at A000-BFFF).
 		*/
 		if (ram_enabled) {
-			s32 real_bank = selected_ram_bank;
-			if (!Rom_Ram_Mode) {
+			s32 real_bank = mbc1_selected_ram_bank;
+			if (!mbc1_Rom_Ram_Mode) {
 				real_bank = 0;
 			}
 			return ram[real_bank].at(addr - CARD_EXTERNAL_RAM);
@@ -316,25 +317,25 @@ void CARDRIDGE::writeMBC1(const u16 addr, const u8 &data) {
 	if (addr >= 0x2000 && addr <= 0x3FFF && rom_info.rom_banks > 0) {
 		// 2000 - 3FFF - ROM Bank Number(Write Only)
 		int rom_bank = (data & 0x1F);
-		selected_rom_bank = rom_bank;
+		mbc1_selected_rom_bank = rom_bank;
 	}
 
 	if (addr >= 0x4000 && addr <= 0x5FFF) {
 		// 4000-5FFF - RAM Bank Number - or - Upper Bits of ROM Bank Number (Write Only)
-		selected_ram_bank = data & 3;
-		if (Rom_Ram_Mode == 1 && static_cast<int>(ram.size()) < selected_ram_bank) {
+		mbc1_selected_ram_bank = data & 3;
+		if (mbc1_Rom_Ram_Mode == 1 && static_cast<int>(ram.size()) < mbc1_selected_ram_bank) {
 			// Spiel versucht auf Ram banks zuzugreifen die eigentlich gar nicht da sind.
-			ram.insert(ram.end(), selected_ram_bank - ram.size() + 1, {std::vector<u8>(CARD_RAM_BANK_SIZE, 0xFF)});
+			ram.insert(ram.end(), mbc1_selected_ram_bank - ram.size() + 1, {std::vector<u8>(CARD_RAM_BANK_SIZE, 0xFF)});
 		}
 	}
 	if (addr >= 0x6000 && addr <= 0x7FFF) {
 		// 6000-7FFF - ROM/RAM Mode Select (Write Only)
 		switch (data) {
 			case 0x00:
-				Rom_Ram_Mode = 0;
+				mbc1_Rom_Ram_Mode = 0;
 				break;
 			case 0x01:
-				Rom_Ram_Mode = 1;
+				mbc1_Rom_Ram_Mode = 1;
 				break;
 			default:
 				break;
@@ -342,8 +343,8 @@ void CARDRIDGE::writeMBC1(const u16 addr, const u8 &data) {
 	}
 
 	if (addr >= CARD_EXTERNAL_RAM && addr <= CARD_EXTERNAL_RAM_END && ram_enabled) {
-		if (Rom_Ram_Mode == 1)
-			ram[selected_ram_bank].at(addr - CARD_EXTERNAL_RAM) = data;
+		if (mbc1_Rom_Ram_Mode == 1)
+			ram[mbc1_selected_ram_bank].at(addr - CARD_EXTERNAL_RAM) = data;
 		else
 			ram[0].at(addr - CARD_EXTERNAL_RAM) = data;
 	}
@@ -356,8 +357,31 @@ void CARDRIDGE::writeMBC3(const u16 addr, const u8 &data) {
 	writeNoMBC(addr, data);
 	// TODO: Implementieren
 }
+u8 CARDRIDGE::readMBC5(const u16 &addr) {
+	if (addr <= CARD_ROM_0_END) {
+		return rom.at(addr);
+	} else if (addr >= 0x4000 && addr <= 0x7FFF) {
+		u32 addr_in_rom = (addr - 0x4000) + (CARD_ROM_BANK_SIZE * mbc5_selected_rom_bank);
+		return rom[addr_in_rom];
+	} else if (addr >= CARD_EXTERNAL_RAM && addr <= CARD_EXTERNAL_RAM_END && ram_enabled) {
+		return ram[mbc5_selected_ram_bank].at(addr - CARD_EXTERNAL_RAM);
+	}
+	return 0xFF;
+}
 void CARDRIDGE::writeMBC5(const u16 addr, const u8 &data) {
-	writeNoMBC(addr, data);
+	if (addr >= 0x2000 && addr <= 0x2FFF) {
+		mbc5_selected_rom_bank = data | (mbc5_selected_rom_bank_hi << 8);
+		mbc5_selected_rom_bank &= (rom_info.rom_banks - 1);
+
+	} else if (addr >= 0x3000 && addr <= 0x3FFF) {
+		mbc5_selected_rom_bank_hi = data & 0x01;
+		mbc5_selected_rom_bank = (mbc5_selected_rom_bank & 0xFF) | (mbc5_selected_rom_bank_hi << 8);
+		mbc5_selected_rom_bank &= (rom_info.rom_banks - 1);
+	} else if (addr >= 0x4000 && addr <= 0x5FFF) {
+		mbc5_selected_ram_bank = data & 0x0F;
+	} else if (addr >= CARD_EXTERNAL_RAM && addr <= CARD_EXTERNAL_RAM_END && ram_enabled) {
+		ram[mbc5_selected_ram_bank % 0x0F].at(addr - CARD_EXTERNAL_RAM) = data;
+	}
 	// TODO: Implementieren
 }
 void CARDRIDGE::writeMBC6(const u16 addr, const u8 &data) {
@@ -372,7 +396,7 @@ void CARDRIDGE::writeHuC1(const u16 addr, const u8 &data) {
 	writeNoMBC(addr, data);
 	// TODO: Implementieren
 }
-void CARDRIDGE::offset_bank_if_special(s32 &data) {
+void CARDRIDGE::offset_bank_if_special(u32 &data) {
 	if (data == 0x0 || data == 0x20 || data == 0x40 || data == 0x60 || data == 0x80)
 		data++;
 }

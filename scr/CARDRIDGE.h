@@ -37,19 +37,23 @@ public:
 	void writeMBC7(const u16 addr, const u8 &data);
 	void writeHuC1(const u16 addr, const u8 &data);
 	u8 read_card_rom(const u16 &addr);
-	[[nodiscard]] unsigned int get_selected_rom_bank() const { return selected_rom_bank; }
+	[[nodiscard]] unsigned int get_selected_rom_bank() const { return mbc1_selected_rom_bank; }
 
 	std::vector<u8> rom;
 	std::vector<u8> boot;
 	std::vector<std::vector<u8>> ram;
 
-	s32 selected_ram_bank = 0;
-	s32 selected_rom_bank = 0;
-	s32 Rom_Ram_Mode;
+	u32 mbc1_Rom_Ram_Mode;
+	u32 mbc1_selected_ram_bank = 0;
+	u32 mbc1_selected_rom_bank = 0;
+
+	u32 mbc5_selected_ram_bank = 0;
+	u32 mbc5_selected_rom_bank = 0;
+	u32 mbc5_selected_rom_bank_hi = 0;
 
 private:
 	void fill_cardridge_info();
-	void offset_bank_if_special(s32 &data);
+	void offset_bank_if_special(u32 &data);
 	bool load_boot_rom();
 	bool ram_enabled;
 };
