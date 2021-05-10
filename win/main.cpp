@@ -9,6 +9,7 @@
 
 #include "Renderer.h"
 #include "gameboy.h"
+#include "spdlog/spdlog.h"
 
 int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
 	const double target_FPS = 60;
@@ -18,6 +19,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
 	bool fps_drossel = true;
 	bool skip_boot_rom = true;
 
+	spdlog::info("Welcome to spdlog!");
 	gameboy gb;
 	// gb.load_rom("C:/Users/knaub/source/repos/testroms/cpu_instrs/individual/02-interrupts.gb", true);
 	// gb.run_for_x_cycles(600000);

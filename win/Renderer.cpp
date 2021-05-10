@@ -4,6 +4,8 @@
 
 #include "Renderer.h"
 #include <charconv>
+#include <windows.h>
+#include "spdlog/spdlog.h"
 
 Renderer::Renderer(CONTROLS *j) : joypad(j) {
 	init_window();
@@ -40,13 +42,6 @@ Renderer::Renderer(CONTROLS *j) : joypad(j) {
 
 	roms = {
 		{"Acid", "C:/Users/knaub/source/repos/testroms/dmg-acid2.gb"},
-		{"1MB", "C:/Users/knaub/source/repos/testroms/mooneye/emulator-only/mbc5/rom_1Mb.gb"},
-		{"2MB", "C:/Users/knaub/source/repos/testroms/mooneye/emulator-only/mbc5/rom_2Mb.gb"},
-		{"4MB", "C:/Users/knaub/source/repos/testroms/mooneye/emulator-only/mbc5/rom_4Mb.gb"},
-		{"8MB", "C:/Users/knaub/source/repos/testroms/mooneye/emulator-only/mbc5/rom_8Mb.gb"},
-		{"16MB", "C:/Users/knaub/source/repos/testroms/mooneye/emulator-only/mbc5/rom_16Mb.gb"},
-		{"32MB", "C:/Users/knaub/source/repos/testroms/mooneye/emulator-only/mbc5/rom_32Mb.gb"},
-		{"rom_512kb", "C:/Users/knaub/source/repos/testroms/mooneye/emulator-only/mbc5/rom_512kb.gb"},
 		{"Pokemon", "C:/Users/knaub/source/repos/testroms/Poke.gb"},
 		{"Tennis", "C:/Users/knaub/source/repos/testroms/tennis.gb"},
 		{"Mario", "C:/Users/knaub/source/repos/testroms/sml.gb"},
@@ -348,7 +343,7 @@ void Renderer::file_menu_bar(std::string *file) {
 	if (ImGui::BeginMenu("File")) {
 		if (ImGui::MenuItem("Open Rom")) {
 			std::string path(MAX_PATH, '\0');
-			OPENFILENAME ofn;
+			OPENFILENAMEA ofn;
 			ZeroMemory(&ofn, sizeof(ofn));
 			ofn.lStructSize = sizeof(ofn);
 			ofn.hwndOwner = NULL;
@@ -359,7 +354,8 @@ void Renderer::file_menu_bar(std::string *file) {
 			ofn.Flags = OFN_DONTADDTORECENT | OFN_FILEMUSTEXIST;
 
 			if (GetOpenFileNameA(&ofn)) {
-				std::cout << "You chose the file \"" << path << "\"\n";
+
+				spdlog::info("You chose the file {}", path);
 				path.resize(strlen(path.c_str()));
 				*file = path;
 			}

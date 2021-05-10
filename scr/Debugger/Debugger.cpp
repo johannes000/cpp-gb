@@ -100,7 +100,7 @@ void Debugger::cpu_view() {
 
 	// DISASSAMBLER
 	auto pc = cpu->get_pc();
-	ImGuiListClipper clipper(dis_vec.size(),
+	ImGuiListClipper clipper(static_cast<s32>(dis_vec.size()),
 							 ImGui::GetTextLineHeightWithSpacing());
 
 	auto itr = std::find(dis_addr_vec.begin(), dis_addr_vec.end(), pc);
