@@ -12,7 +12,7 @@ class CARDRIDGE {
 public:
 	CARDRIDGE();
 	bool rom_loaded = false;
-	bool load_rom(const char *rom_file, bool skip_boot);
+	bool load_rom(std::string rom_file, bool skip_boot);
 
 	Rom_Info rom_info;
 
@@ -36,6 +36,11 @@ public:
 	void writeMBC6(const u16 addr, const u8 &data);
 	void writeMBC7(const u16 addr, const u8 &data);
 	void writeHuC1(const u16 addr, const u8 &data);
+
+	void create_sav_file();
+	void load_sav_file();
+	void build_save_file_path();
+
 	u8 read_card_rom(const u16 &addr);
 	[[nodiscard]] unsigned int get_selected_rom_bank() const { return mbc1_selected_rom_bank; }
 

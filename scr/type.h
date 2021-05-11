@@ -241,6 +241,11 @@ enum class DestCode {
 
 struct Rom_Info {
 
+	std::string filename;
+	std::string filepath;
+
+	std::string savefile;
+
 	char title[15] = "";
 	bool SGBFlag = false;
 

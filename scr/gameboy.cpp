@@ -9,10 +9,10 @@ gameboy::gameboy()
 	reset(false);
 }
 
-bool gameboy::load_rom(const char *rom_file, bool skip_boot_rom) {
+bool gameboy::load_rom(std::string rom_file, bool skip_boot_rom) {
 	reset(skip_boot_rom);
 
-	if (!*rom_file)
+	if (rom_file.empty())
 		return false;
 	card.load_rom(rom_file, skip_boot_rom);
 

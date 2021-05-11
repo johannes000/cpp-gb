@@ -3,10 +3,11 @@
 #include <fstream>
 #include <iostream>
 #include <cstring>
+#include "spdlog/spdlog.h"
 
 CARDRIDGE::CARDRIDGE() {}
 
-bool CARDRIDGE::load_rom(const char *rom_file, bool skip_boot) {
+bool CARDRIDGE::load_rom(std::string rom_file, bool skip_boot) {
 	rom.clear();
 	ram.clear();
 	boot.clear();
@@ -16,15 +17,28 @@ bool CARDRIDGE::load_rom(const char *rom_file, bool skip_boot) {
 
 	std::ifstream is(rom_file, std::ios::binary);
 	if (!is) {
-		std::cerr << "Kann die Datei nicht oeffnen : " << rom_file << std::endl;
+		spdlog::error("Kann die Datei nicht öffnen: {}", rom_file);
 		return false;
 	}
 	const std::vector<u8> romf(std::istreambuf_iterator<char>(is), {});
 	this->rom = romf;
 
+	size_t last_slash_idx = rom_file.find_last_of("/");
+	if (std::string::npos != last_slash_idx) {
+		rom_info.filename = rom_file.substr(last_slash_idx + 1);
+		rom_info.filepath = rom_file.substr(0, last_slash_idx);
+	} else {
+		last_slash_idx = rom_file.find_last_of("\\");
+		if (std::string::npos != last_slash_idx) {
+			rom_info.filename = rom_file.substr(last_slash_idx + 1);
+			rom_info.filepath = rom_file.substr(0, last_slash_idx);
+		} else
+			rom_info.filename = rom_file;
+	}
+	build_save_file_path();
 	fill_cardridge_info();
 
-	ram = {static_cast<long long unsigned int>(rom_info.ram_banks), {std::vector<u8>(CARD_RAM_BANK_SIZE, 0xFF)}};
+	ram = {static_cast<u16>(rom_info.ram_banks), {std::vector<u8>(CARD_RAM_BANK_SIZE, 0xFF)}};
 
 	mbc1_Rom_Ram_Mode = 0;
 	mbc1_selected_ram_bank = 0;
@@ -417,4 +431,57 @@ bool CARDRIDGE::load_boot_rom() {
 		return true;
 	}
 	return false;
+}
+
+void CARDRIDGE::build_save_file_path() {
+
+	std::string file;
+	std::string path;
+
+	path = rom_info.filepath;
+	path += "/";
+
+	auto it = rom_info.filename.find(".");
+	if (it != std::string::npos)
+		file = rom_info.filename.substr(0, it);
+	path += file;
+	path += ".sav";
+	rom_info.savefile = path;
+}
+
+void CARDRIDGE::create_sav_file() {
+	if (rom_info.ram_banks == 0 || !rom_loaded)
+		return;
+
+	std::string file = rom_info.savefile;
+	spdlog::info("Saving Ram");
+	spdlog::info("Save File: {}", file);
+
+	std::ofstream os(file.c_str(), std::ios::out | std::ios::binary);
+
+	for (s32 i = 0; i < rom_info.ram_banks; i++) {
+		for (auto data : ram[i]) {
+			os.write(reinterpret_cast<const char *>(&data), 1);
+		}
+	}
+	spdlog::info("Ram Save done");
+}
+
+void CARDRIDGE::load_sav_file() {
+	if (rom_info.ram_banks == 0)
+		return;
+	std::string file = rom_info.savefile;
+
+	spdlog::info("Loading Ram");
+	spdlog::info("Save File: {}", file);
+	std::ifstream is(file, std::ios::in | std::ios::binary);
+	for (s32 i = 0; i < rom_info.ram_banks; i++) {
+		int index = 0;
+		while (index < CARD_RAM_BANK_SIZE) {
+			u8 byte = 0;
+			is.read(reinterpret_cast<char *>(&byte), 1);
+			ram[i][index++] = byte;
+		}
+	}
+	spdlog::info("Ram Load done");
 }

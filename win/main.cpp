@@ -10,8 +10,9 @@
 #include "Renderer.h"
 #include "gameboy.h"
 #include "spdlog/spdlog.h"
+#include <fmt/core.h>
+int main([[maybe_unused]] int argc, [[maybe_unused]] const char **argv) {
 
-int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
 	const double target_FPS = 60;
 	const double target_duration = 1 / target_FPS;
 	double measured_duration = 0.0;
@@ -19,7 +20,6 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
 	bool fps_drossel = true;
 	bool skip_boot_rom = true;
 
-	spdlog::info("Welcome to spdlog!");
 	gameboy gb;
 	// gb.load_rom("C:/Users/knaub/source/repos/testroms/cpu_instrs/individual/02-interrupts.gb", true);
 	// gb.run_for_x_cycles(600000);
@@ -27,8 +27,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
 	Renderer renderer(&gb.joypad);
 	bool rom_loaded = false;
 
-	std::string file;
-	file = "";
+	std::string file = "";
 
 	gb.debug.setDebugState(Debug_State::RUN);
 
@@ -63,12 +62,15 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *args[]) {
 				renderer.update_views(&gb.ppu, &gb.debug);
 			}
 			if (file[0] != 0) {
-				gb.load_rom(file.c_str(), skip_boot_rom);
+				gb.card.create_sav_file();
+				gb.load_rom(file, skip_boot_rom);
+				gb.card.load_sav_file();
 				rom_loaded = true;
 			}
 
 			renderer.render();
 		}
 	}
+	gb.card.create_sav_file();
 	return 0;
 }

@@ -15,27 +15,17 @@ target_compile_features(project_options INTERFACE cxx_std_20)
 # Link this 'library' to use the warnings specified in CompilerWarnings.cmake
 add_library(project_warnings INTERFACE)
 
-# # enable cache system
-# include(cmake/Cache.cmake)
-
-# standard compiler warnings1
-include(cmake/CompilerWarnings.cmake)
-set_project_warnings(project_warnings)
-
-# sanitizer options if supported by compiler
-include(cmake/Sanitizers.cmake)
-enable_sanitizers(project_options)
-
 # enable doxygen
 include(cmake/Doxygen.cmake)
 enable_doxygen()
 
-# allow for static analysis options
-include(cmake/StaticAnalyzers.cmake)
-
-include(cmake/Conan.cmake)
-run_conan()
-
+add_subdirectory(./external/docopt)
+if(NOT TARGET docopt)
+# Stand-alone build
+        set(docopt_DIR "./external/docopt")
+        list(APPEND CMAKE_MODULE_PATH "${docopt_DIR}/cmake")
+        find_package(docopt COMPONENTS CXX REQUIRED)
+endif()
 
 add_subdirectory(./external/spdlog)
 if(NOT TARGET spdlog)
@@ -45,6 +35,12 @@ if(NOT TARGET spdlog)
         find_package(SPDLOG REQUIRED)
 endif()
 
+add_subdirectory(./external/fmt)
+if(NOT TARGET fmt)
+# Stand-alone build
+        set(FMT_DIR "./external/fmt")
+        list(APPEND CMAKE_MODULE_PATH "${FMT_DIR}/build")
+endif()
 
 if (NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Debug)
@@ -53,7 +49,8 @@ endif ()
 if (NOT MSVC)
     set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wshadow -Wnon-virtual-dtor -Wnon-virtual-dtor -Wcast-align -Wnull-dereference -Woverloaded-virtual  -Wformat=2 ")
 else()
-    set(CMAKE_CXX_FLAGS "/W3")
+    set(CMAKE_CXX_FLAGS "/W3 /external:I")
+
 endif ()
 
 if (MSVC)
@@ -67,9 +64,10 @@ option(GLFW_BUILD_EXAMPLES OFF)
 option(GLFW_BUILD_TESTS OFF)
 option(GLFW_INSTALL OFF)
 
-
 include_directories("./external/googletest/googletest/include")
 include_directories("./external/spdlog/include")
+include_directories("./external/fmt/include")
+include_directories("./external/docopt")
 include_directories("./external/glfwWIN64/include")
 include_directories("./external/imgui")
 include_directories("./scr/Debugger")
@@ -129,14 +127,6 @@ add_library(imgui
         ./external/imgui/imstb_textedit.h
         ./external/imgui/imstb_truetype.h
         )
-        
 
-add_executable(cpp-gb-w
-        win/main.cpp
-        win/Renderer.cpp win/Renderer.h)
+add_subdirectory(win)
 
-target_link_libraries(cpp-gb-w PUBLIC cpp-gb debugger)
-target_link_libraries(cpp-gb-w PUBLIC imgui)
-target_link_libraries(cpp-gb-w PUBLIC ${GLFW})
-target_link_libraries(cpp-gb-w PUBLIC ${OPENGL_gl_LIBRARY} "glad")        
-target_link_libraries(cpp-gb-w PUBLIC spdlog::spdlog)

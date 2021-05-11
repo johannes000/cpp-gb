@@ -8,6 +8,8 @@
 #include "CONTROLS.h"
 #include "Debugger/Debugger.h"
 
+#include <string>
+
 struct gameboy {
 	gameboy();
 
@@ -25,7 +27,7 @@ struct gameboy {
 
 	void reset(bool);
 
-	bool load_rom(const char *, bool);
+	bool load_rom(std::string, bool);
 	void log_cpu(CPU_Register);
 	void run_for_x_cycles(int);
 
