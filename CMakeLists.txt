@@ -6,56 +6,34 @@ include(cmake/PreventInSourceBuilds.cmake)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/external/modules/")
-
-
 # Link this 'library' to set the c++ standard / compile-time options requested
 add_library(project_options INTERFACE)
 target_compile_features(project_options INTERFACE cxx_std_20)
 
-# Link this 'library' to use the warnings specified in CompilerWarnings.cmake
-add_library(project_warnings INTERFACE)
+# enable cache system
+include(cmake/Cache.cmake)
 
-# enable doxygen
+# allow for static analysis options
+include(cmake/StaticAnalyzers.cmake)
+
 include(cmake/Doxygen.cmake)
 enable_doxygen()
 
-add_subdirectory(./external/docopt)
-if(NOT TARGET docopt)
-# Stand-alone build
-        set(docopt_DIR "./external/docopt")
-        list(APPEND CMAKE_MODULE_PATH "${docopt_DIR}/cmake")
-        find_package(docopt COMPONENTS CXX REQUIRED)
-endif()
-
-add_subdirectory(./external/spdlog)
-if(NOT TARGET spdlog)
-# Stand-alone build
-        set(SPDLOG_DIR "./external/spdlog")
-        list(APPEND CMAKE_MODULE_PATH "${SPDLOG_DIR}/cmake")
-        find_package(SPDLOG REQUIRED)
-endif()
-
-add_subdirectory(./external/fmt)
-if(NOT TARGET fmt)
-# Stand-alone build
-        set(FMT_DIR "./external/fmt")
-        list(APPEND CMAKE_MODULE_PATH "${FMT_DIR}/build")
-endif()
-
-if (NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE Debug)
-endif ()
+include(cmake/Conan.cmake)
+run_conan()
 
 if (NOT MSVC)
     set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wshadow -Wnon-virtual-dtor -Wnon-virtual-dtor -Wcast-align -Wnull-dereference -Woverloaded-virtual  -Wformat=2 ")
 else()
-    set(CMAKE_CXX_FLAGS "/W3 /external:I")
-
+    set(CMAKE_CXX_FLAGS "/W3 ")
 endif ()
+set(LLVM_ENABLE_RTTI ON)
+set(LLVM_ENABLE_EH ON)
 
 if (MSVC)
         find_library(GLFW glfw3 PATHS "./external/glfwWIN64/lib-vc2019")
-else ()
+else (CMAKE_CXX_COMPILER_ID MATCHES ".*Clang")
+        # find_library(GLFW glfw3 PATHS "./external/glfwWIN64/lib-vc2019")
         find_library(GLFW glfw3 PATHS "./external/glfwWIN64/lib-mingw-w64")
 endif ()
 
@@ -67,7 +45,6 @@ option(GLFW_INSTALL OFF)
 include_directories("./external/googletest/googletest/include")
 include_directories("./external/spdlog/include")
 include_directories("./external/fmt/include")
-include_directories("./external/docopt")
 include_directories("./external/glfwWIN64/include")
 include_directories("./external/imgui")
 include_directories("./scr/Debugger")
@@ -86,9 +63,7 @@ if(PACKAGE_TESTS)
         add_subdirectory(external/googletest)
         add_subdirectory(test)
 endif()
-
-find_package(OpenGL REQUIRED)
-# find_package(imgui REQUIRED)
+# find_package(OpenGL REQUIRED)
 
 add_library(cpp-gb 
         scr/CPU/ARITHMETIC.cpp
@@ -104,7 +79,6 @@ add_library(cpp-gb
         scr/PPU.cpp scr/PPU.h
         scr/CONTROLS.cpp scr/CONTROLS.h
 )
-
 
 add_library(debugger
         scr/Debugger/Debugger.cpp scr/Debugger/Debugger.h

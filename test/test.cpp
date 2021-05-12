@@ -519,7 +519,7 @@ GTEST_TEST(MooneyeMBC5, rom_512kb) {
 	EXPECT_TRUE(Result);
 }
 
-GTEST_TEST(APUTest, DISABLED_01_registers) {
+GTEST_TEST(APUTest, 01_registers) {
 	gameboy gb;
 	gb.load_rom("C:/Users/knaub/source/repos/testroms/dmg_sound/rom_singles/01-registers.gb", true);
 	gb.run_for_x_cycles(55500000);
@@ -529,7 +529,7 @@ GTEST_TEST(APUTest, DISABLED_01_registers) {
 	EXPECT_EQ(expected_result, result);
 }
 
-GTEST_TEST(APUTest, DISABLED_02_len_ctr) {
+GTEST_TEST(APUTest, 02_len_ctr) {
 	gameboy gb;
 	gb.load_rom("C:/Users/knaub/source/repos/testroms/dmg_sound/rom_singles/02-len ctr.gb", true);
 	gb.run_for_x_cycles(55500000);
@@ -539,7 +539,7 @@ GTEST_TEST(APUTest, DISABLED_02_len_ctr) {
 	EXPECT_EQ(expected_result, result);
 }
 
-GTEST_TEST(APUTest, DISABLED_03_trigger) {
+GTEST_TEST(APUTest, 03_trigger) {
 	gameboy gb;
 	gb.load_rom("C:/Users/knaub/source/repos/testroms/dmg_sound/rom_singles/03-trigger.gb", true);
 	gb.run_for_x_cycles(55500000);
@@ -549,7 +549,7 @@ GTEST_TEST(APUTest, DISABLED_03_trigger) {
 	EXPECT_EQ(expected_result, result);
 }
 
-GTEST_TEST(APUTest, DISABLED_04_sweep) {
+GTEST_TEST(APUTest, 04_sweep) {
 	gameboy gb;
 	gb.load_rom("C:/Users/knaub/source/repos/testroms/dmg_sound/rom_singles/04-sweep.gb", true);
 	gb.run_for_x_cycles(55500000);
@@ -559,7 +559,7 @@ GTEST_TEST(APUTest, DISABLED_04_sweep) {
 	EXPECT_EQ(expected_result, result);
 }
 
-GTEST_TEST(APUTest, DISABLED_05_sweep_details) {
+GTEST_TEST(APUTest, 05_sweep_details) {
 	gameboy gb;
 	gb.load_rom("C:/Users/knaub/source/repos/testroms/dmg_sound/rom_singles/05-sweep details.gb", true);
 	gb.run_for_x_cycles(55500000);
@@ -569,7 +569,7 @@ GTEST_TEST(APUTest, DISABLED_05_sweep_details) {
 	EXPECT_EQ(expected_result, result);
 }
 
-GTEST_TEST(APUTest, DISABLED_06_overflow_on_trigger) {
+GTEST_TEST(APUTest, 06_overflow_on_trigger) {
 	gameboy gb;
 	gb.load_rom("C:/Users/knaub/source/repos/testroms/dmg_sound/rom_singles/06-overflow on trigger.gb", true);
 	gb.run_for_x_cycles(55500000);
@@ -579,7 +579,7 @@ GTEST_TEST(APUTest, DISABLED_06_overflow_on_trigger) {
 	EXPECT_EQ(expected_result, result);
 }
 
-GTEST_TEST(APUTest, DISABLED_07_len_sweep_period_sync) {
+GTEST_TEST(APUTest, 07_len_sweep_period_sync) {
 	gameboy gb;
 	gb.load_rom("C:/Users/knaub/source/repos/testroms/dmg_sound/rom_singles/07-len sweep period sync.gb", true);
 	gb.run_for_x_cycles(55500000);
@@ -589,7 +589,7 @@ GTEST_TEST(APUTest, DISABLED_07_len_sweep_period_sync) {
 	EXPECT_EQ(expected_result, result);
 }
 
-GTEST_TEST(APUTest, DISABLED_08_len_ctr_during_power) {
+GTEST_TEST(APUTest, 08_len_ctr_during_power) {
 	gameboy gb;
 	gb.load_rom("C:/Users/knaub/source/repos/testroms/dmg_sound/rom_singles/08-len ctr during power.gb", true);
 	gb.run_for_x_cycles(55500000);
@@ -599,7 +599,7 @@ GTEST_TEST(APUTest, DISABLED_08_len_ctr_during_power) {
 	EXPECT_EQ(expected_result, result);
 }
 
-GTEST_TEST(APUTest, DISABLED_09_wave_read_while_on) {
+GTEST_TEST(APUTest, 09_wave_read_while_on) {
 	gameboy gb;
 	gb.load_rom("C:/Users/knaub/source/repos/testroms/dmg_sound/rom_singles/09-wave read while on.gb", true);
 	gb.run_for_x_cycles(55500000);
@@ -609,7 +609,7 @@ GTEST_TEST(APUTest, DISABLED_09_wave_read_while_on) {
 	EXPECT_EQ(expected_result, result);
 }
 
-GTEST_TEST(APUTest, DISABLED_10_wave_trigger_while_on) {
+GTEST_TEST(APUTest, 10_wave_trigger_while_on) {
 	gameboy gb;
 	gb.load_rom("C:/Users/knaub/source/repos/testroms/dmg_sound/rom_singles/10-wave trigger while on.gb", true);
 	gb.run_for_x_cycles(55500000);
@@ -619,7 +619,7 @@ GTEST_TEST(APUTest, DISABLED_10_wave_trigger_while_on) {
 	EXPECT_EQ(expected_result, result);
 }
 
-GTEST_TEST(APUTest, DISABLED_11_regs_after_power) {
+GTEST_TEST(APUTest, 11_regs_after_power) {
 	gameboy gb;
 	gb.load_rom("C:/Users/knaub/source/repos/testroms/dmg_sound/rom_singles/11-regs after power.gb", true);
 	gb.run_for_x_cycles(55500000);
@@ -629,7 +629,7 @@ GTEST_TEST(APUTest, DISABLED_11_regs_after_power) {
 	EXPECT_EQ(expected_result, result);
 }
 
-GTEST_TEST(APUTest, DISABLED_12_wave_write_while_on) {
+GTEST_TEST(APUTest, 12_wave_write_while_on) {
 	gameboy gb;
 	gb.load_rom("C:/Users/knaub/source/repos/testroms/dmg_sound/rom_singles/12-wave write while on.gb", true);
 	gb.run_for_x_cycles(55500000);

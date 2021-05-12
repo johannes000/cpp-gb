@@ -422,8 +422,7 @@ bool CARDRIDGE::load_boot_rom() {
 	//const char *boot_rom_path = "C:/Users/knaub/source/repos/testroms/gbc_bios.bin";
 	std::ifstream is(boot_rom_path, std::ios::binary);
 	if (!is) {
-		std::cerr << "Kann die Boot Rom nicht öffnen!" << std::endl;
-		std::cerr << boot_rom_path << std::endl;
+		spdlog::error("Kann die Boot Rom nicht öffnen! {}", boot_rom_path);
 		abort();
 	} else {
 		const std::vector<u8> romf(std::istreambuf_iterator<char>(is), {});
