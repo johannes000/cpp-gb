@@ -1,11 +1,10 @@
 cmake_minimum_required(VERSION 3.16)
 project(cpp-gb LANGUAGES CXX C)
+set(CMAKE_CXX_STANDARD 20)
 
 include(cmake/StandardProjectSettings.cmake)
 include(cmake/PreventInSourceBuilds.cmake)
 
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/external/modules/")
 # Link this 'library' to set the c++ standard / compile-time options requested
 add_library(project_options INTERFACE)
 target_compile_features(project_options INTERFACE cxx_std_20)
@@ -14,10 +13,16 @@ target_compile_features(project_options INTERFACE cxx_std_20)
 include(cmake/Cache.cmake)
 
 # allow for static analysis options
-include(cmake/StaticAnalyzers.cmake)
+# include(cmake/StaticAnalyzers.cmake)
 
 include(cmake/Doxygen.cmake)
 enable_doxygen()
+
+
+set(CONAN_EXTRA_REQUIRES ${CONAN_EXTRA_REQUIRES} openal/1.21.0
+                                                 glfw/3.3.4
+                                                 opengl/system
+                                                 )
 
 include(cmake/Conan.cmake)
 run_conan()
@@ -27,25 +32,9 @@ if (NOT MSVC)
 else()
     set(CMAKE_CXX_FLAGS "/W3 ")
 endif ()
-set(LLVM_ENABLE_RTTI ON)
-set(LLVM_ENABLE_EH ON)
 
-if (MSVC)
-        find_library(GLFW glfw3 PATHS "./external/glfwWIN64/lib-vc2019")
-else (CMAKE_CXX_COMPILER_ID MATCHES ".*Clang")
-        # find_library(GLFW glfw3 PATHS "./external/glfwWIN64/lib-vc2019")
-        find_library(GLFW glfw3 PATHS "./external/glfwWIN64/lib-mingw-w64")
-endif ()
-
-option(GLFW_BUILD_DOCS OFF)
-option(GLFW_BUILD_EXAMPLES OFF)
-option(GLFW_BUILD_TESTS OFF)
-option(GLFW_INSTALL OFF)
-
-include_directories("./external/googletest/googletest/include")
+include_directories(${CONAN_INCLUDE_DIRS})
 include_directories("./external/spdlog/include")
-include_directories("./external/fmt/include")
-include_directories("./external/glfwWIN64/include")
 include_directories("./external/imgui")
 include_directories("./scr/Debugger")
 include_directories("./scr")

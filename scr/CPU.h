@@ -13,7 +13,7 @@ class CPU {
 public:
 	explicit CPU(MEMORY *m);
 
-	u8 parse_op_code(u8 &);
+	u8 parse_op_code(const u8 &);
 
 	int update();
 

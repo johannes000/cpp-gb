@@ -44,7 +44,6 @@ int gameboy::run_one_cycle(bool skip_render) {
 }
 
 void gameboy::log_cpu(CPU_Register R) {
-	static int a = 0;
 
 	if (!cpu.is_in_boot()) {
 		printf("A: %02X F: %02X B: %02X C: %02X D: %02X E: %02X H: %02X L: %02X", R.A, R.F, R.B, R.C, R.D, R.E, R.H, R.L);
@@ -52,7 +51,6 @@ void gameboy::log_cpu(CPU_Register R) {
 		printf(" PC: 00:%04X", R.PC);
 		printf(" (%02X %02X %02X %02X)", mem.read(R.PC), mem.read(R.PC + 1), mem.read(R.PC + 2), mem.read(R.PC + 3));
 		printf("\n");
-		a++;
 	}
 }
 
@@ -65,9 +63,8 @@ void gameboy::run_until_breakpoint() {
 }
 
 void gameboy::run_for_x_cycles(int cycles_to_run) {
-	int cycles;
 	while (cycles_to_run > 0) {
-		cycles = run_one_cycle(false);
+		int cycles = run_one_cycle(false);
 		if (ppu.ready_to_render)
 			ppu.ready_to_render = false;
 		if (cycles == -1)

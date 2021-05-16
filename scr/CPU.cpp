@@ -40,7 +40,7 @@ void CPU::init_register(bool skip_boot) {
 	}
 }
 
-u8 CPU::parse_op_code(u8 &opcode) {
+u8 CPU::parse_op_code(const u8 &opcode) {
 	u8 function;
 	if (opcode == 0xCB) {
 		prefix = false;

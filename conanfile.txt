@@ -1,5 +1,0 @@
-[requires]
-spdlog/1.8.5
-
-[generators]
-cmake

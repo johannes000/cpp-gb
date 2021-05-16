@@ -199,9 +199,9 @@ void Debugger::cpu_view() {
 			ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.1f, 0.8f, 0.8f, 1.0f));
 		char address[32];
 		sprintf(address, "%X", *b);
-		if (ImGui::Selectable(address, true, ImGuiSelectableFlags_SpanAllColumns))
+		if (ImGui::Selectable(address, true, ImGuiSelectableFlags_SpanAllColumns)) {
 			breakpoints.erase(b);
-
+		}
 		if (*b == pc)
 			ImGui::PopStyleColor(1);
 		b++;

@@ -69,9 +69,7 @@ void MEMORY::write(const u16 &addr, const u8 &data) {
 		TestOutput.push_back(c);
 	}
 
-	if (addr <= CARD_ROM_END) {
-		cardridge->write(addr, data);
-	} else if (addr >= GRAPHICS_RAM && addr <= GRAPHICS_RAM_END) {
+	if (addr >= GRAPHICS_RAM && addr <= GRAPHICS_RAM_END) {
 		ppu->write(addr, data);
 	} else if (addr >= CARD_EXTERNAL_RAM && addr <= CARD_EXTERNAL_RAM_END) {
 		cardridge->write(addr, data);
@@ -87,6 +85,8 @@ void MEMORY::write(const u16 &addr, const u8 &data) {
 		memory.at(addr) = data;
 	} else if (addr == INTERRUPT_ENABLE_REG) {
 		cpu->write(addr, data);
+	} else {
+		cardridge->write(addr, data);
 	}
 }
 

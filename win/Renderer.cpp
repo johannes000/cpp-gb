@@ -346,7 +346,7 @@ void Renderer::show_fps() const {
 
 void key_callback(GLFWwindow *window, int key, [[maybe_unused]] int scancode,
 				  int action, [[maybe_unused]] int mods) {
-	auto joypad = (CONTROLS *)glfwGetWindowUserPointer(window);
+	auto joypad = reinterpret_cast<CONTROLS *>(glfwGetWindowUserPointer(window));
 	joypad->handle_glwf_inputs(key, action);
 }
 

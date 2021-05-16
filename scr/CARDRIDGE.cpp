@@ -292,7 +292,7 @@ u8 CARDRIDGE::readMBC1(const u16 &addr) {
 		}
 		return rom.at(addr_in_rom % rom.size());
 
-	} else if (addr >= CARD_BANKS && addr <= CARD_BANKS_END) {
+	} else if (addr <= CARD_BANKS_END) {
 		/*
 		4000 - 7FFF - ROM Bank 01 - 7F(Read Only)
 		This area may contain any of the further 16KByte banks of the ROM,
@@ -374,7 +374,7 @@ void CARDRIDGE::writeMBC3(const u16 addr, const u8 &data) {
 u8 CARDRIDGE::readMBC5(const u16 &addr) {
 	if (addr <= CARD_ROM_0_END) {
 		return rom.at(addr);
-	} else if (addr >= 0x4000 && addr <= 0x7FFF) {
+	} else if (addr <= 0x7FFF) {
 		u32 addr_in_rom = (addr - 0x4000) + (CARD_ROM_BANK_SIZE * mbc5_selected_rom_bank);
 		return rom[addr_in_rom];
 	} else if (addr >= CARD_EXTERNAL_RAM && addr <= CARD_EXTERNAL_RAM_END && ram_enabled) {
@@ -453,8 +453,7 @@ void CARDRIDGE::create_sav_file() {
 		return;
 
 	std::string file = rom_info.savefile;
-	spdlog::info("Saving Ram");
-	spdlog::info("Save File: {}", file);
+	spdlog::info("Saving File: {}", file);
 
 	std::ofstream os(file.c_str(), std::ios::out | std::ios::binary);
 
@@ -463,7 +462,7 @@ void CARDRIDGE::create_sav_file() {
 			os.write(reinterpret_cast<const char *>(&data), 1);
 		}
 	}
-	spdlog::info("Ram Save done");
+	spdlog::info("Saving done: {}", file);
 }
 
 void CARDRIDGE::load_sav_file() {
@@ -471,8 +470,7 @@ void CARDRIDGE::load_sav_file() {
 		return;
 	std::string file = rom_info.savefile;
 
-	spdlog::info("Loading Ram");
-	spdlog::info("Save File: {}", file);
+	spdlog::info("Loading File: {}", file);
 	std::ifstream is(file, std::ios::in | std::ios::binary);
 	for (s32 i = 0; i < rom_info.ram_banks; i++) {
 		int index = 0;
@@ -482,5 +480,5 @@ void CARDRIDGE::load_sav_file() {
 			ram[i][index++] = byte;
 		}
 	}
-	spdlog::info("Ram Load done");
+	spdlog::info("Loading Done {}", file);
 }

@@ -13,7 +13,7 @@ class MEMORY;
 
 class CONTROLS {
 public:
-	CONTROLS(MEMORY *m);
+	explicit CONTROLS(MEMORY *m);
 
 	void write(const u16 &addr, const u8 &data);
 
