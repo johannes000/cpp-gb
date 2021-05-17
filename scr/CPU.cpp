@@ -8,7 +8,6 @@
  */
 
 #include "CPU.h"
-
 #include <iostream>
 
 CPU::CPU(MEMORY *m) : mem(m) {}

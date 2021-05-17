@@ -11,6 +11,7 @@
 #include "gameboy.h"
 #include "spdlog/spdlog.h"
 #include <fmt/core.h>
+
 int main([[maybe_unused]] int argc, [[maybe_unused]] const char **argv) {
 
 	const double target_FPS = 60;

@@ -6,8 +6,9 @@ target_link_libraries(
         cpp-gb-w PRIVATE 
                 cpp-gb debugger
                 project_options
-                imgui
                 glad        
+                imgui_bindings
+                CONAN_PKG::imgui
                 CONAN_PKG::glfw
                 CONAN_PKG::opengl   
                 CONAN_PKG::spdlog

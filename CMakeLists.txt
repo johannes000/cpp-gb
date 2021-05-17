@@ -19,10 +19,11 @@ include(cmake/Doxygen.cmake)
 enable_doxygen()
 
 
-set(CONAN_EXTRA_REQUIRES ${CONAN_EXTRA_REQUIRES} openal/1.21.0
-                                                 glfw/3.3.4
-                                                 opengl/system
-                                                 )
+set(CONAN_EXTRA_REQUIRES  "openal/1.21.0
+                           glfw/3.3.4
+                           opengl/system
+                           imgui/1.82
+                           ")
 
 include(cmake/Conan.cmake)
 run_conan()
@@ -30,12 +31,15 @@ run_conan()
 if (NOT MSVC)
     set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wshadow -Wnon-virtual-dtor -Wnon-virtual-dtor -Wcast-align -Wnull-dereference -Woverloaded-virtual  -Wformat=2 ")
 else()
-    set(CMAKE_CXX_FLAGS "/W3 ")
+    set(CMAKE_CXX_FLAGS "/W3 /EHa ")
 endif ()
 
 include_directories(${CONAN_INCLUDE_DIRS})
-include_directories("./external/spdlog/include")
-include_directories("./external/imgui")
+include_directories(${CONAN_SRC_DIRS_IMGUI})
+include_directories(${CONAN_LIB_DIRS_IMGUI})
+include_directories(${CONAN_BUILD_DIRS_SPDLOG})
+include_directories(${CONAN_INCLUDE_DIRS_SPDLOG})
+# include_directories("./external/spdlog/include")
 include_directories("./scr/Debugger")
 include_directories("./scr")
 include_directories("./win")
@@ -74,22 +78,13 @@ add_library(debugger
         scr/Debugger/Debug_helper.cpp
 )
 
-add_library(imgui
-        ./external/imgui/imconfig.h
-        ./external/imgui/imgui_demo.cpp
-        ./external/imgui/imgui_draw.cpp
-        ./external/imgui/imgui_impl_glfw.cpp
-        ./external/imgui/imgui_impl_glfw.h
-        ./external/imgui/imgui_impl_opengl3.cpp
-        ./external/imgui/imgui_impl_opengl3.h
-        ./external/imgui/imgui_internal.h
-        ./external/imgui/imgui_widgets.cpp
-        ./external/imgui/imgui.cpp
-        ./external/imgui/imgui.h
-        ./external/imgui/imstb_rectpack.h
-        ./external/imgui/imstb_textedit.h
-        ./external/imgui/imstb_truetype.h
+add_library(imgui_bindings
+       ${CONAN_SRC_DIRS_IMGUI}/imgui_impl_opengl3.cpp
+       ${CONAN_SRC_DIRS_IMGUI}/imgui_impl_opengl3.h
+       ${CONAN_SRC_DIRS_IMGUI}/imgui_impl_glfw.cpp
+       ${CONAN_SRC_DIRS_IMGUI}/imgui_impl_glfw.h
         )
+
 
 add_subdirectory(win)
 
