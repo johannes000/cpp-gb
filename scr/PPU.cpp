@@ -8,7 +8,12 @@ PPU::PPU(MEMORY *m, CPU *c)
 	  mem(m) {
 	reset();
 }
-
+bool compare_sprite_x(Sprite *sp1, Sprite *sp2) {
+	return (sp1->x_pos < sp2->x_pos);
+}
+bool compare_sprite_x_reverse(Sprite *sp1, Sprite *sp2) {
+	return (sp1->x_pos > sp2->x_pos);
+}
 bool PPU::update(const int cycles, bool skip_render) {
 	ready_to_render = false;
 	if (skip_render) {
@@ -277,37 +282,56 @@ void PPU::buffer_sprite_line(const u8 line, std::vector<u8> *bg_line) {
 	int sprite_size = lcd_control.sprite_size == 1 ? 16 : 8;
 	const int y = static_cast<int>(line);
 
-	for (Sprite &spr : sprites) {
-		int tile_no = spr.tile_no;
-		if (sprite_size == 16)
-			tile_no &= 0xFE;
+	std::vector<Sprite *> SpritesToDraw = {};
+	// for (Sprite &spr : sprites) {
+	for (auto &spr : sprites) {
 		const int real_ypos = lcd_control.sprite_size == 1 ? spr.y_pos : spr.y_pos - 9;
-		if (real_ypos != 0 && real_ypos < 160 && spr.x_pos != 0 && spr.x_pos < 168 && sprites_count <= 10) {
+		if (real_ypos != 0 && real_ypos < 160 && spr.x_pos != 0 && spr.x_pos < 168) {
 			if (y > real_ypos - sprite_size && y <= real_ypos) {
 				// Sprite wird gebufferd
-				sprites_count++;
+				SpritesToDraw.push_back(&spr);
 				// Y-Flip
-				int pixel_y_pos = spr.y_flip ? real_ypos - y : y - real_ypos + sprite_size - 1;
+			}
+		}
+	}
+	std::sort(SpritesToDraw.begin(), SpritesToDraw.end(), compare_sprite_x_reverse);
+	if (SpritesToDraw.size() > 1) {
+		for (int SpriteIndex = 1; SpriteIndex < SpritesToDraw.size(); SpriteIndex++) {
+			Sprite *spr = SpritesToDraw[SpriteIndex];
+			Sprite *last_spr = SpritesToDraw[SpriteIndex - 1];
+			if (spr->x_pos == last_spr->x_pos) {
+				int offset = (spr->id > last_spr->id) ? 0 : 1;
+				SpritesToDraw.erase(SpritesToDraw.begin() + SpriteIndex - offset);
+			}
+		}
+	}
+	// int max_sprite_index = SpritesToDraw.size() > 10 ? 10 : SpritesToDraw.size();
+	int max_sprite_index = SpritesToDraw.size();
+	for (int SpriteIndex = 0; SpriteIndex < max_sprite_index; SpriteIndex++) {
+		Sprite *spr = SpritesToDraw[SpriteIndex];
+		int tile_no = spr->tile_no;
+		if (sprite_size == 16)
+			tile_no &= 0xFE;
+		const int real_ypos = lcd_control.sprite_size == 1 ? spr->y_pos : spr->y_pos - 9;
+		int pixel_y_pos = spr->y_flip ? real_ypos - y : y - real_ypos + sprite_size - 1;
 
-				if (pixel_y_pos >= 0) {
-					for (int pixel_x_pos = 0; pixel_x_pos <= 7 && (spr.x_pos + pixel_x_pos) != 0 && spr.x_pos + pixel_x_pos < 168; pixel_x_pos++) {
-						// Pixel im Buffer
+		if (pixel_y_pos >= 0) {
+			for (int pixel_x_pos = 0; pixel_x_pos <= 7 && (spr->x_pos + pixel_x_pos) != 0 && spr->x_pos + pixel_x_pos < 168; pixel_x_pos++) {
+				// Pixel im Buffer
 
-						const s32 x_pos_in_line = (std::max)(0, spr.x_pos + pixel_x_pos - 8);
-						const int buffer_index = ((GB_LCD_SIZE_WIDTH * y) + x_pos_in_line);
-						if (pixel_y_pos >= 8) {
-							pixel_y_pos -= 8;
-							tile_no |= 0x01;
-						}
-						const auto palette_color_index = tile_map_data[tile_no][spr.x_flip ? (pixel_y_pos * 8) - pixel_x_pos + 7 : (pixel_y_pos * 8) + pixel_x_pos];
-						if (palette_color_index) {
-							const auto color = sprite_palette[spr.palette][palette_color_index];
-							if (!spr.bg_priority) {
-								bg_buffer[buffer_index] = color;
-							} else if (bg_line->at(x_pos_in_line) == 0) {
-								bg_buffer[buffer_index] = color;
-							}
-						}
+				const s32 x_pos_in_line = (std::max)(0, spr->x_pos + pixel_x_pos - 8);
+				const int buffer_index = ((GB_LCD_SIZE_WIDTH * y) + x_pos_in_line);
+				if (pixel_y_pos >= 8) {
+					pixel_y_pos -= 8;
+					tile_no |= 0x01;
+				}
+				const auto palette_color_index = tile_map_data[tile_no][spr->x_flip ? (pixel_y_pos * 8) - pixel_x_pos + 7 : (pixel_y_pos * 8) + pixel_x_pos];
+				if (palette_color_index) {
+					const auto color = sprite_palette[spr->palette][palette_color_index];
+					if (!spr->bg_priority) {
+						bg_buffer[buffer_index] = color;
+					} else if (bg_line->at(x_pos_in_line) == 0) {
+						bg_buffer[buffer_index] = color;
 					}
 				}
 			}
@@ -322,8 +346,8 @@ std::vector<u8> PPU::buffer_window_line(const u8 line) {
 
 	if (line >= GB_LCD_SIZE_HEIGHT)
 		return window_line;
-	u16 window_y = read(LCD_WY);
-	u16 window_x = read(LCD_WX);
+	u16 window_y = lcd_register.LCD_WY;
+	u16 window_x = lcd_register.LCD_WX;
 	if (window_x < 8)
 		window_x = 0;
 	else

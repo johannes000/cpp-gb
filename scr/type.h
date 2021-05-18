@@ -453,7 +453,18 @@ enum class GB_Key {
 	Start = 7,
 
 };
-
+struct Sprite {
+	int id;
+	int y_pos;		  // Specifies the sprites vertical position on the screen (Y - 16)
+	int x_pos;		  // Specifies the sprites horizontal position on the screen (X - 8)
+	u8 tile_no;		  // Specifies the sprites Tile Number (00-FF)
+	bool bg_priority; // OBJ-to-BG Priority (0=OBJ Above BG, 1=OBJ Behind BG color 1-3)
+	bool y_flip;	  // Y flip          (0=Normal, 1=Vertically mirrored)
+	bool x_flip;	  // X flip          (0=Normal, 1=Horizontally mirrored)
+	bool palette;	  // Palette number  **Non CGB Mode Only** (0=OBP0, 1=OBP1)
+	std::vector<u8> tile_data;
+	u8 *tile_data_ptr = &tile_data[0];
+};
 //void rom_info_CType_to_
 
 inline void set_bit(u8 &value, const u8 &bit) { value |= (1u << bit); }
