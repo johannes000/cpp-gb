@@ -48,6 +48,7 @@ using namespace gl;
 
 #include "Debugger/Debugger.h"
 #include "CONTROLS.h"
+#include "PPU.h"
 
 class Debugger;
 class CONTROLS;

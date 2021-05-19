@@ -414,7 +414,7 @@ void Renderer::debug_menu_bar(CARDRIDGE *card) {
 void Renderer::palette_menu_bar(PPU *ppu) {
 	if (ImGui::BeginMenu("Palettes")) {
 		char address[32];
-		for (s32 index = 0; index < ppu->Palettes.size(); index++) {
+		for (u32 index = 0; index < ppu->Palettes.size(); index++) {
 			sprintf_s(address, "%i", index, sizeof(address));
 			if (ImGui::MenuItem(address)) {
 				ppu->current_palette = index;

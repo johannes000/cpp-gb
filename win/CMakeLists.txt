@@ -5,6 +5,7 @@ add_executable(cpp-gb-w
 target_link_libraries(
         cpp-gb-w PRIVATE 
                 cpp-gb debugger
+                project_warnings
                 project_options
                 glad        
                 imgui_bindings
@@ -13,4 +14,5 @@ target_link_libraries(
                 CONAN_PKG::opengl   
                 CONAN_PKG::spdlog
                 CONAN_PKG::fmt
+                CONAN_PKG::docopt.cpp
                 )

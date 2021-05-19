@@ -278,7 +278,6 @@ std::vector<u8> PPU::buffer_bg_line(const u8 line) {
 void PPU::buffer_sprite_line(const u8 line, std::vector<u8> *bg_line) {
 	if (line >= GB_LCD_SIZE_HEIGHT + 8 || !lcd_control.sprites_enabled || !lcd_control.lcd_power)
 		return;
-	u8 sprites_count = 0;
 	int sprite_size = lcd_control.sprite_size == 1 ? 16 : 8;
 	const int y = static_cast<int>(line);
 
@@ -301,6 +300,7 @@ void PPU::buffer_sprite_line(const u8 line, std::vector<u8> *bg_line) {
 			Sprite *last_spr = SpritesToDraw[SpriteIndex - 1];
 			if (spr->x_pos == last_spr->x_pos) {
 				int offset = (spr->id > last_spr->id) ? 0 : 1;
+				// When X coordinates are the same, sprites located first in OAM have a higher priority.
 				SpritesToDraw.erase(SpritesToDraw.begin() + SpriteIndex - offset);
 			}
 		}

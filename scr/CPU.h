@@ -7,6 +7,58 @@
 #include "MEMORY.h"
 #include "type.h"
 
+enum class Flag {
+	z = 7, // Zero Flag
+	n = 6, // Add/Sub-Flag
+	h = 5, // Half Carry Flag
+	c = 4  // Carry Flag
+};
+
+struct CPU_Register {
+	struct {
+		union {
+			struct {
+				u8 F;
+				u8 A;
+			};
+			u16 AF;
+		};
+	};
+
+	struct {
+		union {
+			struct {
+				u8 C;
+				u8 B;
+			};
+			u16 BC;
+		};
+	};
+
+	struct {
+		union {
+			struct {
+				u8 E;
+				u8 D;
+			};
+			u16 DE;
+		};
+	};
+
+	struct {
+		union {
+			struct {
+				u8 L;
+				u8 H;
+			};
+			u16 HL;
+		};
+	};
+
+	u16 SP;
+	u16 PC;
+};
+
 class MEMORY;
 
 class CPU {

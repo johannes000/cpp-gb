@@ -23,6 +23,41 @@ constexpr int CLOCKS_FULL_FRAME = 70224;
 
 constexpr int VERTICAL_BLANK_LINES = 154;
 
+struct LCD_Register {
+	Register LCD_SCY; // SCY - Scroll Y (R/W)
+	Register LCD_SCX; // SCX - Scroll X (R/W)
+	Register LCD_LY;  // LY - LCDC Y-Coordinate (R)
+	Register LCD_LYC; // LYC - LY Compare (R/W)
+	Register LCD_WY;  // WY - Window Y Position (R/W)
+	Register LCD_WX;  // WX - Window X Position minus 7 (R/W)
+
+	Register BG_PALETTE_DATA; // BGP - BG Palette Data (R/W)
+	// - Non CGB Mode Only
+	Register SPRITE_PALETTE_DATA_0; // OBP0 - Object Palette 0 Data (R/W)
+	// - Non CGB Mode Only
+	Register SPRITE_PALETTE_DATA_1; // OBP1 - Object Palette 1 Data (R/W)
+									// - Non CGB Mode Only
+};
+
+enum class LCD_Mode {
+	H_Blank, // 0: During H - Blank
+	V_Blank, // 1 : During V - Blank
+	OAM,	 // 2 : OAM Access
+	VRAM,	 // 3 : VRAM Access
+};
+struct Sprite {
+	int id;
+	int y_pos;		  // Specifies the sprites vertical position on the screen (Y - 16)
+	int x_pos;		  // Specifies the sprites horizontal position on the screen (X - 8)
+	u8 tile_no;		  // Specifies the sprites Tile Number (00-FF)
+	bool bg_priority; // OBJ-to-BG Priority (0=OBJ Above BG, 1=OBJ Behind BG color 1-3)
+	bool y_flip;	  // Y flip          (0=Normal, 1=Vertically mirrored)
+	bool x_flip;	  // X flip          (0=Normal, 1=Horizontally mirrored)
+	bool palette;	  // Palette number  **Non CGB Mode Only** (0=OBP0, 1=OBP1)
+	std::vector<u8> tile_data;
+	u8 *tile_data_ptr = &tile_data[0];
+};
+
 class MEMORY;
 
 class CPU;

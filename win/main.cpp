@@ -11,8 +11,38 @@
 #include "gameboy.h"
 #include "spdlog/spdlog.h"
 #include <fmt/core.h>
+#include "docopt/docopt.h"
+
+#include <iostream>
+
+static const char USAGE[] =
+	R"(Gameboy Emulator
+
+    Usage:
+	  cpp-gb-w -r <path_from_argument>
+	  cpp-gb-w (-s | --skipboot)
+	  cpp-gb-w (-h | --help)
+	  cpp-gb-w --version
+	  cpp-gb-w 
+
+    Options:
+	  -r 				Run chosen Rom at startup.
+      -s --skipboot     Skip the boot animation.
+      -h --help     	Show this screen.
+      --version     	Show version.
+)";
 
 int main([[maybe_unused]] int argc, [[maybe_unused]] const char **argv) {
+
+	std::map<std::string, docopt::value>
+		args = docopt::docopt(USAGE,
+							  {argv + 1, argv + argc},
+							  true,			// show help if requested
+							  "pre-alpha"); // version string
+
+	for (auto const &arg : args) {
+		std::cout << arg.first << " " << arg.second << std::endl;
+	}
 
 	const double target_FPS = 60;
 	const double target_duration = 1 / target_FPS;

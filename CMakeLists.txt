@@ -9,8 +9,16 @@ include(cmake/PreventInSourceBuilds.cmake)
 add_library(project_options INTERFACE)
 target_compile_features(project_options INTERFACE cxx_std_20)
 
+# Link this 'library' to use the warnings specified in CompilerWarnings.cmake
+add_library(project_warnings INTERFACE)
+
 # enable cache system
 include(cmake/Cache.cmake)
+
+# standard compiler warnings
+include(cmake/CompilerWarnings.cmake)
+set_project_warnings(project_warnings)
+
 
 # allow for static analysis options
 # include(cmake/StaticAnalyzers.cmake)
@@ -39,7 +47,6 @@ include_directories(${CONAN_SRC_DIRS_IMGUI})
 include_directories(${CONAN_LIB_DIRS_IMGUI})
 include_directories(${CONAN_BUILD_DIRS_SPDLOG})
 include_directories(${CONAN_INCLUDE_DIRS_SPDLOG})
-# include_directories("./external/spdlog/include")
 include_directories("./scr/Debugger")
 include_directories("./scr")
 include_directories("./win")
