@@ -425,7 +425,6 @@ void Renderer::palette_menu_bar(PPU *ppu) {
 }
 
 void Renderer::main_view([[maybe_unused]] CPU *cpu, [[maybe_unused]] PPU *ppu, [[maybe_unused]] MEMORY *mem, [[maybe_unused]] CARDRIDGE *card, [[maybe_unused]] CONTROLS *joy, std::string *file) {
-	file->clear();
 	glfwGetFramebufferSize(window, &window_width, &window_height);
 	// IMGUI MENU BAR
 	if (ImGui::BeginMainMenuBar()) {

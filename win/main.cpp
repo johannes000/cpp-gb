@@ -20,19 +20,32 @@ static const char USAGE[] =
 
     Usage:
 	  cpp-gb-w -r <path_from_argument>
+	  cpp-gb-w (-s | --skipboot) -f
 	  cpp-gb-w (-s | --skipboot)
 	  cpp-gb-w (-h | --help)
 	  cpp-gb-w --version
+	  cpp-gb-w -f
+	  cpp-gb-w -a
 	  cpp-gb-w 
 
     Options:
-	  -r 				Run chosen Rom at startup.
+	  -r				Run chosen Rom at startup.
+	  -f				Don't throttle the FPS
       -s --skipboot     Skip the boot animation.
       -h --help     	Show this screen.
       --version     	Show version.
 )";
 
 int main([[maybe_unused]] int argc, [[maybe_unused]] const char **argv) {
+
+	gameboy gb;
+	std::string file = "";
+
+	file = "C:/Users/knaub/source/repos/testroms/dmg-acid2.gb";
+	bool rom_loaded = false;
+
+	bool skip_boot_rom = true;
+	bool fps_drossel = false;
 
 	std::map<std::string, docopt::value>
 		args = docopt::docopt(USAGE,
@@ -42,23 +55,22 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] const char **argv) {
 
 	for (auto const &arg : args) {
 		std::cout << arg.first << " " << arg.second << std::endl;
+		if (arg.first == "--skipboot" && arg.second.asBool() == true)
+			skip_boot_rom = true;
+		if (arg.first == "-f" && arg.second.asBool() == true)
+			fps_drossel = false;
+		if (arg.first == "-a" && arg.second.asBool() == true) {
+			file = "C:/Users/knaub/source/repos/testroms/dmg-acid2.gb";
+		}
 	}
 
 	const double target_FPS = 60;
 	const double target_duration = 1 / target_FPS;
 	double measured_duration = 0.0;
 
-	bool fps_drossel = true;
-	bool skip_boot_rom = true;
-
-	gameboy gb;
 	// gb.load_rom("C:/Users/knaub/source/repos/testroms/cpu_instrs/individual/02-interrupts.gb", true);
-	// gb.run_for_x_cycles(600000);
 
 	Renderer renderer(&gb.joypad);
-	bool rom_loaded = false;
-
-	std::string file = "";
 
 	gb.debug.setDebugState(Debug_State::RUN);
 
@@ -96,6 +108,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] const char **argv) {
 				gb.card.create_sav_file();
 				gb.load_rom(file, skip_boot_rom);
 				gb.card.load_sav_file();
+				file.clear();
 				rom_loaded = true;
 			}
 

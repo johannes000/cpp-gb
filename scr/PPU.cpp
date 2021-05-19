@@ -296,18 +296,19 @@ void PPU::buffer_sprite_line(const u8 line, std::vector<u8> *bg_line) {
 	std::sort(SpritesToDraw.begin(), SpritesToDraw.end(), compare_sprite_x_reverse);
 	if (SpritesToDraw.size() > 1) {
 		for (int SpriteIndex = 1; SpriteIndex < SpritesToDraw.size(); SpriteIndex++) {
-			Sprite *spr = SpritesToDraw[SpriteIndex];
-			Sprite *last_spr = SpritesToDraw[SpriteIndex - 1];
-			if (spr->x_pos == last_spr->x_pos) {
-				int offset = (spr->id > last_spr->id) ? 0 : 1;
+			// Iteratoren um die Sprites leichter zu swapen.
+			auto spr = SpritesToDraw.begin() + SpriteIndex;
+			auto last_spr = SpritesToDraw.begin() + SpriteIndex - 1;
+			if (((*spr)->x_pos == (*last_spr)->x_pos) && ((*spr)->id > (*last_spr)->id)) {
 				// When X coordinates are the same, sprites located first in OAM have a higher priority.
-				SpritesToDraw.erase(SpritesToDraw.begin() + SpriteIndex - offset);
+				std::iter_swap(spr, last_spr);
 			}
 		}
 	}
-	// int max_sprite_index = SpritesToDraw.size() > 10 ? 10 : SpritesToDraw.size();
-	int max_sprite_index = SpritesToDraw.size();
-	for (int SpriteIndex = 0; SpriteIndex < max_sprite_index; SpriteIndex++) {
+	while (SpritesToDraw.size() > 10)
+		SpritesToDraw.erase(SpritesToDraw.begin());
+
+	for (int SpriteIndex = 0; SpriteIndex < SpritesToDraw.size(); SpriteIndex++) {
 		Sprite *spr = SpritesToDraw[SpriteIndex];
 		int tile_no = spr->tile_no;
 		if (sprite_size == 16)
