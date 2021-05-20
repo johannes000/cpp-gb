@@ -48,6 +48,7 @@ include_directories(${CONAN_LIB_DIRS_IMGUI})
 include_directories(${CONAN_BUILD_DIRS_SPDLOG})
 include_directories(${CONAN_INCLUDE_DIRS_SPDLOG})
 include_directories("./scr/Debugger")
+include_directories("./scr/CPU")
 include_directories("./scr")
 include_directories("./win")
 include_directories("./test")
@@ -64,26 +65,6 @@ if(PACKAGE_TESTS)
         add_subdirectory(test)
 endif()
 # find_package(OpenGL REQUIRED)
-
-add_library(cpp-gb 
-        scr/CPU/ARITHMETIC.cpp
-        scr/CPU/CONTROL.cpp
-        scr/CPU/helper.cpp
-        scr/CPU/JUMPS.cpp
-        scr/CPU/LD.cpp
-        scr/CPU/SHIFT.cpp
-        scr/CARDRIDGE.cpp scr/CARDRIDGE.h
-        scr/CPU.cpp scr/CPU.h
-        scr/gameboy.cpp scr/gameboy.h
-        scr/MEMORY.cpp scr/MEMORY.h
-        scr/PPU.cpp scr/PPU.h
-        scr/CONTROLS.cpp scr/CONTROLS.h
-)
-
-add_library(debugger
-        scr/Debugger/Debugger.cpp scr/Debugger/Debugger.h
-        scr/Debugger/Debug_helper.cpp
-)
 
 add_library(imgui_bindings
        ${CONAN_SRC_DIRS_IMGUI}/imgui_impl_opengl3.cpp

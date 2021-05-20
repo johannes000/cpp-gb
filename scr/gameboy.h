@@ -31,7 +31,9 @@ struct gameboy {
 	void log_cpu(CPU_Register);
 	void run_for_x_cycles(int);
 
-	bool in_test_mode = false;
+	bool in_test_mode;
+	bool skip_boot_rom;
+	bool fps_drossel;
 };
 
 #endif // !GAMEBOY_H_GUARD

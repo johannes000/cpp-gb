@@ -28,7 +28,6 @@ bool PPU::update(const int cycles, bool skip_render) {
 			if (cycles_in_mode >= CLOCKS_SCANLINE_OAM) {
 				cycles_in_mode -= CLOCKS_SCANLINE_OAM;
 				set_lcd_mode(LCD_Mode::VRAM);
-				compare_ly_lyc();
 			}
 			break;
 
@@ -37,8 +36,6 @@ bool PPU::update(const int cycles, bool skip_render) {
 			if (cycles_in_mode >= CLOCKS_SCANLINE_VRAM) {
 				cycles_in_mode -= CLOCKS_SCANLINE_VRAM;
 				set_lcd_mode(LCD_Mode::H_Blank);
-				// if (lcd_state.h_blank_interrupt)
-				// 	cpu->request_interrupt(Interrupt::LCD_Stat);
 			}
 			break;
 
@@ -46,18 +43,16 @@ bool PPU::update(const int cycles, bool skip_render) {
 			// MODE 0: H - Blank (204 cycles) nach jeder line
 			if (cycles_in_mode >= CLOCKS_HORIZONTAL_BLANK) { // H-Blank vorbei
 				cycles_in_mode -= CLOCKS_HORIZONTAL_BLANK;
-				int line = lcd_register.LCD_LY;
-				// compare_ly_lyc();
+				int line = lcd_register.LCD_LY++;
 				buffer_line(line);
-				if (++lcd_register.LCD_LY >= GB_LCD_SIZE_HEIGHT) {
+				compare_ly_lyc();
+				if (line == GB_LCD_SIZE_HEIGHT - 1) {
 					set_lcd_mode(LCD_Mode::V_Blank);
-					compare_ly_lyc();
 					cpu->request_interrupt(Interrupt::V_Blank);
 					if (lcd_state.v_blank_interrupt)
 						cpu->request_interrupt(Interrupt::LCD_Stat);
 				} else {
 					set_lcd_mode(LCD_Mode::OAM);
-					compare_ly_lyc();
 					if (lcd_state.oam_interrupt)
 						cpu->request_interrupt(Interrupt::LCD_Stat);
 					if (lcd_state.h_blank_interrupt)
@@ -74,9 +69,10 @@ bool PPU::update(const int cycles, bool skip_render) {
 					lcd_register.LCD_LY = 0;
 					ready_to_render = true;
 					set_lcd_mode(LCD_Mode::OAM);
-					compare_ly_lyc();
 					if (lcd_state.oam_interrupt)
 						cpu->request_interrupt(Interrupt::LCD_Stat);
+				} else {
+					compare_ly_lyc();
 				}
 			}
 			break;
@@ -187,6 +183,8 @@ void PPU::reset() {
 	lcd_state = {};
 	lcd_state.stub = 1;
 	cycles_in_mode = 0;
+	cycles_in_vblank = 0;
+	vblank_line = 0;
 }
 /**
  * @brief Schreibt den gewünschten mode ins LCD Status register
@@ -308,8 +306,7 @@ void PPU::buffer_sprite_line(const u8 line, std::vector<u8> *bg_line) {
 	while (SpritesToDraw.size() > 10)
 		SpritesToDraw.erase(SpritesToDraw.begin());
 
-	for (int SpriteIndex = 0; SpriteIndex < SpritesToDraw.size(); SpriteIndex++) {
-		Sprite *spr = SpritesToDraw[SpriteIndex];
+	for (auto spr : SpritesToDraw) {
 		int tile_no = spr->tile_no;
 		if (sprite_size == 16)
 			tile_no &= 0xFE;

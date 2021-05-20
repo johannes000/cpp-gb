@@ -82,7 +82,9 @@ private:
 	CPU *cpu;
 	MEMORY *mem;
 
-	int cycles_in_mode{};
+	int cycles_in_mode;
+	int cycles_in_vblank;
+	int vblank_line;
 
 	void update_tile(const u16 &addr);
 

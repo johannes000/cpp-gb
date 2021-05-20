@@ -1,4 +1,11 @@
+#include "type.h"
 #include "gameboy.h"
+#include "MEMORY.cpp"
+#include "CPU.cpp"
+#include "CONTROLS.cpp"
+#include "CARDRIDGE.cpp"
+#include "PPU.cpp"
+#include "Debugger/Debugger.cpp"
 
 gameboy::gameboy()
 	: mem(&cpu, &card, &ppu, &joypad),
@@ -6,7 +13,10 @@ gameboy::gameboy()
 	  ppu(&mem, &cpu),
 	  joypad(&mem),
 	  debug(&cpu, &ppu, &mem, &card, &joypad) {
-	reset(false);
+	bool in_test_mode [[maybe_unused]] = false;
+	bool skip_boot_rom [[maybe_unused]] = true;
+	bool fps_drossel [[maybe_unused]] = true;
+	reset(skip_boot_rom);
 }
 
 bool gameboy::load_rom(std::string rom_file, bool skip_boot_rom) {

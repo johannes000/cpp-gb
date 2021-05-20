@@ -1,10 +1,8 @@
-add_executable(cpp-gb-w
-        main.cpp
-        Renderer.cpp Renderer.h)
+
+add_executable(cpp-gb-w main.cpp)
 
 target_link_libraries(
         cpp-gb-w PRIVATE 
-                cpp-gb debugger
                 project_warnings
                 project_options
                 glad        

@@ -7,7 +7,8 @@
 
 #include "type.h"
 #include "MEMORY.h"
-#include "Renderer.h"
+// TODO: Platform Unabhängig machen
+#include "../win/Renderer.h"
 
 enum class GB_Key {
 	// Bit 7 - Not used

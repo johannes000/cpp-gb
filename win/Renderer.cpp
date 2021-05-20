@@ -5,7 +5,6 @@
 #include "Renderer.h"
 #include <charconv>
 #include <windows.h>
-#include "spdlog/spdlog.h"
 
 Renderer::Renderer(CONTROLS *j) : joypad(j) {
 	init_window();

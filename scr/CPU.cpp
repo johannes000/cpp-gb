@@ -8,6 +8,12 @@
  */
 
 #include "CPU.h"
+#include "./CPU/helper.cpp"
+#include "./CPU/ARITHMETIC.cpp"
+#include "./CPU/CONTROL.cpp"
+#include "./CPU/JUMPS.cpp"
+#include "./CPU/LD.cpp"
+#include "./CPU/SHIFT.cpp"
 #include <iostream>
 
 CPU::CPU(MEMORY *m) : mem(m) {}

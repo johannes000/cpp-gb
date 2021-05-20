@@ -7,16 +7,16 @@
  * @copyright Copyright (c) 2020
  */
 
-#include "Renderer.h"
-#include "gameboy.h"
-#include "spdlog/spdlog.h"
 #include <fmt/core.h>
+#include "spdlog/spdlog.h"
 #include "docopt/docopt.h"
+#include "gameboy.cpp"
+#include "Renderer.cpp"
 
 #include <iostream>
 
 static const char USAGE[] =
-	R"(Gameboy Emulator
+R"(Gameboy Emulator
 
     Usage:
 	  cpp-gb-w -r <path_from_argument>
@@ -36,7 +36,7 @@ static const char USAGE[] =
       --version     	Show version.
 )";
 
-int main([[maybe_unused]] int argc, [[maybe_unused]] const char **argv) {
+int main([[maybe_unused]] int argc, [[maybe_unused]] const char** argv) {
 
 	gameboy gb;
 	std::string file = "";
@@ -44,21 +44,17 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] const char **argv) {
 	file = "C:/Users/knaub/source/repos/testroms/dmg-acid2.gb";
 	bool rom_loaded = false;
 
-	bool skip_boot_rom = true;
-	bool fps_drossel = false;
-
 	std::map<std::string, docopt::value>
 		args = docopt::docopt(USAGE,
-							  {argv + 1, argv + argc},
+							  { argv + 1, argv + argc },
 							  true,			// show help if requested
 							  "pre-alpha"); // version string
 
-	for (auto const &arg : args) {
-		std::cout << arg.first << " " << arg.second << std::endl;
+	for (auto const& arg : args) {
 		if (arg.first == "--skipboot" && arg.second.asBool() == true)
-			skip_boot_rom = true;
+			gb.skip_boot_rom = true;
 		if (arg.first == "-f" && arg.second.asBool() == true)
-			fps_drossel = false;
+			gb.fps_drossel = false;
 		if (arg.first == "-a" && arg.second.asBool() == true) {
 			file = "C:/Users/knaub/source/repos/testroms/dmg-acid2.gb";
 		}
@@ -67,8 +63,6 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] const char **argv) {
 	const double target_FPS = 60;
 	const double target_duration = 1 / target_FPS;
 	double measured_duration = 0.0;
-
-	// gb.load_rom("C:/Users/knaub/source/repos/testroms/cpu_instrs/individual/02-interrupts.gb", true);
 
 	Renderer renderer(&gb.joypad);
 
@@ -79,7 +73,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] const char **argv) {
 		double t_start = glfwGetTime();
 		double d_time = t_start - measured_duration;
 
-		if (d_time >= target_duration || !fps_drossel) {
+		if (d_time >= target_duration || !gb.fps_drossel) {
 			measured_duration = t_start;
 
 			glfwPollEvents();
@@ -88,25 +82,25 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] const char **argv) {
 
 			if (rom_loaded) {
 				switch (gb.debug.get_debug_state()) {
-					case Debug_State::RUN:
-						gb.run_until_vblank();
-						break;
-					case Debug_State::STEP:
-						if (gb.debug.get_next_step()) {
-							gb.run_one_cycle();
-							gb.debug.handle_breakpoints();
-						}
-						break;
-					case Debug_State::BREAKPOINT:
-						gb.run_until_breakpoint();
-						break;
+				case Debug_State::RUN:
+					gb.run_until_vblank();
+					break;
+				case Debug_State::STEP:
+					if (gb.debug.get_next_step()) {
+						gb.run_one_cycle();
+						gb.debug.handle_breakpoints();
+					}
+					break;
+				case Debug_State::BREAKPOINT:
+					gb.run_until_breakpoint();
+					break;
 				}
 
 				renderer.update_views(&gb.ppu, &gb.debug);
 			}
 			if (file[0] != 0) {
 				gb.card.create_sav_file();
-				gb.load_rom(file, skip_boot_rom);
+				gb.load_rom(file, gb.skip_boot_rom);
 				gb.card.load_sav_file();
 				file.clear();
 				rom_loaded = true;
