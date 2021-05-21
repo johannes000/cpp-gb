@@ -2,14 +2,13 @@
 // Created by knaub on 15.07.2020.
 //
 
-#include "Renderer.h"
 #include <charconv>
 #include <windows.h>
 
-Renderer::Renderer(CONTROLS *j) : joypad(j) {
+Renderer::Renderer(gameboy *GB) : gb(GB) {
 	init_window();
 
-	glfwSetWindowUserPointer(window, (void *)joypad);
+	glfwSetWindowUserPointer(window, (void *)&gb->joypad);
 	glfwSetKeyCallback(window, key_callback);
 
 	glfwSetInputMode(window, GLFW_STICKY_KEYS, 1);
@@ -209,9 +208,9 @@ void Renderer::start_new_imgui_frame() {
 	ImGui::NewFrame();
 }
 
-void Renderer::update_views(PPU *ppu, Debugger *debug) {
+void Renderer::update_views() {
 
-	update_texture(frame_texture, ppu->get_lcd_buffer());
+	update_texture(frame_texture, gb->ppu.get_lcd_buffer());
 
 	if (show_demo_window)
 		ImGui::ShowDemoWindow(&show_demo_window);
@@ -220,18 +219,18 @@ void Renderer::update_views(PPU *ppu, Debugger *debug) {
 		gameboy_lcd_window();
 
 	if (in_debug_tile_buffer)
-		tile_buffer_view(ppu);
+		tile_buffer_view();
 	if (in_debug_card_view)
-		debug->card_view();
+		gb->debug.card_view();
 	if (in_debug_cpu_debuger)
-		debug->cpu_view();
+		gb->debug.cpu_view();
 	if (in_debug_memory_view)
-		debug->memory_view();
+		gb->debug.memory_view();
 	if (in_debug_controler_view)
-		debug->control_view();
+		gb->debug.control_view();
 }
 
-void Renderer::update_tile_buffer(PPU *ppu) {
+void Renderer::update_tile_buffer() {
 #if 1
 	u16 tile_data_address = 0x8000;
 
@@ -239,8 +238,8 @@ void Renderer::update_tile_buffer(PPU *ppu) {
 		for (int column = 0; column < 16; column++) {
 			u16 start = tile_data_address + (16 * column);
 			for (int line = (row * 8); line < 8 + (row * 8); line++, start += 2) {
-				u8 p_line_1 = ppu->read(start);
-				u8 p_line_2 = ppu->read(start + 1);
+				u8 p_line_1 = gb->ppu.read(start);
+				u8 p_line_2 = gb->ppu.read(start + 1);
 
 				for (int tileColumn = (column * 8), position = 7;
 					 tileColumn < 8 + (column * 8); tileColumn++, position--) {
@@ -249,7 +248,7 @@ void Renderer::update_tile_buffer(PPU *ppu) {
 						static_cast<u8>(check_bit(p_line_1, (position)) << 1u) |
 						static_cast<u8>(check_bit(p_line_2, (position)));
 
-					tile_buffer[index] = ppu->bg_palette[color];
+					tile_buffer[index] = gb->ppu.bg_palette[color];
 				}
 			}
 		}
@@ -297,10 +296,10 @@ void Renderer::gameboy_lcd_window() {
 	ImGui::End();
 }
 
-void Renderer::tile_buffer_view(PPU *ppu) {
+void Renderer::tile_buffer_view() {
 	static int counter = 0;
 	if (!(counter++ % 60)) {
-		update_tile_buffer(ppu);
+		update_tile_buffer();
 		update_texture(tiles_texture, &tile_buffer[0]);
 	}
 	ImGui::Begin("Tile Buffer");
@@ -309,7 +308,7 @@ void Renderer::tile_buffer_view(PPU *ppu) {
 				 ImVec2(TILE_MAP_WIDTH * 2, TILE_MAP_HEIGHT * 2));
 
 	if (ImGui::TreeNode("Sprites")) {
-		for (auto sprite : ppu->sprites) {
+		for (auto sprite : gb->ppu.sprites) {
 			if (ImGui::TreeNode(std::to_string(sprite.id).c_str())) {
 				ImGui::Text("Tile No:%i", sprite.tile_no);
 				ImGui::Text("X:      %i", sprite.x_pos);
@@ -370,6 +369,8 @@ void Renderer::file_menu_bar(std::string *file) {
 				*file = path;
 			}
 		}
+		if (ImGui::BeginMenu("Close")) {
+		}
 
 		ImGui::EndMenu();
 	}
@@ -383,53 +384,53 @@ void Renderer::file_menu_bar(std::string *file) {
 	}
 }
 
-void Renderer::debug_menu_bar(CARDRIDGE *card) {
+void Renderer::debug_menu_bar() {
 	if (ImGui::BeginMenu("Debug")) {
-		if (ImGui::MenuItem("Show FPS", NULL, &in_debug_show_fps, card->rom_loaded)) {
+		if (ImGui::MenuItem("Show FPS", NULL, &in_debug_show_fps, gb->card.rom_loaded)) {
 		}
-		if (ImGui::MenuItem("CPU", NULL, &in_debug_cpu_debuger, card->rom_loaded)) {
+		if (ImGui::MenuItem("CPU", NULL, &in_debug_cpu_debuger, gb->card.rom_loaded)) {
 			in_debug_small_lcd_window = true;
 		}
-		if (ImGui::MenuItem("Small LCD Window", NULL, &in_debug_small_lcd_window, card->rom_loaded)) {
+		if (ImGui::MenuItem("Small LCD Window", NULL, &in_debug_small_lcd_window, gb->card.rom_loaded)) {
 		}
-		if (ImGui::MenuItem("Tile Buffer", NULL, &in_debug_tile_buffer, card->rom_loaded)) {
+		if (ImGui::MenuItem("Tile Buffer", NULL, &in_debug_tile_buffer, gb->card.rom_loaded)) {
 			in_debug_small_lcd_window = true;
 		}
-		if (ImGui::MenuItem("Register Info", NULL, &in_debug_card_view, card->rom_loaded)) {
+		if (ImGui::MenuItem("Register Info", NULL, &in_debug_card_view, gb->card.rom_loaded)) {
 			in_debug_small_lcd_window = true;
 		}
-		if (ImGui::MenuItem("Memory View", NULL, &in_debug_memory_view, card->rom_loaded)) {
+		if (ImGui::MenuItem("Memory View", NULL, &in_debug_memory_view, gb->card.rom_loaded)) {
 			in_debug_small_lcd_window = true;
 		}
-		if (ImGui::MenuItem("Joypad Info", NULL, &in_debug_controler_view, card->rom_loaded)) {
+		if (ImGui::MenuItem("Joypad Info", NULL, &in_debug_controler_view, gb->card.rom_loaded)) {
 			in_debug_small_lcd_window = true;
 		}
 
-		if (ImGui::MenuItem("Demo Window", NULL, &show_demo_window, card->rom_loaded)) {
+		if (ImGui::MenuItem("Demo Window", NULL, &show_demo_window, gb->card.rom_loaded)) {
 		}
 		ImGui::EndMenu();
 	}
 }
-void Renderer::palette_menu_bar(PPU *ppu) {
+void Renderer::palette_menu_bar() {
 	if (ImGui::BeginMenu("Palettes")) {
 		char address[32];
-		for (u32 index = 0; index < ppu->Palettes.size(); index++) {
+		for (u32 index = 0; index < gb->ppu.Palettes.size(); index++) {
 			sprintf_s(address, "%i", index, sizeof(address));
 			if (ImGui::MenuItem(address)) {
-				ppu->current_palette = index;
+				gb->ppu.current_palette = index;
 			}
 		}
 		ImGui::EndMenu();
 	}
 }
-
-void Renderer::main_view([[maybe_unused]] CPU *cpu, [[maybe_unused]] PPU *ppu, [[maybe_unused]] MEMORY *mem, [[maybe_unused]] CARDRIDGE *card, [[maybe_unused]] CONTROLS *joy, std::string *file) {
+void Renderer::main_view(std::string *file) {
 	glfwGetFramebufferSize(window, &window_width, &window_height);
 	// IMGUI MENU BAR
 	if (ImGui::BeginMainMenuBar()) {
 		file_menu_bar(file);
-		debug_menu_bar(card);
-		palette_menu_bar(ppu);
+		debug_menu_bar();
+		palette_menu_bar();
+		emulator_menu_bar();
 	}
 	ImGui::SetCursorPos(ImVec2(window_width - 350.0f, 0.0f));
 	ImGui::TextColored(magenta, "Frame Rate: %.2f FPS | Frame Time: %.2f ms",
@@ -438,4 +439,14 @@ void Renderer::main_view([[maybe_unused]] CPU *cpu, [[maybe_unused]] PPU *ppu, [
 
 	menu_bar_height = ImGui::GetWindowHeight();
 	ImGui::EndMainMenuBar();
+}
+
+void Renderer::emulator_menu_bar() {
+	if (ImGui::BeginMenu("Emulator")) {
+		if (ImGui::MenuItem("Skip Boot Rom", NULL, &gb->skip_boot_rom)) {
+		}
+		if (ImGui::MenuItem("60 FPS lock", NULL, &gb->fps_drossel)) {
+		}
+		ImGui::EndMenu();
+	}
 }

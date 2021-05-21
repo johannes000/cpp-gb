@@ -137,9 +137,8 @@ struct Pixel_a {
 	}
 };
 
-
-	inline void
-	set_bit(u8 &value, const u8 &bit) { value |= (1u << bit); }
+inline void
+set_bit(u8 &value, const u8 &bit) { value |= (1u << bit); }
 
 inline void set_bit(u16 &value, const u16 &bit) { value |= (1u << bit); }
 

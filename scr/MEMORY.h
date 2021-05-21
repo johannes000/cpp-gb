@@ -1,24 +1,10 @@
 #ifndef MEMORY_H_GUARD
 #define MEMORY_H_GUARD
 
-#include <iostream>
-#include <vector>
-#include <string>
-
-#include "CARDRIDGE.h"
-#include "CPU.h"
-#include "PPU.h"
-#include "type.h"
-#include "CONTROLS.h"
-
 class CPU;
-
 class PPU;
-
 class CARDRIDGE;
-
 class CONTROLS;
-
 class MEMORY {
 public:
 	MEMORY(CPU *c, CARDRIDGE *card, PPU *p, CONTROLS *j);

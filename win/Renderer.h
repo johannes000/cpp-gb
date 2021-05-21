@@ -5,8 +5,6 @@
 #ifndef CPP_GB_RENDERER_H
 #define CPP_GB_RENDERER_H
 
-#include "type.h"
-
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
@@ -46,13 +44,9 @@ using namespace gl;
 #pragma comment(lib, "legacy_stdio_definitions")
 #endif
 
-#include "Debugger/Debugger.h"
-#include "CONTROLS.h"
-#include "PPU.h"
-
 class Debugger;
 class CONTROLS;
-
+struct gameboy;
 struct Texture {
 	GLuint texture_handler;
 	GLuint *texture_ptr = &texture_handler;
@@ -63,7 +57,7 @@ struct Texture {
 struct Renderer {
 	GLFWwindow *window{};
 
-	explicit Renderer(CONTROLS *joypad);
+	explicit Renderer(gameboy *gb);
 
 	void init_window();
 
@@ -122,13 +116,15 @@ struct Renderer {
 	void *frame_buffer = nullptr;
 	GLuint frame_buffer_id = 0;
 
-	void update_views(PPU *ppu, Debugger *debug);
+	gameboy *gb;
 
-	void update_tile_buffer(PPU *ppu);
+	void update_views();
+
+	void update_tile_buffer();
 
 	void gameboy_lcd_window();
 
-	void tile_buffer_view(PPU *ppu);
+	void tile_buffer_view();
 
 	void menu();
 
@@ -136,12 +132,11 @@ struct Renderer {
 
 	std::map<std::string, std::string> roms;
 
-	CONTROLS *joypad;
-
-	void main_view(CPU *cpu, PPU *ppu, MEMORY *mem, CARDRIDGE *card, CONTROLS *joy, std::string *file);
+	void main_view(std::string *file);
 	void file_menu_bar(std::string *file);
-	void debug_menu_bar(CARDRIDGE *card);
-	void palette_menu_bar(PPU *ppu);
+	void debug_menu_bar();
+	void palette_menu_bar();
+	void emulator_menu_bar();
 };
 
 void key_callback(GLFWwindow *window, int key, [[maybe_unused]] int scancode,

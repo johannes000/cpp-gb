@@ -1,5 +1,3 @@
-#include "CARDRIDGE.h"
-
 #include <fstream>
 #include <iostream>
 #include <cstring>

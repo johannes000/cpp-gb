@@ -1,4 +1,3 @@
-#include "PPU.h"
 #include <omp.h>
 #include <algorithm>
 

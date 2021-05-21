@@ -1,6 +1,7 @@
 #ifndef GAMEBOY_H_GUARD
 #define GAMEBOY_H_GUARD
 
+#include "type.h"
 #include "CARDRIDGE.h"
 #include "CPU.h"
 #include "MEMORY.h"

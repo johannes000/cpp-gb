@@ -4,9 +4,6 @@
 #include <vector>
 #include <map>
 
-#include "MEMORY.h"
-#include "type.h"
-
 enum class Flag {
 	z = 7, // Zero Flag
 	n = 6, // Add/Sub-Flag

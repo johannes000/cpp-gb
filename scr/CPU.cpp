@@ -7,7 +7,6 @@
  * @copyright Copyright (c) 2021
  */
 
-#include "CPU.h"
 #include "./CPU/helper.cpp"
 #include "./CPU/ARITHMETIC.cpp"
 #include "./CPU/CONTROL.cpp"

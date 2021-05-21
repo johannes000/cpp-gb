@@ -1,4 +1,3 @@
-#include "type.h"
 #include "gameboy.h"
 #include "MEMORY.cpp"
 #include "CPU.cpp"

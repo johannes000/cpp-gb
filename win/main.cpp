@@ -10,13 +10,15 @@
 #include <fmt/core.h>
 #include "spdlog/spdlog.h"
 #include "docopt/docopt.h"
+#include "type.h"
 #include "gameboy.cpp"
+#include "Renderer.h"
 #include "Renderer.cpp"
 
 #include <iostream>
 
 static const char USAGE[] =
-R"(Gameboy Emulator
+	R"(Gameboy Emulator
 
     Usage:
 	  cpp-gb-w -r <path_from_argument>
@@ -36,7 +38,7 @@ R"(Gameboy Emulator
       --version     	Show version.
 )";
 
-int main([[maybe_unused]] int argc, [[maybe_unused]] const char** argv) {
+int main([[maybe_unused]] int argc, [[maybe_unused]] const char **argv) {
 
 	gameboy gb;
 	std::string file = "";
@@ -46,11 +48,11 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] const char** argv) {
 
 	std::map<std::string, docopt::value>
 		args = docopt::docopt(USAGE,
-							  { argv + 1, argv + argc },
+							  {argv + 1, argv + argc},
 							  true,			// show help if requested
 							  "pre-alpha"); // version string
 
-	for (auto const& arg : args) {
+	for (auto const &arg : args) {
 		if (arg.first == "--skipboot" && arg.second.asBool() == true)
 			gb.skip_boot_rom = true;
 		if (arg.first == "-f" && arg.second.asBool() == true)
@@ -64,7 +66,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] const char** argv) {
 	const double target_duration = 1 / target_FPS;
 	double measured_duration = 0.0;
 
-	Renderer renderer(&gb.joypad);
+	Renderer renderer(&gb);
 
 	gb.debug.setDebugState(Debug_State::RUN);
 
@@ -78,25 +80,25 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] const char** argv) {
 
 			glfwPollEvents();
 			renderer.start_new_imgui_frame();
-			renderer.main_view(&gb.cpu, &gb.ppu, &gb.mem, &gb.card, &gb.joypad, &file);
+			renderer.main_view(&file);
 
 			if (rom_loaded) {
 				switch (gb.debug.get_debug_state()) {
-				case Debug_State::RUN:
-					gb.run_until_vblank();
-					break;
-				case Debug_State::STEP:
-					if (gb.debug.get_next_step()) {
-						gb.run_one_cycle();
-						gb.debug.handle_breakpoints();
-					}
-					break;
-				case Debug_State::BREAKPOINT:
-					gb.run_until_breakpoint();
-					break;
+					case Debug_State::RUN:
+						gb.run_until_vblank();
+						break;
+					case Debug_State::STEP:
+						if (gb.debug.get_next_step()) {
+							gb.run_one_cycle();
+							gb.debug.handle_breakpoints();
+						}
+						break;
+					case Debug_State::BREAKPOINT:
+						gb.run_until_breakpoint();
+						break;
 				}
 
-				renderer.update_views(&gb.ppu, &gb.debug);
+				renderer.update_views();
 			}
 			if (file[0] != 0) {
 				gb.card.create_sav_file();

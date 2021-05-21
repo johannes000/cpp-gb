@@ -5,8 +5,6 @@
 #ifndef CPP_GB_CONTROLS_H
 #define CPP_GB_CONTROLS_H
 
-#include "type.h"
-#include "MEMORY.h"
 // TODO: Platform Unabhängig machen
 #include "../win/Renderer.h"
 

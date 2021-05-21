@@ -3,8 +3,6 @@
 
 #include <vector>
 
-#include "type.h"
-
 constexpr u16 CARD_ROM_BANK_SIZE = 0x4000;
 constexpr u16 CARD_RAM_BANK_SIZE = 0x4000;
 
