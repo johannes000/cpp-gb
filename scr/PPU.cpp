@@ -1,4 +1,3 @@
-#include <omp.h>
 #include <algorithm>
 
 PPU::PPU(MEMORY *m, CPU *c)
@@ -34,7 +33,10 @@ bool PPU::update(const int cycles, bool skip_render) {
 			// MODE 3 : VRAM Zugriff Pixel Transfer
 			if (cycles_in_mode >= CLOCKS_SCANLINE_VRAM) {
 				cycles_in_mode -= CLOCKS_SCANLINE_VRAM;
+				// compare_ly_lyc();
 				set_lcd_mode(LCD_Mode::H_Blank);
+				if (lcd_state.h_blank_interrupt)
+					cpu->request_interrupt(Interrupt::LCD_Stat);
 			}
 			break;
 
@@ -54,8 +56,6 @@ bool PPU::update(const int cycles, bool skip_render) {
 					set_lcd_mode(LCD_Mode::OAM);
 					if (lcd_state.oam_interrupt)
 						cpu->request_interrupt(Interrupt::LCD_Stat);
-					if (lcd_state.h_blank_interrupt)
-						cpu->request_interrupt(Interrupt::LCD_Stat);
 				}
 			}
 			break;
@@ -70,9 +70,8 @@ bool PPU::update(const int cycles, bool skip_render) {
 					set_lcd_mode(LCD_Mode::OAM);
 					if (lcd_state.oam_interrupt)
 						cpu->request_interrupt(Interrupt::LCD_Stat);
-				} else {
-					compare_ly_lyc();
 				}
+				compare_ly_lyc();
 			}
 			break;
 	}

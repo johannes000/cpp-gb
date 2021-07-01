@@ -1,4 +1,12 @@
+#include "type.h"
+#include "CARDRIDGE.h"
+#include "CPU.h"
+#include "MEMORY.h"
+#include "PPU.h"
+#include "CONTROLS.h"
+#include "Debugger/Debugger.h"
 #include "gameboy.h"
+
 #include "MEMORY.cpp"
 #include "CPU.cpp"
 #include "CONTROLS.cpp"
@@ -86,10 +94,10 @@ void gameboy::run_until_vblank() {
 	bool vblank = false;
 	s32 cycles_sum = 0;
 	while (!vblank && debug.get_debug_state() == Debug_State::RUN && cycles_sum <= 702240) {
+		cpu.handle_interrupts();
 		const int last_cycle = cpu.update();
 		vblank = ppu.update(last_cycle, false);
 		cpu.handle_timer(last_cycle);
-		cpu.handle_interrupts();
 		cycles_sum += last_cycle;
 	}
 }

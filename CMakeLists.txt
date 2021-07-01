@@ -36,9 +36,10 @@ set(CONAN_EXTRA_REQUIRES  "openal/1.21.0
 include(cmake/Conan.cmake)
 run_conan()
 
-if (NOT MSVC)
-    set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wshadow -Wnon-virtual-dtor -Wnon-virtual-dtor -Wcast-align -Wnull-dereference -Woverloaded-virtual  -Wformat=2 ")
-else()
+# if (NOT MSVC)
+#     set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wshadow -Wnon-virtual-dtor -Wnon-virtual-dtor -Wcast-align -Wnull-dereference -Woverloaded-virtual  -Wformat=2 ")
+# else()
+if(MSVC)
     set(CMAKE_CXX_FLAGS "/W3 /EHa ")
 endif ()
 

@@ -8,15 +8,13 @@
  */
 
 #include <fmt/core.h>
-#include "spdlog/spdlog.h"
-#include "docopt/docopt.h"
+#include <spdlog/spdlog.h>
 #include "type.h"
 #include "gameboy.cpp"
 #include "Renderer.h"
 #include "Renderer.cpp"
 
-#include <iostream>
-
+#include <docopt/docopt.h>
 static const char USAGE[] =
 	R"(Gameboy Emulator
 
@@ -28,15 +26,22 @@ static const char USAGE[] =
 	  cpp-gb-w --version
 	  cpp-gb-w -f
 	  cpp-gb-w -a
+	  cpp-gb-w -e
+	  cpp-gb-w -e -s -f
 	  cpp-gb-w 
 
     Options:
 	  -r				Run chosen Rom at startup.
+	  -e				Boot without rom
 	  -f				Don't throttle the FPS
       -s --skipboot     Skip the boot animation.
       -h --help     	Show this screen.
       --version     	Show version.
 )";
+
+#ifndef _DEBUG
+spdlog::set_level(spdlog::level::err);
+#endif // DEBUG
 
 int main([[maybe_unused]] int argc, [[maybe_unused]] const char **argv) {
 
@@ -59,6 +64,9 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] const char **argv) {
 			gb.fps_drossel = false;
 		if (arg.first == "-a" && arg.second.asBool() == true) {
 			file = "C:/Users/knaub/source/repos/testroms/dmg-acid2.gb";
+		}
+		if (arg.first == "-e" && arg.second.asBool() == true) {
+			file = "";
 		}
 	}
 

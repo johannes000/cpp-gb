@@ -1,14 +1,6 @@
 #ifndef GAMEBOY_H_GUARD
 #define GAMEBOY_H_GUARD
 
-#include "type.h"
-#include "CARDRIDGE.h"
-#include "CPU.h"
-#include "MEMORY.h"
-#include "PPU.h"
-#include "CONTROLS.h"
-#include "Debugger/Debugger.h"
-
 #include <string>
 
 struct gameboy {
