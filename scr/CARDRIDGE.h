@@ -15,7 +15,6 @@ enum class RomRamBankSwitch {
 	ROM,
 	RAM,
 	undefined
-
 };
 
 enum class CType { // Cartridge Type
