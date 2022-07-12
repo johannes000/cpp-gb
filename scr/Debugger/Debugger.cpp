@@ -42,7 +42,6 @@ void Debugger::update_views() {
 }
 
 void Debugger::card_view() {
-	ImGui::Begin("Rominfo");
 
 	ImGui::Text("%s", cardridge->rom_info.title);
 	ImGui::Separator();
@@ -53,12 +52,9 @@ void Debugger::card_view() {
 	ImGui::Text("Ram Size: %s", cardridge->rom_info.ram_size_string());
 	ImGui::SameLine();
 	ImGui::Text("| Rom Size: %s", cardridge->rom_info.rom_size_string());
-
-	ImGui::End();
 }
 
 void Debugger::cpu_view() {
-	ImGui::Begin("CPU");
 
 	bool goto_pc = ImGui::Button("Goto PC");
 	ImGui::SameLine();
@@ -208,7 +204,6 @@ void Debugger::cpu_view() {
 	}
 
 	ImGui::EndChild();
-	ImGui::End();
 }
 
 void Debugger::reset() {}
@@ -230,7 +225,6 @@ void Debugger::disassemble() {
 }
 
 void Debugger::control_view() {
-	ImGui::Begin("Control");
 	CPU_Register cpu_regs = cpu->get_register();
 
 	ImGui::Text("AF = %04X", cpu_regs.AF);
@@ -289,12 +283,9 @@ void Debugger::control_view() {
 	ImGui::Text("TMA  %X", mem->read(TIMER_MODULO));
 	ImGui::SameLine();
 	ImGui::Text("TAC  %X", mem->read(TIMER_CONTROL));
-
-	ImGui::End();
 }
 
 void Debugger::memory_view() {
-	ImGui::Begin("Memory View");
 
 	ImGui::BeginChild("##scrollingregion", ImVec2(0, 300));
 	ImGuiListClipper clipper(0xFFFF / 0x10,
@@ -320,5 +311,4 @@ void Debugger::memory_view() {
 	}
 	clipper.End();
 	ImGui::EndChild();
-	ImGui::End();
 }

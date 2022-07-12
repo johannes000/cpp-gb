@@ -1,4 +1,3 @@
-
 # Created by https://www.toptal.com/developers/gitignore/api/visualstudio,c++,windows
 # Edit at https://www.toptal.com/developers/gitignore?templates=visualstudio,c++,windows
 
@@ -408,9 +407,6 @@ MigrationBackup/
 
 # End of https://www.toptal.com/developers/gitignore/api/visualstudio,c++,windows
 
-
-
-
 # Created by https://www.toptal.com/developers/gitignore/api/cmake,clion
 # Edit at https://www.toptal.com/developers/gitignore?templates=cmake,clion
 
@@ -528,7 +524,6 @@ _deps
 # External projects
 *-prefix/
 
-
 ### Ninja ###
 .ninja_deps
 .ninja_log
@@ -542,3 +537,7 @@ testroms/
 
 external/
 build/
+
+GPATH
+GRTAGS
+GTAGS

@@ -1,23 +1,20 @@
 {
     "configurations": [
         {
-            "name": "Win64",
+            "name": "Win32",
             "includePath": [
-                "${workspaceFolder}/**",
-                "${workspaceFolder}/external/*",
-                "C:/Users/knaub/.conan/data/*",
-                "C:/Users/knaub/.conan/data/**",
-                "C:/Users/knaub/.conan/data/imgui/1.82/_/_/package/3ba38a4c79ec751a2c8692bec628dd0fc8ad06c2/include",
-                "${default}"
+                "${default}",
+                "C:\\Users\\knaub\\.conan\\data\\imgui\\1.82\\_\\_\\package\\38046e5faf8391118beb351664dd52a22dc7a70d\\include"
+
             ],
             "defines": [
                 "_DEBUG",
                 "UNICODE",
                 "_UNICODE"
             ],
-            "windowsSdkVersion": "10.0.18362.0",
-            "intelliSenseMode": "msvc-x64",
-            "configurationProvider": "ms-vscode.cmake-tools"
+            "windowsSdkVersion": "10.0.19041.0",
+            "compilerPath": "C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/VC/Tools/MSVC/14.29.30133/bin/Hostx64/x64/cl.exe",
+            "compileCommands": "${workspaceFolder}/build/compile_commands.json"
         }
     ],
     "version": 4

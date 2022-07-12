@@ -15,19 +15,19 @@ Todo:
   ☐ GameBoy Color @low
   
   
-  Done:
-    ✔ .Sav Dateien für MBC1 @done(27-06-22)
-    ✔ Sprites @done(17-04-21)
-    ✔ FPS drossel @done(18-04-21)
-    ✔ Bootrom Skippen @done(18-04-21)
-    ✔ Windows File Dialog @done(19-04-21)
-    ✔ Test roms ohne Rendern durchlaufen lassen @done(20-04-21)
-    ✔ Unit Test @done(21-04-21)
-    ✔ PPU Interrupts @done(23-04-21)
-    ✔ Window Layer @done(23-04-21)
-    ✔ Blarggs CPU Tests Bestehen @done(01-05-21)
-    ✔ MBC1 @done(04-05-21)
-    ✔ 16x8 Sprites Fixen @done(04-05-21)
-    ✔ Timer fixen @done(04-05-21)
-    ✔ Menu Bar @done(08-05-21)
+Done:
+  ✔ .Sav Dateien für MBC1 @done(27-06-22)
+  ✔ Sprites @done(17-04-21)
+  ✔ FPS drossel @done(18-04-21)
+  ✔ Bootrom Skippen @done(18-04-21)
+  ✔ Windows File Dialog @done(19-04-21)
+  ✔ Test roms ohne Rendern durchlaufen lassen @done(20-04-21)
+  ✔ Unit Test @done(21-04-21)
+  ✔ PPU Interrupts @done(23-04-21)
+  ✔ Window Layer @done(23-04-21)
+  ✔ Blarggs CPU Tests Bestehen @done(01-05-21)
+  ✔ MBC1 @done(04-05-21)
+  ✔ 16x8 Sprites Fixen @done(04-05-21)
+  ✔ Timer fixen @done(04-05-21)
+  ✔ Menu Bar @done(08-05-21)
 

@@ -106,33 +106,26 @@ struct Renderer {
 	bool show_demo_window = false;
 	bool show_another_window = false;
 	bool in_debug_show_fps = true;
-	bool in_debug_cpu_debuger = false;
-	bool in_debug_small_lcd_window = false;
-	bool in_debug_tile_buffer = false;
-	bool in_debug_card_view = false;
-	bool in_debug_memory_view = false;
-	bool in_debug_controler_view = false;
 
 	void *frame_buffer = nullptr;
 	GLuint frame_buffer_id = 0;
 
 	gameboy *gb;
 
-	void update_views();
-
 	void update_tile_buffer();
 
-	void gameboy_lcd_window();
-
-	void tile_buffer_view();
-
+	void update_views();
 	void menu();
 
 	void show_fps() const;
 
 	std::map<std::string, std::string> roms;
 
+	void debug_view();
+	void gameboy_lcd_window();
+	void tile_buffer_view();
 	void main_view(std::string *file);
+
 	void file_menu_bar(std::string *file);
 	void debug_menu_bar();
 	void palette_menu_bar();

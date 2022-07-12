@@ -186,7 +186,7 @@ void Renderer::render() const {
 	glViewport(0, 0, display_w, display_h);
 	glClearColor(bg_color.x, bg_color.y, bg_color.z, bg_color.w);
 	glClear(GL_COLOR_BUFFER_BIT);
-	if (!in_debug_small_lcd_window) {
+	if (!show_debug_views) {
 		// TODO: Echte Position Berechnen
 		int real_display_h = display_h - menu_bar_height;
 		int dstX0 = ((real_display_h * frame_buffer_ratio) / 2) - 160;
@@ -198,6 +198,7 @@ void Renderer::render() const {
 						  dstX0, dstY0, dstX1, dstY1,
 						  GL_COLOR_BUFFER_BIT, GL_NEAREST);
 	}
+
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
 	glfwSwapBuffers(window);
@@ -209,25 +210,12 @@ void Renderer::start_new_imgui_frame() {
 }
 
 void Renderer::update_views() {
-
 	update_texture(frame_texture, gb->ppu.get_lcd_buffer());
-
 	if (show_demo_window)
 		ImGui::ShowDemoWindow(&show_demo_window);
-
-	if (in_debug_small_lcd_window)
-		gameboy_lcd_window();
-
-	if (in_debug_tile_buffer)
-		tile_buffer_view();
-	if (in_debug_card_view)
-		gb->debug.card_view();
-	if (in_debug_cpu_debuger)
-		gb->debug.cpu_view();
-	if (in_debug_memory_view)
-		gb->debug.memory_view();
-	if (in_debug_controler_view)
-		gb->debug.control_view();
+	show_debug_views = true;
+	if (show_debug_views)
+		debug_view();
 }
 
 void Renderer::update_tile_buffer() {
@@ -265,7 +253,7 @@ bool Renderer::load_texture(GLuint *textureHandler, int width, int height,
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA,
 				 GL_UNSIGNED_BYTE, data);
-	//glBindTexture(GL_TEXTURE_2D, 0);
+	// glBindTexture(GL_TEXTURE_2D, 0);
 
 	return true;
 }
@@ -284,16 +272,14 @@ void Renderer::update_texture(Texture texture, const void *data) {
 void Renderer::gameboy_lcd_window() {
 	f32 ratio = static_cast<f32>(GB_LCD_SIZE_WIDTH) / static_cast<f32>(GB_LCD_SIZE_HEIGHT);
 
+	ImGui::BeginChild("LCD");
 	// int w = ImGui::GetIO().DisplaySize.x;
 	int h = ImGui::GetIO().DisplaySize.y / 2;
-
-	ImGui::Begin("Main Window");
 
 	ImGui::Image((ImTextureID)(intptr_t)frame_texture.texture_handler, ImVec2(h * ratio, h));
 
 	show_fps();
-
-	ImGui::End();
+	ImGui::EndChild();
 }
 
 void Renderer::tile_buffer_view() {
@@ -302,7 +288,7 @@ void Renderer::tile_buffer_view() {
 		update_tile_buffer();
 		update_texture(tiles_texture, &tile_buffer[0]);
 	}
-	ImGui::Begin("Tile Buffer");
+	ImGui::BeginChild("Tile Buffer");
 
 	ImGui::Image((ImTextureID)(intptr_t)tiles_texture.texture_handler,
 				 ImVec2(TILE_MAP_WIDTH * 2, TILE_MAP_HEIGHT * 2));
@@ -329,8 +315,7 @@ void Renderer::tile_buffer_view() {
 		}
 		ImGui::TreePop();
 	}
-
-	ImGui::End();
+	ImGui::EndChild();
 }
 
 void Renderer::show_fps() const {
@@ -340,6 +325,17 @@ void Renderer::show_fps() const {
 						   ImGui::GetIO().Framerate,
 						   1000.0f / ImGui::GetIO().Framerate);
 	}
+}
+
+void Renderer::debug_view() {
+	ImGui::Begin("Debugger");
+	gameboy_lcd_window();
+	tile_buffer_view();
+	gb->debug.card_view();
+	gb->debug.cpu_view();
+	gb->debug.memory_view();
+	gb->debug.control_view();
+	ImGui::End();
 }
 
 void key_callback(GLFWwindow *window, int key, [[maybe_unused]] int scancode,
@@ -388,22 +384,7 @@ void Renderer::debug_menu_bar() {
 	if (ImGui::BeginMenu("Debug")) {
 		if (ImGui::MenuItem("Show FPS", NULL, &in_debug_show_fps, gb->card.rom_loaded)) {
 		}
-		if (ImGui::MenuItem("CPU", NULL, &in_debug_cpu_debuger, gb->card.rom_loaded)) {
-			in_debug_small_lcd_window = true;
-		}
-		if (ImGui::MenuItem("Small LCD Window", NULL, &in_debug_small_lcd_window, gb->card.rom_loaded)) {
-		}
-		if (ImGui::MenuItem("Tile Buffer", NULL, &in_debug_tile_buffer, gb->card.rom_loaded)) {
-			in_debug_small_lcd_window = true;
-		}
-		if (ImGui::MenuItem("Register Info", NULL, &in_debug_card_view, gb->card.rom_loaded)) {
-			in_debug_small_lcd_window = true;
-		}
-		if (ImGui::MenuItem("Memory View", NULL, &in_debug_memory_view, gb->card.rom_loaded)) {
-			in_debug_small_lcd_window = true;
-		}
-		if (ImGui::MenuItem("Joypad Info", NULL, &in_debug_controler_view, gb->card.rom_loaded)) {
-			in_debug_small_lcd_window = true;
+		if (ImGui::MenuItem("CPU", NULL, &show_debug_views, gb->card.rom_loaded)) {
 		}
 
 		if (ImGui::MenuItem("Demo Window", NULL, &show_demo_window, gb->card.rom_loaded)) {
