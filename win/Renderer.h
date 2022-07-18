@@ -122,7 +122,6 @@ struct Renderer {
 	std::map<std::string, std::string> roms;
 
 	void debug_view();
-	void gameboy_lcd_window();
 	void tile_buffer_view();
 	void main_view(std::string *file);
 

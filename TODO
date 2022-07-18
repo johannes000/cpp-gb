@@ -1,21 +1,21 @@
 
 Todo:
-  ☐ Debug UI ändern @high
-    ☐ Alles in einem View nicht 5
   ☐ Acid 2 Test @high 
   ☐ Bootrom hardcoden @low
   ☐ PPU Windows fixen @high
   ☐ Sound @high
   ☐ MBCs OOP
-    ☐ MBC3 @low
-    ☐ MBC2 @low
-    ☐ MBC5 @low
-    ☐ MBC6 @low
-    ☐ MBC7 @low
+  ☐ MBC3 @low
+  ☐ MBC2 @low
+  ☐ MBC5 @low
+  ☐ MBC6 @low
+  ☐ MBC7 @low
   ☐ GameBoy Color @low
   
   
-Done:
+  Done:
+  ✔ Debug UI ändern @high @done(18-07-22)
+    ✔ Alles in einem View nicht 5 @done(18-07-22)
   ✔ .Sav Dateien für MBC1 @done(27-06-22)
   ✔ Sprites @done(17-04-21)
   ✔ FPS drossel @done(18-04-21)

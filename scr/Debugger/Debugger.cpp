@@ -287,7 +287,7 @@ void Debugger::control_view() {
 
 void Debugger::memory_view() {
 
-	ImGui::BeginChild("##scrollingregion", ImVec2(0, 300));
+	ImGui::BeginChild("##scrollingregion");
 	ImGuiListClipper clipper(0xFFFF / 0x10,
 							 ImGui::GetTextLineHeightWithSpacing());
 	for (int mem_line = clipper.DisplayStart; mem_line <= clipper.DisplayEnd;

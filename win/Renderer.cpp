@@ -213,7 +213,6 @@ void Renderer::update_views() {
 	update_texture(frame_texture, gb->ppu.get_lcd_buffer());
 	if (show_demo_window)
 		ImGui::ShowDemoWindow(&show_demo_window);
-	show_debug_views = true;
 	if (show_debug_views)
 		debug_view();
 }
@@ -269,26 +268,12 @@ void Renderer::update_texture(Texture texture, const void *data) {
 	return update_texture(texture.texture_ptr, texture.width, texture.height, data);
 }
 
-void Renderer::gameboy_lcd_window() {
-	f32 ratio = static_cast<f32>(GB_LCD_SIZE_WIDTH) / static_cast<f32>(GB_LCD_SIZE_HEIGHT);
-
-	ImGui::BeginChild("LCD");
-	// int w = ImGui::GetIO().DisplaySize.x;
-	int h = ImGui::GetIO().DisplaySize.y / 2;
-
-	ImGui::Image((ImTextureID)(intptr_t)frame_texture.texture_handler, ImVec2(h * ratio, h));
-
-	show_fps();
-	ImGui::EndChild();
-}
-
 void Renderer::tile_buffer_view() {
 	static int counter = 0;
 	if (!(counter++ % 60)) {
 		update_tile_buffer();
 		update_texture(tiles_texture, &tile_buffer[0]);
 	}
-	ImGui::BeginChild("Tile Buffer");
 
 	ImGui::Image((ImTextureID)(intptr_t)tiles_texture.texture_handler,
 				 ImVec2(TILE_MAP_WIDTH * 2, TILE_MAP_HEIGHT * 2));
@@ -315,7 +300,6 @@ void Renderer::tile_buffer_view() {
 		}
 		ImGui::TreePop();
 	}
-	ImGui::EndChild();
 }
 
 void Renderer::show_fps() const {
@@ -328,13 +312,50 @@ void Renderer::show_fps() const {
 }
 
 void Renderer::debug_view() {
-	ImGui::Begin("Debugger");
-	gameboy_lcd_window();
-	tile_buffer_view();
-	gb->debug.card_view();
+	f32 ratio = static_cast<f32>(GB_LCD_SIZE_WIDTH) / static_cast<f32>(GB_LCD_SIZE_HEIGHT);
+	ImVec2 win_size = ImGui::GetIO().DisplaySize;
+
+	f32 w = win_size.x;
+	f32 third_w = w / 3;
+	f32 h = win_size.y;
+	f32 half_h = (h - ImGui::GetFrameHeight()) / 2;
+	ImVec2 lcd_size = {half_h * ratio, half_h};
+
+	ImGui::SetNextWindowSize({w, h - ImGui::GetFrameHeight()});
+	ImGui::SetNextWindowPos({0, ImGui::GetFrameHeight()});
+	ImGuiWindowFlags f = ImGuiWindowFlags_NoDecoration;
+	ImGui::Begin("Debugger", false, f);
+
+	ImGui::BeginChild("CPU", {third_w, half_h});
 	gb->debug.cpu_view();
+	ImGui::EndChild();
+
+	ImGui::SameLine();
+	ImGui::BeginChild("Tile Buffer", {w - third_w - half_h * ratio, half_h});
+	tile_buffer_view();
+	ImGui::EndChild();
+
+	ImGui::SameLine();
+	ImGui::BeginChild("LCD", lcd_size);
+	ImGui::Image((ImTextureID)(intptr_t)frame_texture.texture_handler, lcd_size);
+	show_fps();
+	ImGui::EndChild();
+
+	ImGui::Separator();
+
+	ImGui::BeginChild("Memory", {third_w, half_h});
 	gb->debug.memory_view();
+	ImGui::EndChildFrame();
+
+	ImGui::SameLine();
+	ImGui::BeginChild("Chard View", {third_w, half_h});
+	gb->debug.card_view();
+	ImGui::EndChildFrame();
+
+	ImGui::SameLine();
+	ImGui::BeginChild("Control", {third_w, half_h}, false, f);
 	gb->debug.control_view();
+	ImGui::EndChildFrame();
 	ImGui::End();
 }
 
@@ -384,9 +405,8 @@ void Renderer::debug_menu_bar() {
 	if (ImGui::BeginMenu("Debug")) {
 		if (ImGui::MenuItem("Show FPS", NULL, &in_debug_show_fps, gb->card.rom_loaded)) {
 		}
-		if (ImGui::MenuItem("CPU", NULL, &show_debug_views, gb->card.rom_loaded)) {
+		if (ImGui::MenuItem("Debugger", NULL, &show_debug_views, gb->card.rom_loaded)) {
 		}
-
 		if (ImGui::MenuItem("Demo Window", NULL, &show_demo_window, gb->card.rom_loaded)) {
 		}
 		ImGui::EndMenu();
