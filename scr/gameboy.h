@@ -11,6 +11,7 @@ struct gameboy {
 	CPU cpu;
 	PPU ppu;
 	CONTROLS joypad;
+	APU apu;
 	Debugger debug;
 
 	void run_until_vblank();

@@ -4,6 +4,7 @@
 #include "MEMORY.h"
 #include "PPU.h"
 #include "CONTROLS.h"
+#include "APU.h"
 #include "Debugger/Debugger.h"
 #include "gameboy.h"
 
@@ -12,6 +13,7 @@
 #include "CONTROLS.cpp"
 #include "CARDRIDGE.cpp"
 #include "PPU.cpp"
+#include "APU.cpp"
 #include "Debugger/Debugger.cpp"
 
 gameboy::gameboy()
@@ -19,10 +21,12 @@ gameboy::gameboy()
 	  cpu(&mem),
 	  ppu(&mem, &cpu),
 	  joypad(&mem),
-	  debug(&cpu, &ppu, &mem, &card, &joypad) {
-	bool in_test_mode [[maybe_unused]] = false;
-	bool skip_boot_rom [[maybe_unused]] = true;
-	bool fps_drossel [[maybe_unused]] = true;
+	  apu(&mem),
+	  debug(&cpu, &ppu, &mem, &card, &joypad),
+
+	  in_test_mode(false),
+	  skip_boot_rom(true),
+	  fps_drossel(true) {
 	reset(skip_boot_rom);
 }
 

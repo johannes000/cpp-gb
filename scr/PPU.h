@@ -124,7 +124,6 @@ public:
 			u8 stub : 1;			  // Bit 7 - stub
 		};
 	} lcd_state{};
-
 	void set_lcd_mode(LCD_Mode mode);
 
 	void update_lcd_mode();

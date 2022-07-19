@@ -140,10 +140,10 @@ u8 PPU::read(const u16 &addr) const {
 			case LCD_SCX:
 				return lcd_register.LCD_SCX;
 			case LCD_LY:
-				//return 0x90;
+				// return 0x90;
 				return lcd_register.LCD_LY;
 			case LCD_LYC:
-				//return 0x90;
+				// return 0x90;
 				return lcd_register.LCD_LYC;
 			case LCD_WY:
 				return lcd_register.LCD_WY;
@@ -337,7 +337,7 @@ void PPU::buffer_sprite_line(const u8 line, std::vector<u8> *bg_line) {
 }
 
 std::vector<u8> PPU::buffer_window_line(const u8 line) {
-	//TODO:	Winpos < 7 wird nicht richtig angezeigt
+	// TODO:	Winpos < 7 wird nicht richtig angezeigt
 	std::vector<u8> window_line = std::vector<u8>(GB_LCD_SIZE_WIDTH, 5);
 
 	if (line >= GB_LCD_SIZE_HEIGHT)
