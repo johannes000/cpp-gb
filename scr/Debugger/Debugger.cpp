@@ -92,7 +92,7 @@ void Debugger::cpu_view() {
 
 	// DECOMPILER
 	ImGui::Separator();
-	ImGui::BeginChild("##scrollingregion", ImVec2(0, 400));
+	ImGui::BeginChild("##scrollingregion", ImVec2(0, 350));
 
 	// DISASSAMBLER
 	auto pc = cpu->get_pc();
@@ -286,29 +286,26 @@ void Debugger::control_view() {
 }
 
 void Debugger::memory_view() {
-
-	ImGui::BeginChild("##scrollingregion");
-	ImGuiListClipper clipper(0xFFFF / 0x10,
-							 ImGui::GetTextLineHeightWithSpacing());
-	for (int mem_line = clipper.DisplayStart; mem_line <= clipper.DisplayEnd;
-		 mem_line++) {
-		int mem_line_addr = mem_line * 0x10;
-		ImGui::Text("0x%04X ", mem_line_addr);
-		for (int i = 0; i < 16; ++i) {
-			ImGui::SameLine();
-			u8 data = mem->read(mem_line_addr + i);
-			if (data == 0x00)
-				ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.5f, 0.5f, 0.5f, 1.0f));
-			ImGui::Text("%02X", data);
-			if (i == 7) {
-				ImGui::SameLine(120.0f);
+	ImGuiListClipper clipper(0xFFFF / 16, ImGui::GetTextLineHeightWithSpacing());
+	while (clipper.Step()) {
+		for (int mem_line = clipper.DisplayStart; mem_line <= clipper.DisplayEnd; mem_line++) {
+			int mem_line_addr = mem_line * 0x10;
+			ImGui::Text("0x%04X ", mem_line_addr);
+			for (int i = 0; i < 16; ++i) {
+				ImGui::SameLine();
+				u8 data = mem->read(mem_line_addr + i);
+				if (data == 0x00)
+					ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.5f, 0.5f, 0.5f, 1.0f));
+				ImGui::Text("%02X", data);
+				if (i == 7) {
+					ImGui::SameLine(120.0f);
+				}
+				if (data == 0x00)
+					ImGui::PopStyleColor(1);
+				// if ((mem_line_addr + i) == 0xFEFF)
+				// 	ImGui::Separator();
 			}
-			if (data == 0x00)
-				ImGui::PopStyleColor(1);
-			if ((mem_line_addr + i) == 0xFEFF)
-				ImGui::Separator();
 		}
 	}
 	clipper.End();
-	ImGui::EndChild();
 }

@@ -343,11 +343,12 @@ void Renderer::debug_view() {
 
 	ImGui::Separator();
 
-	ImGui::BeginChild("Memory", {third_w, half_h});
+	f32 memory_w = 420;
+	ImGui::BeginChild("Memory", {memory_w, half_h}, false, ImGuiComboFlags_None);
 	gb->debug.memory_view();
 	ImGui::EndChildFrame();
 
-	f32 third_of_rest_w = (w - third_w) / 3;
+	f32 third_of_rest_w = (w - memory_w) / 3;
 
 	ImGui::SameLine();
 	ImGui::BeginChild("Chard View", {third_of_rest_w, half_h});
