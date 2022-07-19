@@ -1,10 +1,10 @@
 #include "type.h"
 #include "CARDRIDGE.h"
 #include "CPU.h"
-#include "MEMORY.h"
+#include "APU.h"
 #include "PPU.h"
 #include "CONTROLS.h"
-#include "APU.h"
+#include "MEMORY.h"
 #include "Debugger/Debugger.h"
 #include "gameboy.h"
 
@@ -17,12 +17,12 @@
 #include "Debugger/Debugger.cpp"
 
 gameboy::gameboy()
-	: mem(&cpu, &card, &ppu, &joypad),
+	: mem(&cpu, &card, &ppu, &joypad, &apu),
 	  cpu(&mem),
 	  ppu(&mem, &cpu),
 	  joypad(&mem),
 	  apu(&mem),
-	  debug(&cpu, &ppu, &mem, &card, &joypad),
+	  debug(&cpu, &ppu, &mem, &card, &joypad, &apu),
 
 	  in_test_mode(false),
 	  skip_boot_rom(true),

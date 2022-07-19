@@ -11,6 +11,10 @@
 #include <spdlog/spdlog.h>
 #include "type.h"
 #include "gameboy.cpp"
+
+#include "Audio.h"
+#include "Audio.cpp"
+
 #include "Renderer.h"
 #include "Renderer.cpp"
 
@@ -74,7 +78,8 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] const char **argv) {
 	const double target_duration = 1 / target_FPS;
 	double measured_duration = 0.0;
 
-	Renderer renderer(&gb);
+	Audio audio(&gb);
+	Renderer renderer(&gb, &audio);
 
 	gb.debug.setDebugState(Debug_State::RUN);
 

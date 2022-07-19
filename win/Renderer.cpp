@@ -5,7 +5,7 @@
 #include <charconv>
 #include <windows.h>
 
-Renderer::Renderer(gameboy *GB) : gb(GB) {
+Renderer::Renderer(gameboy *g, Audio *a) : gb(g), audio(a) {
 	init_window();
 
 	glfwSetWindowUserPointer(window, (void *)&gb->joypad);
@@ -347,13 +347,20 @@ void Renderer::debug_view() {
 	gb->debug.memory_view();
 	ImGui::EndChildFrame();
 
+	f32 third_of_rest_w = (w - third_w) / 3;
+
 	ImGui::SameLine();
-	ImGui::BeginChild("Chard View", {third_w, half_h});
+	ImGui::BeginChild("Chard View", {third_of_rest_w, half_h});
 	gb->debug.card_view();
 	ImGui::EndChildFrame();
 
 	ImGui::SameLine();
-	ImGui::BeginChild("Control", {third_w, half_h}, false, f);
+	ImGui::BeginChild("APU", {third_of_rest_w, half_h});
+	audio->audio_view();
+	ImGui::EndChild();
+
+	ImGui::SameLine();
+	ImGui::BeginChild("Control", {third_of_rest_w, half_h}, false, f);
 	gb->debug.control_view();
 	ImGui::EndChildFrame();
 	ImGui::End();

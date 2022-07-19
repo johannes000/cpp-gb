@@ -7,7 +7,7 @@ class CARDRIDGE;
 class CONTROLS;
 class MEMORY {
 public:
-	MEMORY(CPU *c, CARDRIDGE *card, PPU *p, CONTROLS *j);
+	MEMORY(CPU *c, CARDRIDGE *card, PPU *p, CONTROLS *j, APU *a);
 
 	u8 read(const u16 &addr);
 
@@ -30,6 +30,7 @@ private:
 	PPU *ppu;
 	CPU *cpu;
 	CONTROLS *joypad;
+	APU *apu;
 
 	std::vector<u8> memory;
 	bool skip_boot = false;

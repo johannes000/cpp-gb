@@ -32,8 +32,7 @@ class CONTROLS;
 
 class Debugger {
 public:
-	explicit Debugger(CPU *c, PPU *p, MEMORY *m, CARDRIDGE *card,
-					  CONTROLS *joypad);
+	explicit Debugger(CPU *c, PPU *p, MEMORY *m, CARDRIDGE *card, CONTROLS *joy, APU *a);
 
 	~Debugger();
 
@@ -51,6 +50,7 @@ private:
 	MEMORY *mem;
 	CARDRIDGE *cardridge;
 	CONTROLS *joypad;
+	APU *apu;
 
 	Debug_State debug_state;
 

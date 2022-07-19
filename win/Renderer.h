@@ -54,10 +54,16 @@ struct Texture {
 	int height;
 	Pixel_a const *data_ptr = nullptr;
 };
+
+struct Audio;
+
 struct Renderer {
 	GLFWwindow *window{};
 
-	explicit Renderer(gameboy *gb);
+	Renderer(gameboy *g, Audio *a);
+
+	Audio *audio;
+	gameboy *gb;
 
 	void init_window();
 
@@ -65,7 +71,7 @@ struct Renderer {
 
 	void terminate_window() const;
 
-	virtual ~Renderer();
+	~Renderer();
 
 	void render() const;
 
@@ -109,8 +115,6 @@ struct Renderer {
 
 	void *frame_buffer = nullptr;
 	GLuint frame_buffer_id = 0;
-
-	gameboy *gb;
 
 	void update_tile_buffer();
 

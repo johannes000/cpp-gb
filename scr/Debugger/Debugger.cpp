@@ -6,7 +6,7 @@
 #include <algorithm>
 #include <vector>
 
-Debugger::Debugger(CPU *c, PPU *p, MEMORY *m, CARDRIDGE *card, CONTROLS *joy)
+Debugger::Debugger(CPU *c, PPU *p, MEMORY *m, CARDRIDGE *card, CONTROLS *joy, APU *a)
 	: hit_breakpoint(false),
 	  cpu(c),
 	  ppu(p),

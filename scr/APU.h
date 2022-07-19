@@ -13,6 +13,8 @@ public:
 
 	void write_u16(const u16 &addr, const u16 &data) const;
 
+	void apu_view();
+
 private:
 	MEMORY *mem;
 };

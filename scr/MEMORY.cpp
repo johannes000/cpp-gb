@@ -2,8 +2,8 @@
 #include <fstream>
 #include <windows.h>
 
-MEMORY::MEMORY(CPU *c, CARDRIDGE *card, PPU *p, CONTROLS *j)
-	: cardridge(card), ppu(p), cpu(c), joypad(j) {
+MEMORY::MEMORY(CPU *c, CARDRIDGE *card, PPU *p, CONTROLS *j,APU *a)
+	: cardridge(card), ppu(p), cpu(c), joypad(j) ,apu(a){
 }
 
 void MEMORY::reset() {
