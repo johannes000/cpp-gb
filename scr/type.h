@@ -100,6 +100,33 @@ constexpr int OSCILLATOR_CLOCK_FREQ = 4194304;
 
 constexpr u16 DMA_TRANSFER = 0xFF46; // DMA Transfer and Start Address (R/W)
 
+// APU ADRESSEN
+// Sound Channel 1 - Tone & Sweep
+constexpr u16 NR10 = 0xFF10; // FF10 - NR10 - Channel 1 Sweep register (R/W)
+constexpr u16 NR11 = 0xFF11; // FF11 - NR11 - Channel 1 Sound length/Wave pattern duty (R/W)
+constexpr u16 NR12 = 0xFF12; // FF12 - NR12 - Channel 1 Volume Envelope (R/W)
+constexpr u16 NR13 = 0xFF13; // FF13 - NR13 - Channel 1 Frequency lo (Write Only)
+constexpr u16 NR14 = 0xFF14; // FF14 - NR14 - Channel 1 Frequency hi (R/W)
+// Sound Channel 2 - Tone
+constexpr u16 NR21 = 0xFF16; // FF16 - NR21 - Channel 2 Sound Length/Wave Pattern Duty (R/W)
+constexpr u16 NR22 = 0xFF17; // FF17 - NR22 - Channel 2 Volume Envelope (R/W)
+constexpr u16 NR23 = 0xFF18; // FF18 - NR23 - Channel 2 Frequency lo data (W)
+constexpr u16 NR24 = 0xFF19; // FF19 - NR24 - Channel 2 Frequency hi data (R/W)
+// Sound Channel 3 - Wave Output
+constexpr u16 NR30 = 0xFF1A; // FF1A - NR30 - Channel 3 Sound on/off (R/W)
+constexpr u16 NR31 = 0xFF1B; // FF1B - NR31 - Channel 3 Sound Length (W)
+constexpr u16 NR32 = 0xFF1C; // FF1C - NR32 - Channel 3 Select output level (R/W)
+constexpr u16 NR33 = 0xFF1D; // FF1D - NR33 - Channel 3 Frequency’s lower data (W)
+constexpr u16 NR34 = 0xFF1E; // FF1E - NR34 - Channel 3 Frequency’s higher data (R/W)
+// Sound Channel 4 - Noise
+constexpr u16 NR41 = 0xFF20; // FF20 - NR41 - Channel 4 Sound Length (W)
+constexpr u16 NR42 = 0xFF21; // FF21 - NR42 - Channel 4 Volume Envelope (R/W)
+constexpr u16 NR43 = 0xFF22; // FF22 - NR43 - Channel 4 Polynomial Counter (R/W)
+constexpr u16 NR44 = 0xFF23; // FF23 - NR44 - Channel 4 Counter/consecutive; Inital (R/W)
+constexpr u16 NR50 = 0xFF24; // FF24 - NR50 - Channel control / ON-OFF / Volume (R/W)
+constexpr u16 NR51 = 0xFF25; // FF25 - NR51 - Selection of Sound output terminal (R/W)
+constexpr u16 NR52 = 0xFF26; // FF26 - NR52 - Sound on/off
+
 constexpr int VERTICAL_REFRESH_CYCLES = 70224;
 
 enum class Interrupt {

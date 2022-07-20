@@ -74,9 +74,9 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] const char **argv) {
 		}
 	}
 
-	const double target_FPS = 60;
-	const double target_duration = 1 / target_FPS;
-	double measured_duration = 0.0;
+	const f64 target_FPS = 60;
+	const f64 target_duration = 1 / target_FPS;
+	f64 measured_duration = 0.0;
 
 	Audio audio(&gb);
 	Renderer renderer(&gb, &audio);
@@ -85,8 +85,8 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] const char **argv) {
 
 	while (!glfwWindowShouldClose(renderer.window)) {
 
-		double t_start = glfwGetTime();
-		double d_time = t_start - measured_duration;
+		f64 t_start = glfwGetTime();
+		f64 d_time = t_start - measured_duration;
 
 		if (d_time >= target_duration || !gb.fps_drossel) {
 			measured_duration = t_start;

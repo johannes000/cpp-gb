@@ -27,8 +27,7 @@ include(cmake/Doxygen.cmake)
 enable_doxygen()
 
 
-set(CONAN_EXTRA_REQUIRES  "openal/1.21.0
-                           glfw/3.3.4
+set(CONAN_EXTRA_REQUIRES  "glfw/3.3.4
                            opengl/system
                            imgui/1.82
                            ")
