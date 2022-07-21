@@ -272,7 +272,7 @@ void CARDRIDGE::writeNoMBC(const u16 addr, const u8 &data) {
 	if (addr >= CARD_EXTERNAL_RAM && addr <= CARD_EXTERNAL_RAM_END && rom_info.ram_size != RAMSize::None && ram_enabled) {
 		ram[0].at(addr - CARD_EXTERNAL_RAM) = data;
 	} else {
-		//std::cerr << "Hier Sollte nicht Reingeschrieben werden! Addr:" << addr << std::endl;
+		// std::cerr << "Hier Sollte nicht Reingeschrieben werden! Addr:" << addr << std::endl;
 	}
 }
 
@@ -417,7 +417,7 @@ bool CARDRIDGE::load_boot_rom() {
 	boot.clear();
 
 	const char *boot_rom_path = "C:/Users/knaub/source/repos/testroms/DMG_ROM.bin";
-	//const char *boot_rom_path = "C:/Users/knaub/source/repos/testroms/gbc_bios.bin";
+	// const char *boot_rom_path = "C:/Users/knaub/source/repos/testroms/gbc_bios.bin";
 	std::ifstream is(boot_rom_path, std::ios::binary);
 	if (!is) {
 		spdlog::error("Kann die Boot Rom nicht öffnen! {}", boot_rom_path);

@@ -3,7 +3,7 @@
 //
 
 #include <charconv>
-#include <windows.h>
+#include "windows.h"
 
 Renderer::Renderer(gameboy *g, Audio *a) : gb(g), audio(a) {
 	init_window();
@@ -171,7 +171,6 @@ void Renderer::terminate_window() const {
 	glfwTerminate();
 }
 void Renderer::bind_framebuffer(GLuint *frame_buffer_handle, GLuint *texture_handle) {
-
 	glGenFramebuffers(1, frame_buffer_handle);
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, *frame_buffer_handle);
 	glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,

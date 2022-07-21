@@ -541,3 +541,5 @@ build/
 GPATH
 GRTAGS
 GTAGS
+
+.vscode/

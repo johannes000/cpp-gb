@@ -18,6 +18,10 @@
 #include "Renderer.h"
 #include "Renderer.cpp"
 
+// Für den Windows WindowHnd
+#define GLFW_EXPOSE_NATIVE_WIN32
+#include <GLFW/glfw3native.h>
+
 #include <docopt/docopt.h>
 static const char USAGE[] =
 	R"(Gameboy Emulator
@@ -80,6 +84,9 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] const char **argv) {
 
 	Audio audio(&gb);
 	Renderer renderer(&gb, &audio);
+
+	HWND hwnd = glfwGetWin32Window(renderer.window);
+	audio.init_sound(hwnd);
 
 	gb.debug.setDebugState(Debug_State::RUN);
 

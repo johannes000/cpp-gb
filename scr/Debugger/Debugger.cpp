@@ -302,8 +302,8 @@ void Debugger::memory_view() {
 				}
 				if (data == 0x00)
 					ImGui::PopStyleColor(1);
-				// if ((mem_line_addr + i) == 0xFEFF)
-				// 	ImGui::Separator();
+				if ((mem_line_addr + i) == 0xFEFF)
+					ImGui::Separator();
 			}
 		}
 	}

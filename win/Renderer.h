@@ -46,7 +46,9 @@ using namespace gl;
 
 class Debugger;
 class CONTROLS;
+class Audio;
 struct gameboy;
+
 struct Texture {
 	GLuint texture_handler;
 	GLuint *texture_ptr = &texture_handler;
@@ -55,15 +57,13 @@ struct Texture {
 	Pixel_a const *data_ptr = nullptr;
 };
 
-struct Audio;
-
 struct Renderer {
 	GLFWwindow *window{};
 
 	Renderer(gameboy *g, Audio *a);
 
-	Audio *audio;
 	gameboy *gb;
+	Audio *audio;
 
 	void init_window();
 

@@ -6,3 +6,6 @@ Audio::Audio(gameboy *g) : gb(g) {
 void Audio::audio_view() {
 	ImGui::Text("Audio");
 }
+
+void Audio::init_sound(HWND Window) {
+}

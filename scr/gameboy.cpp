@@ -30,19 +30,19 @@ gameboy::gameboy()
 	reset(skip_boot_rom);
 }
 
-bool gameboy::load_rom(std::string rom_file, bool skip_boot_rom) {
-	reset(skip_boot_rom);
+bool gameboy::load_rom(std::string rom_file, bool skip_boot) {
+	reset(skip_boot);
 
 	if (rom_file.empty())
 		return false;
-	card.load_rom(rom_file, skip_boot_rom);
+	card.load_rom(rom_file, skip_boot);
 
 	return true;
 }
 
-void gameboy::reset(bool skip_boot_rom) {
-	mem.reset(skip_boot_rom);
-	cpu.init_register(skip_boot_rom);
+void gameboy::reset(bool skip_boot) {
+	mem.reset(skip_boot);
+	cpu.init_register(skip_boot);
 	ppu.reset();
 }
 
