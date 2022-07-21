@@ -6,6 +6,7 @@ target_link_libraries(
                 project_warnings
                 project_options
                 glad        
+                DSound
                 imgui_bindings
                 CONAN_PKG::imgui
                 CONAN_PKG::glfw

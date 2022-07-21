@@ -86,7 +86,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] const char **argv) {
 	Renderer renderer(&gb, &audio);
 
 	HWND hwnd = glfwGetWin32Window(renderer.window);
-	audio.init_sound(hwnd);
+	audio.win32_init_dsound(hwnd);
 
 	gb.debug.setDebugState(Debug_State::RUN);
 

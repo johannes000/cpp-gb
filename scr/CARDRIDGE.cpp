@@ -451,7 +451,6 @@ void CARDRIDGE::create_sav_file() {
 		return;
 
 	std::string file = rom_info.savefile;
-	spdlog::info("Saving File: {}", file);
 
 	std::ofstream os(file.c_str(), std::ios::out | std::ios::binary);
 
@@ -460,7 +459,7 @@ void CARDRIDGE::create_sav_file() {
 			os.write(reinterpret_cast<const char *>(&data), 1);
 		}
 	}
-	spdlog::info("Saving done: {}", file);
+	spdlog::info("Sav File created: {}", file);
 }
 
 void CARDRIDGE::load_sav_file() {
@@ -468,7 +467,6 @@ void CARDRIDGE::load_sav_file() {
 		return;
 	std::string file = rom_info.savefile;
 
-	spdlog::info("Loading File: {}", file);
 	std::ifstream is(file, std::ios::in | std::ios::binary);
 	for (s32 i = 0; i < rom_info.ram_banks; i++) {
 		int index = 0;
@@ -478,5 +476,5 @@ void CARDRIDGE::load_sav_file() {
 			ram[i][index++] = byte;
 		}
 	}
-	spdlog::info("Loading Done {}", file);
+	spdlog::info("Sav File Loaded {}", file);
 }

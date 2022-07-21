@@ -56,6 +56,7 @@ include_directories("./test")
 include_directories("./external/glad/include/")
 add_library("glad" STATIC "./external/glad/src/glad.c")
 
+find_library(DSound dsound.lib)
 option(PACKAGE_TESTS "Build the tests" ON)
 
 if(PACKAGE_TESTS)
