@@ -21,6 +21,13 @@ private:
 	IDirectSound *direct_sound;
 	IDirectSoundBuffer *primary_buffer;
 	IDirectSoundBuffer *secondary_buffer;
+
+private:
+	i32 samples_per_second;
+	i32 running_sample_index;
+	i32 bytes_per_sample;
+	i32 second_buffer_size;
+	i32 latency_sample_count;
 };
 
 #endif

@@ -1,6 +1,11 @@
 #include "Audio.h"
 
 Audio::Audio(gameboy *g) : gb(g), direct_sound(0), primary_buffer(0), secondary_buffer(0) {
+	samples_per_second = 44100;
+	running_sample_index = 0;
+	bytes_per_sample = sizeof(i16) * 2;
+	second_buffer_size = samples_per_second * bytes_per_sample;
+	latency_sample_count = samples_per_second / 15;
 }
 
 void Audio::audio_view() {
@@ -25,15 +30,15 @@ bool Audio::win32_init_dsound(HWND Window) {
 		return false;
 	}
 
-	DSBUFFERDESC buffer_desc;
-	buffer_desc.dwSize = sizeof(DSBUFFERDESC);
-	buffer_desc.dwFlags = DSBCAPS_PRIMARYBUFFER;
-	buffer_desc.dwBufferBytes = 0;
-	buffer_desc.dwReserved = 0;
-	buffer_desc.lpwfxFormat = NULL;
-	buffer_desc.guid3DAlgorithm = GUID_NULL;
+	DSBUFFERDESC Buffer_desc = {};
+	Buffer_desc.dwSize = sizeof(DSBUFFERDESC);
+	Buffer_desc.dwFlags = DSBCAPS_PRIMARYBUFFER;
+	Buffer_desc.dwBufferBytes = 0;
+	Buffer_desc.dwReserved = 0;
+	Buffer_desc.lpwfxFormat = NULL;
+	Buffer_desc.guid3DAlgorithm = GUID_NULL;
 
-	result = direct_sound->CreateSoundBuffer(&buffer_desc, &primary_buffer, NULL);
+	result = direct_sound->CreateSoundBuffer(&Buffer_desc, &primary_buffer, NULL);
 	if (SUCCEEDED(result)) {
 		spdlog::info("AUDIO: Primary Buffer erstellt");
 	} else {
@@ -55,6 +60,20 @@ bool Audio::win32_init_dsound(HWND Window) {
 		spdlog::info("AUDIO: Primary Buffer Wave Format festgelegt");
 	} else {
 		spdlog::critical("AUDIO: Primary Buffer konnte Wave Format nicht festlegen. Result: {}", result);
+		return false;
+	}
+
+	Buffer_desc = {};
+	Buffer_desc.dwSize = sizeof(DSBUFFERDESC);
+	Buffer_desc.dwFlags = DSBCAPS_GETCURRENTPOSITION2;
+	Buffer_desc.dwBufferBytes = second_buffer_size;
+	Buffer_desc.lpwfxFormat = &Wave_Format;
+
+	result = direct_sound->CreateSoundBuffer(&Buffer_desc, &secondary_buffer, 0);
+	if (SUCCEEDED(result)) {
+		spdlog::info("AUDIO: Secondary Buffer erstellt");
+	} else {
+		spdlog::critical("AUDIO: Secondary Buffer konnte nicht erstellt werden. Result: {}", result);
 		return false;
 	}
 
