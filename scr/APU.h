@@ -2,7 +2,6 @@
 #define APU_H
 
 #pragma once
-
 class APU {
 public:
 	APU(MEMORY *m);
@@ -15,6 +14,10 @@ public:
 
 private:
 	MEMORY *mem;
+
+	bool sound_on;
+
+	void reset();
 
 private:
 	// REGISTER
@@ -42,32 +45,8 @@ private:
 
 	//  Sound Channel 1 - Tone & Sweep
 	struct Channel_1 {
-		i32 wave_pattern_duty; // Wave Pattern Duty (Read/Write)
-							   // %00	12.5% (_-------_-------_-------)
-							   // %01	25% (__------__------__------)
-							   // %10	50% (____----____----____----) (normal)
-							   // %11	75% (______--______--______--)
-
-		i32 sound_length_data; // Sound length data (Write Only) (t1: 0-63)
-							   // Sound Length = (64-t1)*(1/256) seconds.
-							   // The Length value is used only if Bit 6 in NR14 is set.(Counter/consecutive selection)
-
-		i32 envelope_init_volume;  // Initial Volume of envelope (0-0Fh) (0=No Sound)
-		bool envelope_increase;	   // Envelope Direction (0=Decrease, 1=Increase)
-		i32 nr_of_envelope_sweeps; // Number of envelope sweep (n: 0-7)
-								   // (If zero, stop envelope operation.)
-
-		i32 initial_frequency;	// Initial (1=Restart Sound)     (Write Only)
-		bool counter_selection; // Counter/consecutive selection (Read/Write)
-								// (1 = Stop output when length in NR11 expires)
-		i32 frequency;			// Frequency (Write Only)
-	} channel_1{};
-
-	//  Sound Channel 2 - Tone
-	// This sound channel works exactly as channel 1,
-	// except that it doesn’t have a Tone Envelope/Sweep Register.
-	struct Channel_2 {
-		i32 sweep_time; // Sweep Time
+		bool channel_on;
+		f32 sweep_time; // Sweep Time
 		// 000	sweep off - no freq change
 		// 001	7.8 ms (1/128Hz)
 		// 010	15.6 ms (2/128Hz)
@@ -87,7 +66,34 @@ private:
 							   // %10	50% (____----____----____----) (normal)
 							   // %11	75% (______--______--______--)
 
-		i32 sound_length_data; // Sound length data (Write Only) (t1: 0-63)
+		f32 sound_length_data; // Sound length data (Write Only) (t1: 0-63)
+							   // Sound Length = (64-t1)*(1/256) seconds.
+							   // The Length value is used only if Bit 6 in NR14 is set.(Counter/consecutive selection)
+
+		i32 envelope_init_volume;  // Initial Volume of envelope (0-0Fh) (0=No Sound)
+		bool envelope_increase;	   // Envelope Direction (0=Decrease, 1=Increase)
+		i32 nr_of_envelope_sweeps; // Number of envelope sweep (n: 0-7)
+								   // (If zero, stop envelope operation.)
+
+		i32 initial_frequency;	// Initial (1=Restart Sound)     (Write Only)
+		bool counter_selection; // Counter/consecutive selection (Read/Write)
+								// (1 = Stop output when length in NR11 expires)
+		i32 frequency;			// Frequency (Write Only)
+	} channel_1{};
+
+	//  Sound Channel 2 - Tone
+	// This sound channel works exactly as channel 1,
+	// except that it doesn’t have a Tone Envelope/Sweep Register.
+	struct Channel_2 {
+		bool channel_on;
+
+		i32 wave_pattern_duty; // Wave Pattern Duty (Read/Write)
+							   // %00	12.5% (_-------_-------_-------)
+							   // %01	25% (__------__------__------)
+							   // %10	50% (____----____----____----) (normal)
+							   // %11	75% (______--______--______--)
+
+		f32 sound_length_data; // Sound length data (Write Only) (t1: 0-63)
 							   // Sound Length = (64-t1)*(1/256) seconds.
 							   // The Length value is used only if Bit 6 in NR14 is set.(Counter/consecutive selection)
 
@@ -108,6 +114,8 @@ private:
 	// This sound channel can be also used to output normal tones when initializing the Wave RAM
 	// by a square wave.This channel doesn’t have a volume envelope register.
 	struct Channel_3 {
+		bool channel_on;
+
 		bool on;		  // Sound Channel 3 Off  (0=Stop, 1=Playback)  (Read/Write)
 		i32 sound_length; // Sound length (Write only) (t1: 0 - 255)
 						  // Sound Length = (256-t1)*(1/256) seconds Sound Length = (256-t1)*(1/256) seconds
@@ -138,6 +146,8 @@ private:
 	// so the that the output becomes more regular,
 	// resulting in a limited ability to output Tone instead of Noise.
 	struct Channel_4 {
+		bool channel_on;
+
 		i32 sound_length; // Sound length (Write only) (t1: 0 - 255)
 						  // Sound Length = (256-t1)*(1/256) seconds Sound Length = (256-t1)*(1/256) seconds
 						  // This value is used only if Bit 6 in NR34 is set.This value is used only if Bit 6 in NR34 is set.
