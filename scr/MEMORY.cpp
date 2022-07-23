@@ -2,8 +2,8 @@
 #include <fstream>
 #include <windows.h>
 
-MEMORY::MEMORY(CPU *c, CARDRIDGE *card, PPU *p, CONTROLS *j,APU *a)
-	: cardridge(card), ppu(p), cpu(c), joypad(j) ,apu(a){
+MEMORY::MEMORY(CPU *c, CARDRIDGE *card, PPU *p, CONTROLS *j, APU *a)
+	: cardridge(card), ppu(p), cpu(c), joypad(j), apu(a) {
 }
 
 void MEMORY::reset() {
@@ -58,6 +58,28 @@ u8 MEMORY::handle_mapped_io_read(const u16 &addr) const {
 		case TIMER_COUNTER:
 		case TIMER_MODULO:
 			return cpu->read(addr);
+		case NR10:
+		case NR11:
+		case NR12:
+		case NR13:
+		case NR14:
+		case NR21:
+		case NR22:
+		case NR23:
+		case NR24:
+		case NR30:
+		case NR31:
+		case NR32:
+		case NR33:
+		case NR34:
+		case NR41:
+		case NR42:
+		case NR43:
+		case NR44:
+		case NR50:
+		case NR51:
+		case NR52:
+			return apu->read(addr);
 		default:
 			return memory.at(addr);
 	}
@@ -117,6 +139,29 @@ void MEMORY::handle_mapped_io_write(const u16 &addr, const u8 &data) {
 			break;
 		case JOY_P1_REGISTER:
 			joypad->write(addr, data);
+			break;
+		case NR10:
+		case NR11:
+		case NR12:
+		case NR13:
+		case NR14:
+		case NR21:
+		case NR22:
+		case NR23:
+		case NR24:
+		case NR30:
+		case NR31:
+		case NR32:
+		case NR33:
+		case NR34:
+		case NR41:
+		case NR42:
+		case NR43:
+		case NR44:
+		case NR50:
+		case NR51:
+		case NR52:
+			apu->write(addr, data);
 			break;
 		default:
 			memory.at(addr) = data;

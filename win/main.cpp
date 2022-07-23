@@ -129,6 +129,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] const char **argv) {
 			}
 
 			renderer.render();
+			audio.update(target_duration);
 		}
 	}
 	gb.card.create_sav_file();

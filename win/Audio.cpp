@@ -79,3 +79,6 @@ bool Audio::win32_init_dsound(HWND Window) {
 
 	return true;
 }
+
+void Audio::update(f64 dt) {
+}

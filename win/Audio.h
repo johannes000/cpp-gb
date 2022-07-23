@@ -3,9 +3,6 @@
 
 #pragma once
 
-// #define DIRECT_SOUND_CREATE(name) HRESULT WINAPI name(LPCGUID lpGUID, LPDIRECTSOUND *ppDS, LPUNKNOWN pUnkOuter);
-// typedef DIRECT_SOUND_CREATE(direct_sound_create);
-
 #include "windows.h"
 #include "dsound.h"
 
@@ -15,6 +12,8 @@ public:
 
 	void audio_view();
 	bool win32_init_dsound(HWND Window);
+
+	void update(f64 dt);
 
 private:
 	gameboy *gb;
