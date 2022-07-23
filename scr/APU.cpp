@@ -22,7 +22,6 @@ APU::APU(MEMORY *m) : mem(m) {
 	nr50 = 0;
 	nr51 = 0;
 	nr52 = 0;
-	nr10_chan_1_sweep_register.value = 0;
 }
 
 u8 APU::read(const u16 &addr) {
