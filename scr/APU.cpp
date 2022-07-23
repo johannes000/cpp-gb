@@ -22,6 +22,8 @@ APU::APU(MEMORY *m) : mem(m) {
 	nr50 = 0;
 	nr51 = 0;
 	nr52 = 0;
+
+	sound_on = false;
 }
 
 u8 APU::read(const u16 &addr) {
@@ -73,22 +75,47 @@ u8 APU::read(const u16 &addr) {
 }
 
 void APU::write(const u16 &addr, const u8 &data) {
-	mem->write_direct(addr, data);
+
 	switch (addr) {
 		case NR10: {
 			nr10 = data;
+
+			channel_1.sweep_time = static_cast<f32>((data & 0x70) >> 4u) / 128.f;
+			channel_1.sweep_decrease = check_bit(data, 3);
+			channel_1.nr_of_sweep_shifts = data & 7u;
 		}
 		case NR11: {
 			nr11 = data;
+
+			channel_1.wave_pattern_duty = (data & 0xC0) >> 6u;
+			f32 t1 = static_cast<f32>(data & 0x3F);
+			if (channel_1.counter_selection)
+				channel_1.sound_length_data = (64.f - t1) * (1.f / 256.f);
 		}
 		case NR12: {
 			nr12 = data;
+
+			channel_1.envelope_init_volume = (data & 0xF0) >> 4u;
+			channel_1.envelope_increase = check_bit(data, 3);
+			channel_1.nr_of_envelope_sweeps = data & 3u;
 		}
 		case NR13: {
 			nr13 = data;
+			i32 upper = channel_1.frequency & 0xFF00;
+			channel_1.frequency = upper | data;
 		}
 		case NR14: {
 			nr14 = data;
+			i32 lower = channel_1.frequency & 0xFF;
+			i32 upper = (data & 3) << 8;
+			channel_1.frequency = lower | upper;
+
+			channel_1.counter_selection = check_bit(data, 6);
+			if (check_bit(data, 7)) {
+				sound_on = true;
+				channel_1.channel_on = true;
+				set_bit(nr52, 0);
+			}
 		}
 		case NR21: {
 			nr21 = data;
@@ -101,6 +128,11 @@ void APU::write(const u16 &addr, const u8 &data) {
 		}
 		case NR24: {
 			nr24 = data;
+			if (check_bit(data, 7)) {
+				sound_on = true;
+				channel_2.channel_on = true;
+				set_bit(nr52, 1);
+			}
 		}
 		case NR30: {
 			nr30 = data;
@@ -116,6 +148,11 @@ void APU::write(const u16 &addr, const u8 &data) {
 		}
 		case NR34: {
 			nr34 = data;
+			if (check_bit(data, 7)) {
+				sound_on = true;
+				channel_3.channel_on = true;
+				set_bit(nr52, 2);
+			}
 		}
 		case NR41: {
 			nr41 = data;
@@ -128,6 +165,11 @@ void APU::write(const u16 &addr, const u8 &data) {
 		}
 		case NR44: {
 			nr44 = data;
+			if (check_bit(data, 7)) {
+				sound_on = true;
+				channel_4.channel_on = true;
+				set_bit(nr52, 3);
+			}
 		}
 		case NR50: {
 			nr50 = data;
@@ -136,9 +178,22 @@ void APU::write(const u16 &addr, const u8 &data) {
 			nr51 = data;
 		}
 		case NR52: {
-			nr52 = data;
+			if (check_bit(data, 7))
+				set_bit(nr52, 7);
+			else
+				reset();
 		}
 		default:
 			mem->write_direct(addr, data);
 	}
+}
+
+void APU::reset() {
+	channel_1 = {};
+	channel_2 = {};
+	channel_3 = {};
+	channel_4 = {};
+
+	sound_on = false;
+	nr52 = 0;
 }

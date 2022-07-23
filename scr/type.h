@@ -131,6 +131,9 @@ constexpr u16 NR44 = 0xFF23; // FF23 - NR44 - Channel 4 Counter/consecutive; Ini
 constexpr u16 NR50 = 0xFF24; // FF24 - NR50 - Channel control / ON-OFF / Volume (R/W)
 constexpr u16 NR51 = 0xFF25; // FF25 - NR51 - Selection of Sound output terminal (R/W)
 constexpr u16 NR52 = 0xFF26; // FF26 - NR52 - Sound on/off
+// Wave Table
+constexpr u16 WAVE_TABLE_START = 0xFF30; // 0xFF30 - Samples 0 and 1
+constexpr u16 WAVE_TABLE_END = 0xFF3F;	 // 0xFF3F - Samples 30 and 31
 
 constexpr int VERTICAL_REFRESH_CYCLES = 70224;
 
