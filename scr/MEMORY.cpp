@@ -36,6 +36,9 @@ u8 MEMORY::read(const u16 &addr) {
 }
 
 u8 MEMORY::handle_mapped_io_read(const u16 &addr) const {
+	if (addr >= WAVE_TABLE_START && addr <= WAVE_TABLE_END)
+		return apu->read(addr);
+
 	switch (addr) {
 		case JOY_P1_REGISTER:
 			return joypad->read(addr);
@@ -112,6 +115,10 @@ void MEMORY::write(const u16 &addr, const u8 &data) {
 }
 
 void MEMORY::handle_mapped_io_write(const u16 &addr, const u8 &data) {
+	if (addr >= WAVE_TABLE_START && addr <= WAVE_TABLE_END) {
+		apu->write(addr, data);
+		return;
+	}
 	switch (addr) {
 		case LCD_CONTROL:
 		case LCD_STATUS:

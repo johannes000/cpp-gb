@@ -136,7 +136,7 @@ private:
 		// otherwise accesses will behave weirdly.
 		// On almost all models, the byte will be written at the offset CH3 is currently reading.
 		// On GBA, the write will simply be ignored.
-		i32 wave_pattern_ram[0xF * sizeof(u8)];
+		i32 wave_pattern_ram[0x0F * sizeof(u8)];
 	} channel_3{};
 
 	// Sound Channel 4 - Noise

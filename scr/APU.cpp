@@ -27,6 +27,9 @@ APU::APU(MEMORY *m) : mem(m) {
 }
 
 u8 APU::read(const u16 &addr) {
+	if (addr >= WAVE_TABLE_START && addr <= WAVE_TABLE_END)
+		return channel_3.wave_pattern_ram[addr - WAVE_TABLE_START];
+
 	switch (addr) {
 		case NR13:
 		case NR23:
@@ -75,7 +78,10 @@ u8 APU::read(const u16 &addr) {
 }
 
 void APU::write(const u16 &addr, const u8 &data) {
-
+	if (addr >= WAVE_TABLE_START && addr <= WAVE_TABLE_END) {
+		channel_3.wave_pattern_ram[addr - WAVE_TABLE_START] = data;
+		return;
+	}
 	switch (addr) {
 		case NR10: {
 			nr10 = data;
@@ -188,12 +194,16 @@ void APU::write(const u16 &addr, const u8 &data) {
 	}
 }
 
+void APU::apu_view() {
+}
+
 void APU::reset() {
 	channel_1 = {};
 	channel_2 = {};
 	channel_3 = {};
 	channel_4 = {};
+	nr50 = 0;
+	nr51 = 0;
 
 	sound_on = false;
-	nr52 = 0;
 }
