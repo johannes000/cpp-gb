@@ -347,20 +347,25 @@ void Renderer::debug_view() {
 	gb->debug.memory_view();
 	ImGui::EndChildFrame();
 
-	f32 third_of_rest_w = (w - memory_w) / 3;
+	f32 fourth_of_rest_w = (w - memory_w) / 4;
 
 	ImGui::SameLine();
-	ImGui::BeginChild("Chard View", {third_of_rest_w, half_h});
+	ImGui::BeginChild("Chard View", {fourth_of_rest_w, half_h});
 	gb->debug.card_view();
 	ImGui::EndChildFrame();
 
 	ImGui::SameLine();
-	ImGui::BeginChild("APU", {third_of_rest_w, half_h});
-	audio->audio_view();
+	ImGui::BeginChild("Audio", {fourth_of_rest_w, half_h});
+	audio->imgui_view();
 	ImGui::EndChild();
 
 	ImGui::SameLine();
-	ImGui::BeginChild("Control", {third_of_rest_w, half_h}, false, f);
+	ImGui::BeginChild("APU", {fourth_of_rest_w, half_h});
+	gb->apu.imgui_view();
+	ImGui::EndChild();
+
+	ImGui::SameLine();
+	ImGui::BeginChild("Control", {fourth_of_rest_w, half_h}, false, f);
 	gb->debug.control_view();
 	ImGui::EndChildFrame();
 	ImGui::End();
@@ -392,8 +397,6 @@ void Renderer::file_menu_bar(std::string *file) {
 				path.resize(strlen(path.c_str()));
 				*file = path;
 			}
-		}
-		if (ImGui::BeginMenu("Close")) {
 		}
 
 		ImGui::EndMenu();

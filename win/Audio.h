@@ -10,7 +10,7 @@ class Audio {
 public:
 	Audio(gameboy *g);
 
-	void audio_view();
+	void imgui_view();
 	bool win32_init_dsound(HWND Window);
 
 	void update(f64 dt);
@@ -23,7 +23,7 @@ private:
 
 private:
 	i32 samples_per_second;
-	i32 running_sample_index;
+	u32 running_sample_index;
 	i32 bytes_per_sample;
 	i32 second_buffer_size;
 	i32 latency_sample_count;

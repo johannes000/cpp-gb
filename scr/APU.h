@@ -10,7 +10,7 @@ public:
 
 	void write(const u16 &addr, const u8 &data);
 
-	void apu_view();
+	void imgui_view();
 
 private:
 	MEMORY *mem;

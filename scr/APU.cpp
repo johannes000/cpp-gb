@@ -194,7 +194,7 @@ void APU::write(const u16 &addr, const u8 &data) {
 	}
 }
 
-void APU::apu_view() {
+void APU::imgui_view() {
 }
 
 void APU::reset() {
