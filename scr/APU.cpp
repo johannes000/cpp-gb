@@ -78,10 +78,13 @@ u8 APU::read(const u16 &addr) {
 }
 
 void APU::write(const u16 &addr, const u8 &data) {
-	if (addr >= WAVE_TABLE_START && addr <= WAVE_TABLE_END) {
-		channel_3.wave_pattern_ram[addr - WAVE_TABLE_START] = data;
+	if (addr >= WAVE_TABLE_START && addr <= WAVE_TABLE_END && channel_3.on) {
+		auto a = (addr - WAVE_TABLE_START) * 2;
+		channel_3.wave_pattern_ram[a] = data & 0x0F;
+		channel_3.wave_pattern_ram[a + 1] = (data & 0xF0) >> 4;
 		return;
 	}
+
 	switch (addr) {
 		case NR10: {
 			nr10 = data;
@@ -119,7 +122,7 @@ void APU::write(const u16 &addr, const u8 &data) {
 			channel_1.counter_selection = check_bit(data, 6);
 			if (check_bit(data, 7)) {
 				sound_on = true;
-				channel_1.channel_on = true;
+				channel_1.on = true;
 				set_bit(nr52, 0);
 			}
 		}
@@ -136,12 +139,13 @@ void APU::write(const u16 &addr, const u8 &data) {
 			nr24 = data;
 			if (check_bit(data, 7)) {
 				sound_on = true;
-				channel_2.channel_on = true;
+				channel_2.on = true;
 				set_bit(nr52, 1);
 			}
 		}
 		case NR30: {
 			nr30 = data;
+			channel_3.on = check_bit(data, 7); // (0 = Stop, 1 = Playback)(Read / Write)
 		}
 		case NR31: {
 			nr31 = data;
@@ -156,7 +160,7 @@ void APU::write(const u16 &addr, const u8 &data) {
 			nr34 = data;
 			if (check_bit(data, 7)) {
 				sound_on = true;
-				channel_3.channel_on = true;
+				channel_3.on = true;
 				set_bit(nr52, 2);
 			}
 		}
@@ -173,7 +177,7 @@ void APU::write(const u16 &addr, const u8 &data) {
 			nr44 = data;
 			if (check_bit(data, 7)) {
 				sound_on = true;
-				channel_4.channel_on = true;
+				channel_4.on = true;
 				set_bit(nr52, 3);
 			}
 		}
@@ -195,6 +199,7 @@ void APU::write(const u16 &addr, const u8 &data) {
 }
 
 void APU::imgui_view() {
+	ImGui::PlotLines("Cannel 3", channel_3_imgui_plot_getter, channel_3.plot_pattern, 32, 0.1f, "", -1.f, 1.f, ImVec2(0, 80));
 }
 
 void APU::reset() {
@@ -206,4 +211,10 @@ void APU::reset() {
 	nr51 = 0;
 
 	sound_on = false;
+}
+
+f32 APU::channel_3_imgui_plot_getter(void *v, i32 i) {
+	auto vv = reinterpret_cast<i8 *>(v);
+	// return static_cast<f32>(vv[i % 32]);
+	return std::sinf(i);
 }

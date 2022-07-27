@@ -1,11 +1,16 @@
 #include "Audio.h"
+constexpr f32 PI = 3.1415926;
 
-Audio::Audio(gameboy *g) : gb(g), direct_sound(0), primary_buffer(0), secondary_buffer(0) {
+Audio::Audio(gameboy *g) : gb(g),
+						   direct_sound(0), primary_buffer(0), secondary_buffer(0) {
 	samples_per_second = 48000;
 	running_sample_index = 0;
 	bytes_per_sample = sizeof(i16) * 2;
 	second_buffer_size = samples_per_second * bytes_per_sample;
-	latency_sample_count = samples_per_second / 15;
+	latency_sample_count = samples_per_second / 60;
+
+	volume = 3000;
+	hz = 264;
 }
 
 void Audio::imgui_view() {
@@ -76,18 +81,60 @@ bool Audio::win32_init_dsound(HWND Window) {
 		return false;
 	}
 
+	secondary_buffer->Play(0, 0, DSBPLAY_LOOPING);
+	win32_fill_sound_buffer(0, second_buffer_size);
+
 	return true;
 }
 
-void Audio::update(f64 dt) {
-	secondary_buffer->Play(0, 0, DSBPLAY_LOOPING);
-	i32 Volume = 1000;
-	i32 Hz = 144;
-	i32 Square_Wave_Period = samples_per_second / Hz;
-	i32 Half_Square_Wave_Period = Square_Wave_Period / 2;
+void Audio::win32_fill_sound_buffer(DWORD Byte_to_Lock, DWORD Bytes_to_Write) {
 
+	void *Region_1;
+	DWORD Region_1_Size;
+	void *Region_2;
+	DWORD Region_2_Size;
+
+	auto result = secondary_buffer->Lock(Byte_to_Lock, Bytes_to_Write,
+										 &Region_1, &Region_1_Size,
+										 &Region_2, &Region_2_Size,
+										 0);
+
+	if (FAILED(result)) {
+		spdlog::error("AUDIO: Fehler beim Locken: {}", result);
+	}
+
+	DWORD Region_1_Sample_Count = Region_1_Size / bytes_per_sample;
+	i16 *Sample_Out = (i16 *)Region_1;
+	for (DWORD SampleIndex = 0; SampleIndex < Region_1_Sample_Count; ++SampleIndex) {
+		f32 t = 2.0f * PI * (f32)running_sample_index / (f32)wave_period;
+		f32 Sin_Value = sinf(t);
+		i16 Sample_Value = static_cast<i16>(Sin_Value * volume);
+		*Sample_Out++ = Sample_Value;
+		*Sample_Out++ = Sample_Value;
+		++running_sample_index;
+	}
+
+	DWORD Region_2_Sample_Count = Region_2_Size / bytes_per_sample;
+	Sample_Out = (i16 *)Region_2;
+	for (DWORD SampleIndex = 0; SampleIndex < Region_2_Sample_Count; ++SampleIndex) {
+		f32 t = 2.0f * PI * (f32)running_sample_index / (f32)wave_period;
+		f32 Sin_Value = sin(t);
+		i16 Sample_Value = static_cast<i16>(Sin_Value * volume);
+		*Sample_Out++ = Sample_Value;
+		*Sample_Out++ = Sample_Value;
+		++running_sample_index;
+	}
+
+	secondary_buffer->Unlock(Region_1, Region_1_Size, Region_2, Region_2_Size);
+}
+
+void Audio::update(f64 dt) {
+	static f64 time = 0;
+
+	wave_period = samples_per_second / hz;
 	DWORD Play_Cursor;
 	DWORD Write_Cursor;
+	DWORD Target_Cursor;
 
 	auto result = secondary_buffer->GetCurrentPosition(&Play_Cursor, &Write_Cursor);
 	if (FAILED(result)) {
@@ -95,47 +142,19 @@ void Audio::update(f64 dt) {
 		return;
 	}
 
-	void *Region_1;
-	DWORD Region_1_Size;
-	void *Region_2;
-	DWORD Region_2_Size;
-
 	DWORD Byte_To_lock = (running_sample_index * bytes_per_sample) % second_buffer_size;
+	DWORD TargetCursor = (Play_Cursor + (latency_sample_count * bytes_per_sample)) % second_buffer_size;
 	DWORD Bytes_To_Write;
-	if (Byte_To_lock >= Play_Cursor) {
+
+	i32 Latency_Sample_Count = samples_per_second / 60;
+
+	if (Byte_To_lock > TargetCursor) {
 		Bytes_To_Write = (second_buffer_size - Byte_To_lock);
-		Bytes_To_Write += Play_Cursor;
+		Bytes_To_Write += TargetCursor;
 	} else {
-		Bytes_To_Write = Play_Cursor - Byte_To_lock;
+		Bytes_To_Write = TargetCursor - Byte_To_lock;
 	}
 
-	result = secondary_buffer->Lock(Byte_To_lock, Bytes_To_Write,
-									&Region_1, &Region_1_Size,
-									&Region_2, &Region_2_Size,
-									0);
-
-	if (FAILED(result)) {
-		spdlog::error("AUDIO: Fehler beim Locken: {}", result);
-	}
-
-	i16 *Sample_Out = (i16 *)Region_1;
-	DWORD Region_1_Sample_Count = Region_1_Size / bytes_per_sample;
-	DWORD Region_2_Sample_Count = Region_2_Size / bytes_per_sample;
-
-	for (DWORD SampleIndex = 0; SampleIndex < Region_1_Sample_Count; ++SampleIndex) {
-		i16 Sample_Value = (running_sample_index / Half_Square_Wave_Period) % 2 ? Volume : -Volume;
-		*Sample_Out++ = Sample_Value;
-		*Sample_Out++ = Sample_Value;
-		++running_sample_index;
-	}
-	Sample_Out = (i16 *)Region_2;
-
-	for (DWORD SampleIndex = 0; SampleIndex < Region_2_Sample_Count; ++SampleIndex) {
-		i16 Sample_Value = (running_sample_index / Half_Square_Wave_Period) % 2 ? Volume : -Volume;
-		*Sample_Out++ = Sample_Value;
-		*Sample_Out++ = Sample_Value;
-		++running_sample_index;
-	}
-
-	secondary_buffer->Unlock(Region_1, Region_1_Size, Region_2, Region_2_Size);
+	win32_fill_sound_buffer(Byte_To_lock, Bytes_To_Write);
+	time += dt;
 }

@@ -45,7 +45,7 @@ private:
 
 	//  Sound Channel 1 - Tone & Sweep
 	struct Channel_1 {
-		bool channel_on;
+		bool on;
 		f32 sweep_time; // Sweep Time
 		// 000	sweep off - no freq change
 		// 001	7.8 ms (1/128Hz)
@@ -85,7 +85,7 @@ private:
 	// This sound channel works exactly as channel 1,
 	// except that it doesn’t have a Tone Envelope/Sweep Register.
 	struct Channel_2 {
-		bool channel_on;
+		bool on;
 
 		i32 wave_pattern_duty; // Wave Pattern Duty (Read/Write)
 							   // %00	12.5% (_-------_-------_-------)
@@ -114,8 +114,6 @@ private:
 	// This sound channel can be also used to output normal tones when initializing the Wave RAM
 	// by a square wave.This channel doesn’t have a volume envelope register.
 	struct Channel_3 {
-		bool channel_on;
-
 		bool on;		  // Sound Channel 3 Off  (0=Stop, 1=Playback)  (Read/Write)
 		i32 sound_length; // Sound length (Write only) (t1: 0 - 255)
 						  // Sound Length = (256-t1)*(1/256) seconds Sound Length = (256-t1)*(1/256) seconds
@@ -136,8 +134,10 @@ private:
 		// otherwise accesses will behave weirdly.
 		// On almost all models, the byte will be written at the offset CH3 is currently reading.
 		// On GBA, the write will simply be ignored.
-		i32 wave_pattern_ram[0x0F * sizeof(u8)];
+		i32 wave_pattern_ram[sizeof(i8) * 32];
+		i32 plot_pattern[sizeof(i8) * 32];
 	} channel_3{};
+	static f32 channel_3_imgui_plot_getter(void *, i32);
 
 	// Sound Channel 4 - Noise
 	// This channel is used to output white noise.
@@ -146,7 +146,7 @@ private:
 	// so the that the output becomes more regular,
 	// resulting in a limited ability to output Tone instead of Noise.
 	struct Channel_4 {
-		bool channel_on;
+		bool on;
 
 		i32 sound_length; // Sound length (Write only) (t1: 0 - 255)
 						  // Sound Length = (256-t1)*(1/256) seconds Sound Length = (256-t1)*(1/256) seconds
