@@ -9,14 +9,14 @@ Audio::Audio(gameboy *g) : gb(g),
 	bytes_per_sample = sizeof(i16) * 2;
 	second_buffer_size = sound_buffer.samples_per_second * bytes_per_sample;
 
-	latency_sample_count = sound_buffer.samples_per_second / 60;
+	latency_sample_count = sound_buffer.samples_per_second / 15;
 
 	volume = 3000;
-	hz = 264;
 }
 
 void Audio::imgui_view() {
 	ImGui::Text("Audio");
+	ImGui::SliderInt("Volume", &volume, 0, 2000);
 }
 
 bool Audio::win32_init_dsound(HWND Window) {
@@ -111,13 +111,12 @@ void Audio::win32_fill_sound_buffer(DWORD Byte_to_Lock, DWORD Bytes_to_Write) {
 	DWORD Region_2_Sample_Count = Region_2_Size / bytes_per_sample;
 	DWORD Sample_Counts = Region_1_Sample_Count + Region_2_Sample_Count;
 
+	i16 *Dest_Sample = (i16 *)Region_1;
 	i16 *Output_Sample = gb->apu.get_output_sample(Sample_Counts);
 
-	i16 *Dest_Sample = (i16 *)Region_1;
-	i16 *Source_Sample = Output_Sample;
 	for (DWORD SampleIndex = 0; SampleIndex < Region_1_Sample_Count; ++SampleIndex) {
-		i16 Sample_ValueL = static_cast<i16>(*Source_Sample++ * volume);
-		i16 Sample_ValueR = static_cast<i16>(*Source_Sample++ * volume);
+		i16 Sample_ValueL = static_cast<i16>(*Output_Sample++ * volume);
+		i16 Sample_ValueR = static_cast<i16>(*Output_Sample++ * volume);
 		*Dest_Sample++ = Sample_ValueL;
 		*Dest_Sample++ = Sample_ValueR;
 		running_sample_index++;
@@ -125,8 +124,8 @@ void Audio::win32_fill_sound_buffer(DWORD Byte_to_Lock, DWORD Bytes_to_Write) {
 
 	Dest_Sample = (i16 *)Region_2;
 	for (DWORD SampleIndex = 0; SampleIndex < Region_2_Sample_Count; ++SampleIndex) {
-		i16 Sample_ValueL = static_cast<i16>(*Source_Sample++ * volume);
-		i16 Sample_ValueR = static_cast<i16>(*Source_Sample++ * volume);
+		i16 Sample_ValueL = static_cast<i16>(*Output_Sample++ * volume);
+		i16 Sample_ValueR = static_cast<i16>(*Output_Sample++ * volume);
 		*Dest_Sample++ = Sample_ValueL;
 		*Dest_Sample++ = Sample_ValueR;
 		running_sample_index++;

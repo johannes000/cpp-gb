@@ -24,14 +24,18 @@ APU::APU(MEMORY *m) : mem(m) {
 	nr52 = 0;
 
 	sound_on = false;
+	play_effect = false;
 
-	sin_wave_period = 264;
+	apu_volume = 10;
+
+	hz = 264;
+	sin_wave_period = 48000 / hz;
 	t_sin = 0;
 
-	channel_1_sample.resize(3360 * 2);
-	channel_2_sample.resize(3360 * 2);
-	channel_3_sample.resize(3360 * 2);
-	channel_4_sample.resize(3360 * 2);
+	channel_1_sample.resize(44000 * 2);
+	channel_2_sample.resize(44000 * 2);
+	channel_3_sample.resize(44000 * 2);
+	channel_4_sample.resize(44000 * 2);
 	clear_channel_samples();
 	channel_1_sample[0] = 22;
 }
@@ -90,6 +94,7 @@ u8 APU::read(const u16 &addr) {
 void APU::write(const u16 &addr, const u8 &data) {
 	if (addr >= WAVE_TABLE_START && addr <= WAVE_TABLE_END && channel_3.on) {
 		auto a = (addr - WAVE_TABLE_START) * 2;
+
 		channel_3.wave_pattern_ram[a] = data & 0x0F;
 		channel_3.wave_pattern_ram[a + 1] = (data & 0xF0) >> 4;
 		return;
@@ -210,15 +215,21 @@ void APU::write(const u16 &addr, const u8 &data) {
 
 void APU::imgui_view() {
 	ImGui::PlotLines("Cannel 3", channel_3_imgui_plot_getter, output_sample, 1400, 0.1f, "", -1.f, 1.f, ImVec2(0, 80));
-	ImGui::SliderInt("Sin", &sin_wave_period, 50, 500);
+	ImGui::SliderInt("Sin", &hz, 50, 500);
+	ImGui::SliderInt("Volume", &apu_volume, 0, 200);
+	play_effect = ImGui::Button("Soundeffect", ImVec2(0, 0));
 }
 
 void APU::update(i32 Sample_Count) {
+	if (play_effect) {
+		channel_2_soundeffect();
+		play_effect = false;
+	}
 	for (int i = 0; i < Sample_Count * 2; i += 2) {
 		f32 Sin_Value = sinf(t_sin);
-		channel_1_sample[i] = (i16)(Sin_Value * 10);
-		channel_1_sample[i + 1] = (i16)(Sin_Value * 10);
-		t_sin += 2.0f * PI * (1.f / (f32)sin_wave_period);
+		channel_1_sample[i] = (i16)(Sin_Value * apu_volume);
+		channel_1_sample[i + 1] = (i16)(Sin_Value * apu_volume);
+		t_sin += 2.0f * PI * (1.f / (f32)(48000 / hz));
 	}
 }
 
@@ -235,6 +246,16 @@ i16 *APU::get_output_sample(i32 Sample_Count) {
 	}
 	clear_channel_samples();
 	return output_sample;
+}
+
+void APU::channel_2_soundeffect() {
+	f32 quick_sin = 0;
+	for (int i = 0; i < 3000; i++) {
+		f32 Sin_Value = sinf(quick_sin);
+		channel_2_sample[i] = (i16)(Sin_Value * apu_volume);
+		channel_2_sample[i + 1] = (i16)(Sin_Value * apu_volume);
+		quick_sin += 2.0f * PI * (1.f / (f32)(48000 / 500));
+	}
 }
 
 void APU::clear_channel_samples() {

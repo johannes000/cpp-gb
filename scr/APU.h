@@ -19,7 +19,12 @@ public:
 private:
 	MEMORY *mem;
 
+	void channel_2_soundeffect();
+	bool play_effect;
+
+	i32 apu_volume;
 	f32 t_sin;
+	i32 hz;
 	i32 sin_wave_period;
 	std::vector<i16> channel_1_sample;
 	std::vector<i16> channel_2_sample;
