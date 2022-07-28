@@ -25,6 +25,8 @@ typedef int64_t i64;
 typedef float f32;
 typedef double f64;
 
+constexpr f32 PI = 3.1415926;
+
 typedef unsigned char Register;
 
 // GAMEBOY STARTER MODES
@@ -170,6 +172,12 @@ struct Pixel_a {
 	inline bool operator==(Pixel_a Comp) {
 		return (Comp.R == this->R && Comp.G == this->G && Comp.B == this->B && Comp.A == this->A);
 	}
+};
+
+struct sound_output_buffer {
+	int samples_per_second;
+	int sample_count;
+	s16 *samples;
 };
 
 inline void set_bit(u8 &value, const u8 &bit) {

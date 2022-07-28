@@ -52,6 +52,7 @@ include_directories("./scr/CPU")
 include_directories("./scr")
 include_directories("./win")
 include_directories("./test")
+include_directories("./external/miniaudio-master")
 
 include_directories("./external/glad/include/")
 add_library("glad" STATIC "./external/glad/src/glad.c")

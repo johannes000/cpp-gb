@@ -13,6 +13,7 @@ public:
 	void imgui_view();
 	bool win32_init_dsound(HWND Window);
 	void win32_fill_sound_buffer(DWORD Byte_to_Lock, DWORD Bytes_to_Write);
+	void win32_clear_sound_buffer(DWORD Byte_to_Lock, DWORD Bytes_to_Write);
 
 	void update(f64 dt);
 
@@ -23,6 +24,8 @@ private:
 	IDirectSoundBuffer *secondary_buffer;
 
 private:
+	sound_output_buffer sound_buffer;
+
 	i32 samples_per_second;
 	u32 running_sample_index;
 	i32 bytes_per_sample;

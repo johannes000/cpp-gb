@@ -2,6 +2,8 @@
 #define APU_H
 
 #pragma once
+
+#include <array>
 class APU {
 public:
 	APU(MEMORY *m);
@@ -11,10 +13,21 @@ public:
 	void write(const u16 &addr, const u8 &data);
 
 	void imgui_view();
+	void update(i32 Sample_Count);
+	i16 *get_output_sample(i32 Sample_Count);
 
 private:
 	MEMORY *mem;
 
+	f32 t_sin;
+	i32 sin_wave_period;
+	std::vector<i16> channel_1_sample;
+	std::vector<i16> channel_2_sample;
+	std::vector<i16> channel_3_sample;
+	std::vector<i16> channel_4_sample;
+	void clear_channel_samples();
+
+	i16 output_sample[48000 * 2];
 	bool sound_on;
 
 	void reset();
@@ -67,7 +80,7 @@ private:
 							   // %11	75% (______--______--______--)
 
 		f32 sound_length_data; // Sound length data (Write Only) (t1: 0-63)
-							   // Sound Length = (64-t1)*(1/256) seconds.
+							   // Sound Length = (64-t1)(1/256) seconds.
 							   // The Length value is used only if Bit 6 in NR14 is set.(Counter/consecutive selection)
 
 		i32 envelope_init_volume;  // Initial Volume of envelope (0-0Fh) (0=No Sound)

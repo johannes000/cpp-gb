@@ -1,13 +1,15 @@
 #include "Audio.h"
-constexpr f32 PI = 3.1415926;
 
 Audio::Audio(gameboy *g) : gb(g),
 						   direct_sound(0), primary_buffer(0), secondary_buffer(0) {
-	samples_per_second = 48000;
+	sound_buffer.samples_per_second = 48000;
+
 	running_sample_index = 0;
+
 	bytes_per_sample = sizeof(i16) * 2;
-	second_buffer_size = samples_per_second * bytes_per_sample;
-	latency_sample_count = samples_per_second / 60;
+	second_buffer_size = sound_buffer.samples_per_second * bytes_per_sample;
+
+	latency_sample_count = sound_buffer.samples_per_second / 60;
 
 	volume = 3000;
 	hz = 264;
@@ -53,7 +55,7 @@ bool Audio::win32_init_dsound(HWND Window) {
 	WAVEFORMATEX Wave_Format = {};
 	Wave_Format.wFormatTag = WAVE_FORMAT_PCM;
 	Wave_Format.nChannels = 2;
-	Wave_Format.nSamplesPerSec = samples_per_second;
+	Wave_Format.nSamplesPerSec = sound_buffer.samples_per_second;
 	Wave_Format.wBitsPerSample = 16;
 	Wave_Format.cbSize = 0;
 	Wave_Format.nBlockAlign = (Wave_Format.nChannels * Wave_Format.wBitsPerSample) / 8;
@@ -82,12 +84,58 @@ bool Audio::win32_init_dsound(HWND Window) {
 	}
 
 	secondary_buffer->Play(0, 0, DSBPLAY_LOOPING);
-	win32_fill_sound_buffer(0, second_buffer_size);
+	win32_clear_sound_buffer(0, second_buffer_size);
 
 	return true;
 }
 
 void Audio::win32_fill_sound_buffer(DWORD Byte_to_Lock, DWORD Bytes_to_Write) {
+
+	static f32 T_Sin;
+
+	void *Region_1;
+	DWORD Region_1_Size;
+	void *Region_2;
+	DWORD Region_2_Size;
+
+	auto result = secondary_buffer->Lock(Byte_to_Lock, Bytes_to_Write,
+										 &Region_1, &Region_1_Size,
+										 &Region_2, &Region_2_Size,
+										 0);
+
+	if (FAILED(result)) {
+		spdlog::error("AUDIO: Fehler beim Locken: {}", result);
+	}
+
+	DWORD Region_1_Sample_Count = Region_1_Size / bytes_per_sample;
+	DWORD Region_2_Sample_Count = Region_2_Size / bytes_per_sample;
+	DWORD Sample_Counts = Region_1_Sample_Count + Region_2_Sample_Count;
+
+	i16 *Output_Sample = gb->apu.get_output_sample(Sample_Counts);
+
+	i16 *Dest_Sample = (i16 *)Region_1;
+	i16 *Source_Sample = Output_Sample;
+	for (DWORD SampleIndex = 0; SampleIndex < Region_1_Sample_Count; ++SampleIndex) {
+		i16 Sample_ValueL = static_cast<i16>(*Source_Sample++ * volume);
+		i16 Sample_ValueR = static_cast<i16>(*Source_Sample++ * volume);
+		*Dest_Sample++ = Sample_ValueL;
+		*Dest_Sample++ = Sample_ValueR;
+		running_sample_index++;
+	}
+
+	Dest_Sample = (i16 *)Region_2;
+	for (DWORD SampleIndex = 0; SampleIndex < Region_2_Sample_Count; ++SampleIndex) {
+		i16 Sample_ValueL = static_cast<i16>(*Source_Sample++ * volume);
+		i16 Sample_ValueR = static_cast<i16>(*Source_Sample++ * volume);
+		*Dest_Sample++ = Sample_ValueL;
+		*Dest_Sample++ = Sample_ValueR;
+		running_sample_index++;
+	}
+
+	secondary_buffer->Unlock(Region_1, Region_1_Size, Region_2, Region_2_Size);
+}
+
+void Audio::win32_clear_sound_buffer(DWORD Byte_to_Lock, DWORD Bytes_to_Write) {
 
 	void *Region_1;
 	DWORD Region_1_Size;
@@ -106,35 +154,24 @@ void Audio::win32_fill_sound_buffer(DWORD Byte_to_Lock, DWORD Bytes_to_Write) {
 	DWORD Region_1_Sample_Count = Region_1_Size / bytes_per_sample;
 	i16 *Sample_Out = (i16 *)Region_1;
 	for (DWORD SampleIndex = 0; SampleIndex < Region_1_Sample_Count; ++SampleIndex) {
-		f32 t = 2.0f * PI * (f32)running_sample_index / (f32)wave_period;
-		f32 Sin_Value = sinf(t);
-		i16 Sample_Value = static_cast<i16>(Sin_Value * volume);
-		*Sample_Out++ = Sample_Value;
-		*Sample_Out++ = Sample_Value;
-		++running_sample_index;
+
+		*Sample_Out++ = 0;
+		*Sample_Out++ = 0;
 	}
 
 	DWORD Region_2_Sample_Count = Region_2_Size / bytes_per_sample;
 	Sample_Out = (i16 *)Region_2;
 	for (DWORD SampleIndex = 0; SampleIndex < Region_2_Sample_Count; ++SampleIndex) {
-		f32 t = 2.0f * PI * (f32)running_sample_index / (f32)wave_period;
-		f32 Sin_Value = sin(t);
-		i16 Sample_Value = static_cast<i16>(Sin_Value * volume);
-		*Sample_Out++ = Sample_Value;
-		*Sample_Out++ = Sample_Value;
-		++running_sample_index;
+		*Sample_Out++ = 0;
+		*Sample_Out++ = 0;
 	}
 
 	secondary_buffer->Unlock(Region_1, Region_1_Size, Region_2, Region_2_Size);
 }
 
 void Audio::update(f64 dt) {
-	static f64 time = 0;
-
-	wave_period = samples_per_second / hz;
 	DWORD Play_Cursor;
 	DWORD Write_Cursor;
-	DWORD Target_Cursor;
 
 	auto result = secondary_buffer->GetCurrentPosition(&Play_Cursor, &Write_Cursor);
 	if (FAILED(result)) {
@@ -143,18 +180,15 @@ void Audio::update(f64 dt) {
 	}
 
 	DWORD Byte_To_lock = (running_sample_index * bytes_per_sample) % second_buffer_size;
-	DWORD TargetCursor = (Play_Cursor + (latency_sample_count * bytes_per_sample)) % second_buffer_size;
+	DWORD Target_Cursor = (Play_Cursor + (latency_sample_count * bytes_per_sample)) % second_buffer_size;
 	DWORD Bytes_To_Write;
 
-	i32 Latency_Sample_Count = samples_per_second / 60;
-
-	if (Byte_To_lock > TargetCursor) {
+	if (Byte_To_lock > Target_Cursor) {
 		Bytes_To_Write = (second_buffer_size - Byte_To_lock);
-		Bytes_To_Write += TargetCursor;
+		Bytes_To_Write += Target_Cursor;
 	} else {
-		Bytes_To_Write = TargetCursor - Byte_To_lock;
+		Bytes_To_Write = Target_Cursor - Byte_To_lock;
 	}
 
 	win32_fill_sound_buffer(Byte_To_lock, Bytes_To_Write);
-	time += dt;
 }

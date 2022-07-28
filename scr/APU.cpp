@@ -24,6 +24,16 @@ APU::APU(MEMORY *m) : mem(m) {
 	nr52 = 0;
 
 	sound_on = false;
+
+	sin_wave_period = 264;
+	t_sin = 0;
+
+	channel_1_sample.resize(3360 * 2);
+	channel_2_sample.resize(3360 * 2);
+	channel_3_sample.resize(3360 * 2);
+	channel_4_sample.resize(3360 * 2);
+	clear_channel_samples();
+	channel_1_sample[0] = 22;
 }
 
 u8 APU::read(const u16 &addr) {
@@ -199,7 +209,39 @@ void APU::write(const u16 &addr, const u8 &data) {
 }
 
 void APU::imgui_view() {
-	ImGui::PlotLines("Cannel 3", channel_3_imgui_plot_getter, channel_3.plot_pattern, 32, 0.1f, "", -1.f, 1.f, ImVec2(0, 80));
+	ImGui::PlotLines("Cannel 3", channel_3_imgui_plot_getter, output_sample, 1400, 0.1f, "", -1.f, 1.f, ImVec2(0, 80));
+	ImGui::SliderInt("Sin", &sin_wave_period, 50, 500);
+}
+
+void APU::update(i32 Sample_Count) {
+	for (int i = 0; i < Sample_Count * 2; i += 2) {
+		f32 Sin_Value = sinf(t_sin);
+		channel_1_sample[i] = (i16)(Sin_Value * 10);
+		channel_1_sample[i + 1] = (i16)(Sin_Value * 10);
+		t_sin += 2.0f * PI * (1.f / (f32)sin_wave_period);
+	}
+}
+
+i16 *APU::get_output_sample(i32 Sample_Count) {
+	update(Sample_Count);
+
+	for (int i = 0; i < Sample_Count * 2; ++i) {
+		auto c1 = channel_1_sample.at(i);
+		auto c2 = channel_2_sample.at(i);
+		auto c3 = channel_3_sample.at(i);
+		auto c4 = channel_4_sample.at(i);
+
+		output_sample[i] = (c1 + c2 + c3 + c4) / 4;
+	}
+	clear_channel_samples();
+	return output_sample;
+}
+
+void APU::clear_channel_samples() {
+	std::fill(channel_1_sample.begin(), channel_1_sample.end(), 0);
+	std::fill(channel_2_sample.begin(), channel_2_sample.end(), 0);
+	std::fill(channel_3_sample.begin(), channel_3_sample.end(), 0);
+	std::fill(channel_4_sample.begin(), channel_4_sample.end(), 0);
 }
 
 void APU::reset() {
@@ -214,7 +256,7 @@ void APU::reset() {
 }
 
 f32 APU::channel_3_imgui_plot_getter(void *v, i32 i) {
-	auto vv = reinterpret_cast<i8 *>(v);
-	// return static_cast<f32>(vv[i % 32]);
-	return std::sinf(i);
+	auto vv = reinterpret_cast<i16 *>(v);
+	auto ff = 1.0f;
+	return ff;
 }
