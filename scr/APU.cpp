@@ -25,6 +25,7 @@ APU::APU(MEMORY *m) : mem(m) {
 
 	sound_on = false;
 	play_effect = false;
+	sinus_test = false;
 
 	apu_volume = 10;
 
@@ -32,12 +33,13 @@ APU::APU(MEMORY *m) : mem(m) {
 	sin_wave_period = 48000 / hz;
 	t_sin = 0;
 
-	channel_1_sample.resize(44000 * 2);
-	channel_2_sample.resize(44000 * 2);
-	channel_3_sample.resize(44000 * 2);
-	channel_4_sample.resize(44000 * 2);
+	channel_1_sample = new i16[48000 * 2];
+	channel_2_sample = new i16[48000 * 2];
+	channel_3_sample = new i16[48000 * 2];
+	channel_4_sample = new i16[48000 * 2];
+
+	output_sample = new i16[48000 * 2];
 	clear_channel_samples();
-	channel_1_sample[0] = 22;
 }
 
 u8 APU::read(const u16 &addr) {
@@ -215,32 +217,47 @@ void APU::write(const u16 &addr, const u8 &data) {
 
 void APU::imgui_view() {
 	ImGui::PlotLines("Cannel 3", channel_3_imgui_plot_getter, output_sample, 1400, 0.1f, "", -1.f, 1.f, ImVec2(0, 80));
-	ImGui::SliderInt("Sin", &hz, 50, 500);
 	ImGui::SliderInt("Volume", &apu_volume, 0, 200);
+
+	ImGui::Separator();
 	play_effect = ImGui::Button("Soundeffect", ImVec2(0, 0));
+	ImGui::SliderInt("Sin", &hz, 50, 500);
+	ImGui::Checkbox("Sinus Test", &sinus_test);
 }
 
-void APU::update(i32 Sample_Count) {
+void APU::update_tests(i32 Sample_Count) {
 	if (play_effect) {
 		channel_2_soundeffect();
 		play_effect = false;
 	}
-	for (int i = 0; i < Sample_Count * 2; i += 2) {
-		f32 Sin_Value = sinf(t_sin);
-		channel_1_sample[i] = (i16)(Sin_Value * apu_volume);
-		channel_1_sample[i + 1] = (i16)(Sin_Value * apu_volume);
-		t_sin += 2.0f * PI * (1.f / (f32)(48000 / hz));
+	if (sinus_test) {
+		for (int i = 0; i < Sample_Count * 2; i += 2) {
+			f32 Sin_Value = sinf(t_sin);
+			channel_1_sample[i] = (i16)(Sin_Value * apu_volume);
+			channel_1_sample[i + 1] = (i16)(Sin_Value * apu_volume);
+			t_sin += 2.0f * PI * (1.f / (f32)(48000 / hz));
+		}
 	}
 }
 
+void APU::update(i32 cycles) {
+	if (channel_1.frequency > 0) {
+		channel_1.frequency -= cycles;
+	} else {
+		spdlog::info("Channel 1 freq leer");
+	}
+	channel_2.frequency > 0 ? channel_2.frequency -= cycles : false;
+	channel_3.frequency > 0 ? channel_3.frequency -= cycles : false;
+}
+
 i16 *APU::get_output_sample(i32 Sample_Count) {
-	update(Sample_Count);
+	update_tests(Sample_Count);
 
 	for (int i = 0; i < Sample_Count * 2; ++i) {
-		auto c1 = channel_1_sample.at(i);
-		auto c2 = channel_2_sample.at(i);
-		auto c3 = channel_3_sample.at(i);
-		auto c4 = channel_4_sample.at(i);
+		auto c1 = channel_1_sample[i];
+		auto c2 = channel_2_sample[i];
+		auto c3 = channel_3_sample[i];
+		auto c4 = channel_4_sample[i];
 
 		output_sample[i] = (c1 + c2 + c3 + c4) / 4;
 	}
@@ -259,10 +276,12 @@ void APU::channel_2_soundeffect() {
 }
 
 void APU::clear_channel_samples() {
-	std::fill(channel_1_sample.begin(), channel_1_sample.end(), 0);
-	std::fill(channel_2_sample.begin(), channel_2_sample.end(), 0);
-	std::fill(channel_3_sample.begin(), channel_3_sample.end(), 0);
-	std::fill(channel_4_sample.begin(), channel_4_sample.end(), 0);
+	for (int i = 0; i < 48000 * 2; ++i) {
+		channel_1_sample[i] = 0;
+		channel_2_sample[i] = 0;
+		channel_3_sample[i] = 0;
+		channel_4_sample[i] = 0;
+	}
 }
 
 void APU::reset() {

@@ -91,8 +91,6 @@ bool Audio::win32_init_dsound(HWND Window) {
 
 void Audio::win32_fill_sound_buffer(DWORD Byte_to_Lock, DWORD Bytes_to_Write) {
 
-	static f32 T_Sin;
-
 	void *Region_1;
 	DWORD Region_1_Size;
 	void *Region_2;

@@ -25,7 +25,7 @@ gameboy::gameboy()
 	  debug(&cpu, &ppu, &mem, &card, &joypad, &apu),
 
 	  in_test_mode(false),
-	  skip_boot_rom(true),
+	  skip_boot_rom(false),
 	  fps_drossel(true) {
 	reset(skip_boot_rom);
 }
@@ -59,6 +59,7 @@ int gameboy::run_one_cycle(bool skip_render) {
 	if (in_test_mode && cpu.op_code == 0x40)
 		return -1;
 	ppu.update(last_cycle, skip_render);
+	apu.update(last_cycle);
 	cpu.handle_timer(last_cycle);
 	cpu.handle_interrupts();
 	return last_cycle;

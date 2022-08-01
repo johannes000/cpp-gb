@@ -13,7 +13,8 @@ public:
 	void write(const u16 &addr, const u8 &data);
 
 	void imgui_view();
-	void update(i32 Sample_Count);
+	void update_tests(i32 Sample_Count);
+	void update(i32 cycles);
 	i16 *get_output_sample(i32 Sample_Count);
 
 private:
@@ -26,14 +27,16 @@ private:
 	f32 t_sin;
 	i32 hz;
 	i32 sin_wave_period;
-	std::vector<i16> channel_1_sample;
-	std::vector<i16> channel_2_sample;
-	std::vector<i16> channel_3_sample;
-	std::vector<i16> channel_4_sample;
+
+	i16 *output_sample;
+	i16 *channel_1_sample;
+	i16 *channel_2_sample;
+	i16 *channel_3_sample;
+	i16 *channel_4_sample;
 	void clear_channel_samples();
 
-	i16 output_sample[48000 * 2];
 	bool sound_on;
+	bool sinus_test;
 
 	void reset();
 

@@ -35,6 +35,7 @@ private:
 	i32 volume;
 	i32 hz;
 	i32 wave_period;
+
 };
 
 #endif
