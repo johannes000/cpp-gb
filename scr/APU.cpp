@@ -33,6 +33,11 @@ APU::APU(MEMORY *m) : mem(m) {
 	sin_wave_period = 48000 / hz;
 	t_sin = 0;
 
+	imgui_channel_1_on = true;
+	imgui_channel_2_on = true;
+	imgui_channel_3_on = true;
+	imgui_channel_4_on = true;
+
 	channel_1 = {};
 	channel_2 = {};
 	channel_3 = {};
@@ -171,6 +176,7 @@ void APU::write(const u16 &addr, const u8 &data) {
 		case NR21: {
 			nr21 = data;
 			channel_2.wave_duty_pattern = (data & 0xC0) >> 6; // Bit 7-6
+			channel_2.wave_duty_position = 0;
 			channel_2.sound_length_data = (data & 0x3F);
 			break;
 		}
@@ -194,7 +200,7 @@ void APU::write(const u16 &addr, const u8 &data) {
 			i32 lower = channel_2.frequency & 0xFF;
 			i32 upper = (data & 7) << 8;
 			channel_2.frequency = lower | upper;
-			channel_2.frequency_timer = (2048 - channel_2.frequency) * 4;
+			channel_2.frequency_timer = 131072 / (2048 - channel_2.frequency);
 
 			channel_2.counter_selection = check_bit(data, 6);
 
@@ -285,6 +291,12 @@ void APU::imgui_view() {
 
 	ImGui::Separator();
 	ImGui::Text("Channel 2 Frequenz in Hz: %d", channel_2.frequency_timer);
+
+	ImGui::Separator();
+	ImGui::Checkbox("Channel 1", &imgui_channel_1_on);
+	ImGui::Checkbox("Channel 2", &imgui_channel_2_on);
+	ImGui::Checkbox("Channel 3", &imgui_channel_3_on);
+	ImGui::Checkbox("Channel 4", &imgui_channel_4_on);
 }
 
 void APU::update_tests(i32 Sample_Count) {
@@ -311,11 +323,11 @@ void APU::update(i32 cycles) {
 		if (--channel_1.frequency < 1) {
 			channel_1.frequency -= cycles;
 		}
-		if (channel_2.frequency_timer > 1) {
+		if (channel_2.frequency_timer > 1 && channel_2.on) {
 			--channel_2.frequency_timer;
 			++cycles_since_sample_2;
 		} else {
-			channel_2.frequency_timer = (2048 - channel_2.frequency) * 4;
+			channel_2.frequency_timer = 131072 / (2048 - channel_2.frequency);
 			++channel_2.wave_duty_position %= 8;
 		}
 		channel_3.frequency > 0 ? channel_3.frequency -= cycles : false;
@@ -323,7 +335,7 @@ void APU::update(i32 cycles) {
 		++cycles_since_sample_1;
 		++cycles_since_sample_3;
 		++cycles_since_sample_4;
-		if (cycles_since_sample_2 > CYCLES_PER_SAMPLE && channel_2.on) {
+		if (cycles_since_sample_2 > CYCLES_PER_SAMPLE / 1 && channel_2.on) {
 			cycles_since_sample_2 = 0;
 			i16 sample = (i16)(channel_2_wave_duty_table[channel_2.wave_duty_pattern][channel_2.wave_duty_position] * 20);
 			channel_2_sample[(channel_2_running_sample_index++) % sample_buffer_size] = sample;
@@ -334,12 +346,16 @@ void APU::update(i32 cycles) {
 
 i16 *APU::get_output_sample(i32 Sample_Count) {
 	update_tests(Sample_Count);
-
 	for (int i = 0; i < Sample_Count * 2; ++i) {
-		auto c1 = channel_1_sample[i];
-		auto c2 = channel_2_sample[i];
-		auto c3 = channel_3_sample[i];
-		auto c4 = channel_4_sample[i];
+		i16 c1, c2, c3, c4 = 0;
+		if (imgui_channel_1_on)
+			c1 = channel_1_sample[i];
+		if (imgui_channel_2_on)
+			c2 = channel_2_sample[i];
+		if (imgui_channel_3_on)
+			c3 = channel_3_sample[i];
+		if (imgui_channel_4_on)
+			c4 = channel_4_sample[i];
 
 		output_sample[i] = (c1 + c2 + c3 + c4) / 4;
 	}

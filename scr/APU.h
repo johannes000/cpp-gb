@@ -41,6 +41,11 @@ private:
 	u32 channel_3_running_sample_index;
 	u32 channel_4_running_sample_index;
 
+	bool imgui_channel_1_on;
+	bool imgui_channel_2_on;
+	bool imgui_channel_3_on;
+	bool imgui_channel_4_on;
+
 	void clear_channel_samples();
 
 	bool sound_on;
