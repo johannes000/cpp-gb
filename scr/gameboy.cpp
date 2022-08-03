@@ -102,6 +102,7 @@ void gameboy::run_until_vblank() {
 		cpu.handle_interrupts();
 		const int last_cycle = cpu.update();
 		vblank = ppu.update(last_cycle, false);
+		apu.update(last_cycle);
 		cpu.handle_timer(last_cycle);
 		cycles_sum += last_cycle;
 	}

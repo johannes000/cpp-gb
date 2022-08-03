@@ -28,11 +28,19 @@ private:
 	i32 hz;
 	i32 sin_wave_period;
 
+	const i32 sample_buffer_size = 48000 * 2;
+
 	i16 *output_sample;
 	i16 *channel_1_sample;
 	i16 *channel_2_sample;
 	i16 *channel_3_sample;
 	i16 *channel_4_sample;
+
+	u32 channel_1_running_sample_index;
+	u32 channel_2_running_sample_index;
+	u32 channel_3_running_sample_index;
+	u32 channel_4_running_sample_index;
+
 	void clear_channel_samples();
 
 	bool sound_on;
@@ -108,11 +116,12 @@ private:
 	struct Channel_2 {
 		bool on;
 
-		i32 wave_pattern_duty; // Wave Pattern Duty (Read/Write)
+		i32 wave_duty_pattern; // Wave Pattern Duty (Read/Write)
 							   // %00	12.5% (_-------_-------_-------)
 							   // %01	25% (__------__------__------)
 							   // %10	50% (____----____----____----) (normal)
 							   // %11	75% (______--______--______--)
+		i32 wave_duty_position;
 
 		f32 sound_length_data; // Sound length data (Write Only) (t1: 0-63)
 							   // Sound Length = (64-t1)*(1/256) seconds.
@@ -127,8 +136,9 @@ private:
 		bool counter_selection; // Counter/consecutive selection (Read/Write)
 								// (1 = Stop output when length in NR11 expires)
 		i32 frequency;			// Frequency (Write Only)
+		i32 frequency_timer;
 	} channel_2{};
-
+	std::vector<std::vector<f32>> channel_2_wave_duty_table;
 	// Sound Channel 3 - Wave Output
 	// This channel can be used to output digital sound,
 	// the length of the sample buffer(Wave RAM) is limited to 32 digits.

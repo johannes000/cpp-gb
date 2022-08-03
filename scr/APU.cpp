@@ -33,12 +33,28 @@ APU::APU(MEMORY *m) : mem(m) {
 	sin_wave_period = 48000 / hz;
 	t_sin = 0;
 
-	channel_1_sample = new i16[48000 * 2];
-	channel_2_sample = new i16[48000 * 2];
-	channel_3_sample = new i16[48000 * 2];
-	channel_4_sample = new i16[48000 * 2];
+	channel_1 = {};
+	channel_2 = {};
+	channel_3 = {};
+	channel_4 = {};
 
-	output_sample = new i16[48000 * 2];
+	channel_1_sample = new i16[sample_buffer_size];
+	channel_2_sample = new i16[sample_buffer_size];
+	channel_3_sample = new i16[sample_buffer_size];
+	channel_4_sample = new i16[sample_buffer_size];
+
+	channel_1_running_sample_index = 0;
+	channel_2_running_sample_index = 0;
+	channel_3_running_sample_index = 0;
+	channel_4_running_sample_index = 0;
+
+	output_sample = new i16[sample_buffer_size];
+
+	channel_2_wave_duty_table = {
+		{0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 1.f},
+		{0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 1.f, 1.f},
+		{0.f, 0.f, 0.f, 0.f, 1.f, 1.f, 1.f, 1.f},
+		{1.f, 1.f, 1.f, 1.f, 1.f, 1.f, 0.f, 0.f}};
 	clear_channel_samples();
 }
 
@@ -99,6 +115,10 @@ void APU::write(const u16 &addr, const u8 &data) {
 
 		channel_3.wave_pattern_ram[a] = data & 0x0F;
 		channel_3.wave_pattern_ram[a + 1] = (data & 0xF0) >> 4;
+		if (addr == WAVE_TABLE_END) {
+			for (int i = 0; i < (WAVE_TABLE_END - WAVE_TABLE_START); ++i)
+				channel_3.plot_pattern[i] = channel_3.wave_pattern_ram[i];
+		}
 		return;
 	}
 
@@ -109,6 +129,7 @@ void APU::write(const u16 &addr, const u8 &data) {
 			channel_1.sweep_time = static_cast<f32>((data & 0x70) >> 4u) / 128.f;
 			channel_1.sweep_decrease = check_bit(data, 3);
 			channel_1.nr_of_sweep_shifts = data & 7u;
+			break;
 		}
 		case NR11: {
 			nr11 = data;
@@ -117,6 +138,7 @@ void APU::write(const u16 &addr, const u8 &data) {
 			f32 t1 = static_cast<f32>(data & 0x3F);
 			if (channel_1.counter_selection)
 				channel_1.sound_length_data = (64.f - t1) * (1.f / 256.f);
+			break;
 		}
 		case NR12: {
 			nr12 = data;
@@ -124,16 +146,18 @@ void APU::write(const u16 &addr, const u8 &data) {
 			channel_1.envelope_init_volume = (data & 0xF0) >> 4u;
 			channel_1.envelope_increase = check_bit(data, 3);
 			channel_1.nr_of_envelope_sweeps = data & 3u;
+			break;
 		}
 		case NR13: {
 			nr13 = data;
 			i32 upper = channel_1.frequency & 0xFF00;
 			channel_1.frequency = upper | data;
+			break;
 		}
 		case NR14: {
 			nr14 = data;
 			i32 lower = channel_1.frequency & 0xFF;
-			i32 upper = (data & 3) << 8;
+			i32 upper = (data & 7) << 8;
 			channel_1.frequency = lower | upper;
 
 			channel_1.counter_selection = check_bit(data, 6);
@@ -142,36 +166,61 @@ void APU::write(const u16 &addr, const u8 &data) {
 				channel_1.on = true;
 				set_bit(nr52, 0);
 			}
+			break;
 		}
 		case NR21: {
 			nr21 = data;
+			channel_2.wave_duty_pattern = (data & 0xC0) >> 6; // Bit 7-6
+			channel_2.sound_length_data = (data & 0x3F);
+			break;
 		}
 		case NR22: {
 			nr22 = data;
+			channel_2.envelope_init_volume = data & 0xF0;
+			channel_2.envelope_increase = check_bit(data, 3);
+			channel_2.nr_of_envelope_sweeps = data & 0x07;
+			// TODO: If zero, stop envelope operation.
+			break;
 		}
 		case NR23: {
 			nr23 = data;
+			i32 upper = channel_1.frequency & 0xFF00;
+			channel_2.frequency = upper | data;
+			break;
 		}
 		case NR24: {
 			nr24 = data;
+
+			i32 lower = channel_2.frequency & 0xFF;
+			i32 upper = (data & 7) << 8;
+			channel_2.frequency = lower | upper;
+			channel_2.frequency_timer = (2048 - channel_2.frequency) * 4;
+
+			channel_2.counter_selection = check_bit(data, 6);
+
 			if (check_bit(data, 7)) {
 				sound_on = true;
 				channel_2.on = true;
 				set_bit(nr52, 1);
 			}
+			break;
 		}
 		case NR30: {
 			nr30 = data;
 			channel_3.on = check_bit(data, 7); // (0 = Stop, 1 = Playback)(Read / Write)
+			break;
 		}
 		case NR31: {
 			nr31 = data;
+			break;
 		}
 		case NR32: {
 			nr32 = data;
+			break;
 		}
 		case NR33: {
 			nr33 = data;
+			break;
 		}
 		case NR34: {
 			nr34 = data;
@@ -180,15 +229,19 @@ void APU::write(const u16 &addr, const u8 &data) {
 				channel_3.on = true;
 				set_bit(nr52, 2);
 			}
+			break;
 		}
 		case NR41: {
 			nr41 = data;
+			break;
 		}
 		case NR42: {
 			nr42 = data;
+			break;
 		}
 		case NR43: {
 			nr43 = data;
+			break;
 		}
 		case NR44: {
 			nr44 = data;
@@ -197,32 +250,41 @@ void APU::write(const u16 &addr, const u8 &data) {
 				channel_4.on = true;
 				set_bit(nr52, 3);
 			}
+			break;
 		}
 		case NR50: {
 			nr50 = data;
+			break;
 		}
 		case NR51: {
 			nr51 = data;
+			break;
 		}
 		case NR52: {
 			if (check_bit(data, 7))
 				set_bit(nr52, 7);
 			else
 				reset();
+			break;
 		}
-		default:
+		default: {
 			mem->write_direct(addr, data);
+			break;
+		}
 	}
 }
 
 void APU::imgui_view() {
-	ImGui::PlotLines("Cannel 3", channel_3_imgui_plot_getter, output_sample, 1400, 0.1f, "", -1.f, 1.f, ImVec2(0, 80));
+	ImGui::PlotLines("Cannel 3", channel_3_imgui_plot_getter, channel_3.plot_pattern, 32 * 4, 0.1f, "", -7.f, 7.f, ImVec2(0, ImGui::GetTextLineHeightWithSpacing()));
 	ImGui::SliderInt("Volume", &apu_volume, 0, 200);
 
 	ImGui::Separator();
 	play_effect = ImGui::Button("Soundeffect", ImVec2(0, 0));
 	ImGui::SliderInt("Sin", &hz, 50, 500);
 	ImGui::Checkbox("Sinus Test", &sinus_test);
+
+	ImGui::Separator();
+	ImGui::Text("Channel 2 Frequenz in Hz: %d", channel_2.frequency_timer);
 }
 
 void APU::update_tests(i32 Sample_Count) {
@@ -241,13 +303,33 @@ void APU::update_tests(i32 Sample_Count) {
 }
 
 void APU::update(i32 cycles) {
-	if (channel_1.frequency > 0) {
-		channel_1.frequency -= cycles;
-	} else {
-		spdlog::info("Channel 1 freq leer");
+	static u32 cycles_since_sample_1 = 0;
+	static u32 cycles_since_sample_2 = 0;
+	static u32 cycles_since_sample_3 = 0;
+	static u32 cycles_since_sample_4 = 0;
+	while (cycles--) {
+		if (--channel_1.frequency < 1) {
+			channel_1.frequency -= cycles;
+		}
+		if (channel_2.frequency_timer > 1) {
+			--channel_2.frequency_timer;
+			++cycles_since_sample_2;
+		} else {
+			channel_2.frequency_timer = (2048 - channel_2.frequency) * 4;
+			++channel_2.wave_duty_position %= 8;
+		}
+		channel_3.frequency > 0 ? channel_3.frequency -= cycles : false;
+
+		++cycles_since_sample_1;
+		++cycles_since_sample_3;
+		++cycles_since_sample_4;
+		if (cycles_since_sample_2 > CYCLES_PER_SAMPLE && channel_2.on) {
+			cycles_since_sample_2 = 0;
+			i16 sample = (i16)(channel_2_wave_duty_table[channel_2.wave_duty_pattern][channel_2.wave_duty_position] * 20);
+			channel_2_sample[(channel_2_running_sample_index++) % sample_buffer_size] = sample;
+			channel_2_sample[(channel_2_running_sample_index++) % sample_buffer_size] = sample;
+		}
 	}
-	channel_2.frequency > 0 ? channel_2.frequency -= cycles : false;
-	channel_3.frequency > 0 ? channel_3.frequency -= cycles : false;
 }
 
 i16 *APU::get_output_sample(i32 Sample_Count) {
@@ -276,12 +358,16 @@ void APU::channel_2_soundeffect() {
 }
 
 void APU::clear_channel_samples() {
-	for (int i = 0; i < 48000 * 2; ++i) {
+	for (int i = 0; i < sample_buffer_size; ++i) {
 		channel_1_sample[i] = 0;
 		channel_2_sample[i] = 0;
 		channel_3_sample[i] = 0;
 		channel_4_sample[i] = 0;
 	}
+	channel_1_running_sample_index = 0;
+	channel_2_running_sample_index = 0;
+	channel_3_running_sample_index = 0;
+	channel_4_running_sample_index = 0;
 }
 
 void APU::reset() {
@@ -296,7 +382,7 @@ void APU::reset() {
 }
 
 f32 APU::channel_3_imgui_plot_getter(void *v, i32 i) {
-	auto vv = reinterpret_cast<i16 *>(v);
-	auto ff = 1.0f;
-	return ff;
+	auto vv = reinterpret_cast<i8 *>(v);
+	f32 ret = static_cast<f32>(vv[i % (WAVE_TABLE_END - WAVE_TABLE_START)]);
+	return ret;
 }
