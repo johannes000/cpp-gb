@@ -11,12 +11,12 @@ Audio::Audio(gameboy *g) : gb(g),
 
 	latency_sample_count = sound_buffer.samples_per_second / 15;
 
-	volume = 3000;
+	volume = 500;
 }
 
 void Audio::imgui_view() {
 	ImGui::Text("Audio");
-	ImGui::SliderInt("Volume", &volume, 0, 2000);
+	ImGui::SliderInt("Volume", &volume, 0, 1000);
 }
 
 bool Audio::win32_init_dsound(HWND Window) {

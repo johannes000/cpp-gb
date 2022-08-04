@@ -46,7 +46,15 @@ private:
 	bool imgui_channel_3_on;
 	bool imgui_channel_4_on;
 
+	void trigger_channel_1();
+	void trigger_channel_2();
+	void trigger_channel_3();
+	void trigger_channel_4();
+
 	void clear_channel_samples();
+	i32 calc_freq_timer(i32 frequency);
+
+	std::vector<std::vector<f32>> wave_duty_table;
 
 	bool sound_on;
 	bool sinus_test;
@@ -100,15 +108,18 @@ private:
 							   // %10	50% (____----____----____----) (normal)
 							   // %11	75% (______--______--______--)
 
-		f32 sound_length_data; // Sound length data (Write Only) (t1: 0-63)
+		i32 sound_length_timer;
+		i32 sound_length_data; // Sound length data (Write Only) (t1: 0-63)
 							   // Sound Length = (64-t1)(1/256) seconds.
 							   // The Length value is used only if Bit 6 in NR14 is set.(Counter/consecutive selection)
 
-		i32 envelope_init_volume;  // Initial Volume of envelope (0-0Fh) (0=No Sound)
-		bool envelope_increase;	   // Envelope Direction (0=Decrease, 1=Increase)
-		i32 nr_of_envelope_sweeps; // Number of envelope sweep (n: 0-7)
-								   // (If zero, stop envelope operation.)
+		i32 envelope_init_volume; // Initial Volume of envelope (0-0Fh) (0=No Sound)
+		bool envelope_increase;	  // Envelope Direction (0=Decrease, 1=Increase)
+		i32 envelope_period;	  // Number of envelope sweep (n: 0-7)
+								  // (If zero, stop envelope operation.)
+		i32 volume;
 
+		i32 current_frequency;
 		i32 initial_frequency;	// Initial (1=Restart Sound)     (Write Only)
 		bool counter_selection; // Counter/consecutive selection (Read/Write)
 								// (1 = Stop output when length in NR11 expires)
@@ -128,38 +139,43 @@ private:
 							   // %11	75% (______--______--______--)
 		i32 wave_duty_position;
 
-		f32 sound_length_data; // Sound length data (Write Only) (t1: 0-63)
+		i32 sound_length_timer;
+		i32 sound_length_data; // Sound length data (Write Only) (t1: 0-63)
 							   // Sound Length = (64-t1)*(1/256) seconds.
 							   // The Length value is used only if Bit 6 in NR14 is set.(Counter/consecutive selection)
 
-		i32 envelope_init_volume;  // Initial Volume of envelope (0-0Fh) (0=No Sound)
-		bool envelope_increase;	   // Envelope Direction (0=Decrease, 1=Increase)
-		i32 nr_of_envelope_sweeps; // Number of envelope sweep (n: 0-7)
-								   // (If zero, stop envelope operation.)
+		i32 envelope_init_volume; // Initial Volume of envelope (0-0Fh) (0=No Sound)
+		bool envelope_increase;	  // Envelope Direction (0=Decrease, 1=Increase)
+		i32 envelope_period;	  // Number of envelope sweep (n: 0-7)
+								  // (If zero, stop envelope operation.)
+		i32 envelope_period_timer;
+		i32 volume;
 
+		i32 current_frequency;
 		i32 initial_frequency;	// Initial (1=Restart Sound)     (Write Only)
 		bool counter_selection; // Counter/consecutive selection (Read/Write)
 								// (1 = Stop output when length in NR11 expires)
 		i32 frequency;			// Frequency (Write Only)
 		i32 frequency_timer;
 	} channel_2{};
-	std::vector<std::vector<f32>> channel_2_wave_duty_table;
 	// Sound Channel 3 - Wave Output
 	// This channel can be used to output digital sound,
 	// the length of the sample buffer(Wave RAM) is limited to 32 digits.
 	// This sound channel can be also used to output normal tones when initializing the Wave RAM
 	// by a square wave.This channel doesn’t have a volume envelope register.
 	struct Channel_3 {
-		bool on;		  // Sound Channel 3 Off  (0=Stop, 1=Playback)  (Read/Write)
-		i32 sound_length; // Sound length (Write only) (t1: 0 - 255)
-						  // Sound Length = (256-t1)*(1/256) seconds Sound Length = (256-t1)*(1/256) seconds
-						  // This value is used only if Bit 6 in NR34 is set.This value is used only if Bit 6 in NR34 is set.
-		i32 output_level; // Select output level (Read/Write)
-						  // %00	Mute (No sound)
-						  // %01	100% volume (Produce Wave Pattern RAM Data as it is)
-						  // %10	50% volume (Produce Wave Pattern RAM data shifted once to the right)
-						  // %11	25% volume (Produce Wave Pattern RAM data shifted twice to the right)
+		bool on; // Sound Channel 3 Off  (0=Stop, 1=Playback)  (Read/Write)
+		i32 sound_length_timer;
+		i32 sound_length_data; // Sound length (Write only) (t1: 0 - 255)
+							   // Sound Length = (256-t1)*(1/256) seconds Sound Length = (256-t1)*(1/256) seconds
+							   // This value is used only if Bit 6 in NR34 is set.This value is used only if Bit 6 in NR34 is set.
+		i32 output_level;	   // Select output level (Read/Write)
+							   // %00	Mute (No sound)
+							   // %01	100% volume (Produce Wave Pattern RAM Data as it is)
+							   // %10	50% volume (Produce Wave Pattern RAM data shifted once to the right)
+							   // %11	25% volume (Produce Wave Pattern RAM data shifted twice to the right)
 
+		i32 current_frequency;
 		i32 initial_frequency;	// Initial (1=Restart Sound)     (Write Only)
 		bool counter_selection; // Counter/consecutive selection (Read/Write)
 								// (1 = Stop output when length in NR11 expires)
@@ -184,14 +200,16 @@ private:
 	struct Channel_4 {
 		bool on;
 
-		i32 sound_length; // Sound length (Write only) (t1: 0 - 255)
-						  // Sound Length = (256-t1)*(1/256) seconds Sound Length = (256-t1)*(1/256) seconds
-						  // This value is used only if Bit 6 in NR34 is set.This value is used only if Bit 6 in NR34 is set.
+		i32 sound_length_timer;
+		i32 sound_length_data; // Sound length (Write only) (t1: 0 - 255)
+							   // Sound Length = (256-t1)*(1/256) seconds Sound Length = (256-t1)*(1/256) seconds
+							   // This value is used only if Bit 6 in NR34 is set.This value is used only if Bit 6 in NR34 is set.
 
-		i32 envelope_init_volume;  // Initial Volume of envelope (0-0Fh) (0=No Sound)
-		bool envelope_increase;	   // Envelope Direction (0=Decrease, 1=Increase)
-		i32 nr_of_envelope_sweeps; // Number of envelope sweep (n: 0-7)
-								   // (If zero, stop envelope operation.)
+		i32 envelope_init_volume; // Initial Volume of envelope (0-0Fh) (0=No Sound)
+		bool envelope_increase;	  // Envelope Direction (0=Decrease, 1=Increase)
+		i32 envelope_period;	  // Number of envelope sweep (n: 0-7)
+								  // (If zero, stop envelope operation.)
+		i32 volume;
 
 		// Polynomial Counter (R/W)
 		// The amplitude is randomly switched between high and low at the given frequency.
