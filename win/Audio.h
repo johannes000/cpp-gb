@@ -5,6 +5,7 @@
 
 #include "windows.h"
 #include "dsound.h"
+#include <SDL2/SDL.h>
 
 class Audio {
 public:
@@ -16,26 +17,24 @@ public:
 	void win32_clear_sound_buffer(DWORD Byte_to_Lock, DWORD Bytes_to_Write);
 
 	void update(f64 dt);
+	SDL_AudioDeviceID audio_device_id;
 
 private:
 	gameboy *gb;
 	IDirectSound *direct_sound;
 	IDirectSoundBuffer *primary_buffer;
 	IDirectSoundBuffer *secondary_buffer;
+	SDL_AudioSpec audio_specs;
 
 private:
 	sound_output_buffer sound_buffer;
 
-	i32 samples_per_second;
 	u32 running_sample_index;
 	i32 bytes_per_sample;
 	i32 second_buffer_size;
 	i32 latency_sample_count;
 
 	i32 volume;
-	i32 hz;
-	i32 wave_period;
-
 };
 
 #endif

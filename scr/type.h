@@ -104,6 +104,7 @@ constexpr u16 TIMER_COUNTER = 0xFF05;
 constexpr u16 TIMER_MODULO = 0xFF06;
 constexpr u16 TIMER_CONTROL = 0xFF07;
 constexpr i32 OSCILLATOR_CLOCK_FREQ = 4194304;
+constexpr i32 CYCLES_PER_FRAME = 70224;
 
 constexpr u16 DMA_TRANSFER = 0xFF46; // DMA Transfer and Start Address (R/W)
 

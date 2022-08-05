@@ -380,7 +380,7 @@ void APU::update(i32 cycles) {
 			if (channel_2.on) {
 				f32 sample = wave_duty_table[channel_2.wave_duty_pattern][channel_2.wave_duty_position];
 				f32 volume = (f32)(channel_2.volume);
-				i16 output = (i16)(((sample * volume) / 7.5f) - 1.0f) * apu_volume;
+				i16 output = (i16)(((sample * volume) / 7.5f) - 1.0f) * apu_volume * 1000;
 				channel_2_sample[(channel_2_running_sample_index++) % sample_buffer_size] = output;
 				channel_2_sample[(channel_2_running_sample_index++) % sample_buffer_size] = output;
 			} else {
@@ -393,7 +393,7 @@ void APU::update(i32 cycles) {
 i16 *APU::get_output_sample(i32 Sample_Count) {
 	apu_sample_count = 0;
 	update_tests(Sample_Count);
-	for (int i = 0; i < Sample_Count * 2; ++i) {
+	for (int i = 0; i < Sample_Count; ++i) {
 		i16 c1 = 0, c2 = 0, c3 = 0, c4 = 0;
 		if (imgui_channel_1_on)
 			c1 = channel_1_sample[i];

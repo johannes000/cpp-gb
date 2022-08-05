@@ -50,21 +50,6 @@ int gameboy::run_one_cycle() {
 	return run_one_cycle(false);
 }
 
-int gameboy::run_one_cycle(bool skip_render) {
-#if 0
-	auto aa = cpu.R;
-	log_cpu(aa);
-#endif
-	const int last_cycle = cpu.update();
-	if (in_test_mode && cpu.op_code == 0x40)
-		return -1;
-	ppu.update(last_cycle, skip_render);
-	apu.update(last_cycle);
-	cpu.handle_timer(last_cycle);
-	cpu.handle_interrupts();
-	return last_cycle;
-}
-
 void gameboy::log_cpu(CPU_Register R) {
 
 	if (!cpu.is_in_boot()) {
@@ -87,12 +72,24 @@ void gameboy::run_until_breakpoint() {
 void gameboy::run_for_x_cycles(int cycles_to_run) {
 	while (cycles_to_run > 0) {
 		int cycles = run_one_cycle(false);
-		if (ppu.ready_to_render)
-			ppu.ready_to_render = false;
 		if (cycles == -1)
 			return;
 		cycles_to_run -= cycles;
 	}
+}
+int gameboy::run_one_cycle(bool skip_render) {
+#if 0
+	auto aa = cpu.R;
+	log_cpu(aa);
+#endif
+	cpu.handle_interrupts();
+	const int last_cycle = cpu.update();
+	if (in_test_mode && cpu.op_code == 0x40)
+		return -1;
+	ppu.update(last_cycle, false);
+	cpu.handle_timer(last_cycle);
+	apu.update(last_cycle);
+	return last_cycle;
 }
 
 void gameboy::run_until_vblank() {

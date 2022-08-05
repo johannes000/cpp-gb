@@ -12,11 +12,25 @@ Audio::Audio(gameboy *g) : gb(g),
 	latency_sample_count = sound_buffer.samples_per_second / 15;
 
 	volume = 500;
+
+	if (SDL_Init(SDL_INIT_AUDIO) < 0)
+		spdlog::error("SDL_Init Fehlgeschlagen");
+	else
+		spdlog::info("SDL Audio OK");
+
+	SDL_AudioSpec Desired_Audio_Settings = {};
+	Desired_Audio_Settings.freq = SAMPLES_PER_SECOND;
+	Desired_Audio_Settings.format = AUDIO_S16SYS;
+	Desired_Audio_Settings.channels = 2;
+	Desired_Audio_Settings.samples = 4096;
+	audio_device_id = SDL_OpenAudioDevice(nullptr, 0, &Desired_Audio_Settings, &audio_specs, 0);
+	// SDL_OpenAudio(&Desired_Audio_Settings, &audio_specs);
+	SDL_PauseAudioDevice(audio_device_id, 0);
 }
 
 void Audio::imgui_view() {
 	ImGui::Text("Audio");
-	ImGui::SliderInt("Volume", &volume, 0, 1000);
+	ImGui::SliderInt("Volume", &volume, 0, 3000);
 }
 
 bool Audio::win32_init_dsound(HWND Window) {
@@ -90,7 +104,6 @@ bool Audio::win32_init_dsound(HWND Window) {
 }
 
 void Audio::win32_fill_sound_buffer(DWORD Byte_to_Lock, DWORD Bytes_to_Write) {
-
 	void *Region_1;
 	DWORD Region_1_Size;
 	void *Region_2;

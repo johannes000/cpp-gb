@@ -13,7 +13,6 @@ bool compare_sprite_x_reverse(Sprite *sp1, Sprite *sp2) {
 	return (sp1->x_pos > sp2->x_pos);
 }
 bool PPU::update(const int cycles, bool skip_render) {
-	ready_to_render = false;
 	if (skip_render) {
 		lcd_register.LCD_LY = 0x90;
 		return ready_to_render;
@@ -442,6 +441,15 @@ void PPU::update_tile(const u16 &a) {
 		const u8 color = static_cast<u8>(check_bit(p_line_1, (7u - pixel)) << 1u) | check_bit(p_line_2, (7u - pixel));
 		auto p = ((y * 8) + pixel);
 		tile_map_data[tile_id][p] = color;
+	}
+}
+
+bool PPU::is_ready_to_render() {
+	if (ready_to_render) {
+		ready_to_render = false;
+		return true;
+	} else {
+		return false;
 	}
 }
 

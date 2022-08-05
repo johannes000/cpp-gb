@@ -177,8 +177,8 @@ void Renderer::bind_framebuffer(GLuint *frame_buffer_handle, GLuint *texture_han
 						   GL_TEXTURE_2D, *texture_handle, 0);
 }
 void Renderer::render() const {
-	ImGui::Render();
 
+	ImGui::Render();
 	int display_w, display_h;
 	glfwGetFramebufferSize(window, &display_w, &display_h);
 

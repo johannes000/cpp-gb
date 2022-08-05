@@ -67,8 +67,6 @@ public:
 
 	void reset();
 
-	bool ready_to_render;
-
 	int current_palette = 0;
 
 private:
@@ -78,12 +76,12 @@ private:
 	int cycles_in_mode;
 	int cycles_in_vblank;
 	int vblank_line;
+	bool ready_to_render;
 
 	void update_tile(const u16 &addr);
 
 public:
-	inline bool
-	is_ready_to_render() const { return ready_to_render; }
+	bool is_ready_to_render();
 
 	// Speicher
 	std::vector<u8> v_ram;
