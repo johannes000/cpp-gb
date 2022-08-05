@@ -30,6 +30,7 @@ enable_doxygen()
 set(CONAN_EXTRA_REQUIRES  "glfw/3.3.4
                            opengl/system
                            imgui/1.82
+                           sdl/2.0.20 
                            ")
 
 include(cmake/Conan.cmake)
@@ -52,12 +53,12 @@ include_directories("./scr/CPU")
 include_directories("./scr")
 include_directories("./win")
 include_directories("./test")
-include_directories("./external/miniaudio-master")
 
 include_directories("./external/glad/include/")
 add_library("glad" STATIC "./external/glad/src/glad.c")
 
 find_library(DSound dsound.lib)
+# find_library(SDL2 SDL2.lib "./external/SDL2-2.0.22/VC/lib/x64")
 
 option(PACKAGE_TESTS "Build the tests" ON)
 

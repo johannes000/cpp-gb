@@ -8,6 +8,7 @@ target_link_libraries(
                 glad        
                 DSound
                 imgui_bindings
+                CONAN_PKG::sdl
                 CONAN_PKG::imgui
                 CONAN_PKG::glfw
                 CONAN_PKG::opengl   

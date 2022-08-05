@@ -104,18 +104,19 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] const char **argv) {
 
 			if (rom_loaded) {
 				switch (gb.debug.get_debug_state()) {
-					case Debug_State::RUN:
+					case Debug_State::RUN: {
 						gb.run_until_vblank();
-						break;
-					case Debug_State::STEP:
+						// gb.run_until_soundbuffer_full(22);
+					} break;
+					case Debug_State::STEP: {
 						if (gb.debug.get_next_step()) {
 							gb.run_one_cycle();
 							gb.debug.handle_breakpoints();
 						}
-						break;
-					case Debug_State::BREAKPOINT:
+					} break;
+					case Debug_State::BREAKPOINT: {
 						gb.run_until_breakpoint();
-						break;
+					} break;
 				}
 
 				renderer.update_views();

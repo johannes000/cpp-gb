@@ -15,6 +15,7 @@ struct gameboy {
 	Debugger debug;
 
 	void run_until_vblank();
+	void run_until_soundbuffer_full(i32 Sample_Size);
 	int run_one_cycle(bool skip_render);
 	int run_one_cycle();
 	void run_until_breakpoint();

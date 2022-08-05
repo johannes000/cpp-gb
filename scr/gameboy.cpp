@@ -102,8 +102,13 @@ void gameboy::run_until_vblank() {
 		cpu.handle_interrupts();
 		const int last_cycle = cpu.update();
 		vblank = ppu.update(last_cycle, false);
-		apu.update(last_cycle);
 		cpu.handle_timer(last_cycle);
 		cycles_sum += last_cycle;
+		apu.update(last_cycle);
+		if (apu.apu_sample_count == 500)
+			break;
 	}
+}
+
+void gameboy::run_until_soundbuffer_full(i32 Sample_Size) {
 }

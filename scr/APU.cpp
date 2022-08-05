@@ -53,6 +53,8 @@ APU::APU(MEMORY *m) : mem(m) {
 	channel_3_running_sample_index = 0;
 	channel_4_running_sample_index = 0;
 
+	apu_sample_count = 0;
+
 	output_sample = new i16[sample_buffer_size];
 
 	wave_duty_table = {
@@ -372,7 +374,8 @@ void APU::update(i32 cycles) {
 		}
 		channel_3.frequency > 0 ? channel_3.frequency -= cycles : false;
 
-		if (Cycles_since_sample >= CYCLES_PER_SAMPLE / 2) {
+		if (Cycles_since_sample >= CYCLES_PER_SAMPLE) {
+			++apu_sample_count;
 			Cycles_since_sample = 0;
 			if (channel_2.on) {
 				f32 sample = wave_duty_table[channel_2.wave_duty_pattern][channel_2.wave_duty_position];
@@ -388,6 +391,7 @@ void APU::update(i32 cycles) {
 }
 
 i16 *APU::get_output_sample(i32 Sample_Count) {
+	apu_sample_count = 0;
 	update_tests(Sample_Count);
 	for (int i = 0; i < Sample_Count * 2; ++i) {
 		i16 c1 = 0, c2 = 0, c3 = 0, c4 = 0;
@@ -399,7 +403,6 @@ i16 *APU::get_output_sample(i32 Sample_Count) {
 			c3 = channel_3_sample[i];
 		if (imgui_channel_4_on)
 			c4 = channel_4_sample[i];
-
 		output_sample[i] = (c1 + c2 + c3 + c4) / 4;
 	}
 	clear_channel_samples();

@@ -16,6 +16,7 @@ public:
 	void update_tests(i32 Sample_Count);
 	void update(i32 cycles);
 	i16 *get_output_sample(i32 Sample_Count);
+	i32 apu_sample_count;
 
 private:
 	MEMORY *mem;
