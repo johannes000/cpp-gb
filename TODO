@@ -1,5 +1,7 @@
 
 Todo:
+  ☐ Renderer Komplett umschreiben
+  ☐ PPU Läuft warscheinlich zu schnell
   ☐ Acid 2 Test @high 
   ☐ Bootrom hardcoden @low
   ☐ PPU Windows fixen @high

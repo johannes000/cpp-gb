@@ -1,4 +1,5 @@
 #include "APU.h"
+#include "loguru.hpp"
 
 APU::APU(MEMORY *m) : mem(m) {
 	nr10 = 0;
@@ -74,7 +75,7 @@ u8 APU::read(const u16 &addr) {
 		case NR23:
 		case NR31:
 		case NR41:
-			spdlog::error("AUDIO: Register ist WO wird aber gelesen: {:X}", addr);
+			DLOG_F(ERROR, "AUDIO: Register ist write only wird aber gelesen: %x", addr);
 			return 0;
 		case NR10:
 			return nr10;
@@ -111,7 +112,7 @@ u8 APU::read(const u16 &addr) {
 		case NR52:
 			return nr52;
 		default:
-			spdlog::error("AUDIO: Hier sollte nicht gelesen werden. Addr: {:X} | {} {}", addr, __FILE__, __LINE__);
+			DLOG_F(ERROR, "AUDIO: Hier sollte nicht gelesen werden. Addr: %x", addr);
 			return 0;
 	}
 }
@@ -309,10 +310,10 @@ void APU::update_tests(i32 Sample_Count) {
 		play_effect = false;
 	}
 	if (sinus_test) {
-		for (int i = 0; i < Sample_Count * 2; i += 2) {
+		for (int i = 0; i < Sample_Count; i += 2) {
 			f32 Sin_Value = sinf(t_sin);
-			channel_1_sample[i] = (i16)(Sin_Value * apu_volume);
-			channel_1_sample[i + 1] = (i16)(Sin_Value * apu_volume);
+			channel_1_sample[i] = (i16)(Sin_Value * apu_volume * 1000);
+			channel_1_sample[i + 1] = (i16)(Sin_Value * apu_volume * 1000);
 			t_sin += 2.0f * PI * (1.f / (f32)(48000 / hz));
 		}
 	}
@@ -380,7 +381,7 @@ void APU::update(i32 cycles) {
 			if (channel_2.on) {
 				f32 sample = wave_duty_table[channel_2.wave_duty_pattern][channel_2.wave_duty_position];
 				f32 volume = (f32)(channel_2.volume);
-				i16 output = (i16)(((sample * volume) / 7.5f) - 1.0f) * apu_volume * 1000;
+				i16 output = (i16)(((sample * volume) / 7.5f) - 1.0f) * 10;
 				channel_2_sample[(channel_2_running_sample_index++) % sample_buffer_size] = output;
 				channel_2_sample[(channel_2_running_sample_index++) % sample_buffer_size] = output;
 			} else {
@@ -391,8 +392,7 @@ void APU::update(i32 cycles) {
 }
 
 i16 *APU::get_output_sample(i32 Sample_Count) {
-	apu_sample_count = 0;
-	update_tests(Sample_Count);
+	update_tests(apu_sample_count);
 	for (int i = 0; i < Sample_Count; ++i) {
 		i16 c1 = 0, c2 = 0, c3 = 0, c4 = 0;
 		if (imgui_channel_1_on)
@@ -439,6 +439,7 @@ void APU::clear_channel_samples() {
 	channel_2_running_sample_index = 0;
 	channel_3_running_sample_index = 0;
 	channel_4_running_sample_index = 0;
+	apu_sample_count = 0;
 }
 
 i32 APU::calc_freq_timer(i32 frequency) {

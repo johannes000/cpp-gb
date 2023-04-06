@@ -5,9 +5,6 @@
 #ifndef CPP_GB_CONTROLS_H
 #define CPP_GB_CONTROLS_H
 
-// TODO: Platform Unabhängig machen
-#include "../win/Renderer.h"
-
 enum class GB_Key {
 	// Bit 7 - Not used
 	// Bit 6 - Not used

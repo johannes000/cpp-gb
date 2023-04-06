@@ -2,7 +2,7 @@
 
 Audio::Audio(gameboy *g) : gb(g),
 						   direct_sound(0), primary_buffer(0), secondary_buffer(0) {
-	sound_buffer.samples_per_second = 48000;
+	sound_buffer.samples_per_second = SAMPLES_PER_SECOND;
 
 	running_sample_index = 0;
 
@@ -14,9 +14,9 @@ Audio::Audio(gameboy *g) : gb(g),
 	volume = 500;
 
 	if (SDL_Init(SDL_INIT_AUDIO) < 0)
-		spdlog::error("SDL_Init Fehlgeschlagen");
+		DLOG_F(ERROR, "SDL_Init Fehlgeschlagen");
 	else
-		spdlog::info("SDL Audio OK");
+		DLOG_F(INFO, "SDL Audio OK");
 
 	SDL_AudioSpec Desired_Audio_Settings = {};
 	Desired_Audio_Settings.freq = SAMPLES_PER_SECOND;
@@ -36,17 +36,17 @@ void Audio::imgui_view() {
 bool Audio::win32_init_dsound(HWND Window) {
 	HRESULT result = DirectSoundCreate(0, &direct_sound, 0);
 	if (SUCCEEDED(result)) {
-		spdlog::info("AUDIO: Direct Sound Created");
+		DLOG_F(INFO, "AUDIO: Direct Sound Created");
 	} else {
-		spdlog::critical("Direct Sound konnte nicht Erstellt werden. Result: {}", result);
+		DLOG_F(FATAL, "Direct Sound konnte nicht Erstellt werden. Result: %ld", result);
 		return false;
 	}
 
 	result = direct_sound->SetCooperativeLevel(Window, DSSCL_PRIORITY);
 	if (SUCCEEDED(result)) {
-		spdlog::info("AUDIO: Direct Sound mit Window verbunden");
+		DLOG_F(INFO, "AUDIO: Direct Sound mit Window verbunden");
 	} else {
-		spdlog::critical("AUDIO: Direct Sound nicht mit Window verbunden");
+		DLOG_F(FATAL, "AUDIO: Direct Sound nicht mit Window verbunden");
 		return false;
 	}
 
@@ -60,9 +60,9 @@ bool Audio::win32_init_dsound(HWND Window) {
 
 	result = direct_sound->CreateSoundBuffer(&Buffer_desc, &primary_buffer, NULL);
 	if (SUCCEEDED(result)) {
-		spdlog::info("AUDIO: Primary Buffer erstellt");
+		DLOG_F(INFO, "AUDIO: Primary Buffer erstellt");
 	} else {
-		spdlog::critical("AUDIO: Primary Buffer konnte nicht erstellt werden. Result: {}", result);
+		DLOG_F(FATAL, "AUDIO: Primary Buffer konnte nicht erstellt werden. Result: %", result);
 		return false;
 	}
 
@@ -77,9 +77,9 @@ bool Audio::win32_init_dsound(HWND Window) {
 
 	result = primary_buffer->SetFormat(&Wave_Format);
 	if (SUCCEEDED(result)) {
-		spdlog::info("AUDIO: Primary Buffer Wave Format festgelegt");
+		DLOG_F(INFO, "AUDIO: Primary Buffer Wave Format festgelegt");
 	} else {
-		spdlog::critical("AUDIO: Primary Buffer konnte Wave Format nicht festlegen. Result: {}", result);
+		DLOG_F(FATAL, "AUDIO: Primary Buffer konnte Wave Format nicht festlegen. Result: {}", result);
 		return false;
 	}
 
@@ -91,9 +91,9 @@ bool Audio::win32_init_dsound(HWND Window) {
 
 	result = direct_sound->CreateSoundBuffer(&Buffer_desc, &secondary_buffer, 0);
 	if (SUCCEEDED(result)) {
-		spdlog::info("AUDIO: Secondary Buffer erstellt");
+		DLOG_F(INFO, "AUDIO: Secondary Buffer erstellt");
 	} else {
-		spdlog::critical("AUDIO: Secondary Buffer konnte nicht erstellt werden. Result: {}", result);
+		DLOG_F(FATAL, "AUDIO: Secondary Buffer konnte nicht erstellt werden. Result: {}", result);
 		return false;
 	}
 
@@ -115,7 +115,7 @@ void Audio::win32_fill_sound_buffer(DWORD Byte_to_Lock, DWORD Bytes_to_Write) {
 										 0);
 
 	if (FAILED(result)) {
-		spdlog::error("AUDIO: Fehler beim Locken: {}", result);
+		DLOG_F(ERROR, "AUDIO: Fehler beim Locken: {}", result);
 	}
 
 	DWORD Region_1_Sample_Count = Region_1_Size / bytes_per_sample;
@@ -158,7 +158,7 @@ void Audio::win32_clear_sound_buffer(DWORD Byte_to_Lock, DWORD Bytes_to_Write) {
 										 0);
 
 	if (FAILED(result)) {
-		spdlog::error("AUDIO: Fehler beim Locken: {}", result);
+		DLOG_F(ERROR, "AUDIO: Fehler beim Locken: {}", result);
 	}
 
 	DWORD Region_1_Sample_Count = Region_1_Size / bytes_per_sample;
@@ -185,7 +185,7 @@ void Audio::update(f64 dt) {
 
 	auto result = secondary_buffer->GetCurrentPosition(&Play_Cursor, &Write_Cursor);
 	if (FAILED(result)) {
-		spdlog::error("AUDIO: Fehler mit GetCurrentPosition: {}", result);
+		DLOG_F(ERROR, "AUDIO: Fehler mit GetCurrentPosition: {}", result);
 		return;
 	}
 

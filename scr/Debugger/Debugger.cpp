@@ -6,12 +6,12 @@
 #include <algorithm>
 #include <vector>
 
-Debugger::Debugger(CPU *c, PPU *p, MEMORY *m, CARDRIDGE *card, CONTROLS *joy, APU *a)
+Debugger::Debugger(CPU *c, PPU *p, MEMORY *m, CARTRIDGE *card, CONTROLS *joy, APU *a)
 	: hit_breakpoint(false),
 	  cpu(c),
 	  ppu(p),
 	  mem(m),
-	  cardridge(card),
+	  CARTRIDGE(card),
 	  joypad(joy),
 	  debug_state(Debug_State::RUN),
 	  next_step(false) {
@@ -43,15 +43,15 @@ void Debugger::update_views() {
 
 void Debugger::card_view() {
 
-	ImGui::Text("%s", cardridge->rom_info.title);
+	ImGui::Text("%s", CARTRIDGE->rom_info.title);
 	ImGui::Separator();
 
-	ImGui::Text("CType: %s", cardridge->rom_info.CType_string());
+	ImGui::Text("CType: %s", CARTRIDGE->rom_info.CType_string());
 	ImGui::SameLine();
-	ImGui::Text("Rom Bank: %d", cardridge->get_selected_rom_bank());
-	ImGui::Text("Ram Size: %s", cardridge->rom_info.ram_size_string());
+	ImGui::Text("Rom Bank: %d", CARTRIDGE->get_selected_rom_bank());
+	ImGui::Text("Ram Size: %s", CARTRIDGE->rom_info.ram_size_string());
 	ImGui::SameLine();
-	ImGui::Text("| Rom Size: %s", cardridge->rom_info.rom_size_string());
+	ImGui::Text("| Rom Size: %s", CARTRIDGE->rom_info.rom_size_string());
 }
 
 void Debugger::cpu_view() {

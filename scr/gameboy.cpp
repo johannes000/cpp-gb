@@ -1,5 +1,5 @@
 #include "type.h"
-#include "CARDRIDGE.h"
+#include "CARTRIDGE.h"
 #include "CPU.h"
 #include "APU.h"
 #include "PPU.h"
@@ -11,7 +11,7 @@
 #include "MEMORY.cpp"
 #include "CPU.cpp"
 #include "CONTROLS.cpp"
-#include "CARDRIDGE.cpp"
+#include "CARTRIDGE.cpp"
 #include "PPU.cpp"
 #include "APU.cpp"
 #include "Debugger/Debugger.cpp"
@@ -51,7 +51,6 @@ int gameboy::run_one_cycle() {
 }
 
 void gameboy::log_cpu(CPU_Register R) {
-
 	if (!cpu.is_in_boot()) {
 		printf("A: %02X F: %02X B: %02X C: %02X D: %02X E: %02X H: %02X L: %02X", R.A, R.F, R.B, R.C, R.D, R.E, R.H, R.L);
 		printf(" SP: %04X", R.SP);
@@ -86,7 +85,7 @@ int gameboy::run_one_cycle(bool skip_render) {
 	const int last_cycle = cpu.update();
 	if (in_test_mode && cpu.op_code == 0x40)
 		return -1;
-	ppu.update(last_cycle, false);
+	ppu.update(last_cycle, skip_render);
 	cpu.handle_timer(last_cycle);
 	apu.update(last_cycle);
 	return last_cycle;
@@ -95,17 +94,12 @@ int gameboy::run_one_cycle(bool skip_render) {
 void gameboy::run_until_vblank() {
 	bool vblank = false;
 	s32 cycles_sum = 0;
-	while (!vblank && debug.get_debug_state() == Debug_State::RUN && cycles_sum <= 702240) {
+	while (!vblank && debug.get_debug_state() == Debug_State::RUN && cycles_sum <= 70224) {
 		cpu.handle_interrupts();
 		const int last_cycle = cpu.update();
 		vblank = ppu.update(last_cycle, false);
 		cpu.handle_timer(last_cycle);
 		cycles_sum += last_cycle;
 		apu.update(last_cycle);
-		if (apu.apu_sample_count == 500)
-			break;
 	}
-}
-
-void gameboy::run_until_soundbuffer_full(i32 Sample_Size) {
 }

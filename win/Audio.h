@@ -3,10 +3,10 @@
 
 #pragma once
 
-#include "windows.h"
 #include "dsound.h"
 #include <SDL2/SDL.h>
 
+#include "../scr/gameboy.h"
 class Audio {
 public:
 	Audio(gameboy *g);

@@ -532,14 +532,10 @@ _deps
 /dmg_boot.bin
 
 #testroms for the emulator
-testroms/
+roms/
 *.gb
 
 external/
 build/
-
-GPATH
-GRTAGS
-GTAGS
 
 .vscode/

@@ -1,64 +1,45 @@
 cmake_minimum_required(VERSION 3.16)
-project(cpp-gb LANGUAGES CXX C)
+project(cpp-gb)
+
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+
 set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED YES)
+set(CMAKE_CXX_EXTENSIONS NO)
 
-include(cmake/StandardProjectSettings.cmake)
-include(cmake/PreventInSourceBuilds.cmake)
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wno-unused-variable -Wno-unused-but-set-variable")
+  if("${CMAKE_CXX_COMPILER_VERSION}" VERSION_GREATER_EQUAL 10.2)
+    # Don't bother adding the coroutine flag when using GCC 10.0 or 10.1
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fcoroutines")
+  endif()
+endif()
 
-# Link this 'library' to set the c++ standard / compile-time options requested
-add_library(project_options INTERFACE)
-target_compile_features(project_options INTERFACE cxx_std_20)
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wno-unused-parameter -Wno-unused-variable -Wno-unused-private-field")
+  if(${CMAKE_CXX_COMPILER_VERSION} VERSION_GREATER_EQUAL 10)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fcoroutines-ts")
+  endif()
+endif()
 
-# Link this 'library' to use the warnings specified in CompilerWarnings.cmake
-add_library(project_warnings INTERFACE)
+include_directories(${PROJECT_SOURCE_DIR}/scr/)
+include_directories(${PROJECT_SOURCE_DIR}/win/)
+include_directories(${PROJECT_SOURCE_DIR}/test/)
+include_directories(${PROJECT_SOURCE_DIR}/include)
+include_directories(${PROJECT_SOURCE_DIR}/include/imgui/)
 
-# enable cache system
-include(cmake/Cache.cmake)
+set(BUILD_PATH ${PROJECT_SOURCE_DIR}/build/bin/Debug)
+set(EXECUTABLE_OUTPUT_PATH ${BUILD_PATH})
+set(LIBRARY_OUTPUT_PATH ${BUILD_PATH})
 
-# standard compiler warnings
-include(cmake/CompilerWarnings.cmake)
-set_project_warnings(project_warnings)
-
-
-# allow for static analysis options
-# include(cmake/StaticAnalyzers.cmake)
-
-include(cmake/Doxygen.cmake)
-enable_doxygen()
-
-
-set(CONAN_EXTRA_REQUIRES  "glfw/3.3.4
-                           opengl/system
-                           imgui/1.82
-                           sdl/2.0.20 
-                           ")
-
-include(cmake/Conan.cmake)
-run_conan()
-
-# if (NOT MSVC)
-#     set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wshadow -Wnon-virtual-dtor -Wnon-virtual-dtor -Wcast-align -Wnull-dereference -Woverloaded-virtual  -Wformat=2 ")
-# else()
-if(MSVC)
-    set(CMAKE_CXX_FLAGS "/W3 /EHa ")
-endif ()
-
-include_directories(${CONAN_INCLUDE_DIRS})
-include_directories(${CONAN_SRC_DIRS_IMGUI})
-include_directories(${CONAN_LIB_DIRS_IMGUI})
-include_directories(${CONAN_BUILD_DIRS_SPDLOG})
-include_directories(${CONAN_INCLUDE_DIRS_SPDLOG})
-include_directories("./scr/Debugger")
-include_directories("./scr/CPU")
-include_directories("./scr")
-include_directories("./win")
-include_directories("./test")
-
-include_directories("./external/glad/include/")
-add_library("glad" STATIC "./external/glad/src/glad.c")
-
-find_library(DSound dsound.lib)
+# find_library(DSound dsound.lib)
 # find_library(SDL2 SDL2.lib "./external/SDL2-2.0.22/VC/lib/x64")
+
+file(GLOB SOURCES 
+    ${CMAKE_SOURCE_DIR}/src/*.cpp 
+    ${CMAKE_SOURCE_DIR}/src/*/*.cpp
+    ${CMAKE_SOURCE_DIR}/src/*/*.c)
+
 
 option(PACKAGE_TESTS "Build the tests" ON)
 
@@ -69,14 +50,6 @@ if(PACKAGE_TESTS)
         add_subdirectory(test)
 endif()
 # find_package(OpenGL REQUIRED)
-
-add_library(imgui_bindings
-       ${CONAN_SRC_DIRS_IMGUI}/imgui_impl_opengl3.cpp
-       ${CONAN_SRC_DIRS_IMGUI}/imgui_impl_opengl3.h
-       ${CONAN_SRC_DIRS_IMGUI}/imgui_impl_glfw.cpp
-       ${CONAN_SRC_DIRS_IMGUI}/imgui_impl_glfw.h
-        )
-
 
 add_subdirectory(win)
 

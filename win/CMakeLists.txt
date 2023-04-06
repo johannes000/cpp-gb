@@ -1,18 +1,25 @@
 
-add_executable(cpp-gb-w main.cpp)
+link_directories(${CMAKE_SOURCE_DIR}/lib/Win64/)
+
+set(IMGUI_DIR ${PROJECT_SOURCE_DIR}/include/imgui/backends)
+add_library(imgui_bindings
+       ${IMGUI_DIR}/imgui_impl_opengl3.cpp
+       ${IMGUI_DIR}/imgui_impl_opengl3.h
+       ${IMGUI_DIR}/imgui_impl_glfw.cpp
+       ${IMGUI_DIR}/imgui_impl_glfw.h
+        )
+
+file(GLOB PLATFORM_SOURCES main.cpp)
+
+add_executable(cpp-gb-w ${PLATFORM_SOURCES} ${SOURCES})
 
 target_link_libraries(
         cpp-gb-w PRIVATE 
-                project_warnings
-                project_options
-                glad        
                 DSound
                 imgui_bindings
-                CONAN_PKG::sdl
-                CONAN_PKG::imgui
-                CONAN_PKG::glfw
-                CONAN_PKG::opengl   
-                CONAN_PKG::spdlog
-                CONAN_PKG::fmt
-                CONAN_PKG::docopt.cpp
+                glfw3
+                OpenGL32
                 )
+
+file(COPY "${CMAKE_SOURCE_DIR}/lib/Win64/" DESTINATION "${EXECUTABLE_OUTPUT_PATH}" FILES_MATCHING PATTERN "*.dll")
+file(COPY "${CMAKE_SOURCE_DIR}/roms/" DESTINATION "${EXECUTABLE_OUTPUT_PATH}/roms")

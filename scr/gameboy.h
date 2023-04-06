@@ -3,10 +3,18 @@
 
 #include <string>
 
+#include "CARTRIDGE.h"
+#include "MEMORY.h"
+#include "CPU.h"
+#include "PPU.h"
+#include "CONTROLS.h"
+#include "APU.h"
+#include "Debugger/Debugger.h"
+
 struct gameboy {
 	gameboy();
 
-	CARDRIDGE card;
+	CARTRIDGE card;
 	MEMORY mem;
 	CPU cpu;
 	PPU ppu;

@@ -1,9 +1,9 @@
 /**
  * @file CPU.cpp
  * @author Johannes
- * @brief 
+ * @brief
  * @date 22-06-2020
- * 
+ *
  * @copyright Copyright (c) 2021
  */
 
@@ -51,7 +51,7 @@ u8 CPU::parse_op_code(const u8 &opcode) {
 		cycles++;
 		u8 p_opcode = read(R.PC + 1);
 		current_instruction_info = prefixedinstructions[p_opcode];
-		//current_instruction_info.bytes += 1;
+		// current_instruction_info.bytes += 1;
 		function = (this->*prefixedinstructions[p_opcode].function)();
 	} else {
 		current_instruction_info = instructions[op_code];
@@ -153,9 +153,9 @@ void CPU::write(const u16 &addr, const u8 &data) {
 	}
 }
 /**
- * @brief 
- * 
- * @param data 
+ * @brief
+ *
+ * @param data
  */
 void CPU::dma_transfer(const u8 &data) {
 	mem->write_direct(DMA_TRANSFER, data);

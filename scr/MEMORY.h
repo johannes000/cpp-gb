@@ -1,13 +1,20 @@
 #ifndef MEMORY_H_GUARD
 #define MEMORY_H_GUARD
 
+#include "CPU.h"
+#include "PPU.h"
+#include "CARTRIDGE.h"
+#include "CONTROLS.h"
+#include "APU.h"
+
 class CPU;
 class PPU;
-class CARDRIDGE;
+class CARTRIDGE;
 class CONTROLS;
+class APU;
 class MEMORY {
 public:
-	MEMORY(CPU *c, CARDRIDGE *card, PPU *p, CONTROLS *j, APU *a);
+	MEMORY(CPU *c, CARTRIDGE *card, PPU *p, CONTROLS *j, APU *a);
 
 	u8 read(const u16 &addr);
 
@@ -26,7 +33,7 @@ public:
 	std::string TestOutput;
 
 private:
-	CARDRIDGE *cardridge;
+	CARTRIDGE *CARTRIDGE;
 	PPU *ppu;
 	CPU *cpu;
 	CONTROLS *joypad;

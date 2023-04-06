@@ -18,7 +18,7 @@
 #include "PPU.h"
 #include "MEMORY.h"
 #include "CONTROLS.h"
-#include "CARDRIDGE.h"
+#include "CARTRIDGE.h"
 
 class CPU;
 
@@ -26,13 +26,13 @@ class PPU;
 
 class MEMORY;
 
-class CARDRIDGE;
+class CARTRIDGE;
 
 class CONTROLS;
 
 class Debugger {
 public:
-	explicit Debugger(CPU *c, PPU *p, MEMORY *m, CARDRIDGE *card, CONTROLS *joy, APU *a);
+	explicit Debugger(CPU *c, PPU *p, MEMORY *m, CARTRIDGE *card, CONTROLS *joy, APU *a);
 
 	~Debugger();
 
@@ -48,7 +48,7 @@ private:
 	CPU *cpu;
 	PPU *ppu;
 	MEMORY *mem;
-	CARDRIDGE *cardridge;
+	CARTRIDGE *CARTRIDGE;
 	CONTROLS *joypad;
 	APU *apu;
 

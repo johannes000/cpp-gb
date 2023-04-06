@@ -393,7 +393,7 @@ void Renderer::file_menu_bar(std::string *file) {
 
 			if (GetOpenFileNameA(&ofn)) {
 
-				spdlog::info("You chose the file {}", path);
+				DLOG_F(INFO, "You chose the file {}", path);
 				path.resize(strlen(path.c_str()));
 				*file = path;
 			}
