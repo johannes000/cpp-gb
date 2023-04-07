@@ -2,9 +2,9 @@
 #include <thread>
 
 #include "Renderer.h"
-// #include "Audio.h"
-
 #include "gameboy.h"
+
+// #include "Audio.h"
 
 #include "utl/type.h"
 

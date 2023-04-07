@@ -22,7 +22,6 @@ if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
   endif()
 endif()
 
-
 set(BUILD_PATH ${PROJECT_SOURCE_DIR}/build/bin/Debug)
 set(EXECUTABLE_OUTPUT_PATH ${BUILD_PATH})
 set(LIBRARY_OUTPUT_PATH ${BUILD_PATH})

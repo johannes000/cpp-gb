@@ -1,12 +1,15 @@
 link_directories(${PROJECT_SOURCE_DIR}/lib/Win64/)
 
-set(IMGUI_DIR ${PROJECT_SOURCE_DIR}/include/imgui/backends)
+set(IMGUI_DIR ${PROJECT_SOURCE_DIR}/include/imgui)
 add_library(imgui_bindings
-       ${IMGUI_DIR}/imgui_impl_opengl3.cpp
-       ${IMGUI_DIR}/imgui_impl_opengl3.h
-       ${IMGUI_DIR}/imgui_impl_glfw.cpp
-       ${IMGUI_DIR}/imgui_impl_glfw.h
+       ${IMGUI_DIR}/backends/imgui_impl_opengl3.cpp
+       ${IMGUI_DIR}/backends/imgui_impl_opengl3.h
+       ${IMGUI_DIR}/backends/imgui_impl_glfw.cpp
+       ${IMGUI_DIR}/backends/imgui_impl_glfw.h
         )
+file(GLOB IMG 
+        ${IMGUI_DIR}/imgui*.cpp
+)
 
 file(GLOB PLATFORM_SOURCES 
     ${CMAKE_CURRENT_LIST_DIR}/Audio.cpp 
@@ -14,7 +17,8 @@ file(GLOB PLATFORM_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/main.cpp 
     )
 
-add_executable(cpp-gb-w ${PLATFORM_SOURCES} ${SOURCES})
+# add_executable(cpp-gb-w main.cpp ${IMG})
+add_executable(cpp-gb-w ${PLATFORM_SOURCES} ${SOURCES} ${IMG})
 
 target_link_libraries(
         cpp-gb-w PRIVATE 

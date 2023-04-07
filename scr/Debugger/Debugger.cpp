@@ -32,10 +32,10 @@ void Debugger::handle_breakpoints() {
 }
 
 void Debugger::update_views() {
-	card_view();
-	cpu_view();
-	memory_view();
-	control_view();
+	// card_view();
+	// cpu_view();
+	// memory_view();
+	// control_view();
 }
 
 void Debugger::card_view() {
@@ -52,7 +52,7 @@ void Debugger::card_view() {
 }
 
 void Debugger::cpu_view() {
-
+	return;
 	bool goto_pc = ImGui::Button("Goto PC");
 	ImGui::SameLine();
 	if (ImGui::Button("Step")) {
