@@ -1,6 +1,12 @@
 
 #ifndef PPU_H_GUARD
 #define PPU_H_GUARD
+
+#include "MEMORY.h"
+#include "CPU.h"
+
+#include "type.h"
+
 constexpr auto FPS_INTERVAL = 1.0; // seconds.;
 
 constexpr u16 VRAM_SIZE = 0x2000;

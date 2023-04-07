@@ -1,4 +1,4 @@
-#include "gameboy.cpp"
+#include "gameboy.h"
 #include "gtest/gtest.h"
 #include <string>
 

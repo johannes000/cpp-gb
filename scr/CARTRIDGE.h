@@ -3,6 +3,8 @@
 
 #include <vector>
 
+#include "type.h"
+
 constexpr u16 CARD_ROM_BANK_SIZE = 0x4000;
 constexpr u16 CARD_RAM_BANK_SIZE = 0x4000;
 
@@ -62,11 +64,7 @@ enum class ROMSize {
 	MB1_2 = 0x53, //(80 banks)
 	MB1_5 = 0x54, //(96 banks)
 };
-enum class Debug_State {
-	STEP,
-	RUN,
-	BREAKPOINT
-};
+
 enum class RAMSize {
 	None = 0x00,
 	KB2 = 0x01,

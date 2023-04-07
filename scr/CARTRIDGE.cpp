@@ -1,10 +1,12 @@
+#include "CARTRIDGE.h"
+
 #include <fstream>
 #include <iostream>
 #include <cstring>
 
-CARTRIDGE ::CARTRIDGE() {}
+CARTRIDGE::CARTRIDGE() {}
 
-bool CARTRIDGE ::load_rom(std::string rom_file, bool skip_boot) {
+bool CARTRIDGE::load_rom(std::string rom_file, bool skip_boot) {
 	rom.clear();
 	ram.clear();
 	boot.clear();
@@ -14,7 +16,7 @@ bool CARTRIDGE ::load_rom(std::string rom_file, bool skip_boot) {
 
 	std::ifstream is(rom_file, std::ios::binary);
 	if (!is) {
-		DLOG_F(ERROR, "Kann die Datei nicht öffnen: %s", rom_file);
+		DLOG_F(ERROR, "Kann die Datei nicht öffnen: %s", rom_file.c_str());
 		return false;
 	}
 	const std::vector<u8> romf(std::istreambuf_iterator<char>(is), {});
@@ -50,11 +52,11 @@ bool CARTRIDGE ::load_rom(std::string rom_file, bool skip_boot) {
 	return true;
 }
 
-u8 CARTRIDGE ::readBoot(const u16 &addr) {
+u8 CARTRIDGE::readBoot(const u16 &addr) {
 	return boot.at(addr);
 }
 
-void CARTRIDGE ::fill_cartridge_info() {
+void CARTRIDGE::fill_cartridge_info() {
 	if (rom.empty())
 		return;
 
@@ -126,7 +128,7 @@ void CARTRIDGE ::fill_cartridge_info() {
 	}
 }
 
-u8 CARTRIDGE ::read(const u16 &addr) {
+u8 CARTRIDGE::read(const u16 &addr) {
 
 	switch (rom_info.ctype) {
 		case CType::ROM_RAM:
@@ -175,7 +177,7 @@ u8 CARTRIDGE ::read(const u16 &addr) {
 	}
 }
 
-void CARTRIDGE ::write(const u16 addr, const u8 &data) {
+void CARTRIDGE::write(const u16 addr, const u8 &data) {
 	if (addr <= 0x1FFF) {
 		if ((data & 0xF) == 0xA)
 			ram_enabled = true;
@@ -231,14 +233,14 @@ void CARTRIDGE ::write(const u16 addr, const u8 &data) {
 	}
 }
 
-u8 CARTRIDGE ::read_card_rom(const u16 &addr) {
+u8 CARTRIDGE::read_card_rom(const u16 &addr) {
 	if (addr < rom.size())
 		return rom.at(addr);
 	else
 		return read(addr);
 }
 
-u8 CARTRIDGE ::readNoMBC(const u16 &addr) {
+u8 CARTRIDGE::readNoMBC(const u16 &addr) {
 	if (addr <= CARD_BANKS_END) {
 		return rom.at(addr);
 	} else {
@@ -246,28 +248,28 @@ u8 CARTRIDGE ::readNoMBC(const u16 &addr) {
 	}
 }
 
-u8 CARTRIDGE ::readMBC2(const u16 &addr) {
+u8 CARTRIDGE::readMBC2(const u16 &addr) {
 	// TODO: Implementieren
 	return readNoMBC(addr);
 }
-u8 CARTRIDGE ::readMBC3(const u16 &addr) {
+u8 CARTRIDGE::readMBC3(const u16 &addr) {
 	// TODO: Implementieren
 	return readNoMBC(addr);
 }
 
-u8 CARTRIDGE ::readMBC6(const u16 &addr) {
+u8 CARTRIDGE::readMBC6(const u16 &addr) {
 	// TODO: Implementieren
 	return readNoMBC(addr);
 }
-u8 CARTRIDGE ::readMBC7(const u16 &addr) {
+u8 CARTRIDGE::readMBC7(const u16 &addr) {
 	// TODO: Implementieren
 	return readNoMBC(addr);
 }
-u8 CARTRIDGE ::readHuC1(const u16 &addr) {
+u8 CARTRIDGE::readHuC1(const u16 &addr) {
 	// TODO: Implementieren
 	return readNoMBC(addr);
 }
-void CARTRIDGE ::writeNoMBC(const u16 addr, const u8 &data) {
+void CARTRIDGE::writeNoMBC(const u16 addr, const u8 &data) {
 	if (addr >= CARD_EXTERNAL_RAM && addr <= CARD_EXTERNAL_RAM_END && rom_info.ram_size != RAMSize::None && ram_enabled) {
 		ram[0].at(addr - CARD_EXTERNAL_RAM) = data;
 	} else {
@@ -275,7 +277,7 @@ void CARTRIDGE ::writeNoMBC(const u16 addr, const u8 &data) {
 	}
 }
 
-u8 CARTRIDGE ::readMBC1(const u16 &addr) {
+u8 CARTRIDGE::readMBC1(const u16 &addr) {
 	if (rom_info.rom_banks == 0) {
 		return readNoMBC(addr);
 	}
@@ -324,7 +326,7 @@ u8 CARTRIDGE ::readMBC1(const u16 &addr) {
 	return readNoMBC(addr);
 }
 
-void CARTRIDGE ::writeMBC1(const u16 addr, const u8 &data) {
+void CARTRIDGE::writeMBC1(const u16 addr, const u8 &data) {
 	if (addr >= 0x2000 && addr <= 0x3FFF && rom_info.rom_banks > 0) {
 		// 2000 - 3FFF - ROM Bank Number(Write Only)
 		int rom_bank = (data & 0x1F);
@@ -334,7 +336,7 @@ void CARTRIDGE ::writeMBC1(const u16 addr, const u8 &data) {
 	if (addr >= 0x4000 && addr <= 0x5FFF) {
 		// 4000-5FFF - RAM Bank Number - or - Upper Bits of ROM Bank Number (Write Only)
 		mbc1_selected_ram_bank = data & 3;
-		if (mbc1_Rom_Ram_Mode == 1 && static_cast<int>(ram.size()) < mbc1_selected_ram_bank) {
+		if (mbc1_Rom_Ram_Mode == 1 && static_cast<u32>(ram.size()) < mbc1_selected_ram_bank) {
 			// Spiel versucht auf Ram banks zuzugreifen die eigentlich gar nicht da sind.
 			ram.insert(ram.end(), mbc1_selected_ram_bank - ram.size() + 1, {std::vector<u8>(CARD_RAM_BANK_SIZE, 0xFF)});
 		}
@@ -360,15 +362,15 @@ void CARTRIDGE ::writeMBC1(const u16 addr, const u8 &data) {
 			ram[0].at(addr - CARD_EXTERNAL_RAM) = data;
 	}
 }
-void CARTRIDGE ::writeMBC2(const u16 addr, const u8 &data) {
+void CARTRIDGE::writeMBC2(const u16 addr, const u8 &data) {
 	writeNoMBC(addr, data);
 	// TODO: Implementieren
 }
-void CARTRIDGE ::writeMBC3(const u16 addr, const u8 &data) {
+void CARTRIDGE::writeMBC3(const u16 addr, const u8 &data) {
 	writeNoMBC(addr, data);
 	// TODO: Implementieren
 }
-u8 CARTRIDGE ::readMBC5(const u16 &addr) {
+u8 CARTRIDGE::readMBC5(const u16 &addr) {
 	if (addr <= CARD_ROM_0_END) {
 		return rom.at(addr);
 	} else if (addr <= 0x7FFF) {
@@ -379,7 +381,7 @@ u8 CARTRIDGE ::readMBC5(const u16 &addr) {
 	}
 	return 0xFF;
 }
-void CARTRIDGE ::writeMBC5(const u16 addr, const u8 &data) {
+void CARTRIDGE::writeMBC5(const u16 addr, const u8 &data) {
 	if (addr >= 0x2000 && addr <= 0x2FFF) {
 		mbc5_selected_rom_bank = data | (mbc5_selected_rom_bank_hi << 8);
 		mbc5_selected_rom_bank &= (rom_info.rom_banks - 1);
@@ -395,24 +397,24 @@ void CARTRIDGE ::writeMBC5(const u16 addr, const u8 &data) {
 	}
 	// TODO: Implementieren
 }
-void CARTRIDGE ::writeMBC6(const u16 addr, const u8 &data) {
+void CARTRIDGE::writeMBC6(const u16 addr, const u8 &data) {
 	writeNoMBC(addr, data);
 	// TODO: Implementieren
 }
-void CARTRIDGE ::writeMBC7(const u16 addr, const u8 &data) {
+void CARTRIDGE::writeMBC7(const u16 addr, const u8 &data) {
 	writeNoMBC(addr, data);
 	// TODO: Implementieren
 }
-void CARTRIDGE ::writeHuC1(const u16 addr, const u8 &data) {
+void CARTRIDGE::writeHuC1(const u16 addr, const u8 &data) {
 	writeNoMBC(addr, data);
 	// TODO: Implementieren
 }
-void CARTRIDGE ::offset_bank_if_special(u32 &data) {
+void CARTRIDGE::offset_bank_if_special(u32 &data) {
 	if (data == 0x0 || data == 0x20 || data == 0x40 || data == 0x60 || data == 0x80)
 		data++;
 }
 
-bool CARTRIDGE ::load_boot_rom() {
+bool CARTRIDGE::load_boot_rom() {
 	boot.clear();
 
 	const char *boot_rom_path = "C:/Users/knaub/source/repos/testroms/DMG_ROM.bin";
@@ -429,7 +431,7 @@ bool CARTRIDGE ::load_boot_rom() {
 	return false;
 }
 
-void CARTRIDGE ::build_save_file_path() {
+void CARTRIDGE::build_save_file_path() {
 
 	std::string file;
 	std::string path;
@@ -445,7 +447,7 @@ void CARTRIDGE ::build_save_file_path() {
 	rom_info.savefile = path;
 }
 
-void CARTRIDGE ::create_sav_file() {
+void CARTRIDGE::create_sav_file() {
 	if (rom_info.ram_banks == 0 || !rom_loaded)
 		return;
 
@@ -458,10 +460,10 @@ void CARTRIDGE ::create_sav_file() {
 			os.write(reinterpret_cast<const char *>(&data), 1);
 		}
 	}
-	DLOG_F(INFO, "Sav File created: %s", file);
+	DLOG_F(INFO, "Sav File created: %s", file.c_str());
 }
 
-void CARTRIDGE ::load_sav_file() {
+void CARTRIDGE::load_sav_file() {
 	if (rom_info.ram_banks == 0)
 		return;
 	std::string file = rom_info.savefile;
@@ -475,5 +477,5 @@ void CARTRIDGE ::load_sav_file() {
 			ram[i][index++] = byte;
 		}
 	}
-	DLOG_F(INFO, "Sav File Loaded: %s", file);
+	DLOG_F(INFO, "Sav File Loaded: %s", file.c_str());
 }

@@ -1,9 +1,11 @@
+#include "MEMORY.h"
+
 #include <iostream>
 #include <fstream>
 #include <windows.h>
 
 MEMORY::MEMORY(CPU *c, CARTRIDGE *card, PPU *p, CONTROLS *j, APU *a)
-	: CARTRIDGE(card), ppu(p), cpu(c), joypad(j), apu(a) {
+	: card(card), ppu(p), cpu(c), joypad(j), apu(a) {
 }
 
 void MEMORY::reset() {
@@ -12,13 +14,13 @@ void MEMORY::reset() {
 u8 MEMORY::read(const u16 &addr) {
 	if (addr <= CARD_ROM_END) {
 		if (cpu->is_in_boot() && addr <= BOOT_ROM_END) {
-			return CARTRIDGE->readBoot(addr);
+			return card->readBoot(addr);
 		}
-		return CARTRIDGE->read(addr);
+		return card->read(addr);
 	} else if (addr <= GRAPHICS_RAM_END) {
 		return ppu->read(addr);
 	} else if (addr <= CARD_EXTERNAL_RAM_END) {
-		return CARTRIDGE->read(addr);
+		return card->read(addr);
 	} else if (addr <= WORKING_RAM_END) {
 		return memory.at(addr);
 	} else if (addr <= WORKING_RAM_SHADOW_END) {
@@ -96,7 +98,7 @@ void MEMORY::write(const u16 &addr, const u8 &data) {
 	if (addr >= GRAPHICS_RAM && addr <= GRAPHICS_RAM_END) {
 		ppu->write(addr, data);
 	} else if (addr >= CARD_EXTERNAL_RAM && addr <= CARD_EXTERNAL_RAM_END) {
-		CARTRIDGE->write(addr, data);
+		card->write(addr, data);
 	} else if (addr >= WORKING_RAM && addr <= WORKING_RAM_END) {
 		memory.at(addr) = data;
 	} else if (addr >= WORKING_RAM_SHADOW && addr <= WORKING_RAM_SHADOW_END) {
@@ -110,7 +112,7 @@ void MEMORY::write(const u16 &addr, const u8 &data) {
 	} else if (addr == INTERRUPT_ENABLE_REG) {
 		cpu->write(addr, data);
 	} else {
-		CARTRIDGE->write(addr, data);
+		card->write(addr, data);
 	}
 }
 
@@ -229,7 +231,7 @@ void MEMORY::reset(bool skip_boot_rom) {
 }
 
 u8 MEMORY::read_card_rom(const u16 &addr) {
-	return CARTRIDGE->read_card_rom(addr);
+	return card->read_card_rom(addr);
 }
 
 void MEMORY::request_interrupt(Interrupt inter) {

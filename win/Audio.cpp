@@ -12,26 +12,12 @@ Audio::Audio(gameboy *g) : gb(g),
 	latency_sample_count = sound_buffer.samples_per_second / 15;
 
 	volume = 500;
-
-	if (SDL_Init(SDL_INIT_AUDIO) < 0)
-		DLOG_F(ERROR, "SDL_Init Fehlgeschlagen");
-	else
-		DLOG_F(INFO, "SDL Audio OK");
-
-	SDL_AudioSpec Desired_Audio_Settings = {};
-	Desired_Audio_Settings.freq = SAMPLES_PER_SECOND;
-	Desired_Audio_Settings.format = AUDIO_S16SYS;
-	Desired_Audio_Settings.channels = 2;
-	Desired_Audio_Settings.samples = 4096;
-	audio_device_id = SDL_OpenAudioDevice(nullptr, 0, &Desired_Audio_Settings, &audio_specs, 0);
-	// SDL_OpenAudio(&Desired_Audio_Settings, &audio_specs);
-	SDL_PauseAudioDevice(audio_device_id, 0);
 }
 
-void Audio::imgui_view() {
-	ImGui::Text("Audio");
-	ImGui::SliderInt("Volume", &volume, 0, 3000);
-}
+// void Audio::imgui_view() {
+// 	ImGui::Text("Audio");
+// 	ImGui::SliderInt("Volume", &volume, 0, 3000);
+// }
 
 bool Audio::win32_init_dsound(HWND Window) {
 	HRESULT result = DirectSoundCreate(0, &direct_sound, 0);
@@ -62,7 +48,7 @@ bool Audio::win32_init_dsound(HWND Window) {
 	if (SUCCEEDED(result)) {
 		DLOG_F(INFO, "AUDIO: Primary Buffer erstellt");
 	} else {
-		DLOG_F(FATAL, "AUDIO: Primary Buffer konnte nicht erstellt werden. Result: %", result);
+		DLOG_F(FATAL, "AUDIO: Primary Buffer konnte nicht erstellt werden. Result: %ld", result);
 		return false;
 	}
 
@@ -79,7 +65,7 @@ bool Audio::win32_init_dsound(HWND Window) {
 	if (SUCCEEDED(result)) {
 		DLOG_F(INFO, "AUDIO: Primary Buffer Wave Format festgelegt");
 	} else {
-		DLOG_F(FATAL, "AUDIO: Primary Buffer konnte Wave Format nicht festlegen. Result: {}", result);
+		DLOG_F(FATAL, "AUDIO: Primary Buffer konnte Wave Format nicht festlegen. Result: %ld", result);
 		return false;
 	}
 
@@ -93,7 +79,7 @@ bool Audio::win32_init_dsound(HWND Window) {
 	if (SUCCEEDED(result)) {
 		DLOG_F(INFO, "AUDIO: Secondary Buffer erstellt");
 	} else {
-		DLOG_F(FATAL, "AUDIO: Secondary Buffer konnte nicht erstellt werden. Result: {}", result);
+		DLOG_F(FATAL, "AUDIO: Secondary Buffer konnte nicht erstellt werden. Result: %ld", result);
 		return false;
 	}
 
@@ -115,7 +101,7 @@ void Audio::win32_fill_sound_buffer(DWORD Byte_to_Lock, DWORD Bytes_to_Write) {
 										 0);
 
 	if (FAILED(result)) {
-		DLOG_F(ERROR, "AUDIO: Fehler beim Locken: {}", result);
+		DLOG_F(ERROR, "AUDIO: Fehler beim Locken: %ld", result);
 	}
 
 	DWORD Region_1_Sample_Count = Region_1_Size / bytes_per_sample;
@@ -158,7 +144,7 @@ void Audio::win32_clear_sound_buffer(DWORD Byte_to_Lock, DWORD Bytes_to_Write) {
 										 0);
 
 	if (FAILED(result)) {
-		DLOG_F(ERROR, "AUDIO: Fehler beim Locken: {}", result);
+		DLOG_F(ERROR, "AUDIO: Fehler beim Locken: %ld", result);
 	}
 
 	DWORD Region_1_Sample_Count = Region_1_Size / bytes_per_sample;
@@ -185,7 +171,7 @@ void Audio::update(f64 dt) {
 
 	auto result = secondary_buffer->GetCurrentPosition(&Play_Cursor, &Write_Cursor);
 	if (FAILED(result)) {
-		DLOG_F(ERROR, "AUDIO: Fehler mit GetCurrentPosition: {}", result);
+		DLOG_F(ERROR, "AUDIO: Fehler mit GetCurrentPosition: %ld", result);
 		return;
 	}
 

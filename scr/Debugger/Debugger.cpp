@@ -1,24 +1,21 @@
-//
-// Created by knaub on 26.06.2020.
-//
+#include "Debugger.h"
 #include "Debug_helper.cpp"
 
 #include <algorithm>
 #include <vector>
 
-Debugger::Debugger(CPU *c, PPU *p, MEMORY *m, CARTRIDGE *card, CONTROLS *joy, APU *a)
+Debugger::Debugger(CPU *c, PPU *p, MEMORY *m, CARTRIDGE *card, CONTROLS *joy, APU *apu)
 	: hit_breakpoint(false),
 	  cpu(c),
 	  ppu(p),
 	  mem(m),
-	  CARTRIDGE(card),
+	  card(card),
 	  joypad(joy),
+	  apu(apu),
 	  debug_state(Debug_State::RUN),
 	  next_step(false) {
 	breakpoints.push_back(0x20A);
 }
-
-Debugger::~Debugger() {}
 
 void Debugger::handle_breakpoints() {
 	next_step = false;
@@ -43,15 +40,15 @@ void Debugger::update_views() {
 
 void Debugger::card_view() {
 
-	ImGui::Text("%s", CARTRIDGE->rom_info.title);
+	ImGui::Text("%s", card->rom_info.title);
 	ImGui::Separator();
 
-	ImGui::Text("CType: %s", CARTRIDGE->rom_info.CType_string());
+	ImGui::Text("CType: %s", card->rom_info.CType_string());
 	ImGui::SameLine();
-	ImGui::Text("Rom Bank: %d", CARTRIDGE->get_selected_rom_bank());
-	ImGui::Text("Ram Size: %s", CARTRIDGE->rom_info.ram_size_string());
+	ImGui::Text("Rom Bank: %d", card->get_selected_rom_bank());
+	ImGui::Text("Ram Size: %s", card->rom_info.ram_size_string());
 	ImGui::SameLine();
-	ImGui::Text("| Rom Size: %s", CARTRIDGE->rom_info.rom_size_string());
+	ImGui::Text("| Rom Size: %s", card->rom_info.rom_size_string());
 }
 
 void Debugger::cpu_view() {

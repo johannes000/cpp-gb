@@ -1,9 +1,11 @@
+#include "PPU.h"
+
 #include <algorithm>
 
 PPU::PPU(MEMORY *m, CPU *c)
-	: ready_to_render(false),
-	  cpu(c),
-	  mem(m) {
+	: cpu(c),
+	  mem(m),
+	  ready_to_render(false) {
 	reset();
 }
 bool compare_sprite_x(Sprite *sp1, Sprite *sp2) {

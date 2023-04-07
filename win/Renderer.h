@@ -1,9 +1,8 @@
-//
-// Created by knaub on 15.07.2020.
-//
-
 #ifndef CPP_GB_RENDERER_H
 #define CPP_GB_RENDERER_H
+
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
 
 #include "imgui.h"
 #include "backends/imgui_impl_glfw.h"
@@ -15,35 +14,15 @@
 #include <string>
 
 #include <map>
-#define IMGUI_IMPL_OPENGL_LOADER_GLAD
-
-#if defined(IMGUI_IMPL_OPENGL_LOADER_GL3W)
-#include <GL/gl3w.h> // Initialize with gl3wInit()
-#elif defined(IMGUI_IMPL_OPENGL_LOADER_GLEW)
-#include <GL/glew.h> // Initialize with glewInit()
-#elif defined(IMGUI_IMPL_OPENGL_LOADER_GLAD)
-#include <glad/glad.h> // Initialize with gladLoadGL()
-
-#elif defined(IMGUI_IMPL_OPENGL_LOADER_GLBINDING2)
-#define GLFW_INCLUDE_NONE	   // GLFW including OpenGL headers causes ambiguity or multiple definition errors.
-#include <glbinding/Binding.h> // Initialize with glbinding::Binding::initialize()
-#include <glbinding/gl/gl.h>
-using namespace gl;
-#elif defined(IMGUI_IMPL_OPENGL_LOADER_GLBINDING3)
-#define GLFW_INCLUDE_NONE		 // GLFW including OpenGL headers causes ambiguity or multiple definition errors.
-#include <glbinding/glbinding.h> // Initialize with glbinding::initialize()
-#include <glbinding/gl/gl.h>
-using namespace gl;
-#else
-#include IMGUI_IMPL_OPENGL_LOADER_CUSTOM
-#endif
-
-#include <GLFW/glfw3.h>
 
 #if defined(_MSC_VER) && (_MSC_VER >= 1900) && \
 	!defined(IMGUI_DISABLE_WIN32_FUNCTIONS)
 #pragma comment(lib, "legacy_stdio_definitions")
 #endif
+
+#include "gameboy.h"
+#include "Audio.h"
+#include "type.h"
 
 class Debugger;
 class CONTROLS;

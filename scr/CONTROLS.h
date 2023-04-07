@@ -1,9 +1,10 @@
-//
-// Created by knaub on 25.06.2020.
-//
-
 #ifndef CPP_GB_CONTROLS_H
 #define CPP_GB_CONTROLS_H
+
+#include "GLFW/glfw3.h"
+
+#include "MEMORY.h"
+#include "type.h"
 
 enum class GB_Key {
 	// Bit 7 - Not used

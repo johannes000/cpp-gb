@@ -1,3 +1,5 @@
+#include <cmath>
+
 #include "APU.h"
 #include "loguru.hpp"
 
@@ -311,7 +313,7 @@ void APU::update_tests(i32 Sample_Count) {
 	}
 	if (sinus_test) {
 		for (int i = 0; i < Sample_Count; i += 2) {
-			f32 Sin_Value = sinf(t_sin);
+			f32 Sin_Value = std::sin(t_sin);
 			channel_1_sample[i] = (i16)(Sin_Value * apu_volume * 1000);
 			channel_1_sample[i + 1] = (i16)(Sin_Value * apu_volume * 1000);
 			t_sin += 2.0f * PI * (1.f / (f32)(48000 / hz));
@@ -412,7 +414,7 @@ i16 *APU::get_output_sample(i32 Sample_Count) {
 void APU::channel_2_soundeffect() {
 	f32 quick_sin = 0;
 	for (int i = 0; i < 3000; i++) {
-		f32 Sin_Value = sinf(quick_sin);
+		f32 Sin_Value = std::sin(quick_sin);
 		channel_2_sample[i] = (i16)(Sin_Value * apu_volume);
 		channel_2_sample[i + 1] = (i16)(Sin_Value * apu_volume);
 		quick_sin += 2.0f * PI * (1.f / (f32)(48000 / 500));

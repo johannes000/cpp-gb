@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(cpp-gb)
+project(cpp-gb VERSION 0.1)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
@@ -22,11 +22,6 @@ if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
   endif()
 endif()
 
-include_directories(${PROJECT_SOURCE_DIR}/scr/)
-include_directories(${PROJECT_SOURCE_DIR}/win/)
-include_directories(${PROJECT_SOURCE_DIR}/test/)
-include_directories(${PROJECT_SOURCE_DIR}/include)
-include_directories(${PROJECT_SOURCE_DIR}/include/imgui/)
 
 set(BUILD_PATH ${PROJECT_SOURCE_DIR}/build/bin/Debug)
 set(EXECUTABLE_OUTPUT_PATH ${BUILD_PATH})
@@ -35,10 +30,18 @@ set(LIBRARY_OUTPUT_PATH ${BUILD_PATH})
 # find_library(DSound dsound.lib)
 # find_library(SDL2 SDL2.lib "./external/SDL2-2.0.22/VC/lib/x64")
 
+include_directories(${PROJECT_SOURCE_DIR}/scr/)
+include_directories(${PROJECT_SOURCE_DIR}/win/)
+include_directories(${PROJECT_SOURCE_DIR}/test/)
+include_directories(${PROJECT_SOURCE_DIR}/include/)
+include_directories(${PROJECT_SOURCE_DIR}/include/imgui/)
+
 file(GLOB SOURCES 
-    ${CMAKE_SOURCE_DIR}/src/*.cpp 
-    ${CMAKE_SOURCE_DIR}/src/*/*.cpp
-    ${CMAKE_SOURCE_DIR}/src/*/*.c)
+    ${CMAKE_SOURCE_DIR}/scr/*.cpp 
+    ${CMAKE_SOURCE_DIR}/scr/*.c 
+    ${CMAKE_SOURCE_DIR}/scr/*/*.cpp
+    ${CMAKE_SOURCE_DIR}/scr/*/*.c
+    )
 
 
 option(PACKAGE_TESTS "Build the tests" ON)

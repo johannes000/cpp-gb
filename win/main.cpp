@@ -1,32 +1,16 @@
-/**
- * @file main.cpp
- * @author Johannes
- * @brief
- * @date 15-06-2020
- *
- * @copyright Copyright (c) 2020
- */
-
 #include <chrono>
 #include <thread>
 
-#include "type.h"
 #include "gameboy.h"
 
 #include "Audio.h"
-#include "Audio.cpp"
-
 #include "Renderer.h"
 
-#include <SDL2\SDL.h>
+#include "type.h"
 
 // Für den Windows WindowHnd
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3native.h>
-
-#ifndef _DEBUG
-// spdlog::set_level(spdlog::level::err);
-#endif // DEBUG
 
 constexpr double frameTimeMicro = (1.0 / 59.73) * 1e6;
 
@@ -85,7 +69,6 @@ int main(int argc, char *args[]) {
 					// audio.update(22.2);
 					// render(&file, &renderer);
 					samps = gb.apu.apu_sample_count;
-					SDL_QueueAudio(audio.audio_device_id, gb.apu.get_output_sample(samps), samps * 2);
 					break;
 				}
 			}

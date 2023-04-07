@@ -1,20 +1,7 @@
-#include "type.h"
-#include "CARTRIDGE.h"
-#include "CPU.h"
-#include "APU.h"
-#include "PPU.h"
-#include "CONTROLS.h"
-#include "MEMORY.h"
-#include "Debugger/Debugger.h"
 #include "gameboy.h"
 
-#include "MEMORY.cpp"
-#include "CPU.cpp"
-#include "CONTROLS.cpp"
-#include "CARTRIDGE.cpp"
-#include "PPU.cpp"
-#include "APU.cpp"
-#include "Debugger/Debugger.cpp"
+#include "Debugger/Debugger.h"
+#include "type.h"
 
 gameboy::gameboy()
 	: mem(&cpu, &card, &ppu, &joypad, &apu),

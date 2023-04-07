@@ -1,6 +1,4 @@
-//
-// Created by knaub on 15.07.2020.
-//
+#include "Renderer.h"
 
 #include <charconv>
 #include "windows.h"
@@ -216,6 +214,9 @@ void Renderer::update_views() {
 		debug_view();
 }
 
+void Renderer::menu() {
+}
+
 void Renderer::update_tile_buffer() {
 #if 1
 	u16 tile_data_address = 0x8000;
@@ -323,7 +324,7 @@ void Renderer::debug_view() {
 	ImGui::SetNextWindowSize({w, h - ImGui::GetFrameHeight()});
 	ImGui::SetNextWindowPos({0, ImGui::GetFrameHeight()});
 	ImGuiWindowFlags f = ImGuiWindowFlags_NoDecoration;
-	ImGui::Begin("Debugger", false, f);
+	ImGui::Begin("Debugger");
 
 	ImGui::BeginChild("CPU", {third_w, half_h});
 	gb->debug.cpu_view();
@@ -356,7 +357,8 @@ void Renderer::debug_view() {
 
 	ImGui::SameLine();
 	ImGui::BeginChild("Audio", {fourth_of_rest_w, half_h});
-	audio->imgui_view();
+	// audio->imgui_view();
+	ImGui::Text("Audio Hier!");
 	ImGui::EndChild();
 
 	ImGui::SameLine();
@@ -393,7 +395,7 @@ void Renderer::file_menu_bar(std::string *file) {
 
 			if (GetOpenFileNameA(&ofn)) {
 
-				DLOG_F(INFO, "You chose the file {}", path);
+				DLOG_F(INFO, "You chose the file %s", path.c_str());
 				path.resize(strlen(path.c_str()));
 				*file = path;
 			}

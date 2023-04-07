@@ -12,6 +12,7 @@ class PPU;
 class CARTRIDGE;
 class CONTROLS;
 class APU;
+
 class MEMORY {
 public:
 	MEMORY(CPU *c, CARTRIDGE *card, PPU *p, CONTROLS *j, APU *a);
@@ -33,7 +34,7 @@ public:
 	std::string TestOutput;
 
 private:
-	CARTRIDGE *CARTRIDGE;
+	CARTRIDGE *card;
 	PPU *ppu;
 	CPU *cpu;
 	CONTROLS *joypad;

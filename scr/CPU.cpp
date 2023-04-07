@@ -1,12 +1,4 @@
-/**
- * @file CPU.cpp
- * @author Johannes
- * @brief
- * @date 22-06-2020
- *
- * @copyright Copyright (c) 2021
- */
-
+#include "CPU.h"
 #include "./CPU/helper.cpp"
 #include "./CPU/ARITHMETIC.cpp"
 #include "./CPU/CONTROL.cpp"

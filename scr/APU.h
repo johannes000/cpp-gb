@@ -3,7 +3,14 @@
 
 #pragma once
 
+#include "MEMORY.h"
+#include "imgui.h"
+#include "type.h"
+
 #include <array>
+
+class MEMORY;
+
 class APU {
 public:
 	APU(MEMORY *m);

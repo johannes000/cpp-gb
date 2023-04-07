@@ -1,13 +1,8 @@
-//
-// Created by knaub on 26.06.2020.
-//
-
 #ifndef CPP_GB_DEBUGGER_H
 #define CPP_GB_DEBUGGER_H
 
 #include "../type.h"
-
-#include "imgui.h"
+#include <imgui/imgui.h>
 
 #include <cstdio>
 #include <cstdlib>
@@ -17,24 +12,26 @@
 #include "CPU.h"
 #include "PPU.h"
 #include "MEMORY.h"
-#include "CONTROLS.h"
 #include "CARTRIDGE.h"
+#include "CONTROLS.h"
+#include "APU.h"
+
+enum class Debug_State {
+	STEP,
+	RUN,
+	BREAKPOINT
+};
 
 class CPU;
-
 class PPU;
-
 class MEMORY;
-
 class CARTRIDGE;
-
 class CONTROLS;
+class APU;
 
 class Debugger {
 public:
 	explicit Debugger(CPU *c, PPU *p, MEMORY *m, CARTRIDGE *card, CONTROLS *joy, APU *a);
-
-	~Debugger();
 
 	void reset();
 
@@ -48,7 +45,7 @@ private:
 	CPU *cpu;
 	PPU *ppu;
 	MEMORY *mem;
-	CARTRIDGE *CARTRIDGE;
+	CARTRIDGE *card;
 	CONTROLS *joypad;
 	APU *apu;
 
