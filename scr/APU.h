@@ -4,8 +4,7 @@
 #pragma once
 
 #include "MEMORY.h"
-#include "imgui.h"
-#include "type.h"
+#include "utl/type.h"
 
 #include <array>
 

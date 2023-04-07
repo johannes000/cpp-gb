@@ -1,13 +1,12 @@
 #ifndef CPP_GB_DEBUGGER_H
 #define CPP_GB_DEBUGGER_H
 
-#include "../type.h"
-#include <imgui/imgui.h>
-
 #include <cstdio>
 #include <cstdlib>
 
 #include <map>
+
+#include "imgui.h"
 
 #include "CPU.h"
 #include "PPU.h"
@@ -15,6 +14,8 @@
 #include "CARTRIDGE.h"
 #include "CONTROLS.h"
 #include "APU.h"
+
+#include <utl/type.h>
 
 enum class Debug_State {
 	STEP,

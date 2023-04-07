@@ -4,7 +4,7 @@
 #include "GLFW/glfw3.h"
 
 #include "MEMORY.h"
-#include "type.h"
+#include "utl/type.h"
 
 enum class GB_Key {
 	// Bit 7 - Not used

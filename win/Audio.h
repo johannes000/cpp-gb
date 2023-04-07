@@ -5,8 +5,8 @@
 
 #include "dsound.h"
 
-#include "../scr/gameboy.h"
-#include "../scr/type.h"
+#include "gameboy.h"
+#include "utl/type.h"
 
 class Audio {
 public:

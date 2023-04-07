@@ -1,7 +1,7 @@
 #include "gameboy.h"
 
 #include "Debugger/Debugger.h"
-#include "type.h"
+#include "utl/type.h"
 
 gameboy::gameboy()
 	: mem(&cpu, &card, &ppu, &joypad, &apu),

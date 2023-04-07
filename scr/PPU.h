@@ -5,7 +5,7 @@
 #include "MEMORY.h"
 #include "CPU.h"
 
-#include "type.h"
+#include "utl/type.h"
 
 constexpr auto FPS_INTERVAL = 1.0; // seconds.;
 

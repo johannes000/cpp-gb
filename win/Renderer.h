@@ -2,7 +2,7 @@
 #define CPP_GB_RENDERER_H
 
 #include <glad/glad.h>
-#include <GLFW/glfw3.h>
+#include "GLFW/glfw3.h"
 
 #include "imgui.h"
 #include "backends/imgui_impl_glfw.h"
@@ -21,8 +21,9 @@
 #endif
 
 #include "gameboy.h"
-#include "Audio.h"
-#include "type.h"
+#include "CONTROLS.h"
+
+#include "utl/type.h"
 
 class Debugger;
 class CONTROLS;
@@ -40,10 +41,9 @@ struct Texture {
 struct Renderer {
 	GLFWwindow *window{};
 
-	Renderer(gameboy *g, Audio *a);
+	Renderer(gameboy *g);
 
 	gameboy *gb;
-	Audio *audio;
 
 	void init_window();
 

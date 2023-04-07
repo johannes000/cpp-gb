@@ -14,13 +14,6 @@ file(GLOB PLATFORM_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/main.cpp 
     )
 
-message(${CMAKE_CURRENT_LIST_DIR})
-
-get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY SOURCES)
-foreach(dir ${dirs})
-  message(STATUS "dir='${dir}'")
-endforeach()
-
 add_executable(cpp-gb-w ${PLATFORM_SOURCES} ${SOURCES})
 
 target_link_libraries(

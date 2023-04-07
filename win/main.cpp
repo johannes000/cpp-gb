@@ -1,16 +1,12 @@
 #include <chrono>
 #include <thread>
 
+#include "Renderer.h"
+// #include "Audio.h"
+
 #include "gameboy.h"
 
-#include "Audio.h"
-#include "Renderer.h"
-
-#include "type.h"
-
-// Für den Windows WindowHnd
-#define GLFW_EXPOSE_NATIVE_WIN32
-#include <GLFW/glfw3native.h>
+#include "utl/type.h"
 
 constexpr double frameTimeMicro = (1.0 / 59.73) * 1e6;
 
@@ -40,11 +36,7 @@ int main(int argc, char *args[]) {
 	auto Frame_Start = std::chrono::system_clock::now();
 	auto Frame_End = std::chrono::system_clock::now();
 
-	Audio audio(&gb);
-	Renderer renderer(&gb, &audio);
-
-	HWND hwnd = glfwGetWin32Window(renderer.window);
-	audio.win32_init_dsound(hwnd);
+	Renderer renderer(&gb);
 
 	gb.debug.setDebugState(Debug_State::RUN);
 

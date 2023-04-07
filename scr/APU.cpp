@@ -1,7 +1,7 @@
-#include <cmath>
-
 #include "APU.h"
-#include "loguru.hpp"
+
+#include "imgui.h"
+#include <cmath>
 
 APU::APU(MEMORY *m) : mem(m) {
 	nr10 = 0;

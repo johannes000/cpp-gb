@@ -3,7 +3,9 @@
 #include <charconv>
 #include "windows.h"
 
-Renderer::Renderer(gameboy *g, Audio *a) : gb(g), audio(a) {
+#include "imgui.h"
+
+Renderer::Renderer(gameboy *g) : gb(g) {
 	init_window();
 
 	glfwSetWindowUserPointer(window, (void *)&gb->joypad);
@@ -394,7 +396,6 @@ void Renderer::file_menu_bar(std::string *file) {
 			ofn.Flags = OFN_DONTADDTORECENT | OFN_FILEMUSTEXIST;
 
 			if (GetOpenFileNameA(&ofn)) {
-
 				DLOG_F(INFO, "You chose the file %s", path.c_str());
 				path.resize(strlen(path.c_str()));
 				*file = path;
