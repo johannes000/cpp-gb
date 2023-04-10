@@ -10,8 +10,6 @@
 #include <windows.h>
 #include <string>
 
-#include <map>
-
 #define IMGUI_IMPL_OPENGL_LOADER_GLAD
 
 #if defined(IMGUI_IMPL_OPENGL_LOADER_GL3W)
@@ -41,6 +39,8 @@ using namespace gl;
 	!defined(IMGUI_DISABLE_WIN32_FUNCTIONS)
 #pragma comment(lib, "legacy_stdio_definitions")
 #endif
+
+#include <map>
 
 #include "gameboy.h"
 #include "CONTROLS.h"
@@ -100,7 +100,7 @@ struct Renderer {
 
 	s32 menu_bar_height;
 
-	bool show_debug_views;
+	// bool show_debug_views;
 	bool show_demo_window;
 	bool show_another_window;
 	bool in_debug_show_fps;
@@ -119,7 +119,7 @@ struct Renderer {
 
 	std::map<std::string, std::string> roms;
 
-	void debug_view();
+	// void debug_view();
 	void tile_buffer_view();
 	void main_view(std::string *file);
 

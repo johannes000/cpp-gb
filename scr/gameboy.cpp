@@ -9,7 +9,6 @@ gameboy::gameboy()
 	  ppu(&mem, &cpu),
 	  joypad(&mem),
 	  apu(&mem),
-	  debug(&cpu, &ppu, &mem, &card, &joypad, &apu),
 
 	  in_test_mode(false),
 	  skip_boot_rom(false),
@@ -47,14 +46,6 @@ void gameboy::log_cpu(CPU_Register R) {
 	}
 }
 
-void gameboy::run_until_breakpoint() {
-	while (!ppu.is_ready_to_render() &&
-		   debug.get_debug_state() == Debug_State::BREAKPOINT) {
-		run_one_cycle();
-		debug.handle_breakpoints();
-	}
-}
-
 void gameboy::run_for_x_cycles(int cycles_to_run) {
 	while (cycles_to_run > 0) {
 		int cycles = run_one_cycle(false);
@@ -81,7 +72,7 @@ int gameboy::run_one_cycle(bool skip_render) {
 void gameboy::run_until_vblank() {
 	bool vblank = false;
 	s32 cycles_sum = 0;
-	while (!vblank && debug.get_debug_state() == Debug_State::RUN && cycles_sum <= 70224) {
+	while (!vblank && cycles_sum <= 70224) {
 		cpu.handle_interrupts();
 		const int last_cycle = cpu.update();
 		vblank = ppu.update(last_cycle, false);

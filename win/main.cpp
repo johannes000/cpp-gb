@@ -38,8 +38,6 @@ int main(int argc, char *args[]) {
 
 	Renderer renderer(&gb);
 
-	gb.debug.setDebugState(Debug_State::RUN);
-
 	i32 Cycle_this_frame = 0;
 	while (!glfwWindowShouldClose(renderer.window)) {
 

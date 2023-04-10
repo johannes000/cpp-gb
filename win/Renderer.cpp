@@ -1,7 +1,9 @@
 #include "Renderer.h"
 
+#include <dirent.h>
 #include <charconv>
 #include "windows.h"
+#include <vector>
 
 #include "imgui.h"
 #include "utl/ImGuiColors.hpp"
@@ -13,7 +15,6 @@ Renderer::Renderer(gameboy *g) : gb(g),
 								 window_xpos(50),
 								 window_ypos(45),
 								 menu_bar_height(),
-								 show_debug_views(false),
 								 show_demo_window(false),
 								 show_another_window(false),
 								 in_debug_show_fps(true),
@@ -52,6 +53,7 @@ Renderer::Renderer(gameboy *g) : gb(g),
 		sprite_textures.push_back(sprite);
 	}
 
+	// TODO: Romsordner einbinden
 	roms = {
 		{"Acid", "C:/Users/knaub/source/repos/testroms/dmg-acid2.gb"},
 		{"01-registers", "C:/Users/knaub/source/repos/testroms/dmg_sound/rom_singles/01-registers.gb"},
@@ -199,18 +201,16 @@ void Renderer::render() const {
 	glViewport(0, 0, display_w, display_h);
 	glClearColor(bg_color.x, bg_color.y, bg_color.z, bg_color.w);
 	glClear(GL_COLOR_BUFFER_BIT);
-	if (!show_debug_views) {
-		// TODO: Echte Position Berechnen
-		int real_display_h = display_h - menu_bar_height;
-		int dstX0 = ((real_display_h * frame_buffer_ratio) / 2) - 160;
-		int dstY0 = 0;
-		int dstX1 = dstX0 + real_display_h * frame_buffer_ratio;
-		int dstY1 = real_display_h;
+	// TODO: Echte Position Berechnen
+	int real_display_h = display_h - menu_bar_height;
+	int dstX0 = ((real_display_h * frame_buffer_ratio) / 2) - 160;
+	int dstY0 = 0;
+	int dstX1 = dstX0 + real_display_h * frame_buffer_ratio;
+	int dstY1 = real_display_h;
 
-		glBlitFramebuffer(0, frame_texture.height, frame_texture.width, 0,
-						  dstX0, dstY0, dstX1, dstY1,
-						  GL_COLOR_BUFFER_BIT, GL_NEAREST);
-	}
+	glBlitFramebuffer(0, frame_texture.height, frame_texture.width, 0,
+					  dstX0, dstY0, dstX1, dstY1,
+					  GL_COLOR_BUFFER_BIT, GL_NEAREST);
 
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
@@ -227,8 +227,6 @@ void Renderer::update_views() {
 	update_texture(frame_texture, gb->ppu.get_lcd_buffer());
 	if (show_demo_window)
 		ImGui::ShowDemoWindow(&show_demo_window);
-	if (show_debug_views)
-		debug_view();
 }
 
 void Renderer::menu() {
@@ -328,68 +326,68 @@ void Renderer::show_fps() const {
 	}
 }
 
-void Renderer::debug_view() {
-	return;
-	f32 ratio = static_cast<f32>(GB_LCD_SIZE_WIDTH) / static_cast<f32>(GB_LCD_SIZE_HEIGHT);
-	ImVec2 win_size = ImGui::GetIO().DisplaySize;
+// void Renderer::debug_view() {
+// 	return;
+// 	f32 ratio = static_cast<f32>(GB_LCD_SIZE_WIDTH) / static_cast<f32>(GB_LCD_SIZE_HEIGHT);
+// 	ImVec2 win_size = ImGui::GetIO().DisplaySize;
 
-	f32 w = win_size.x;
-	f32 third_w = w / 3;
-	f32 h = win_size.y;
-	f32 half_h = (h - ImGui::GetFrameHeight()) / 2;
-	ImVec2 lcd_size = {half_h * ratio, half_h};
+// 	f32 w = win_size.x;
+// 	f32 third_w = w / 3;
+// 	f32 h = win_size.y;
+// 	f32 half_h = (h - ImGui::GetFrameHeight()) / 2;
+// 	ImVec2 lcd_size = {half_h * ratio, half_h};
 
-	ImGui::SetNextWindowSize({w, h - ImGui::GetFrameHeight()});
-	ImGui::SetNextWindowPos({0, ImGui::GetFrameHeight()});
-	ImGuiWindowFlags f = ImGuiWindowFlags_NoDecoration;
-	ImGui::Begin("Debugger");
+// 	ImGui::SetNextWindowSize({w, h - ImGui::GetFrameHeight()});
+// 	ImGui::SetNextWindowPos({0, ImGui::GetFrameHeight()});
+// 	ImGuiWindowFlags f = ImGuiWindowFlags_NoDecoration;
+// 	ImGui::Begin("Debugger");
 
-	ImGui::BeginChild("CPU", {third_w, half_h});
-	gb->debug.cpu_view();
-	ImGui::EndChild();
+// 	ImGui::BeginChild("CPU", {third_w, half_h});
+// 	gb->debug.cpu_view();
+// 	ImGui::EndChild();
 
-	ImGui::SameLine();
-	ImGui::BeginChild("Tile Buffer", {w - third_w - half_h * ratio, half_h});
-	tile_buffer_view();
-	ImGui::EndChild();
+// 	ImGui::SameLine();
+// 	ImGui::BeginChild("Tile Buffer", {w - third_w - half_h * ratio, half_h});
+// 	tile_buffer_view();
+// 	ImGui::EndChild();
 
-	ImGui::SameLine();
-	ImGui::BeginChild("LCD", lcd_size);
-	ImGui::Image((ImTextureID)(intptr_t)frame_texture.texture_handler, lcd_size);
-	show_fps();
-	ImGui::EndChild();
+// 	ImGui::SameLine();
+// 	ImGui::BeginChild("LCD", lcd_size);
+// 	ImGui::Image((ImTextureID)(intptr_t)frame_texture.texture_handler, lcd_size);
+// 	show_fps();
+// 	ImGui::EndChild();
 
-	ImGui::Separator();
+// 	ImGui::Separator();
 
-	f32 memory_w = 420;
-	ImGui::BeginChild("Memory", {memory_w, half_h}, false, ImGuiComboFlags_None);
-	gb->debug.memory_view();
-	ImGui::EndChildFrame();
+// 	f32 memory_w = 420;
+// 	ImGui::BeginChild("Memory", {memory_w, half_h}, false, ImGuiComboFlags_None);
+// 	gb->debug.memory_view();
+// 	ImGui::EndChildFrame();
 
-	f32 fourth_of_rest_w = (w - memory_w) / 4;
+// 	f32 fourth_of_rest_w = (w - memory_w) / 4;
 
-	ImGui::SameLine();
-	ImGui::BeginChild("Chard View", {fourth_of_rest_w, half_h});
-	gb->debug.card_view();
-	ImGui::EndChildFrame();
+// 	ImGui::SameLine();
+// 	ImGui::BeginChild("Chard View", {fourth_of_rest_w, half_h});
+// 	gb->debug.card_view();
+// 	ImGui::EndChildFrame();
 
-	ImGui::SameLine();
-	ImGui::BeginChild("Audio", {fourth_of_rest_w, half_h});
-	// audio->imgui_view();
-	ImGui::Text("Audio Hier!");
-	ImGui::EndChild();
+// 	ImGui::SameLine();
+// 	ImGui::BeginChild("Audio", {fourth_of_rest_w, half_h});
+// 	// audio->imgui_view();
+// 	ImGui::Text("Audio Hier!");
+// 	ImGui::EndChild();
 
-	ImGui::SameLine();
-	ImGui::BeginChild("APU", {fourth_of_rest_w, half_h});
-	gb->apu.imgui_view();
-	ImGui::EndChild();
+// 	ImGui::SameLine();
+// 	ImGui::BeginChild("APU", {fourth_of_rest_w, half_h});
+// 	gb->apu.imgui_view();
+// 	ImGui::EndChild();
 
-	ImGui::SameLine();
-	ImGui::BeginChild("Control", {fourth_of_rest_w, half_h}, false, f);
-	gb->debug.control_view();
-	ImGui::EndChildFrame();
-	ImGui::End();
-}
+// 	ImGui::SameLine();
+// 	ImGui::BeginChild("Control", {fourth_of_rest_w, half_h}, false, f);
+// 	gb->debug.control_view();
+// 	ImGui::EndChildFrame();
+// 	ImGui::End();
+// }
 
 void key_callback(GLFWwindow *window, int key, [[maybe_unused]] int scancode,
 				  int action, [[maybe_unused]] int mods) {
@@ -433,8 +431,6 @@ void Renderer::file_menu_bar(std::string *file) {
 void Renderer::debug_menu_bar() {
 	if (ImGui::BeginMenu("Debug")) {
 		if (ImGui::MenuItem("Show FPS", NULL, &in_debug_show_fps, gb->card.rom_loaded)) {
-		}
-		if (ImGui::MenuItem("Debugger", NULL, &show_debug_views, gb->card.rom_loaded)) {
 		}
 		if (ImGui::MenuItem("Demo Window", NULL, &show_demo_window, gb->card.rom_loaded)) {
 		}
