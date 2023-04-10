@@ -4,8 +4,22 @@
 #include "windows.h"
 
 #include "imgui.h"
+#include "utl/ImGuiColors.hpp"
 
-Renderer::Renderer(gameboy *g) : gb(g) {
+Renderer::Renderer(gameboy *g) : gb(g),
+								 frame_buffer_ratio(1.0),
+								 window_height(900),
+								 window_width(1700),
+								 window_xpos(50),
+								 window_ypos(45),
+								 menu_bar_height(),
+								 show_debug_views(false),
+								 show_demo_window(false),
+								 show_another_window(false),
+								 in_debug_show_fps(true),
+								 bg_color({0.8f, 0.8f, 0.8f, 1.0f}),
+								 frame_buffer(nullptr),
+								 frame_buffer_id(0) {
 	init_window();
 
 	glfwSetWindowUserPointer(window, (void *)&gb->joypad);
@@ -202,6 +216,7 @@ void Renderer::render() const {
 
 	glfwSwapBuffers(window);
 }
+
 void Renderer::start_new_imgui_frame() {
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplGlfw_NewFrame();
@@ -314,6 +329,7 @@ void Renderer::show_fps() const {
 }
 
 void Renderer::debug_view() {
+	return;
 	f32 ratio = static_cast<f32>(GB_LCD_SIZE_WIDTH) / static_cast<f32>(GB_LCD_SIZE_HEIGHT);
 	ImVec2 win_size = ImGui::GetIO().DisplaySize;
 

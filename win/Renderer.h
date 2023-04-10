@@ -87,33 +87,25 @@ struct Renderer {
 
 	std::vector<Pixel_a> tile_buffer;
 	Texture frame_texture;
-	f32 frame_buffer_ratio = 1.0;
+	f32 frame_buffer_ratio;
 
 	Texture tiles_texture;
 
 	std::vector<Texture> sprite_textures;
-	s32 window_height = 900;
-	s32 window_width = 1700;
+	s32 window_height;
+	s32 window_width;
 
-	s32 window_xpos = 50;
-	s32 window_ypos = 45;
+	s32 window_xpos;
+	s32 window_ypos;
 
-	s32 menu_bar_height = {};
+	s32 menu_bar_height;
 
-	const ImVec4 bg_color = {0.8f, 0.8f, 0.8f, 1.0f};
-	ImVec4 cyan = ImVec4(0.0f, 1.0f, 1.0f, 1.0f);
-	ImVec4 magenta = ImVec4(1.0f, 0.502f, 0.957f, 1.0f);
-	ImVec4 yellow = ImVec4(1.0f, 1.0f, 0.0f, 1.0f);
-	ImVec4 red = ImVec4(1.0f, 0.149f, 0.447f, 1.0f);
-	ImVec4 green = ImVec4(0.0f, 1.0f, 0.0f, 1.0f);
-	ImVec4 white = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
-	ImVec4 gray = ImVec4(0.5f, 0.5f, 0.5f, 1.0f);
-	ImVec4 dark_gray = ImVec4(0.1f, 0.1f, 0.1f, 1.0f);
+	bool show_debug_views;
+	bool show_demo_window;
+	bool show_another_window;
+	bool in_debug_show_fps;
 
-	bool show_debug_views = true;
-	bool show_demo_window = false;
-	bool show_another_window = false;
-	bool in_debug_show_fps = true;
+	ImVec4 bg_color;
 
 	void *frame_buffer = nullptr;
 	GLuint frame_buffer_id = 0;
