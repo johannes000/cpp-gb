@@ -72,7 +72,7 @@ int gameboy::run_one_cycle(bool skip_render) {
 void gameboy::run_until_vblank() {
 	bool vblank = false;
 	s32 cycles_sum = 0;
-	while (!vblank && cycles_sum <= 70224) {
+	while (!vblank && cycles_sum <= CYCLES_PER_FRAME) {
 		cpu.handle_interrupts();
 		const int last_cycle = cpu.update();
 		vblank = ppu.update(last_cycle, false);

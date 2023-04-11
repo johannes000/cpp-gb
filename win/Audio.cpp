@@ -101,7 +101,7 @@ void Audio::win32_fill_sound_buffer(DWORD Byte_to_Lock, DWORD Bytes_to_Write) {
 										 0);
 
 	if (FAILED(result)) {
-		DLOG_F(ERROR, "AUDIO: Fehler beim Locken: %ld", result);
+		DLOG_F(ERROR, "AUDIO: Fehler beim Locken 2: %ld", result);
 	}
 
 	DWORD Region_1_Sample_Count = Region_1_Size / bytes_per_sample;

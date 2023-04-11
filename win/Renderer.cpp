@@ -263,6 +263,7 @@ bool Renderer::load_texture(GLuint *textureHandler, int width, int height,
 							const void *data) {
 	glGenTextures(1, textureHandler);
 	glBindTexture(GL_TEXTURE_2D, *textureHandler);
+
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA,
@@ -277,7 +278,8 @@ bool Renderer::load_texture(Texture texture) {
 
 void Renderer::update_texture(GLuint *textureHandler, int width, int height, const void *data) {
 	glBindTexture(GL_TEXTURE_2D, *textureHandler);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+	// glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, data);
 }
 void Renderer::update_texture(Texture texture, const void *data) {
 	return update_texture(texture.texture_ptr, texture.width, texture.height, data);
