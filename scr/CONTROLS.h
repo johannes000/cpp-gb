@@ -1,8 +1,6 @@
 #ifndef CPP_GB_CONTROLS_H
 #define CPP_GB_CONTROLS_H
 
-#include "GLFW/glfw3.h"
-
 #include "MEMORY.h"
 #include "utl/type.h"
 

@@ -41,6 +41,7 @@ void CONTROLS::write(const u16 &addr, const u8 &data) {
 }
 
 void CONTROLS::handle_glwf_inputs(int key, int action) {
+#if 0
 	switch (action) {
 		case GLFW_PRESS:
 		case GLFW_REPEAT:
@@ -105,6 +106,7 @@ void CONTROLS::handle_glwf_inputs(int key, int action) {
 		default: // switch action
 			break;
 	}
+#endif
 }
 
 u8 CONTROLS::get_joypad_state() {

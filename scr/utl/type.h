@@ -7,7 +7,7 @@
 #include <cstdint>
 #include <string>
 
-#include "utl/loguru.hpp"
+#include "loguru.hpp"
 
 typedef uint8_t u8;
 typedef uint16_t u16;
