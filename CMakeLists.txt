@@ -109,6 +109,8 @@ file(GLOB SOURCES
   scr/MEMORY.cpp
   scr/PPU.cpp
 
+  scr/GUI/Gui.cpp
+
   scr/gameboy.cpp
 
   scr/main.cpp
@@ -129,4 +131,9 @@ target_link_libraries(
   SDL2::SDL2
 )
 
-file(COPY "${PROJECT_SOURCE_DIR}/roms/" DESTINATION "${EXECUTABLE_OUTPUT_PATH}/roms")
+add_custom_command(
+  TARGET cpp-gb-w POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy_directory
+  ${CMAKE_SOURCE_DIR}/roms
+  ${EXECUTABLE_OUTPUT_PATH}/roms
+)

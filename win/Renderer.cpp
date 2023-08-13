@@ -281,6 +281,7 @@ void Renderer::update_texture(GLuint *textureHandler, int width, int height, con
 	// glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, data);
 }
+
 void Renderer::update_texture(Texture texture, const void *data) {
 	return update_texture(texture.texture_ptr, texture.width, texture.height, data);
 }
