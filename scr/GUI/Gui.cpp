@@ -72,7 +72,7 @@ Gui::Gui() {
 	context.window = SDL_CreateWindow("Dear ImGui SDL2+OpenGL3 example", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, window_flags);
 	context.gl_context = SDL_GL_CreateContext(context.window);
 	SDL_GL_MakeCurrent(context.window, context.gl_context);
-	SDL_GL_SetSwapInterval(1); // Enable vsync
+	SDL_GL_SetSwapInterval(0); // Enable vsync
 
 	// Setup Dear ImGui context
 	IMGUI_CHECKVERSION();
@@ -187,21 +187,21 @@ void Gui::render(gameboy &gb) {
 	{
 		ImGui::Begin("Gameboy Emulator");
 
-		const int width = GB_LCD_SIZE_WIDTH;   // Breite des Framebuffers
-		const int height = GB_LCD_SIZE_HEIGHT; // Höhe des Framebuffers
+		ImVec2 widget_size = ImGui::GetContentRegionAvail();
+		ImVec2 original_image_size = {GB_LCD_SIZE_WIDTH, GB_LCD_SIZE_HEIGHT};
 
-		static std::vector<Pixel_a> framebuffer(width * height);
-		static u8 c = 0;
-
-		for (int i = 0; i < width * height; ++i) {
-			framebuffer[i].R = 150;
-			framebuffer[i].G = 160;
-			framebuffer[i].B = 0;
-			framebuffer[i].A = 255;
+		f32 aspect_ratio = original_image_size.x / original_image_size.y;
+		ImVec2 image_size;
+		image_size.x = widget_size.x;
+		image_size.y = widget_size.x / aspect_ratio;
+		if (image_size.y > widget_size.y) {
+			image_size.y = widget_size.y;
+			image_size.x = widget_size.y * aspect_ratio;
 		}
 
 		updateTextureData(gb_framebuffer_texture, gb.ppu.get_lcd_buffer());
-		ImGui::Image((ImTextureID)(intptr_t)gb_framebuffer_texture.textureID, ImVec2(gb_framebuffer_texture.width, gb_framebuffer_texture.height));
+		ImGui::Image((ImTextureID)(intptr_t)gb_framebuffer_texture.textureID, image_size, ImVec2(0, 0), ImVec2(1, 1), ImVec4(1, 1, 1, 1), ImVec4(0, 0, 0, 0));
+
 		ImGui::End();
 	}
 

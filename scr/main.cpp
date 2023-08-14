@@ -11,7 +11,7 @@ int main(int argc, char **argv) {
 	Gui gui;
 	gameboy gb;
 
-	gb.load_rom("roms/sml2.gb", true);
+	gb.load_rom("roms/sml.gb", true);
 	i32 Cycle_this_frame = 0;
 	while (!done) {
 
@@ -22,19 +22,19 @@ int main(int argc, char **argv) {
 				done = true;
 			if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_CLOSE && event.window.windowID == SDL_GetWindowID(gui.getContext()->window))
 				done = true;
-
-			while (Cycle_this_frame < CYCLES_PER_FRAME) {
-				const i32 Last_cycle = gb.run_one_cycle();
-				Cycle_this_frame += Last_cycle;
-				if (gb.ppu.is_ready_to_render()) {
-					// audio.update(Last_cycle);
-					gui.render(gb);
-					break;
-				}
-			}
-			Cycle_this_frame -= CYCLES_PER_FRAME;
-			// gui.render(gb);
 		}
+
+		while (Cycle_this_frame < CYCLES_PER_FRAME) {
+			const i32 Last_cycle = gb.run_one_cycle();
+			Cycle_this_frame += Last_cycle;
+			if (gb.ppu.is_ready_to_render()) {
+				// audio.update(Last_cycle);
+				gui.render(gb);
+				break;
+			}
+		}
+		Cycle_this_frame -= CYCLES_PER_FRAME;
+		// gui.render(gb);
 	}
 	gui.destroy();
 
