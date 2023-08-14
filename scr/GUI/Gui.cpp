@@ -31,6 +31,29 @@ ImVec4 gray = ImVec4(0.5f, 0.5f, 0.5f, 1.0f);
 ImVec4 dark_gray = ImVec4(0.1f, 0.1f, 0.1f, 1.0f);
 }; // namespace
 
+bool generate_texture(GLuint &textureHandler, int width, int height,
+					  const void *data) {
+	glGenTextures(1, &textureHandler);
+	glBindTexture(GL_TEXTURE_2D, textureHandler);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA,
+				 GL_UNSIGNED_BYTE, data);
+
+	// glBindTexture(GL_TEXTURE_2D, 0);
+	return true;
+}
+
+bool generate_texture(TextureData &texture) {
+	return generate_texture(texture.textureID, texture.width, texture.height, nullptr);
+}
+
+void update_buffer(TextureData &textureData, const void *videoBuffer) {
+	glBindTexture(GL_TEXTURE_2D, textureData.textureID);
+	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, textureData.width, textureData.height, GL_RGBA, GL_UNSIGNED_BYTE, videoBuffer);
+}
+
 Gui::Gui() {
 	// Setup SDL
 	CHECK_EQ_F(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER), 0, "Error: {}\n", SDL_GetError());
@@ -69,7 +92,7 @@ Gui::Gui() {
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
 	SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
-	context.window = SDL_CreateWindow("Dear ImGui SDL2+OpenGL3 example", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, window_flags);
+	context.window = SDL_CreateWindow("Gameboy", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, window_flags);
 	context.gl_context = SDL_GL_CreateContext(context.window);
 	SDL_GL_MakeCurrent(context.window, context.gl_context);
 	SDL_GL_SetSwapInterval(0); // Enable vsync
@@ -118,21 +141,216 @@ Gui::Gui() {
 	// ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, nullptr, io.Fonts->GetGlyphRangesJapanese());
 	// IM_ASSERT(font != nullptr);
 
+	tile_buffer = {TILE_MAP_HEIGHT * TILE_MAP_HEIGHT,
+				   {0xFF, 0xFF, 0xFF, 0x00}};
+
 	gb_framebuffer_texture.width = GB_LCD_SIZE_WIDTH;
 	gb_framebuffer_texture.height = GB_LCD_SIZE_HEIGHT;
 
-	glGenTextures(1, &gb_framebuffer_texture.textureID);
-	glBindTexture(GL_TEXTURE_2D, gb_framebuffer_texture.textureID);
+	generate_texture(gb_framebuffer_texture);
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, GB_LCD_SIZE_WIDTH, GB_LCD_SIZE_HEIGHT, 0, GL_RGBA,
-				 GL_UNSIGNED_BYTE, nullptr);
+	tile_buffer_texture.height = TILE_MAP_HEIGHT;
+	tile_buffer_texture.width = TILE_MAP_WIDTH;
+
+	generate_texture(tile_buffer_texture);
 }
 
-void updateTextureData(TextureData &textureData, const void *videoBuffer) {
-	glBindTexture(GL_TEXTURE_2D, textureData.textureID);
-	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, textureData.width, textureData.height, GL_RGBA, GL_UNSIGNED_BYTE, videoBuffer);
+void Gui::generate_widgets(gameboy &gb) {
+	auto &cpu = gb.cpu;
+	auto &ppu = gb.ppu;
+	auto &mem = gb.mem;
+	auto &joypad = gb.joypad;
+	auto &card = gb.card;
+	{
+		ImGui::Begin("Gameboy Emulator");
+
+		ImVec2 widget_size = ImGui::GetContentRegionAvail();
+		ImVec2 original_image_size = {GB_LCD_SIZE_WIDTH, GB_LCD_SIZE_HEIGHT};
+
+		f32 aspect_ratio = original_image_size.x / original_image_size.y;
+		ImVec2 image_size;
+		image_size.x = widget_size.x;
+		image_size.y = widget_size.x / aspect_ratio;
+		if (image_size.y > widget_size.y) {
+			image_size.y = widget_size.y;
+			image_size.x = widget_size.y * aspect_ratio;
+		}
+
+		update_buffer(gb_framebuffer_texture, gb.ppu.get_lcd_buffer());
+		ImGui::Image((ImTextureID)(intptr_t)gb_framebuffer_texture.textureID, image_size, ImVec2(0, 0), ImVec2(1, 1), ImVec4(1, 1, 1, 1), ImVec4(0, 0, 0, 0));
+
+		ImGui::End();
+	}
+
+	// Tile Buffer
+	{
+
+		static int counter = 0;
+		if (!(counter++ % 60)) {
+			u16 tile_data_address = 0x8000;
+
+			for (int row = 0; row < 24; row++) {
+				for (int column = 0; column < 16; column++) {
+					u16 start = tile_data_address + (16 * column);
+					for (int line = (row * 8); line < 8 + (row * 8); line++, start += 2) {
+						u8 p_line_1 = gb.ppu.read(start);
+						u8 p_line_2 = gb.ppu.read(start + 1);
+
+						for (int tileColumn = (column * 8), position = 7;
+							 tileColumn < 8 + (column * 8); tileColumn++, position--) {
+							int index = tileColumn + line * TILE_MAP_WIDTH;
+							const u8 color =
+								static_cast<u8>(check_bit(p_line_1, (position)) << 1u) |
+								static_cast<u8>(check_bit(p_line_2, (position)));
+
+							tile_buffer[index] = gb.ppu.bg_palette[color];
+						}
+					}
+				}
+				tile_data_address += 0x100;
+			}
+			update_buffer(tile_buffer_texture, &tile_buffer[0]);
+		}
+
+		ImGui::Begin("Tile Buffer");
+		ImGui::Image((ImTextureID)(intptr_t)tile_buffer_texture.textureID,
+					 ImVec2(TILE_MAP_WIDTH * 2, TILE_MAP_HEIGHT * 2));
+
+		if (ImGui::TreeNode("Sprites")) {
+			for (auto sprite : gb.ppu.sprites) {
+				if (ImGui::TreeNode(std::to_string(sprite.id).c_str())) {
+					ImGui::Text("Tile No:%i", sprite.tile_no);
+					ImGui::Text("X:      %i", sprite.x_pos);
+					ImGui::Text("Y:      %i", sprite.y_pos);
+#if 0
+				Texture spr = sprite_textures[sprite.id];
+				std::vector<Pixel_a> translated_sprite;
+				for (auto &pixel : ppu.tile_map_data[sprite.tile_no]) {
+					translated_sprite.push_back(ppu.Palettes[ppu.current_palette][pixel]);
+				}
+				spr.translated_texture = translated_sprite;
+
+				update_texture(spr, spr.translated_Texture_ptr);
+				ImGui::Image((ImTextureID)(intptr_t)spr.texture_handler, ImVec2(spr.height * 4, spr.width * 4));
+#endif
+					ImGui::TreePop();
+				}
+			}
+			ImGui::TreePop();
+		}
+		ImGui::End();
+	}
+
+	// Memory
+	{
+		ImGui::Begin("Memory");
+		ImGuiListClipper clipper;
+		clipper.Begin(0xFFFF / 16, ImGui::GetTextLineHeightWithSpacing());
+		// ImGuiListClipper clipper(0xFFFF / 16, ImGui::GetTextLineHeightWithSpacing());
+		while (clipper.Step()) {
+			for (int mem_line = clipper.DisplayStart; mem_line <= clipper.DisplayEnd; mem_line++) {
+				int mem_line_addr = mem_line * 0x10;
+				ImGui::Text("0x%04X ", mem_line_addr);
+				for (int i = 0; i < 16; ++i) {
+					ImGui::SameLine();
+					u8 data = gb.mem.read(mem_line_addr + i);
+					if (data == 0x00)
+						ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.5f, 0.5f, 0.5f, 1.0f));
+					ImGui::Text("%02X", data);
+					if (i == 7) {
+						ImGui::SameLine(120.0f);
+					}
+					if (data == 0x00)
+						ImGui::PopStyleColor(1);
+					if ((mem_line_addr + i) == 0xFEFF)
+						ImGui::Separator();
+				}
+			}
+		}
+		clipper.End();
+		ImGui::End();
+	}
+
+	// Control
+	{
+		ImGui::Begin("Control");
+
+		CPU_Register cpu_regs = cpu.get_register();
+
+		ImGui::Text("AF = %04X", cpu_regs.AF);
+		ImGui::SameLine();
+		ImGui::Text("DE = %04X", cpu_regs.DE);
+		ImGui::SameLine();
+		ImGui::Text("PC = %04X", cpu_regs.PC);
+		ImGui::Text("BC = %04X", cpu_regs.BC);
+		ImGui::SameLine();
+		ImGui::Text("HL = %04X", cpu_regs.HL);
+		ImGui::SameLine();
+		ImGui::Text("SP = %04X", cpu_regs.SP);
+
+		ImGui::Separator();
+
+		ImGui::Text("Z %1d", cpu.check_flag(Flag::z));
+		ImGui::SameLine();
+		ImGui::Text("N %1d", cpu.check_flag(Flag::n));
+		ImGui::SameLine();
+		ImGui::Text("H %1d", cpu.check_flag(Flag::h));
+		ImGui::SameLine();
+		ImGui::Text("C %1d", cpu.check_flag(Flag::c));
+		ImGui::SameLine();
+		ImGui::Text("(HL) %02X", cpu.read(cpu_regs.HL));
+
+		LCD_Register lcd_regs = ppu.get_lcd_register();
+		ImGui::Separator();
+
+		ImGui::Text("IME %X", cpu.is_IME());
+
+		ImGui::Text("Interrupt Request");
+		for (int i = 0; i < 5; ++i) {
+			ImGui::SameLine();
+			ImGui::Text("%X", check_bit(mem.read(INTERRUPT_FLAGS_REG), i));
+		}
+		ImGui::Text("Interrupt Enable ");
+		for (int i = 0; i < 5; ++i) {
+			ImGui::SameLine();
+			ImGui::Text("%X", check_bit(mem.read(INTERRUPT_ENABLE_REG), i));
+		}
+
+		ImGui::Separator();
+		ImGui::Text(" %d", lcd_regs.LCD_LY);
+		ImGui::SameLine();
+		ImGui::Text("JOY ");
+		u8 joy = joypad.get_joypad_state();
+		for (int i = 0; i < 8; ++i) {
+			ImGui::SameLine();
+			ImGui::Text("%1d", check_bit(joy, i));
+		}
+		ImGui::Separator();
+		ImGui::Text(" TIMER ");
+		ImGui::Text("DIV  %X", mem.read(DIVIDER_REGISTER));
+		ImGui::SameLine();
+		ImGui::Text("TIMA %X", mem.read(TIMER_COUNTER));
+		ImGui::Text("TMA  %X", mem.read(TIMER_MODULO));
+		ImGui::SameLine();
+		ImGui::Text("TAC  %X", mem.read(TIMER_CONTROL));
+		ImGui::End();
+	}
+
+	// Card
+	{
+		ImGui::Begin("Card");
+
+		ImGui::Text("%s", card.rom_info.title);
+		ImGui::Separator();
+
+		ImGui::Text("CType: %s", card.rom_info.CType_string());
+		ImGui::SameLine();
+		ImGui::Text("Rom Bank: %d", card.get_selected_rom_bank());
+		ImGui::Text("Ram Size: %s", card.rom_info.ram_size_string());
+		ImGui::SameLine();
+		ImGui::Text("| Rom Size: %s", card.rom_info.rom_size_string());
+		ImGui::End();
+	}
 }
 
 void Gui::render(gameboy &gb) {
@@ -147,6 +365,58 @@ void Gui::render(gameboy &gb) {
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplSDL2_NewFrame();
 	ImGui::NewFrame();
+
+	static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
+
+	// We are using the ImGuiWindowFlags_NoDocking flag to make the parent window not dockable into,
+	// because it would be confusing to have two docking targets within each others.
+	ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
+	const ImGuiViewport *viewport = ImGui::GetMainViewport();
+	ImGui::SetNextWindowPos(viewport->WorkPos);
+	ImGui::SetNextWindowSize(viewport->WorkSize);
+	ImGui::SetNextWindowViewport(viewport->ID);
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+	window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
+	window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+
+	// Important: note that we proceed even if Begin() returns false (aka window is collapsed).
+	// This is because we want to keep our DockSpace() active. If a DockSpace() is inactive,
+	// all active windows docked into it will lose their parent and become undocked.
+	// We cannot preserve the docking relationship between an active window and an inactive docking, otherwise
+	// any change of dockspace/settings would lead to windows being stuck in limbo and never being visible.
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+	ImGui::Begin("DockSpace", nullptr, window_flags);
+	ImGui::PopStyleVar();
+	ImGui::PopStyleVar(2);
+
+	// Submit the DockSpace
+	if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable) {
+		ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
+		ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
+	}
+
+	if (ImGui::BeginMenuBar()) {
+		if (ImGui::BeginMenu("Emulator")) {
+			if (ImGui::MenuItem("Skip Boot Rom", NULL, gb.skip_boot_rom)) {
+			}
+			if (ImGui::MenuItem("60 FPS lock", NULL, gb.fps_drossel)) {
+			}
+			ImGui::EndMenu();
+		}
+		if (ImGui::BeginMenu("Palettes")) {
+			char address[32];
+			for (u32 index = 0; index < gb.ppu.Palettes.size(); index++) {
+				sprintf_s(address, "%i", index, sizeof(address));
+				if (ImGui::MenuItem(address)) {
+					gb.ppu.current_palette = index;
+				}
+			}
+			ImGui::EndMenu();
+		}
+		ImGui::EndMenuBar();
+	}
+	ImGui::End();
 
 	// 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
 	if (show_demo_window)
@@ -184,26 +454,7 @@ void Gui::render(gameboy &gb) {
 		ImGui::End();
 	}
 
-	{
-		ImGui::Begin("Gameboy Emulator");
-
-		ImVec2 widget_size = ImGui::GetContentRegionAvail();
-		ImVec2 original_image_size = {GB_LCD_SIZE_WIDTH, GB_LCD_SIZE_HEIGHT};
-
-		f32 aspect_ratio = original_image_size.x / original_image_size.y;
-		ImVec2 image_size;
-		image_size.x = widget_size.x;
-		image_size.y = widget_size.x / aspect_ratio;
-		if (image_size.y > widget_size.y) {
-			image_size.y = widget_size.y;
-			image_size.x = widget_size.y * aspect_ratio;
-		}
-
-		updateTextureData(gb_framebuffer_texture, gb.ppu.get_lcd_buffer());
-		ImGui::Image((ImTextureID)(intptr_t)gb_framebuffer_texture.textureID, image_size, ImVec2(0, 0), ImVec2(1, 1), ImVec4(1, 1, 1, 1), ImVec4(0, 0, 0, 0));
-
-		ImGui::End();
-	}
+	generate_widgets(gb);
 
 	// Rendering
 	ImGui::Render();

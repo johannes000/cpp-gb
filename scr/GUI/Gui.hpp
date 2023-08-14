@@ -15,6 +15,8 @@
 #include <SDL_opengl.h>
 #endif
 
+#include "utl/type.h"
+
 class gameboy;
 struct Context {
 	SDL_Window *window;
@@ -36,10 +38,14 @@ public:
 	Context *getContext() { return &context; }
 
 private:
+	void generate_widgets(gameboy &gb);
+
 	Context context{};
 	void showFPS() const;
 
 	TextureData gb_framebuffer_texture;
+	TextureData tile_buffer_texture;
+	std::vector<Pixel_a> tile_buffer;
 
 public:
 };
