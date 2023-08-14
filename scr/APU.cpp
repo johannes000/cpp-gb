@@ -77,7 +77,7 @@ u8 APU::read(const u16 &addr) {
 		case NR23:
 		case NR31:
 		case NR41:
-			DLOG_F(ERROR, "AUDIO: Register ist write only wird aber gelesen: %x", addr);
+			DLOG_F(ERROR, "AUDIO: Register ist write only wird aber gelesen: 0x{:04X}", addr);
 			return 0;
 		case NR10:
 			return nr10;
@@ -114,7 +114,7 @@ u8 APU::read(const u16 &addr) {
 		case NR52:
 			return nr52;
 		default:
-			DLOG_F(ERROR, "AUDIO: Hier sollte nicht gelesen werden. Addr: %x", addr);
+			DLOG_F(ERROR, "AUDIO: Hier sollte nicht gelesen werden. Addr: 0x{:04X}", addr);
 			return 0;
 	}
 }

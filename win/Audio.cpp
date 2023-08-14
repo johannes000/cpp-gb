@@ -24,7 +24,7 @@ bool Audio::win32_init_dsound(HWND Window) {
 	if (SUCCEEDED(result)) {
 		DLOG_F(INFO, "AUDIO: Direct Sound Created");
 	} else {
-		DLOG_F(FATAL, "Direct Sound konnte nicht Erstellt werden. Result: %ld", result);
+		DLOG_F(FATAL, "Direct Sound konnte nicht Erstellt werden. Result: {}", result);
 		return false;
 	}
 
@@ -48,7 +48,7 @@ bool Audio::win32_init_dsound(HWND Window) {
 	if (SUCCEEDED(result)) {
 		DLOG_F(INFO, "AUDIO: Primary Buffer erstellt");
 	} else {
-		DLOG_F(FATAL, "AUDIO: Primary Buffer konnte nicht erstellt werden. Result: %ld", result);
+		DLOG_F(FATAL, "AUDIO: Primary Buffer konnte nicht erstellt werden. Result: {}", result);
 		return false;
 	}
 
@@ -65,7 +65,7 @@ bool Audio::win32_init_dsound(HWND Window) {
 	if (SUCCEEDED(result)) {
 		DLOG_F(INFO, "AUDIO: Primary Buffer Wave Format festgelegt");
 	} else {
-		DLOG_F(FATAL, "AUDIO: Primary Buffer konnte Wave Format nicht festlegen. Result: %ld", result);
+		DLOG_F(FATAL, "AUDIO: Primary Buffer konnte Wave Format nicht festlegen. Result: {}", result);
 		return false;
 	}
 
@@ -79,7 +79,7 @@ bool Audio::win32_init_dsound(HWND Window) {
 	if (SUCCEEDED(result)) {
 		DLOG_F(INFO, "AUDIO: Secondary Buffer erstellt");
 	} else {
-		DLOG_F(FATAL, "AUDIO: Secondary Buffer konnte nicht erstellt werden. Result: %ld", result);
+		DLOG_F(FATAL, "AUDIO: Secondary Buffer konnte nicht erstellt werden. Result: {}", result);
 		return false;
 	}
 
@@ -101,7 +101,7 @@ void Audio::win32_fill_sound_buffer(DWORD Byte_to_Lock, DWORD Bytes_to_Write) {
 										 0);
 
 	if (FAILED(result)) {
-		DLOG_F(ERROR, "AUDIO: Fehler beim Locken 2: %ld", result);
+		DLOG_F(ERROR, "AUDIO: Fehler beim Locken 2: {}", result);
 	}
 
 	DWORD Region_1_Sample_Count = Region_1_Size / bytes_per_sample;
@@ -144,7 +144,7 @@ void Audio::win32_clear_sound_buffer(DWORD Byte_to_Lock, DWORD Bytes_to_Write) {
 										 0);
 
 	if (FAILED(result)) {
-		DLOG_F(ERROR, "AUDIO: Fehler beim Locken: %ld", result);
+		DLOG_F(ERROR, "AUDIO: Fehler beim Locken: {}", result);
 	}
 
 	DWORD Region_1_Sample_Count = Region_1_Size / bytes_per_sample;
@@ -171,7 +171,7 @@ void Audio::update(f64 dt) {
 
 	auto result = secondary_buffer->GetCurrentPosition(&Play_Cursor, &Write_Cursor);
 	if (FAILED(result)) {
-		DLOG_F(ERROR, "AUDIO: Fehler mit GetCurrentPosition: %ld", result);
+		DLOG_F(ERROR, "AUDIO: Fehler mit GetCurrentPosition: {}", result);
 		return;
 	}
 

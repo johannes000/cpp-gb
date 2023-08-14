@@ -16,7 +16,7 @@ bool CARTRIDGE::load_rom(std::string rom_file, bool skip_boot) {
 
 	std::ifstream is(rom_file, std::ios::binary);
 	if (!is) {
-		DLOG_F(ERROR, "Kann die Datei nicht öffnen: %s", rom_file.c_str());
+		DLOG_F(ERROR, "Kann die Datei nicht öffnen: {}", rom_file.c_str());
 		return false;
 	}
 	const std::vector<u8> romf(std::istreambuf_iterator<char>(is), {});
@@ -421,7 +421,7 @@ bool CARTRIDGE::load_boot_rom() {
 	// const char *boot_rom_path = "C:/Users/knaub/source/repos/testroms/gbc_bios.bin";
 	std::ifstream is(boot_rom_path, std::ios::binary);
 	if (!is) {
-		DLOG_F(ERROR, "Kann die Boot Rom nicht öffnen! %s", boot_rom_path);
+		DLOG_F(ERROR, "Kann die Boot Rom nicht öffnen! {}", boot_rom_path);
 		abort();
 	} else {
 		const std::vector<u8> romf(std::istreambuf_iterator<char>(is), {});
@@ -460,7 +460,7 @@ void CARTRIDGE::create_sav_file() {
 			os.write(reinterpret_cast<const char *>(&data), 1);
 		}
 	}
-	DLOG_F(INFO, "Sav File created: %s", file.c_str());
+	DLOG_F(INFO, "Sav File created: {}", file.c_str());
 }
 
 void CARTRIDGE::load_sav_file() {
@@ -477,5 +477,5 @@ void CARTRIDGE::load_sav_file() {
 			ram[i][index++] = byte;
 		}
 	}
-	DLOG_F(INFO, "Sav File Loaded: %s", file.c_str());
+	DLOG_F(INFO, "Sav File Loaded: {}", file.c_str());
 }
