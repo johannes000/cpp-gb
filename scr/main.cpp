@@ -11,7 +11,7 @@ int main(int argc, char **argv) {
 	Gui gui;
 	gameboy gb;
 
-	gb.load_rom("roms/sml.gb", true);
+	gb.load_rom("roms/mem_timing/mem_timing.gb", false);
 	i32 Cycle_this_frame = 0;
 	while (!done) {
 
