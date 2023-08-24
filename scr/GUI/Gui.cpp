@@ -2,6 +2,8 @@
 #include "gameboy.h"
 #include "utl/type.h"
 
+#include <filesystem>
+
 #include "imgui.h"
 #include "imgui_impl_sdl2.h"
 #include "imgui_impl_opengl3.h"
@@ -158,6 +160,7 @@ Gui::Gui() {
 void Gui::generate_widgets(gameboy &gb) {
 	auto &cpu = gb.cpu;
 	auto &ppu = gb.ppu;
+	auto &apu = gb.apu;
 	auto &mem = gb.mem;
 	auto &joypad = gb.joypad;
 	auto &card = gb.card;
@@ -349,6 +352,47 @@ void Gui::generate_widgets(gameboy &gb) {
 		ImGui::Text("Ram Size: %s", card.rom_info.ram_size_string());
 		ImGui::SameLine();
 		ImGui::Text("| Rom Size: %s", card.rom_info.rom_size_string());
+		ImGui::End();
+	}
+
+	// Roms
+	{
+		// TODO: Ordner zuerst anzeigen
+		namespace fs = std::filesystem;
+
+		std::vector<std::string> gbFiles;
+		static std::string romsDirectory = "roms";
+
+		gbFiles.push_back("..");
+		for (const auto &entry : fs::directory_iterator(romsDirectory)) {
+			std::string entryName = entry.path().filename().string();
+			if (entry.is_regular_file() && entry.path().extension() == ".gb") {
+				gbFiles.push_back(entryName); // Nur Dateinamen hinzufügen
+			} else if (entry.is_directory()) {
+				gbFiles.push_back(entryName + "/"); // Verzeichnis mit "/" markieren
+			}
+		}
+
+		ImGui::Begin("GB Files");
+		for (const std::string &gbFile : gbFiles) {
+			if (ImGui::Selectable(gbFile.c_str())) {
+				fs::path selectedRomPath =
+					fs::path(romsDirectory) / fs::path(gbFile);
+				if (fs::is_directory(selectedRomPath)) {
+					romsDirectory = selectedRomPath.string();
+					LOG_F(INFO, "{}", romsDirectory);
+				} else {
+					gb.load_rom(selectedRomPath.string(), true);
+				}
+			}
+		}
+		ImGui::End();
+	}
+
+	// Audio
+	{
+		ImGui::Begin("Audio");
+		apu.imgui_view();
 		ImGui::End();
 	}
 }
