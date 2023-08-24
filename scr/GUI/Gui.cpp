@@ -357,33 +357,36 @@ void Gui::generate_widgets(gameboy &gb) {
 
 	// Roms
 	{
-		// TODO: Ordner zuerst anzeigen
 		namespace fs = std::filesystem;
 
-		std::vector<std::string> gbFiles;
-		static std::string romsDirectory = "roms";
+		std::vector<std::string> folders;
+		std::vector<std::string> gb_files;
+		static std::string rom_directory = "roms";
 
-		gbFiles.push_back("..");
-		for (const auto &entry : fs::directory_iterator(romsDirectory)) {
+		folders.push_back("..");
+		for (const auto &entry : fs::directory_iterator(rom_directory)) {
 			std::string entryName = entry.path().filename().string();
 			if (entry.is_regular_file() && entry.path().extension() == ".gb") {
-				gbFiles.push_back(entryName); // Nur Dateinamen hinzufügen
+				gb_files.push_back(entryName);
 			} else if (entry.is_directory()) {
-				gbFiles.push_back(entryName + "/"); // Verzeichnis mit "/" markieren
+				folders.push_back(entryName + "/");
 			}
 		}
 
 		ImGui::Begin("GB Files");
-		for (const std::string &gbFile : gbFiles) {
-			if (ImGui::Selectable(gbFile.c_str())) {
-				fs::path selectedRomPath =
-					fs::path(romsDirectory) / fs::path(gbFile);
-				if (fs::is_directory(selectedRomPath)) {
-					romsDirectory = selectedRomPath.string();
-					LOG_F(INFO, "{}", romsDirectory);
-				} else {
-					gb.load_rom(selectedRomPath.string(), true);
-				}
+		for (auto &folder : folders) {
+			if (ImGui::Selectable(folder.c_str())) {
+				fs::path selected_path =
+					fs::path(rom_directory) / fs::path(folder);
+				rom_directory = selected_path.string();
+			}
+		}
+
+		for (const std::string &gb_file : gb_files) {
+			if (ImGui::Selectable(gb_file.c_str())) {
+				fs::path selected_rom_path =
+					fs::path(rom_directory) / fs::path(gb_file);
+				gb.load_rom(selected_rom_path.string(), true);
 			}
 		}
 		ImGui::End();
