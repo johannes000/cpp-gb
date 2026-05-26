@@ -1,3 +1,6 @@
+#define SDL_MAIN_HANDLED
+
+#include "Audio.hpp"
 #include "gameboy.h"
 #include "GUI/Gui.hpp"
 #include "utl/type.h"
@@ -11,6 +14,7 @@ int main(int argc, char **argv) {
 
 	bool done = false;
 	Gui gui;
+	Audio audio;
 	gameboy gb;
 
 	gb.load_rom("roms/mem_timing/mem_timing.gb", false);

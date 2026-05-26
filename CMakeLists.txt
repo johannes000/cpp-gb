@@ -109,6 +109,7 @@ file(GLOB SOURCES
   scr/MEMORY.cpp
   scr/PPU.cpp
 
+  scr/Audio.cpp
   scr/GUI/Gui.cpp
 
   scr/gameboy.cpp
