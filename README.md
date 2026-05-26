@@ -8,7 +8,7 @@ Dieses Projekt wurde von mir entwickelt, um C++ zu lernen, mich  mit der C++-Too
 
 
 
-<video src="screenshots/video.webm" width="40%" controls autoplay loop muted>
+<video src="screenshots/demo.mp4" width="40%" controls autoplay loop muted>
   Dein Browser unterstützt das Video-Tag nicht.
 </video>
 
