@@ -13,6 +13,9 @@ Dieses Projekt wurde von mir entwickelt, um C++ zu lernen, mich  mit der C++-Too
 </video>
 
 <img src="screenshots/cpu_tests.png" alt="Alle CPU Instruction Tests bestanden" width="40%">
+<img src="screenshots/kriby_1.png" width="40%">
+<img src="screenshots/looneytunes_1.png" width="40%">
+<img src="screenshots/sml_1.png" width="40%">
 
 ## Features
 
