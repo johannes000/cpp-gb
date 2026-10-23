@@ -1,6 +1,6 @@
-#include "Debugger.h"
+#include "Debugger.hpp"
 
-const char *Debugger::what_register_is_this(const u16 &reg) {
+auto Debugger::what_register_is_this(const u16 &reg) -> const char * {
 	if ((reg & 0xFF00u) == 0xFF00u)
 		switch (reg & 0x00FFu) {
 			case 0x00:
@@ -83,6 +83,6 @@ const char *Debugger::what_register_is_this(const u16 &reg) {
 	return "";
 }
 
-const char *Debugger::what_register_is_this(const u8 &reg) {
+auto Debugger::what_register_is_this(const u8 &reg) -> const char * {
 	return what_register_is_this(static_cast<u16>(0xFF00u | reg));
 }

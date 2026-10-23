@@ -3,7 +3,7 @@
 
 #include <vector>
 
-#include "utl/type.h"
+#include "utl/type.hpp"
 
 constexpr u16 CARD_ROM_BANK_SIZE = 0x4000;
 constexpr u16 CARD_RAM_BANK_SIZE = 0x4000;
@@ -81,26 +81,26 @@ enum class DestCode {
 
 struct Rom_Info {
 
-	std::string filename;
-	std::string filepath;
+	std::string filename_;
+	std::string filepath_;
 
-	std::string savefile;
+	std::string savefile_;
 
-	char title[15] = "";
-	bool SGBFlag = false;
+	char title_[15] = "";
+	bool SGBFlag_ = false;
 
-	CGBFlag cgb = CGBFlag::ON;
-	CType ctype = CType::MBC1;
+	CGBFlag cgb_ = CGBFlag::ON;
+	CType ctype_ = CType::MBC1;
 
-	ROMSize rom_size = ROMSize::KB32;
-	RAMSize ram_size = RAMSize::None;
+	ROMSize rom_size_ = ROMSize::KB32;
+	RAMSize ram_size_ = RAMSize::None;
 
-	int rom_banks{};
-	int ram_banks{};
+	int rom_banks_{};
+	int ram_banks_{};
 
 public:
-	inline const char *CGBFlag_string() {
-		switch (this->cgb) {
+	inline auto CGBFlag_string() -> const char * {
+		switch (this->cgb_) {
 			case CGBFlag::ON:
 				return "ON";
 			case CGBFlag::OFF:
@@ -109,8 +109,8 @@ public:
 		return nullptr;
 	}
 
-	inline const char *CType_string() const {
-		switch (this->ctype) {
+	inline auto CType_string() const -> const char * {
+		switch (this->ctype_) {
 			case CType::ROM_ONLY:
 				return "ROM ONLY";
 			default:
@@ -170,8 +170,8 @@ public:
 		}
 	}
 
-	inline const char *rom_size_string() const {
-		switch (this->rom_size) {
+	inline auto rom_size_string() const -> const char * {
+		switch (this->rom_size_) {
 			default:
 				return "Wrong size";
 			case ROMSize::KB32:
@@ -201,8 +201,8 @@ public:
 		}
 	}
 
-	inline const char *ram_size_string() const {
-		switch (this->ram_size) {
+	inline auto ram_size_string() const -> const char * {
+		switch (this->ram_size_) {
 			case RAMSize::None:
 				return "No Ram";
 			case RAMSize::KB2:
@@ -224,56 +224,56 @@ public:
 class CARTRIDGE {
 public:
 	CARTRIDGE();
-	bool rom_loaded = false;
-	bool load_rom(std::string rom_file, bool skip_boot);
+	bool rom_loaded_ = false;
+	auto load_rom(std::string rom_file, bool skip_boot) -> bool;
 
-	Rom_Info rom_info;
+	Rom_Info rom_info_;
 
-	u8 read(const u16 &addr);
-	u8 readBoot(const u16 &addr);
-	u8 readNoMBC(const u16 &addr);
-	u8 readMBC1(const u16 &addr);
-	u8 readMBC2(const u16 &addr);
-	u8 readMBC3(const u16 &addr);
-	u8 readMBC5(const u16 &addr);
-	u8 readMBC6(const u16 &addr);
-	u8 readMBC7(const u16 &addr);
-	u8 readHuC1(const u16 &addr);
+	auto read(const u16 &addr) -> u8;
+	auto readBoot(const u16 &addr) -> u8;
+	auto readNoMBC(const u16 &addr) -> u8;
+	auto readMBC1(const u16 &addr) -> u8;
+	auto readMBC2(const u16 &addr) -> u8;
+	auto readMBC3(const u16 &addr) -> u8;
+	auto readMBC5(const u16 &addr) -> u8;
+	auto readMBC6(const u16 &addr) -> u8;
+	auto readMBC7(const u16 &addr) -> u8;
+	auto readHuC1(const u16 &addr) -> u8;
 
-	void write(const u16 addr, const u8 &data);
-	void writeNoMBC(const u16 addr, const u8 &data);
-	void writeMBC1(const u16 addr, const u8 &data);
-	void writeMBC2(const u16 addr, const u8 &data);
-	void writeMBC3(const u16 addr, const u8 &data);
-	void writeMBC5(const u16 addr, const u8 &data);
-	void writeMBC6(const u16 addr, const u8 &data);
-	void writeMBC7(const u16 addr, const u8 &data);
-	void writeHuC1(const u16 addr, const u8 &data);
+	auto write(const u16 addr, const u8 &data) -> void;
+	auto writeNoMBC(const u16 addr, const u8 &data) -> void;
+	auto writeMBC1(const u16 addr, const u8 &data) -> void;
+	auto writeMBC2(const u16 addr, const u8 &data) -> void;
+	auto writeMBC3(const u16 addr, const u8 &data) -> void;
+	auto writeMBC5(const u16 addr, const u8 &data) -> void;
+	auto writeMBC6(const u16 addr, const u8 &data) -> void;
+	auto writeMBC7(const u16 addr, const u8 &data) -> void;
+	auto writeHuC1(const u16 addr, const u8 &data) -> void;
 
-	void create_sav_file();
-	void load_sav_file();
-	void build_save_file_path();
+	auto create_sav_file() -> void;
+	auto load_sav_file() -> void;
+	auto build_save_file_path() -> void;
 
-	u8 read_card_rom(const u16 &addr);
-	[[nodiscard]] unsigned int get_selected_rom_bank() const { return mbc1_selected_rom_bank; }
+	auto read_card_rom(const u16 &addr) -> u8;
+	[[nodiscard]] auto get_selected_rom_bank() const -> unsigned int { return mbc1_selected_rom_bank_; }
 
-	std::vector<u8> rom;
-	std::vector<u8> boot;
-	std::vector<std::vector<u8>> ram;
+	std::vector<u8> rom_;
+	std::vector<u8> boot_;
+	std::vector<std::vector<u8>> ram_;
 
-	u32 mbc1_Rom_Ram_Mode;
-	u32 mbc1_selected_ram_bank = 0;
-	u32 mbc1_selected_rom_bank = 0;
+	u32 mbc1_Rom_Ram_Mode_;
+	u32 mbc1_selected_ram_bank_ = 0;
+	u32 mbc1_selected_rom_bank_ = 0;
 
-	u32 mbc5_selected_ram_bank = 0;
-	u32 mbc5_selected_rom_bank = 0;
-	u32 mbc5_selected_rom_bank_hi = 0;
+	u32 mbc5_selected_ram_bank_ = 0;
+	u32 mbc5_selected_rom_bank_ = 0;
+	u32 mbc5_selected_rom_bank_hi_ = 0;
 
 private:
-	void fill_cartridge_info();
-	void offset_bank_if_special(u32 &data);
-	bool load_boot_rom();
-	bool ram_enabled;
+	auto fill_cartridge_info() -> void;
+	auto offset_bank_if_special(u32 &data) -> void;
+	auto load_boot_rom() -> bool;
+	bool ram_enabled_;
 };
 
 #endif

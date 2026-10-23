@@ -1,113 +1,113 @@
-#include "CPU.h"
+#include "CPU.hpp"
 #include <iostream>
 
-CPU::CPU(MEMORY *m) : mem(m) {}
+CPU::CPU(MEMORY *m) : mem_(m) {}
 
-void CPU::init_register(bool skip_boot) {
-	in_boot = true;
-	R.PC = 0x0000;
-	IME = false;
-	is_halted = false;
+auto CPU::init_register(bool skip_boot) -> void {
+	in_boot_ = true;
+	R_.PC_ = 0x0000;
+	IME_ = false;
+	is_halted_ = false;
 
-	interrupt_enable_register = 0x00;
-	interrupt_request_register = 0x00;
+	interrupt_enable_register_ = 0x00;
+	interrupt_request_register_ = 0x00;
 
-	timer_cycle_sum = 0;
-	div_cycle_sum = 0;
+	timer_cycle_sum_ = 0;
+	div_cycle_sum_ = 0;
 
-	op_code = 0x00;
-	cycles = 0;
+	op_code_ = 0x00;
+	cycles_ = 0;
 
 	if (skip_boot) {
-		in_boot = false;
+		in_boot_ = false;
 
-		R.AF = 0x01B0;
-		R.BC = 0x0013;
-		R.DE = 0x00D8;
-		R.HL = 0x014D;
-		R.SP = 0xFFFE;
-		R.PC = 0x0100;
+		R_.AF_ = 0x01B0;
+		R_.BC_ = 0x0013;
+		R_.DE_ = 0x00D8;
+		R_.HL_ = 0x014D;
+		R_.SP_ = 0xFFFE;
+		R_.PC_ = 0x0100;
 	}
 }
 
-u8 CPU::parse_op_code(const u8 &opcode) {
+auto CPU::parse_op_code(const u8 &opcode) -> u8 {
 	u8 function;
 	if (opcode == 0xCB) {
-		prefix = false;
-		cycles++;
-		u8 p_opcode = read(R.PC + 1);
-		current_instruction_info = prefixedinstructions[p_opcode];
+		prefix_ = false;
+		cycles_++;
+		u8 p_opcode = read(R_.PC_ + 1);
+		current_instruction_info_ = prefixedinstructions_[p_opcode];
 		// current_instruction_info.bytes += 1;
-		function = (this->*prefixedinstructions[p_opcode].function)();
+		function = (this->*prefixedinstructions_[p_opcode].function_)();
 	} else {
-		current_instruction_info = instructions[op_code];
-		function = (this->*instructions[opcode].function)();
+		current_instruction_info_ = instructions_[op_code_];
+		function = (this->*instructions_[opcode].function_)();
 	}
 	return function;
 }
 
-int CPU::update() {
-	if (is_halted || ((interrupt_request_register & interrupt_enable_register & 0x1Fu) && IME)) {
+auto CPU::update() -> int {
+	if (is_halted_ || ((interrupt_request_register_ & interrupt_enable_register_ & 0x1Fu) && IME_)) {
 		return 1;
 	}
-	op_code = get_next_op_code();
-	const auto jp = parse_op_code(op_code);
+	op_code_ = get_next_op_code();
+	const auto jp = parse_op_code(op_code_);
 	if (jp == 0)
 		inc_pc(); // Wenn 1 returned wird wurde der PC schon vom OPcode verändert.
-	cycles += current_instruction_info.cycles;
-	return current_instruction_info.cycles;
+	cycles_ += current_instruction_info_.cycles_;
+	return current_instruction_info_.cycles_;
 }
 
-debug_instruction CPU::get_instruction_at_addr(u16 addr) const {
+auto CPU::get_instruction_at_addr(u16 addr) const -> debug_instruction {
 	debug_instruction debug_inst;
 
 	cpu_instruction cpu_inst;
 	u16 intermediate = 0xFFFF;
 
-	u8 inst_code = mem->read(addr);
-	cpu_inst = instructions[inst_code];
+	u8 inst_code = mem_->read(addr);
+	cpu_inst = instructions_[inst_code];
 	if (inst_code == 0xCB) {
-		inst_code = mem->read(++addr);
-		cpu_inst = prefixedinstructions[inst_code];
-		cpu_inst.bytes = 1;
-		debug_inst.prefixed = true;
+		inst_code = mem_->read(++addr);
+		cpu_inst = prefixedinstructions_[inst_code];
+		cpu_inst.bytes_ = 1;
+		debug_inst.prefixed_ = true;
 	}
-	if (cpu_inst.bytes > 1)
+	if (cpu_inst.bytes_ > 1)
 		intermediate =
-			cpu_inst.bytes == 2 ? static_cast<u16>(mem->read_card_rom(addr + 1)) : u8_to_u16(mem->read_card_rom((addr + 2)), mem->read_card_rom(addr + 1));
+			cpu_inst.bytes_ == 2 ? static_cast<u16>(mem_->read_card_rom(addr + 1)) : u8_to_u16(mem_->read_card_rom((addr + 2)), mem_->read_card_rom(addr + 1));
 
 	return debug_inst = {
-			   cpu_inst.mnemonic,
-			   cpu_inst.bytes,
-			   cpu_inst.cycles,
+			   cpu_inst.mnemonic_,
+			   cpu_inst.bytes_,
+			   cpu_inst.cycles_,
 			   inst_code,
 			   intermediate,
 			   addr,
 		   };
 }
 
-u8 CPU::read(const u16 &addr) {
+auto CPU::read(const u16 &addr) -> u8 {
 	switch (addr) {
 		case DIVIDER_REGISTER:
-			return divider_register;
+			return divider_register_;
 		case TIMER_CONTROL:
-			return timer_control;
+			return timer_control_;
 		case TIMER_COUNTER:
-			return timer_counter;
+			return timer_counter_;
 		case TIMER_MODULO:
-			return timer_modulo;
+			return timer_modulo_;
 		case INTERRUPT_ENABLE_REG:
-			return interrupt_enable_register;
+			return interrupt_enable_register_;
 		case INTERRUPT_FLAGS_REG:
-			return interrupt_request_register;
+			return interrupt_request_register_;
 		case IN_BOOT_ADDRESS:
-			return in_boot;
+			return in_boot_;
 		default:
-			return mem->read(addr);
+			return mem_->read(addr);
 	}
 }
 
-void CPU::write(const u16 &addr, const u8 &data) {
+auto CPU::write(const u16 &addr, const u8 &data) -> void {
 	switch (addr) {
 		case DMA_TRANSFER: // This register starts the OAM DMA transfer
 			dma_transfer(data);
@@ -119,22 +119,22 @@ void CPU::write(const u16 &addr, const u8 &data) {
 			handle_time_control_write(data);
 			break;
 		case TIMER_COUNTER:
-			timer_counter = data;
+			timer_counter_ = data;
 			break;
 		case TIMER_MODULO:
-			timer_modulo = data;
+			timer_modulo_ = data;
 			break;
 		case INTERRUPT_ENABLE_REG:
-			interrupt_enable_register = data & 0x1Fu;
+			interrupt_enable_register_ = data & 0x1Fu;
 			break;
 		case INTERRUPT_FLAGS_REG:
-			interrupt_request_register = data & 0x1Fu;
+			interrupt_request_register_ = data & 0x1Fu;
 			break;
 		case IN_BOOT_ADDRESS:
-			in_boot = false;
+			in_boot_ = false;
 			break;
 		default:
-			mem->write(addr, data);
+			mem_->write(addr, data);
 			break;
 	}
 }
@@ -143,75 +143,75 @@ void CPU::write(const u16 &addr, const u8 &data) {
  *
  * @param data
  */
-void CPU::dma_transfer(const u8 &data) {
-	mem->write_direct(DMA_TRANSFER, data);
-	current_instruction_info.cycles = 160;
+auto CPU::dma_transfer(const u8 &data) -> void {
+	mem_->write_direct(DMA_TRANSFER, data);
+	current_instruction_info_.cycles_ = 160;
 	// current_instruction_info.cycles = 4;
 
 	const u16 addr = data << 8u;
 	if (addr >= 0x8000 && addr < 0xE000) {
 		for (u8 i = 0; i < 0xA0; i++) {
 			u16 temp = 0xFE00 + i;
-			mem->write(temp, read(addr + i));
+			mem_->write(temp, read(addr + i));
 		}
 	}
 }
 
-void CPU::handle_time_control_write(const u8 &data) {
-	if ((timer_control & 3u) != (data & 3u))
-		timer_cycle_sum = 0;
-	timer_control = data;
+auto CPU::handle_time_control_write(const u8 &data) -> void {
+	if ((timer_control_ & 3u) != (data & 3u))
+		timer_cycle_sum_ = 0;
+	timer_control_ = data;
 }
 
-void CPU::handle_div_register_write() { divider_register = 0; }
+auto CPU::handle_div_register_write() -> void { divider_register_ = 0; }
 
-void CPU::write_u16(const u16 &addr, const u16 &data) const {
-	mem->write_u16(addr, data);
+auto CPU::write_u16(const u16 &addr, const u16 &data) const -> void {
+	mem_->write_u16(addr, data);
 }
 
-void CPU::handle_interrupts() {
-	u8 interrupt = interrupt_request_register & interrupt_enable_register & 0x1Fu;
-	if (!IME) {
-		if (is_halted && interrupt != 0)
-			is_halted = false;
+auto CPU::handle_interrupts() -> void {
+	u8 interrupt = interrupt_request_register_ & interrupt_enable_register_ & 0x1Fu;
+	if (!IME_) {
+		if (is_halted_ && interrupt != 0)
+			is_halted_ = false;
 		return;
 	}
 	if (interrupt) {
-		is_halted = false;
-		IME = false;
-		push_r16_reg(&R.PC);
+		is_halted_ = false;
+		IME_ = false;
+		push_r16_reg(&R_.PC_);
 		if (check_bit(interrupt, static_cast<u8>(Interrupt::V_Blank))) {
-			reset_bit(interrupt_request_register, static_cast<u8>(Interrupt::V_Blank));
-			R.PC = 0x40;
+			reset_bit(interrupt_request_register_, static_cast<u8>(Interrupt::V_Blank));
+			R_.PC_ = 0x40;
 		} else if (check_bit(interrupt, static_cast<u8>(Interrupt::LCD_Stat))) {
-			reset_bit(interrupt_request_register, static_cast<u8>(Interrupt::LCD_Stat));
-			R.PC = 0x48;
+			reset_bit(interrupt_request_register_, static_cast<u8>(Interrupt::LCD_Stat));
+			R_.PC_ = 0x48;
 		} else if (check_bit(interrupt, static_cast<u8>(Interrupt::Timer_overflow))) {
-			reset_bit(interrupt_request_register, static_cast<u8>(Interrupt::Timer_overflow));
-			R.PC = 0x50;
+			reset_bit(interrupt_request_register_, static_cast<u8>(Interrupt::Timer_overflow));
+			R_.PC_ = 0x50;
 		} else if (check_bit(interrupt, static_cast<u8>(Interrupt::Serial_link))) {
-			reset_bit(interrupt_request_register, static_cast<u8>(Interrupt::Serial_link));
-			R.PC = 0x58;
+			reset_bit(interrupt_request_register_, static_cast<u8>(Interrupt::Serial_link));
+			R_.PC_ = 0x58;
 		} else if (check_bit(interrupt, static_cast<u8>(Interrupt::Joypad))) {
-			reset_bit(interrupt_request_register, static_cast<u8>(Interrupt::Joypad));
-			R.PC = 0x60;
+			reset_bit(interrupt_request_register_, static_cast<u8>(Interrupt::Joypad));
+			R_.PC_ = 0x60;
 		}
 	}
 }
 
-void CPU::handle_timer(int t_cycles) {
-	div_cycle_sum += t_cycles;
-	if (div_cycle_sum >= 0xFF) {
-		div_cycle_sum -= 0xFF;
-		divider_register++;
+auto CPU::handle_timer(int t_cycles) -> void {
+	div_cycle_sum_ += t_cycles;
+	if (div_cycle_sum_ >= 0xFF) {
+		div_cycle_sum_ -= 0xFF;
+		divider_register_++;
 	}
 
 	// if Timer Enable
-	if (check_bit(timer_control, 2)) {
-		timer_cycle_sum += t_cycles * 4;
+	if (check_bit(timer_control_, 2)) {
+		timer_cycle_sum_ += t_cycles * 4;
 
 		int freq = 1024;
-		switch (timer_control & 3u) {
+		switch (timer_control_ & 3u) {
 			case 1:
 				freq = 16;
 				break;
@@ -223,23 +223,23 @@ void CPU::handle_timer(int t_cycles) {
 				break;
 		}
 
-		while (timer_cycle_sum >= freq) {
-			timer_counter++;
-			if (timer_counter == 0x100) {
+		while (timer_cycle_sum_ >= freq) {
+			timer_counter_++;
+			if (timer_counter_ == 0x100) {
 				request_interrupt(Interrupt::Timer_overflow);
-				timer_counter = static_cast<u16>(timer_modulo);
+				timer_counter_ = static_cast<u16>(timer_modulo_);
 			}
-			timer_cycle_sum -= freq;
+			timer_cycle_sum_ -= freq;
 		}
 	}
 }
 
-void CPU::request_interrupt(Interrupt inter) {
-	set_bit(interrupt_request_register, static_cast<u8>(inter));
+auto CPU::request_interrupt(Interrupt inter) -> void {
+	set_bit(interrupt_request_register_, static_cast<u8>(inter));
 }
 
-bool CPU::is_in_boot() const { return in_boot; }
+auto CPU::is_in_boot() const -> bool { return in_boot_; }
 
-void CPU::inc_pc() { R.PC += current_instruction_info.bytes; }
+auto CPU::inc_pc() -> void { R_.PC_ += current_instruction_info_.bytes_; }
 
-inline u8 CPU::get_next_op_code() { return read(R.PC); }
+inline auto CPU::get_next_op_code() -> u8 { return read(R_.PC_); }

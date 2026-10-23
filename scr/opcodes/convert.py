@@ -76,7 +76,7 @@ with open('Opcodes.json') as json_file:
             except:
                 pass
 
-        string += 'u8 opcode'+strHex+'();	// ' + mnemonic
+        string += 'auto opcode'+strHex+'() -> u8;	// ' + mnemonic
         if(op1 != ""):
             string += " " + op1
         if(op2 != ""):
@@ -101,7 +101,7 @@ with open('Opcodes.json') as json_file:
             except:
                 pass
 
-        string += 'u8 prefixedopcode'+strHex+'();	// ' + mnemonic
+        string += 'auto prefixedopcode'+strHex+'() -> u8;	// ' + mnemonic
         if(op1 != ""):
             string += " " + op1
         if(op2 != ""):

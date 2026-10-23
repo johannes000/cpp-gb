@@ -1,4 +1,4 @@
-#include "Renderer.h"
+#include "Renderer.hpp"
 
 #include <dirent.h>
 #include <charconv>
@@ -413,7 +413,7 @@ void Renderer::file_menu_bar(std::string *file) {
 			ofn.Flags = OFN_DONTADDTORECENT | OFN_FILEMUSTEXIST;
 
 			if (GetOpenFileNameA(&ofn)) {
-				DLOG_F(INFO, "You chose the file %s", path.c_str());
+				spdlog::info("You chose the file {}", path.c_str());
 				path.resize(strlen(path.c_str()));
 				*file = path;
 			}

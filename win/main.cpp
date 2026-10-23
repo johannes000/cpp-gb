@@ -1,15 +1,16 @@
 #include <chrono>
 #include <thread>
 
-#include "Renderer.h"
-#include "Audio.h"
-#include "gameboy.h"
+#include "Renderer.hpp"
+#include "Audio.hpp"
+#include "gameboy.hpp"
 
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3native.h>
-// #include "Audio.h"
+// #include "Audio.hpp"
 
-#include "utl/type.h"
+#include "utl/log.hpp"
+#include "utl/type.hpp"
 
 constexpr double frameTimeMicro = (1.0 / 59.73) * 1e6;
 
@@ -21,10 +22,7 @@ void render(std::string *file, Renderer *renderer) {
 }
 
 int main(int argc, char *args[]) {
-	loguru::init(argc, args);
-
-	loguru::add_file("everything.log", loguru::Append, loguru::Verbosity_MAX);
-	loguru::add_file("error.log", loguru::Append, loguru::Verbosity_ERROR);
+	init_logging(".");
 
 	gameboy gb;
 	std::string file = "";

@@ -7,7 +7,7 @@
 #include <cstdint>
 #include <string>
 
-#include "loguru.hpp"
+#include <spdlog/spdlog.h>
 
 typedef uint8_t u8;
 typedef uint16_t u16;
@@ -154,76 +154,76 @@ enum class Interrupt {
 	Joypad,
 };
 struct debug_instruction {
-	const char *mnemonic{};
-	u8 bytes{};
-	u8 cycles{};
-	u8 opcode{};
-	u16 intermediate{};
-	u16 address{};
-	bool prefixed{false};
+	const char *mnemonic_{};
+	u8 bytes_{};
+	u8 cycles_{};
+	u8 opcode_{};
+	u16 intermediate_{};
+	u16 address_{};
+	bool prefixed_{false};
 };
 struct Pixel {
 	// GL_RGB
 	// Red, Green, Blue
-	u8 R;
-	u8 G;
-	u8 B;
+	u8 R_;
+	u8 G_;
+	u8 B_;
 };
 struct Pixel_a {
 	// GL_RGBA
 	// Red, Green, Blue, Alpha
-	u8 R;
-	u8 G;
-	u8 B;
-	u8 A;
-	inline bool operator==(Pixel_a Comp) {
-		return (Comp.R == this->R && Comp.G == this->G && Comp.B == this->B && Comp.A == this->A);
+	u8 R_;
+	u8 G_;
+	u8 B_;
+	u8 A_;
+	inline auto operator==(Pixel_a Comp) -> bool {
+		return (Comp.R_ == this->R_ && Comp.G_ == this->G_ && Comp.B_ == this->B_ && Comp.A_ == this->A_);
 	}
 };
 
 struct sound_output_buffer {
-	int samples_per_second;
-	int sample_count;
-	s16 *samples;
+	int samples_per_second_;
+	int sample_count_;
+	s16 *samples_;
 };
 
-inline void set_bit(u8 &value, const u8 &bit) {
+inline auto set_bit(u8 &value, const u8 &bit) -> void {
 	value |= (1u << bit);
 }
 
-inline void set_bit(u16 &value, const u16 &bit) {
+inline auto set_bit(u16 &value, const u16 &bit) -> void {
 	value |= (1u << bit);
 }
 
-inline void reset_bit(u8 &value, const u8 &bit) {
+inline auto reset_bit(u8 &value, const u8 &bit) -> void {
 	value &= ~(1u << bit);
 }
 
-inline void reset_bit(u16 &value, const u16 &bit) {
+inline auto reset_bit(u16 &value, const u16 &bit) -> void {
 	value &= ~(1u << bit);
 }
 
-inline void toggle_bit(u8 &value, const u8 &bit) {
+inline auto toggle_bit(u8 &value, const u8 &bit) -> void {
 	value ^= (1u << bit);
 }
 
-inline void toggle_bit(u16 &value, const u16 &bit) {
+inline auto toggle_bit(u16 &value, const u16 &bit) -> void {
 	value ^= (1u << bit);
 }
 
-inline bool check_bit(const u8 value, const u8 bit) {
+inline auto check_bit(const u8 value, const u8 bit) -> bool {
 	return static_cast<u8>(value >> bit) & 1u;
 }
 
-inline bool check_bit(const u16 value, const u16 bit) {
+inline auto check_bit(const u16 value, const u16 bit) -> bool {
 	return static_cast<u16>(value >> bit) & 1u;
 }
 
-inline void set_bit_if(u8 &value, const u8 &bit, bool condition) {
+inline auto set_bit_if(u8 &value, const u8 &bit, bool condition) -> void {
 	condition ? set_bit(value, bit) : reset_bit(value, bit);
 }
 
-inline void set_bit_if(u16 &value, const u16 &bit, bool condition) {
+inline auto set_bit_if(u16 &value, const u16 &bit, bool condition) -> void {
 	condition ? set_bit(value, bit) : reset_bit(value, bit);
 }
 

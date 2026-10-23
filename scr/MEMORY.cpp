@@ -1,49 +1,48 @@
-#include "MEMORY.h"
+#include "MEMORY.hpp"
 
 #include <iostream>
 #include <fstream>
-#include <windows.h>
 
 MEMORY::MEMORY(CPU *c, CARTRIDGE *card, PPU *p, CONTROLS *j, APU *a)
-	: card(card), ppu(p), cpu(c), joypad(j), apu(a) {
+	: card_(card), ppu_(p), cpu_(c), joypad_(j), apu_(a) {
 }
 
-void MEMORY::reset() {
+auto MEMORY::reset() -> void {
 }
 
-u8 MEMORY::read(const u16 &addr) {
+auto MEMORY::read(const u16 &addr) -> u8 {
 	if (addr <= CARD_ROM_END) {
-		if (cpu->is_in_boot() && addr <= BOOT_ROM_END) {
-			return card->readBoot(addr);
+		if (cpu_->is_in_boot() && addr <= BOOT_ROM_END) {
+			return card_->readBoot(addr);
 		}
-		return card->read(addr);
+		return card_->read(addr);
 	} else if (addr <= GRAPHICS_RAM_END) {
-		return ppu->read(addr);
+		return ppu_->read(addr);
 	} else if (addr <= CARD_EXTERNAL_RAM_END) {
-		return card->read(addr);
+		return card_->read(addr);
 	} else if (addr <= WORKING_RAM_END) {
-		return memory.at(addr);
+		return memory_.at(addr);
 	} else if (addr <= WORKING_RAM_SHADOW_END) {
-		return memory.at(addr - WORKING_RAM_SHADOW_OFFSET);
+		return memory_.at(addr - WORKING_RAM_SHADOW_OFFSET);
 	} else if (addr <= SPRITE_INFORMATION_END) {
-		return ppu->read(addr);
+		return ppu_->read(addr);
 	} else if (addr >= MEMORY_MAPPED_IO && addr <= MEMORY_MAPPED_IO_END) {
 		return handle_mapped_io_read(addr);
 	} else if (addr <= ZERO_PAGE_RAM_END) {
-		return memory.at(addr);
+		return memory_.at(addr);
 	} else if (addr == INTERRUPT_ENABLE_REG) {
-		return cpu->read(addr);
+		return cpu_->read(addr);
 	}
 	return 0xFF;
 }
 
-u8 MEMORY::handle_mapped_io_read(const u16 &addr) const {
+auto MEMORY::handle_mapped_io_read(const u16 &addr) const -> u8 {
 	if (addr >= WAVE_TABLE_START && addr <= WAVE_TABLE_END)
-		return apu->read(addr);
+		return apu_->read(addr);
 
 	switch (addr) {
 		case JOY_P1_REGISTER:
-			return joypad->read(addr);
+			return joypad_->read(addr);
 		case LCD_CONTROL:
 		case LCD_STATUS:
 		case LCD_SCY:
@@ -55,14 +54,14 @@ u8 MEMORY::handle_mapped_io_read(const u16 &addr) const {
 		case BG_PALETTE_DATA:
 		case SPRITE_PALETTE_DATA_0:
 		case SPRITE_PALETTE_DATA_1:
-			return ppu->read(addr);
+			return ppu_->read(addr);
 		case INTERRUPT_FLAGS_REG:
 		case INTERRUPT_ENABLE_REG:
 		case DIVIDER_REGISTER:
 		case TIMER_CONTROL:
 		case TIMER_COUNTER:
 		case TIMER_MODULO:
-			return cpu->read(addr);
+			return cpu_->read(addr);
 		case NR10:
 		case NR11:
 		case NR12:
@@ -84,41 +83,41 @@ u8 MEMORY::handle_mapped_io_read(const u16 &addr) const {
 		case NR50:
 		case NR51:
 		case NR52:
-			return apu->read(addr);
+			return apu_->read(addr);
 		default:
-			return memory.at(addr);
+			return memory_.at(addr);
 	}
 }
-void MEMORY::write(const u16 &addr, const u8 &data) {
+auto MEMORY::write(const u16 &addr, const u8 &data) -> void {
 	if (addr == 0xFF02 && data == 0x81) {
 		char c = static_cast<char>(read(0xff01));
-		TestOutput.push_back(c);
+		TestOutput_.push_back(c);
 	}
 
 	if (addr >= GRAPHICS_RAM && addr <= GRAPHICS_RAM_END) {
-		ppu->write(addr, data);
+		ppu_->write(addr, data);
 	} else if (addr >= CARD_EXTERNAL_RAM && addr <= CARD_EXTERNAL_RAM_END) {
-		card->write(addr, data);
+		card_->write(addr, data);
 	} else if (addr >= WORKING_RAM && addr <= WORKING_RAM_END) {
-		memory.at(addr) = data;
+		memory_.at(addr) = data;
 	} else if (addr >= WORKING_RAM_SHADOW && addr <= WORKING_RAM_SHADOW_END) {
-		memory.at(addr - WORKING_RAM_SHADOW_OFFSET) = data;
+		memory_.at(addr - WORKING_RAM_SHADOW_OFFSET) = data;
 	} else if (addr >= SPRITE_INFORMATION && addr <= SPRITE_INFORMATION_END) {
-		ppu->write(addr, data);
+		ppu_->write(addr, data);
 	} else if (addr >= MEMORY_MAPPED_IO && addr <= MEMORY_MAPPED_IO_END) {
 		handle_mapped_io_write(addr, data);
 	} else if (addr >= ZERO_PAGE_RAM && addr <= ZERO_PAGE_RAM_END) {
-		memory.at(addr) = data;
+		memory_.at(addr) = data;
 	} else if (addr == INTERRUPT_ENABLE_REG) {
-		cpu->write(addr, data);
+		cpu_->write(addr, data);
 	} else {
-		card->write(addr, data);
+		card_->write(addr, data);
 	}
 }
 
-void MEMORY::handle_mapped_io_write(const u16 &addr, const u8 &data) {
+auto MEMORY::handle_mapped_io_write(const u16 &addr, const u8 &data) -> void {
 	if (addr >= WAVE_TABLE_START && addr <= WAVE_TABLE_END) {
-		apu->write(addr, data);
+		apu_->write(addr, data);
 		return;
 	}
 	switch (addr) {
@@ -133,10 +132,10 @@ void MEMORY::handle_mapped_io_write(const u16 &addr, const u8 &data) {
 		case BG_PALETTE_DATA:
 		case SPRITE_PALETTE_DATA_0:
 		case SPRITE_PALETTE_DATA_1:
-			ppu->write(addr, data);
+			ppu_->write(addr, data);
 			break;
 		case DMA_TRANSFER:
-			cpu->write(addr, data);
+			cpu_->write(addr, data);
 			break;
 		case INTERRUPT_FLAGS_REG:
 		case IN_BOOT_ADDRESS:
@@ -144,10 +143,10 @@ void MEMORY::handle_mapped_io_write(const u16 &addr, const u8 &data) {
 		case TIMER_CONTROL:
 		case TIMER_COUNTER:
 		case TIMER_MODULO:
-			cpu->write(addr, data);
+			cpu_->write(addr, data);
 			break;
 		case JOY_P1_REGISTER:
-			joypad->write(addr, data);
+			joypad_->write(addr, data);
 			break;
 		case NR10:
 		case NR11:
@@ -170,24 +169,24 @@ void MEMORY::handle_mapped_io_write(const u16 &addr, const u8 &data) {
 		case NR50:
 		case NR51:
 		case NR52:
-			apu->write(addr, data);
+			apu_->write(addr, data);
 			break;
 		default:
-			memory.at(addr) = data;
+			memory_.at(addr) = data;
 			break;
 	}
 }
 
-void MEMORY::write_u16(const u16 &addr, const u16 &data) {
+auto MEMORY::write_u16(const u16 &addr, const u16 &data) -> void {
 	const u8 data_lb = data >> 8u;
 	const u8 data_hb = data & 0xFFu;
 	write(addr, data_hb);
 	write(addr + 1, data_lb);
 }
 
-void MEMORY::reset(bool skip_boot_rom) {
-	this->skip_boot = skip_boot_rom;
-	memory = std::vector<u8>(0x10000, 0);
+auto MEMORY::reset(bool skip_boot_rom) -> void {
+	this->skip_boot_ = skip_boot_rom;
+	memory_ = std::vector<u8>(0x10000, 0);
 	if (skip_boot_rom) {
 
 		// Zero the memory from $8000-$9FFF (VRAM)
@@ -230,14 +229,14 @@ void MEMORY::reset(bool skip_boot_rom) {
 	}
 }
 
-u8 MEMORY::read_card_rom(const u16 &addr) {
-	return card->read_card_rom(addr);
+auto MEMORY::read_card_rom(const u16 &addr) -> u8 {
+	return card_->read_card_rom(addr);
 }
 
-void MEMORY::request_interrupt(Interrupt inter) {
-	cpu->request_interrupt(inter);
+auto MEMORY::request_interrupt(Interrupt inter) -> void {
+	cpu_->request_interrupt(inter);
 }
 
-void MEMORY::write_direct(const u16 &addr, const u8 &data) {
-	memory.at(addr) = data;
+auto MEMORY::write_direct(const u16 &addr, const u8 &data) -> void {
+	memory_.at(addr) = data;
 }

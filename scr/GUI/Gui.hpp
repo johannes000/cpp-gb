@@ -4,47 +4,47 @@
 #pragma once
 
 #include "imgui.h"
-#include "imgui_impl_sdl2.h"
+#include "imgui_impl_sdl3.h"
 #include "imgui_impl_opengl3.h"
 #include <stdio.h>
-#include <SDL.h>
+#include <SDL3/SDL.h>
 #if defined(IMGUI_IMPL_OPENGL_ES2)
-#include <SDL_opengles2.h>
+#include <SDL3/SDL_opengles2.h>
 #else
-#include <SDL_opengl.h>
+#include <SDL3/SDL_opengl.h>
 #endif
 
-#include "utl/type.h"
+#include "utl/type.hpp"
 
-class gameboy;
+struct gameboy;
 struct Context {
-	SDL_Window *window;
-	SDL_GLContext gl_context;
+	SDL_Window *window_;
+	SDL_GLContext gl_context_;
 };
 
 struct TextureData {
-	GLuint textureID;
-	int width;
-	int height;
+	GLuint textureID_;
+	int width_;
+	int height_;
 };
 
 class Gui {
 public:
 	Gui();
-	void render(gameboy &gb);
-	void destroy();
+	auto render(gameboy &gb) -> void;
+	auto destroy() -> void;
 
-	Context *getContext() { return &context; }
+	auto getContext() -> Context * { return &context_; }
 
 private:
-	void generate_widgets(gameboy &gb);
+	auto generate_widgets(gameboy &gb) -> void;
 
-	Context context{};
-	void showFPS() const;
+	Context context_{};
+	auto showFPS() const -> void;
 
-	TextureData gb_framebuffer_texture;
-	TextureData tile_buffer_texture;
-	std::vector<Pixel_a> tile_buffer;
+	TextureData gb_framebuffer_texture_;
+	TextureData tile_buffer_texture_;
+	std::vector<Pixel_a> tile_buffer_;
 
 public:
 };

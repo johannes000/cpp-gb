@@ -1,8 +1,8 @@
 #ifndef CPP_GB_CONTROLS_H
 #define CPP_GB_CONTROLS_H
 
-#include "MEMORY.h"
-#include "utl/type.h"
+#include "MEMORY.hpp"
+#include "utl/type.hpp"
 
 enum class GB_Key {
 	// Bit 7 - Not used
@@ -30,20 +30,20 @@ class CONTROLS {
 public:
 	explicit CONTROLS(MEMORY *m);
 
-	void write(const u16 &addr, const u8 &data);
+	auto write(const u16 &addr, const u8 &data) -> void;
 
-	void handle_glwf_inputs(int key, int action);
+	auto handle_glwf_inputs(int key, int action) -> void;
 
-	[[nodiscard]] u8 read(const u16 &addr) const;
+	[[nodiscard]] auto read(const u16 &addr) const -> u8;
 
-	u8 get_joypad_state();
+	auto get_joypad_state() -> u8;
 
 private:
-	MEMORY *mem;
+	MEMORY *mem_;
 
-	u8 joy_button_direction_selector;
-	u8 joy_both_states;
-	u8 joy_both_states_old;
+	u8 joy_button_direction_selector_;
+	u8 joy_both_states_;
+	u8 joy_both_states_old_;
 };
 
 #endif // CPP_GB_CONTROLS_H

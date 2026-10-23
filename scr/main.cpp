@@ -1,16 +1,12 @@
-#define SDL_MAIN_HANDLED
-
 #include "Audio.hpp"
-#include "gameboy.h"
+#include "gameboy.hpp"
 #include "GUI/Gui.hpp"
-#include "utl/type.h"
+#include "utl/log.hpp"
+#include "utl/type.hpp"
 #include <filesystem>
 
-int main(int argc, char **argv) {
-	loguru::init(argc, argv);
-
-	loguru::add_file("logs/everything.log", loguru::Append, loguru::Verbosity_MAX);
-	loguru::add_file("logs/error.log", loguru::Truncate, loguru::Verbosity_ERROR);
+auto main(int argc, char **argv) -> int {
+	init_logging();
 
 	bool done = false;
 	Gui gui;
@@ -23,17 +19,17 @@ int main(int argc, char **argv) {
 
 		SDL_Event event;
 		while (SDL_PollEvent(&event)) {
-			ImGui_ImplSDL2_ProcessEvent(&event);
-			if (event.type == SDL_QUIT)
+			ImGui_ImplSDL3_ProcessEvent(&event);
+			if (event.type == SDL_EVENT_QUIT)
 				done = true;
-			if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_CLOSE && event.window.windowID == SDL_GetWindowID(gui.getContext()->window))
+			if (event.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED && event.window.windowID == SDL_GetWindowID(gui.getContext()->window_))
 				done = true;
 		}
 
 		while (Cycle_this_frame < CYCLES_PER_FRAME) {
 			const i32 Last_cycle = gb.run_one_cycle();
 			Cycle_this_frame += Last_cycle;
-			if (gb.ppu.is_ready_to_render()) {
+			if (gb.ppu_.is_ready_to_render()) {
 				// audio.update(Last_cycle);
 				gui.render(gb);
 				break;

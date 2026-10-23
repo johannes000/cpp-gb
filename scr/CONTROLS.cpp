@@ -1,22 +1,22 @@
-#include "CONTROLS.h"
+#include "CONTROLS.hpp"
 
-CONTROLS::CONTROLS(MEMORY *m) : mem(m),
-								joy_button_direction_selector(0xFF),
-								joy_both_states(0xFF),
-								joy_both_states_old(0xFF) {
+CONTROLS::CONTROLS(MEMORY *m) : mem_(m),
+								joy_button_direction_selector_(0xFF),
+								joy_both_states_(0xFF),
+								joy_both_states_old_(0xFF) {
 }
 
-u8 CONTROLS::read(const u16 &addr) const {
+auto CONTROLS::read(const u16 &addr) const -> u8 {
 	if (addr == JOY_P1_REGISTER) {
 		u8 joy_p1 = 0xFF;
-		switch (joy_button_direction_selector & 0xF0u) {
+		switch (joy_button_direction_selector_ & 0xF0u) {
 			case 0x10:
-				joy_p1 = (joy_both_states & 0xF0u) >> 4u;
+				joy_p1 = (joy_both_states_ & 0xF0u) >> 4u;
 				reset_bit(joy_p1, 5);
 				set_bit(joy_p1, 4);
 				break;
 			case 0x20:
-				joy_p1 = joy_both_states & 0x0Fu;
+				joy_p1 = joy_both_states_ & 0x0Fu;
 				set_bit(joy_p1, 5);
 				reset_bit(joy_p1, 4);
 				break;
@@ -29,18 +29,18 @@ u8 CONTROLS::read(const u16 &addr) const {
 	}
 }
 
-void CONTROLS::write(const u16 &addr, const u8 &data) {
+auto CONTROLS::write(const u16 &addr, const u8 &data) -> void {
 	switch (addr) {
 		case JOY_P1_REGISTER:
-			joy_button_direction_selector = data & 0x30u;
+			joy_button_direction_selector_ = data & 0x30u;
 			break;
 		default:
-			mem->write(addr, data);
+			mem_->write(addr, data);
 			break;
 	}
 }
 
-void CONTROLS::handle_glwf_inputs(int key, int action) {
+auto CONTROLS::handle_glwf_inputs(int key, int action) -> void {
 #if 0
 	switch (action) {
 		case GLFW_PRESS:
@@ -109,8 +109,8 @@ void CONTROLS::handle_glwf_inputs(int key, int action) {
 #endif
 }
 
-u8 CONTROLS::get_joypad_state() {
-	if (joy_both_states != joy_both_states_old)
-		joy_both_states_old = joy_both_states;
-	return joy_both_states;
+auto CONTROLS::get_joypad_state() -> u8 {
+	if (joy_both_states_ != joy_both_states_old_)
+		joy_both_states_old_ = joy_both_states_;
+	return joy_both_states_;
 }

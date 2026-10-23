@@ -1,52 +1,52 @@
-#include "gameboy.h"
+#include "gameboy.hpp"
 
-#include "Debugger/Debugger.h"
-#include "utl/type.h"
+#include "Debugger/Debugger.hpp"
+#include "utl/type.hpp"
 
 gameboy::gameboy()
-	: mem(&cpu, &card, &ppu, &joypad, &apu),
-	  cpu(&mem),
-	  ppu(&mem, &cpu),
-	  joypad(&mem),
-	  apu(&mem),
+	: mem_(&cpu_, &card_, &ppu_, &joypad_, &apu_),
+	  cpu_(&mem_),
+	  ppu_(&mem_, &cpu_),
+	  joypad_(&mem_),
+	  apu_(&mem_),
 
-	  in_test_mode(false),
-	  skip_boot_rom(false),
-	  fps_drossel(true) {
-	reset(skip_boot_rom);
+	  in_test_mode_(false),
+	  skip_boot_rom_(false),
+	  fps_drossel_(true) {
+	reset(skip_boot_rom_);
 }
 
-bool gameboy::load_rom(std::string rom_file, bool skip_boot) {
+auto gameboy::load_rom(std::string rom_file, bool skip_boot) -> bool {
 	reset(skip_boot);
 
 	if (rom_file.empty())
 		return false;
-	card.load_rom(rom_file, skip_boot);
+	card_.load_rom(rom_file, skip_boot);
 
 	return true;
 }
 
-void gameboy::reset(bool skip_boot) {
-	mem.reset(skip_boot);
-	cpu.init_register(skip_boot);
-	ppu.reset();
+auto gameboy::reset(bool skip_boot) -> void {
+	mem_.reset(skip_boot);
+	cpu_.init_register(skip_boot);
+	ppu_.reset();
 }
 
-int gameboy::run_one_cycle() {
+auto gameboy::run_one_cycle() -> int {
 	return run_one_cycle(false);
 }
 
-void gameboy::log_cpu(CPU_Register R) {
-	if (!cpu.is_in_boot()) {
-		printf("A: %02X F: %02X B: %02X C: %02X D: %02X E: %02X H: %02X L: %02X", R.A, R.F, R.B, R.C, R.D, R.E, R.H, R.L);
-		printf(" SP: %04X", R.SP);
-		printf(" PC: 00:%04X", R.PC);
-		printf(" (%02X %02X %02X %02X)", mem.read(R.PC), mem.read(R.PC + 1), mem.read(R.PC + 2), mem.read(R.PC + 3));
+auto gameboy::log_cpu(CPU_Register R) -> void {
+	if (!cpu_.is_in_boot()) {
+		printf("A: %02X F: %02X B: %02X C: %02X D: %02X E: %02X H: %02X L: %02X", R.A_, R.F_, R.B_, R.C_, R.D_, R.E_, R.H_, R.L_);
+		printf(" SP: %04X", R.SP_);
+		printf(" PC: 00:%04X", R.PC_);
+		printf(" (%02X %02X %02X %02X)", mem_.read(R.PC_), mem_.read(R.PC_ + 1), mem_.read(R.PC_ + 2), mem_.read(R.PC_ + 3));
 		printf("\n");
 	}
 }
 
-void gameboy::run_for_x_cycles(int cycles_to_run) {
+auto gameboy::run_for_x_cycles(int cycles_to_run) -> void {
 	while (cycles_to_run > 0) {
 		int cycles = run_one_cycle(false);
 		if (cycles == -1)
@@ -54,30 +54,30 @@ void gameboy::run_for_x_cycles(int cycles_to_run) {
 		cycles_to_run -= cycles;
 	}
 }
-int gameboy::run_one_cycle(bool skip_render) {
+auto gameboy::run_one_cycle(bool skip_render) -> int {
 #if 0
 	auto aa = cpu.R;
 	log_cpu(aa);
 #endif
-	cpu.handle_interrupts();
-	const int last_cycle = cpu.update();
-	if (in_test_mode && cpu.op_code == 0x40)
+	cpu_.handle_interrupts();
+	const int last_cycle = cpu_.update();
+	if (in_test_mode_ && cpu_.op_code_ == 0x40)
 		return -1;
-	ppu.update(last_cycle, skip_render);
-	cpu.handle_timer(last_cycle);
-	apu.update(last_cycle);
+	ppu_.update(last_cycle, skip_render);
+	cpu_.handle_timer(last_cycle);
+	apu_.update(last_cycle);
 	return last_cycle;
 }
 
-void gameboy::run_until_vblank() {
+auto gameboy::run_until_vblank() -> void {
 	bool vblank = false;
 	s32 cycles_sum = 0;
 	while (!vblank && cycles_sum <= CYCLES_PER_FRAME) {
-		cpu.handle_interrupts();
-		const int last_cycle = cpu.update();
-		vblank = ppu.update(last_cycle, false);
-		cpu.handle_timer(last_cycle);
+		cpu_.handle_interrupts();
+		const int last_cycle = cpu_.update();
+		vblank = ppu_.update(last_cycle, false);
+		cpu_.handle_timer(last_cycle);
 		cycles_sum += last_cycle;
-		apu.update(last_cycle);
+		apu_.update(last_cycle);
 	}
 }

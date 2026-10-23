@@ -1,19 +1,19 @@
 #include "Gui.hpp"
-#include "gameboy.h"
-#include "utl/type.h"
+#include "gameboy.hpp"
+#include "utl/type.hpp"
 
+#include <cstdio>
 #include <filesystem>
 
 #include "imgui.h"
-#include "imgui_impl_sdl2.h"
+#include "imgui_impl_sdl3.h"
 #include "imgui_impl_opengl3.h"
 #include <stdio.h>
-#define SDL_MAIN_HANDLED
-#include <SDL.h>
+#include <SDL3/SDL.h>
 #if defined(IMGUI_IMPL_OPENGL_ES2)
-#include <SDL_opengles2.h>
+#include <SDL3/SDL_opengles2.h>
 #else
-#include <SDL_opengl.h>
+#include <SDL3/SDL_opengl.h>
 #endif
 
 // This example can also compile and run with Emscripten! See 'Makefile.emscripten' for details.
@@ -33,8 +33,8 @@ ImVec4 gray = ImVec4(0.5f, 0.5f, 0.5f, 1.0f);
 ImVec4 dark_gray = ImVec4(0.1f, 0.1f, 0.1f, 1.0f);
 }; // namespace
 
-bool generate_texture(GLuint &textureHandler, int width, int height,
-					  const void *data) {
+auto generate_texture(GLuint &textureHandler, int width, int height,
+					  const void *data) -> bool {
 	glGenTextures(1, &textureHandler);
 	glBindTexture(GL_TEXTURE_2D, textureHandler);
 
@@ -47,18 +47,21 @@ bool generate_texture(GLuint &textureHandler, int width, int height,
 	return true;
 }
 
-bool generate_texture(TextureData &texture) {
-	return generate_texture(texture.textureID, texture.width, texture.height, nullptr);
+auto generate_texture(TextureData &texture) -> bool {
+	return generate_texture(texture.textureID_, texture.width_, texture.height_, nullptr);
 }
 
-void update_buffer(TextureData &textureData, const void *videoBuffer) {
-	glBindTexture(GL_TEXTURE_2D, textureData.textureID);
-	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, textureData.width, textureData.height, GL_RGBA, GL_UNSIGNED_BYTE, videoBuffer);
+auto update_buffer(TextureData &textureData, const void *videoBuffer) -> void {
+	glBindTexture(GL_TEXTURE_2D, textureData.textureID_);
+	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, textureData.width_, textureData.height_, GL_RGBA, GL_UNSIGNED_BYTE, videoBuffer);
 }
 
 Gui::Gui() {
 	// Setup SDL
-	CHECK_EQ_F(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER), 0, "Error: {}\n", SDL_GetError());
+	if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_GAMEPAD)) {
+		spdlog::critical("SDL_Init fehlgeschlagen: {}", SDL_GetError());
+		std::abort();
+	}
 
 	// Decide GL+GLSL versions
 #if defined(IMGUI_IMPL_OPENGL_ES2)
@@ -85,18 +88,18 @@ Gui::Gui() {
 #endif
 
 	// From 2.0.18: Enable native IME.
-#ifdef SDL_HINT_IME_SHOW_UI
-	SDL_SetHint(SDL_HINT_IME_SHOW_UI, "1");
+#ifdef SDL_HINT_IME_IMPLEMENTED_UI
+	SDL_SetHint(SDL_HINT_IME_IMPLEMENTED_UI, "1");
 #endif
 
 	// Create window with graphics context
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
-	SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
-	context.window = SDL_CreateWindow("Gameboy", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, window_flags);
-	context.gl_context = SDL_GL_CreateContext(context.window);
-	SDL_GL_MakeCurrent(context.window, context.gl_context);
+	SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIGH_PIXEL_DENSITY);
+	context_.window_ = SDL_CreateWindow("Gameboy", 1280, 720, window_flags);
+	context_.gl_context_ = SDL_GL_CreateContext(context_.window_);
+	SDL_GL_MakeCurrent(context_.window_, context_.gl_context_);
 	SDL_GL_SetSwapInterval(0); // Enable vsync
 
 	// Setup Dear ImGui context
@@ -123,7 +126,7 @@ Gui::Gui() {
 	}
 
 	// Setup Platform/Renderer backends
-	ImGui_ImplSDL2_InitForOpenGL(context.window, context.gl_context);
+	ImGui_ImplSDL3_InitForOpenGL(context_.window_, context_.gl_context_);
 	ImGui_ImplOpenGL3_Init(glsl_version);
 
 	// Load Fonts
@@ -143,27 +146,27 @@ Gui::Gui() {
 	// ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, nullptr, io.Fonts->GetGlyphRangesJapanese());
 	// IM_ASSERT(font != nullptr);
 
-	tile_buffer = {TILE_MAP_HEIGHT * TILE_MAP_HEIGHT,
-				   {0xFF, 0xFF, 0xFF, 0x00}};
+	tile_buffer_ = {TILE_MAP_HEIGHT * TILE_MAP_HEIGHT,
+					{0xFF, 0xFF, 0xFF, 0x00}};
 
-	gb_framebuffer_texture.width = GB_LCD_SIZE_WIDTH;
-	gb_framebuffer_texture.height = GB_LCD_SIZE_HEIGHT;
+	gb_framebuffer_texture_.width_ = GB_LCD_SIZE_WIDTH;
+	gb_framebuffer_texture_.height_ = GB_LCD_SIZE_HEIGHT;
 
-	generate_texture(gb_framebuffer_texture);
+	generate_texture(gb_framebuffer_texture_);
 
-	tile_buffer_texture.height = TILE_MAP_HEIGHT;
-	tile_buffer_texture.width = TILE_MAP_WIDTH;
+	tile_buffer_texture_.height_ = TILE_MAP_HEIGHT;
+	tile_buffer_texture_.width_ = TILE_MAP_WIDTH;
 
-	generate_texture(tile_buffer_texture);
+	generate_texture(tile_buffer_texture_);
 }
 
-void Gui::generate_widgets(gameboy &gb) {
-	auto &cpu = gb.cpu;
-	auto &ppu = gb.ppu;
-	auto &apu = gb.apu;
-	auto &mem = gb.mem;
-	auto &joypad = gb.joypad;
-	auto &card = gb.card;
+auto Gui::generate_widgets(gameboy &gb) -> void {
+	auto &cpu = gb.cpu_;
+	auto &ppu = gb.ppu_;
+	auto &apu = gb.apu_;
+	auto &mem = gb.mem_;
+	auto &joypad = gb.joypad_;
+	auto &card = gb.card_;
 	{
 		ImGui::Begin("Gameboy Emulator");
 
@@ -179,8 +182,8 @@ void Gui::generate_widgets(gameboy &gb) {
 			image_size.x = widget_size.y * aspect_ratio;
 		}
 
-		update_buffer(gb_framebuffer_texture, gb.ppu.get_lcd_buffer());
-		ImGui::Image((ImTextureID)(intptr_t)gb_framebuffer_texture.textureID, image_size, ImVec2(0, 0), ImVec2(1, 1), ImVec4(1, 1, 1, 1), ImVec4(0, 0, 0, 0));
+		update_buffer(gb_framebuffer_texture_, gb.ppu_.get_lcd_buffer());
+		ImGui::Image((ImTextureID)(intptr_t)gb_framebuffer_texture_.textureID_, image_size, ImVec2(0, 0), ImVec2(1, 1));
 
 		ImGui::End();
 	}
@@ -196,8 +199,8 @@ void Gui::generate_widgets(gameboy &gb) {
 				for (int column = 0; column < 16; column++) {
 					u16 start = tile_data_address + (16 * column);
 					for (int line = (row * 8); line < 8 + (row * 8); line++, start += 2) {
-						u8 p_line_1 = gb.ppu.read(start);
-						u8 p_line_2 = gb.ppu.read(start + 1);
+						u8 p_line_1 = gb.ppu_.read(start);
+						u8 p_line_2 = gb.ppu_.read(start + 1);
 
 						for (int tileColumn = (column * 8), position = 7;
 							 tileColumn < 8 + (column * 8); tileColumn++, position--) {
@@ -206,25 +209,25 @@ void Gui::generate_widgets(gameboy &gb) {
 								static_cast<u8>(check_bit(p_line_1, (position)) << 1u) |
 								static_cast<u8>(check_bit(p_line_2, (position)));
 
-							tile_buffer[index] = gb.ppu.bg_palette[color];
+							tile_buffer_[index] = gb.ppu_.bg_palette_[color];
 						}
 					}
 				}
 				tile_data_address += 0x100;
 			}
-			update_buffer(tile_buffer_texture, &tile_buffer[0]);
+			update_buffer(tile_buffer_texture_, &tile_buffer_[0]);
 		}
 
 		ImGui::Begin("Tile Buffer");
-		ImGui::Image((ImTextureID)(intptr_t)tile_buffer_texture.textureID,
+		ImGui::Image((ImTextureID)(intptr_t)tile_buffer_texture_.textureID_,
 					 ImVec2(TILE_MAP_WIDTH * 2, TILE_MAP_HEIGHT * 2));
 
 		if (ImGui::TreeNode("Sprites")) {
-			for (auto sprite : gb.ppu.sprites) {
-				if (ImGui::TreeNode(std::to_string(sprite.id).c_str())) {
-					ImGui::Text("Tile No:%i", sprite.tile_no);
-					ImGui::Text("X:      %i", sprite.x_pos);
-					ImGui::Text("Y:      %i", sprite.y_pos);
+			for (auto sprite : gb.ppu_.sprites_) {
+				if (ImGui::TreeNode(std::to_string(sprite.id_).c_str())) {
+					ImGui::Text("Tile No:%i", sprite.tile_no_);
+					ImGui::Text("X:      %i", sprite.x_pos_);
+					ImGui::Text("Y:      %i", sprite.y_pos_);
 #if 0
 				Texture spr = sprite_textures[sprite.id];
 				std::vector<Pixel_a> translated_sprite;
@@ -256,7 +259,7 @@ void Gui::generate_widgets(gameboy &gb) {
 				ImGui::Text("0x%04X ", mem_line_addr);
 				for (int i = 0; i < 16; ++i) {
 					ImGui::SameLine();
-					u8 data = gb.mem.read(mem_line_addr + i);
+					u8 data = gb.mem_.read(mem_line_addr + i);
 					if (data == 0x00)
 						ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.5f, 0.5f, 0.5f, 1.0f));
 					ImGui::Text("%02X", data);
@@ -280,16 +283,16 @@ void Gui::generate_widgets(gameboy &gb) {
 
 		CPU_Register cpu_regs = cpu.get_register();
 
-		ImGui::Text("AF = %04X", cpu_regs.AF);
+		ImGui::Text("AF = %04X", cpu_regs.AF_);
 		ImGui::SameLine();
-		ImGui::Text("DE = %04X", cpu_regs.DE);
+		ImGui::Text("DE = %04X", cpu_regs.DE_);
 		ImGui::SameLine();
-		ImGui::Text("PC = %04X", cpu_regs.PC);
-		ImGui::Text("BC = %04X", cpu_regs.BC);
+		ImGui::Text("PC = %04X", cpu_regs.PC_);
+		ImGui::Text("BC = %04X", cpu_regs.BC_);
 		ImGui::SameLine();
-		ImGui::Text("HL = %04X", cpu_regs.HL);
+		ImGui::Text("HL = %04X", cpu_regs.HL_);
 		ImGui::SameLine();
-		ImGui::Text("SP = %04X", cpu_regs.SP);
+		ImGui::Text("SP = %04X", cpu_regs.SP_);
 
 		ImGui::Separator();
 
@@ -301,7 +304,7 @@ void Gui::generate_widgets(gameboy &gb) {
 		ImGui::SameLine();
 		ImGui::Text("C %1d", cpu.check_flag(Flag::c));
 		ImGui::SameLine();
-		ImGui::Text("(HL) %02X", cpu.read(cpu_regs.HL));
+		ImGui::Text("(HL) %02X", cpu.read(cpu_regs.HL_));
 
 		LCD_Register lcd_regs = ppu.get_lcd_register();
 		ImGui::Separator();
@@ -320,7 +323,7 @@ void Gui::generate_widgets(gameboy &gb) {
 		}
 
 		ImGui::Separator();
-		ImGui::Text(" %d", lcd_regs.LCD_LY);
+		ImGui::Text(" %d", lcd_regs.LCD_LY_);
 		ImGui::SameLine();
 		ImGui::Text("JOY ");
 		u8 joy = joypad.get_joypad_state();
@@ -343,15 +346,15 @@ void Gui::generate_widgets(gameboy &gb) {
 	{
 		ImGui::Begin("Card");
 
-		ImGui::Text("%s", card.rom_info.title);
+		ImGui::Text("%s", card.rom_info_.title_);
 		ImGui::Separator();
 
-		ImGui::Text("CType: %s", card.rom_info.CType_string());
+		ImGui::Text("CType: %s", card.rom_info_.CType_string());
 		ImGui::SameLine();
 		ImGui::Text("Rom Bank: %d", card.get_selected_rom_bank());
-		ImGui::Text("Ram Size: %s", card.rom_info.ram_size_string());
+		ImGui::Text("Ram Size: %s", card.rom_info_.ram_size_string());
 		ImGui::SameLine();
-		ImGui::Text("| Rom Size: %s", card.rom_info.rom_size_string());
+		ImGui::Text("| Rom Size: %s", card.rom_info_.rom_size_string());
 		ImGui::End();
 	}
 
@@ -400,7 +403,7 @@ void Gui::generate_widgets(gameboy &gb) {
 	}
 }
 
-void Gui::render(gameboy &gb) {
+auto Gui::render(gameboy &gb) -> void {
 
 	static bool show_demo_window = true;
 	static bool show_another_window = false;
@@ -410,7 +413,7 @@ void Gui::render(gameboy &gb) {
 
 	// Start the Dear ImGui frame
 	ImGui_ImplOpenGL3_NewFrame();
-	ImGui_ImplSDL2_NewFrame();
+	ImGui_ImplSDL3_NewFrame();
 	ImGui::NewFrame();
 
 	static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
@@ -445,18 +448,18 @@ void Gui::render(gameboy &gb) {
 
 	if (ImGui::BeginMenuBar()) {
 		if (ImGui::BeginMenu("Emulator")) {
-			if (ImGui::MenuItem("Skip Boot Rom", NULL, gb.skip_boot_rom)) {
+			if (ImGui::MenuItem("Skip Boot Rom", NULL, gb.skip_boot_rom_)) {
 			}
-			if (ImGui::MenuItem("60 FPS lock", NULL, gb.fps_drossel)) {
+			if (ImGui::MenuItem("60 FPS lock", NULL, gb.fps_drossel_)) {
 			}
 			ImGui::EndMenu();
 		}
 		if (ImGui::BeginMenu("Palettes")) {
 			char address[32];
-			for (u32 index = 0; index < gb.ppu.Palettes.size(); index++) {
-				sprintf_s(address, "%i", index, sizeof(address));
+			for (u32 index = 0; index < gb.ppu_.Palettes_.size(); index++) {
+				std::snprintf(address, sizeof(address), "%u", index);
 				if (ImGui::MenuItem(address)) {
-					gb.ppu.current_palette = index;
+					gb.ppu_.current_palette_ = index;
 				}
 			}
 			ImGui::EndMenu();
@@ -521,21 +524,21 @@ void Gui::render(gameboy &gb) {
 		SDL_GL_MakeCurrent(backup_current_window, backup_current_context);
 	}
 
-	SDL_GL_SwapWindow(context.window);
+	SDL_GL_SwapWindow(context_.window_);
 }
 
-void Gui::destroy() {
+auto Gui::destroy() -> void {
 	// Cleanup
 	ImGui_ImplOpenGL3_Shutdown();
-	ImGui_ImplSDL2_Shutdown();
+	ImGui_ImplSDL3_Shutdown();
 	ImGui::DestroyContext();
 
-	SDL_GL_DeleteContext(context.gl_context);
-	SDL_DestroyWindow(context.window);
+	SDL_GL_DestroyContext(context_.gl_context_);
+	SDL_DestroyWindow(context_.window_);
 	SDL_Quit();
 }
 
-void Gui::showFPS() const {
+auto Gui::showFPS() const -> void {
 	ImGui::SetCursorPos(ImVec2(20.0f, 30.0f));
 	ImGui::TextColored(magenta, "Frame Rate: %.2f FPS\nFrame Time: %.2f ms",
 					   ImGui::GetIO().Framerate,

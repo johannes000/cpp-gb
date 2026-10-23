@@ -18,10 +18,10 @@ with open('Opcodes.json') as json_file:
             except:
                 pass
 
-# u8 CPU::opcode0x00() {
+# auto CPU::opcode0x00() -> u8 {
 # 	return u8();
 # }
-        string += 'u8 CPU::opcode'+strHex+'(){	// ' + mnemonic
+        string += 'auto CPU::opcode'+strHex+'() -> u8 {	// ' + mnemonic
         if(op1 != ""):
             string += " " + op1
         if(op2 != ""):
@@ -50,10 +50,10 @@ with open('Opcodes.json') as json_file:
             except:
                 pass
 
-# u8 CPU::opcode0x00() {
+# auto CPU::opcode0x00() -> u8 {
 # 	return u8();
 # }
-        string += 'u8 CPU::prefixedopcode'+strHex+'(){	// ' + mnemonic
+        string += 'auto CPU::prefixedopcode'+strHex+'() -> u8 {	// ' + mnemonic
         if(op1 != ""):
             string += " " + op1
         if(op2 != ""):

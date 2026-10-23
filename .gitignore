@@ -452,7 +452,6 @@ MigrationBackup/
 
 # CMake
 cmake-build-*/
-cmake/
 
 # Mongo Explorer plugin
 .idea/**/mongoSettings.xml
@@ -539,3 +538,6 @@ external/
 build/
 
 .vscode/
+build-*/
+.cpm/
+logs/
